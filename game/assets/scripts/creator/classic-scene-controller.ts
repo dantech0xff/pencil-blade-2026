@@ -5,6 +5,12 @@ import {
   type ClassicSessionCommand,
   type ClassicSessionSnapshot,
 } from '../domain/classic-session';
+import {
+  ClassicWorldSpeed,
+  type ClassicWorldSpeedCommand,
+  type ClassicWorldSpeedSnapshot,
+} from '../domain/classic-world-speed';
+import type { BladeSegment } from '../domain/blade-tracks';
 import { BladeInputController } from './blade-input-controller';
 import { ClassicPhysicsAdapter } from './classic-physics-adapter';
 import {
@@ -15,16 +21,28 @@ import {
 const { ccclass, requireComponent } = _decorator;
 
 export const CLASSIC_RESOLUTION_APPLIED_EVENT = 'classic-resolution-applied';
+export const CLASSIC_PHYSICS_STEPPED_EVENT = 'classic-physics-stepped';
 export const CLASSIC_SESSION_COMMAND_EVENT = 'classic-session-command';
 export const CLASSIC_SESSION_SNAPSHOT_EVENT = 'classic-session-snapshot';
+export const CLASSIC_WORLD_SPEED_COMMAND_EVENT = 'classic-world-speed-command';
 
-/** Root bridge for resolved Classic session, resolution, and Physics2D behavior. */
+export interface ClassicPhysicsSteppedEvent {
+  readonly bladeSegments: readonly BladeSegment[];
+  readonly deltaSeconds: number;
+}
+
+/**
+ * Root bridge for resolved Classic session, resolution, and Physics2D behavior.
+ * Scene-lifetime owner: keep this component enabled until node destruction; disabling it is
+ * not a gameplay pause boundary.
+ */
 @ccclass('ClassicSceneController')
 @requireComponent(BladeInputController)
 export class ClassicSceneController extends Component {
   private readonly session = new ClassicSession();
   private readonly physics = new ClassicPhysicsAdapter();
   private readonly resolution = new ClassicResolutionAdapter();
+  private readonly worldSpeed = new ClassicWorldSpeed();
   private bladeInput: BladeInputController | null = null;
   private appliedResolution: AppliedClassicResolution | null = null;
 
@@ -36,20 +54,24 @@ export class ClassicSceneController extends Component {
     this.bladeInput = bladeInput;
     this.appliedResolution = this.resolution.apply();
     this.physics.configureResolvedWorldProperties();
+    this.physics.startVariableSimulation(
+      (frameDeltaSeconds) => this.worldSpeed.physicsStepDelta(frameDeltaSeconds),
+      (variableDeltaSeconds) => this.afterPhysicsStep(variableDeltaSeconds),
+    );
   }
 
   start(): void {
     if (this.appliedResolution === null) {
       throw new Error('Classic resolution must be applied before scene start');
     }
+    this.applyWorldSpeedCommands(this.worldSpeed.enableClassicSpeedUp());
     this.node.emit(CLASSIC_RESOLUTION_APPLIED_EVENT, this.appliedResolution);
     this.emitSessionSnapshot();
   }
 
   onDestroy(): void {
-    if (this.session.snapshot().worldStopped) {
-      this.physics.setWorldStopped(false);
-    }
+    this.unschedule(this.onSpeedUpDelayComplete);
+    this.physics.restorePreviousWorldProperties();
   }
 
   resolutionSnapshot(): AppliedClassicResolution | null {
@@ -58,6 +80,21 @@ export class ClassicSceneController extends Component {
 
   sessionSnapshot(): ClassicSessionSnapshot {
     return this.session.snapshot();
+  }
+
+  worldSpeedSnapshot(): ClassicWorldSpeedSnapshot {
+    return this.worldSpeed.snapshot();
+  }
+
+  raycastAll(
+    startWorld: Readonly<{ x: number; y: number }>,
+    endWorld: Readonly<{ x: number; y: number }>,
+  ) {
+    return this.physics.raycastAll(startWorld, endWorld);
+  }
+
+  callAfterPhysicsStep(mutation: () => void): void {
+    this.physics.callAfterStep(mutation);
   }
 
   completeIntro(): void {
@@ -99,4 +136,28 @@ export class ClassicSceneController extends Component {
   private emitSessionSnapshot(): void {
     this.node.emit(CLASSIC_SESSION_SNAPSHOT_EVENT, this.session.snapshot());
   }
+
+  private afterPhysicsStep(deltaSeconds: number): void {
+    const bladeSegments = Object.freeze([
+      ...(this.bladeInput?.segmentsForPostPhysicsUpdate() ?? []),
+    ]);
+    const payload: ClassicPhysicsSteppedEvent = Object.freeze({
+      bladeSegments,
+      deltaSeconds,
+    });
+    this.node.emit(CLASSIC_PHYSICS_STEPPED_EVENT, payload);
+  }
+
+  private applyWorldSpeedCommands(commands: readonly ClassicWorldSpeedCommand[]): void {
+    for (const command of commands) {
+      if (command.type === 'schedule-speed-up-callback') {
+        this.scheduleOnce(this.onSpeedUpDelayComplete, command.delaySeconds);
+      }
+      this.node.emit(CLASSIC_WORLD_SPEED_COMMAND_EVENT, command);
+    }
+  }
+
+  private readonly onSpeedUpDelayComplete = (): void => {
+    this.applyWorldSpeedCommands(this.worldSpeed.speedUpDelayComplete());
+  };
 }

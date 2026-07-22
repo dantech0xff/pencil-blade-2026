@@ -60,6 +60,7 @@ equivalence), not assign the legacy negative property verbatim.
 |---|---|---|
 | Construction | World pointer starts null; stop flag is false; velocity and position iteration fields are each float `10.0` (`0x41200000`); world speed is `1.0` (`0x3F800000`); update is scheduled. | `PhysicsLayer::PhysicsLayer()` `0x0016163C` |
 | Scene entry | Create a Box2D world with gravity `(0, -10)` (`0x00000000`, `0xC1200000`), allow sleeping, and leave continuous-collision/TOI processing enabled. | `PhysicsLayer::onEnter()` `0x00161558`; `b2World::Step(float,int,int)` `0x002AF868`, continuous flag read at `0x002AF91C–0x002AF93A` |
+| Director delta | Measure elapsed wall time. Clock failure, the next-delta-zero flag, or non-positive elapsed time produces zero; no positive upper clamp is present in the inspected calculation. The scheduler applies its time scale, initially `1.0`, before dispatch. The requested approximately 60 Hz animation interval is cadence, not a fixed simulation delta. | `AppDelegate::applicationDidFinishLaunching()` `0x00141F50`; `CCDirector::calculateDeltaTime()` `0x001AA6A0`; `CCScheduler::CCScheduler()` `0x00194F24`; `CCScheduler::update(float)` `0x001960D8` |
 | Frame update | First run the base node update. If the stop flag is false, call `Step(frameDt * worldSpeed, int(velocityIterations), int(positionIterations))`. No fixed step, accumulator, delta clamp, or original substep loop was recovered in this layer. | `PhysicsLayer::update(float)` `0x001615FC`; `b2World::Step(float,int,int)` `0x002AF868` |
 | Stop/resume | `StopPhysicsWorld(value)` stores the supplied Boolean. When true, the frame update skips `Step`; when false, stepping resumes. | `PhysicsLayer::StopPhysicsWorld(bool)` `0x001614D8` |
 | Freeze/unfreeze | Freeze sets world speed to `0.5` (`0x3F000000`); unfreeze restores `1.0` (`0x3F800000`). | `PhysicsLayer::FreezeeWorld()` `0x001616BA`; `PhysicsLayer::UnFreezeeWorld()` `0x001616C4` |
@@ -103,15 +104,45 @@ The blade is an input/ray-query abstraction, not a persistent collision body.
 
 ### Force and impulse scope
 
-The complete bounded Classic creation, toss, cut, bomb, and bonus paths mutate motion through
-body-definition defaults, `SetTransform`, `SetLinearVelocity`, `SetAngularVelocity`, direct
-world-speed scaling, and gravity. They contain no app-owned force or impulse call and no
-equivalent inline body-state mutation. The native dynamic inventory corroborates the scope:
-it exposes `b2Body::SetLinearVelocity` at `0x001455A0` and `b2Body::SetTransform` at
-`0x002ACF10`, but no `b2Body::ApplyForce`, `ApplyLinearImpulse`, or `ApplyAngularImpulse`
-symbol. This is a recovered negative for the Classic slice, not a claim about every remaining
-mode. The Creator Classic adapter must emit no invented impulse; a later mode contract must
-define any force/impulse API and unit boundary before using one.
+Intact-fruit creation/toss, bomb, and bounded bonus paths mutate motion through body-definition
+defaults, `SetTransform`, `SetLinearVelocity`, `SetAngularVelocity`, direct world-speed scaling,
+and gravity. No force or impulse is recovered in those paths.
+
+`Fruit::Cut(...)` `0x00150648` is the evidence-backed exception: it creates the bottom half
+first and the top half second, then applies one linear impulse at each new body's centre with
+the wake flag true. The earlier dynamic-symbol inventory did not list
+`b2Body::ApplyLinearImpulse`; that absence was not proof of a negative because this call path
+is statically resolved inside the recovered function. The bounded negative is now only that no
+other Classic force, linear impulse, or angular impulse may be added without direct evidence.
+
+For each half, with `direction` defined by the split-orientation rules in the cut/score contract:
+
+```text
+factor    = critical ? 9.0 : 1.0
+magnitude = f32(f32(viewportWidth * 0.02) * factor)
+impulse   = f32vec(f32vec(direction * originalIntactFruitMass) * magnitude)
+```
+
+The impulse uses the intact fruit's mass, not the new half's mass. The source linear velocity
+is not inherited: each half starts at `(0,0)`, receives `f32(sourceAngularVelocity * 0.5)`, and
+uses gravity scale `1.5`. Bottom impulse application precedes top impulse application.
+
+### CutFruit bodies and fixtures
+
+`CutFruit::create(b2World*, int, int)` `0x0014BDF0` creates the bottom part with part ID `1`
+and the top part with part ID `0`. Each is a dynamic body with allow-sleep/awake true,
+bullet/fixed-rotation false, zero damping, and the motion values above. Both receive the same
+recovered split angle.
+
+Each half uses a centred box whose Box2D half-extents are `(rasterWidth/32,
+rasterHeight/32)` metres. The Creator mapping is therefore full collider size
+`(2*rasterWidth, 2*rasterHeight)` world units. Density is `1`, friction is float32 `0.2`,
+restitution is `0`, sensor is false, and category/mask/group are `0x0001/0xFFFC/0`.
+
+The half position is the intact body centre converted to legacy world units plus
+`direction * (halfRasterHeight/2)`. The same possibly half-scaled direction feeds both this
+offset and the impulse. Each half fades independently for exactly `0.75` action-clock seconds;
+bounds may dispose it earlier, and physical destruction still waits for an unlocked world.
 
 ### Contact filtering
 
@@ -247,18 +278,24 @@ legacy `/32` a second time. See the official
 |---|---|
 | World configuration | A narrow `ClassicPhysicsAdapter` owns `PhysicsSystem2D` configuration: gravity `(0,-320)` Creator world units/s² (the recovered `(0,-10)` m/s²), iteration values `10/10`, stop state, and world-speed compatibility. Sleeping/continuous collision must be verified against the pinned Box2D backend. |
 | Units | Keep legacy evidence values in explicit `worldUnit` and `metre` types. Creator positions, collider dimensions, ray endpoints, and public gravity use PTM-aware world units; position/geometry metres map with `*32`. `RigidBody2D.linearVelocity`, however, is passed directly to Box2D and must receive the recovered m/s value unchanged. Pin these intentionally different API boundaries in tests. |
-| Force/impulse scope | Emit no force or impulse command for the bounded Classic slice. Do not invent an impulse conversion merely because Creator exposes the API; add one only when a later recovered mode contract supplies the call, units, point, and wake semantics. |
+| Force/impulse scope | Intact tosses, bombs, and bounded bonus paths emit no force/impulse. For ordinary cut halves only, attach bottom then top and call `applyLinearImpulseToCenter(recoveredImpulse, true)` in that order after each backend body exists. Pass the recovered Box2D impulse numeric value unchanged; do not apply Creator's position PTM conversion to it. |
+| Cut halves | Create exact cut-bottom then cut-top SpriteFrames with dynamic bodies, gravity scale `1.5`, zero initial linear velocity, half source angular velocity, shared split angle, centred `2W x 2H` box colliders, and the fruit filter/material values. Advance the `0.75s` fade on the action clock separately from post-physics bounds checks. |
 | Fruit | A fruit prefab uses `RigidBody2D` dynamic plus `BoxCollider2D` for IDs `1/2` or `CircleCollider2D` otherwise. In Creator world units, the recovered box half-extents become full `size = (2 * spriteWidth, 2 * spriteHeight)`; the recovered circle becomes `radius = (spriteWidth + spriteHeight) / 4`. Apply the exact material/filter table. |
 | Bomb | A bomb prefab uses `RigidBody2D` dynamic plus `CircleCollider2D`. The recovered `spriteWidth/88`-metre radius becomes `4 * spriteWidth / 11` Creator world units. Apply the exact material/filter table. |
 | Electric-bomb field | Represent the recovered static filter/category and activation state explicitly. Its legacy half-extents map to a nominal Creator `BoxCollider2D.size = (4 * viewportWidth, 0)`, but isolate that degenerate shape and the invalid native listener layout behind a reviewed compatibility decision. Creator contact code must be type-safe. |
 | Blade | A TypeScript input/blade service owns four logical touch slots and delegates two `ERaycast2DType.All` queries to the adapter. Pass the extended legacy/Creator world endpoints directly to Creator; do not divide them by `32`. Filter by gameplay metadata (`tag 1437`, disabled-cut state, fruit flag), not contact masks. |
 | Query result compatibility | Concatenate the forward query results and then the reverse query results without sorting or collider-level deduplication. Preserve repeated fixture occurrences by default. Pass original world endpoints to domain `cut`; extended points exist only for the physics query. |
 | Disposal | Queue body/component/node destruction and flush only after the Physics2D step/callback boundary. Never destroy a body directly from a raycast or contact callback. |
-| Variable timestep | Creator documents a fixed timestep (`1/60` by default), while the native layer directly passes `frameDt * worldSpeed`. Treat this as an explicit compatibility boundary: first test whether the pinned backend exposes an equivalent supported step path; otherwise record and test the chosen fixed-step/time-scaling approximation as an inference. |
+| Variable timestep | Keep automatic simulation disabled. Register one project-owned `System.postUpdate` immediately after the built-in manual-mode Physics2D system, compute float32 `frameDt * worldSpeed`, then call the public manual boundary once with iterations `10/10`. Explicitly synchronize scene-to-physics before the step and physics-to-scene after it; do not use Creator's fixed accumulator. |
 
-Creator's public PTM conversion is documented, but its ray-result ordering, solver knobs, and
-manual-step surface remain integration boundaries rather than facts about the old binary. Pin
-the Creator/Box2D backend before coding the adapter and verify each boundary in the new project.
+Creator's public PTM conversion is documented, but its ray-result ordering and lifecycle
+behavior remain integration boundaries rather than facts about the old binary. Creator 3.8.8's
+public `PhysicsSystem2D.step(delta)` delegates directly to the selected world with configured
+iteration values. It does not check `enable`, synchronize transforms, emit physics events, set
+the private stepping flag, drain delayed lifecycle work, or draw debug geometry. The adapter
+therefore guards `enable`, reproduces the public sync/event/debug sequence, and queues every
+project-owned create/destroy/enable/disable/apply mutation until after the manual step returns.
+No contact callback may mutate Creator physics lifecycle directly.
 Creator 3.8.8 source confirms direct linear-velocity passthrough and positive body-angle
 synchronization: [rigid-body adapter](https://github.com/cocos/cocos-engine/blob/v3.8.8/cocos/physics-2d/box2d/rigid-body.ts#L249-L256),
 [physics-world synchronization](https://github.com/cocos/cocos-engine/blob/v3.8.8/cocos/physics-2d/box2d/physics-world.ts#L236-L259).
@@ -288,13 +325,14 @@ behavior:
 
 - Numeric fruit/bomb collider dimensions until resource geometry identifies each sprite's
   untrimmed content width and height. The formulas themselves are recovered.
-- Original director-level frame-delta clamp, pause behavior, and any scheduling behavior
-  outside `PhysicsLayer::update`.
+- Scheduling behavior outside the inspected display-link/director/scheduler path, including
+  platform lifecycle transitions beyond the recovered next-delta-zero behavior.
 - The owner and exact timing of `b2World` teardown on scene exit; the recovered layer
   destructor does not perform deletion.
-- Exact parity of Creator's selected Physics2D backend for units, iteration configuration,
-  continuous collision, ray ordering, and variable-step control until the backend is pinned
-  and adapter tests run.
+- Exact parity of Creator's selected Physics2D backend for continuous collision and ray ordering.
+  Public manual variable-step control, PTM conversion, iteration forwarding, and synchronization
+  order are pinned to the installed Creator 3.8.8 source; its private delayed-lifecycle guard is
+  unavailable to callers and remains an enforced project-side deferred-mutation constraint.
 - Whether standard Classic activates the separate `FreezeeWorld`/`UnFreezeeWorld` path. Its
   gradual `30.0s` speed-up path is recovered. The Classic ID-13 cut path does activate
   `BombElectric`; its unsafe native contact behavior remains unresolved as described above.
@@ -330,10 +368,10 @@ following:
    including the final rearmed no-op callback. Do not scale toss/action deltas with world
    speed. If the separate freeze path is activated by a later recovered contract,
    freeze/unfreeze produces `0.5` then `1.0`.
-4. **Force/impulse negative test:** no bounded Classic scenario emits `applyForce`,
-   `applyLinearImpulse`, or `applyAngularImpulse`; motion changes use only the recovered
-   transform, velocity, gravity, world-speed, and stop operations. A later mode cannot add an
-   impulse without a separate evidence-backed contract and adapter-unit test.
+4. **Force/impulse scope tests:** intact tosses, bombs, and bounded bonus paths emit no force
+   or impulse. Ordinary fruit cuts create bottom then top at zero linear velocity and apply the
+   recovered centre impulses in that order with wake true; critical impulses are exactly nine
+   times normal impulses. No angular impulse or other Classic force/impulse is permitted.
 5. **Fruit fixture tests:** IDs `1/2` receive box half-extents `(width/32,height/32)`; every
    other valid factory ID receives circle radius `(width+height)/128`; material, sensor,
    category, mask, and group values exactly match the table. Creator-facing assertions use
@@ -370,7 +408,9 @@ following:
 | `0x00145B3C` / `0x00145B9A` | `BombContactListener::PreSolve/BeginContact` | Electric contact gating and layout conflict | `DER-NATIVE-001`, `DER-NATIVE-CORPUS-001`, `DER-FUNCMAP-001` |
 | `0x00145EA4` / `0x00146108` | `BombElectric::onEnter/create` | Electric body, fixture, listener, and tag | `DER-NATIVE-001`, `DER-NATIVE-CORPUS-001`, `DER-FUNCMAP-001` |
 | `0x0014C738` | `CutObject::update(float)` | Bounds and failure | `DER-NATIVE-001`, `DER-NATIVE-CORPUS-001`, `DER-FUNCMAP-001` |
+| `0x0014BC3C`–`0x0014C090` | `CutFruit::FadeOutCallback/Dispose/update/onEnter/create` | Cut-half fixture, fade, critical update, and deferred disposal | `DER-NATIVE-001`, `DER-NATIVE-CORPUS-001`, `DER-FUNCMAP-001` |
 | `0x00150320` | `Fruit::createWithTarget(...)` | Fruit body and fixture | `DER-NATIVE-001`, `DER-NATIVE-CORPUS-001`, `DER-FUNCMAP-001` |
+| `0x00150648` | `Fruit::Cut(CCPoint, CCPoint)` | Split orientation, bottom/top creation, placement, body motion, and centre impulses | `DER-NATIVE-001`, `DER-NATIVE-CORPUS-001`, `DER-FUNCMAP-001` |
 | `0x001602D4` / `0x001603A4` | `PhysicsBladeLayer` touch end/begin | Blade slot lifecycle | `DER-NATIVE-001`, `DER-NATIVE-CORPUS-001`, `DER-FUNCMAP-001` |
 | `0x00160442` | `PhysicsBladeLayer::update(float)` | Ray-query gate | `DER-NATIVE-001`, `DER-NATIVE-CORPUS-001`, `DER-FUNCMAP-001` |
 | `0x00160F82` / `0x00160FE4` | `ExtraPoint(...)` / `RayCastWorld(...)` | Segment extension, conversion, filtering, dispatch | `DER-NATIVE-001`, `DER-NATIVE-CORPUS-001`, `DER-FUNCMAP-001` |

@@ -7,8 +7,11 @@ behavioral and presentation fidelity. The original APK cannot run on available c
 Android devices, so restoration is static-only. Facts not recovered from `libgame.so`,
 resources, Java/metadata, or explicitly approved as inferences remain unknown. The `game/`
 Creator foundation now exists and the exact root has produced the first Editor-serialized
-Classic scene. The full scene/prefab map still needs to be authored before the vertical slice
-is complete.
+Classic scene. All 862 recovered APK game assets are staged byte-for-byte and imported into
+the Creator bundle. The current playable loop consumes the exact paper background,
+intro/terminal text, ordinary intact/cut fruit, critical particles, and 20 core audio clips.
+This is a bounded Classic checkpoint, not presentation completion: most resource consumers
+and the full scene/prefab map remain open.
 
 ## Authority and evidence
 
@@ -34,6 +37,16 @@ replay, and device comparison are unavailable and are not project gates.
   the editor, engine revision, Android SDK, NDK, and JDK after resolving local bundle trust.
 - The current workspace contains the Creator 3.8.8 project under `game/`, a `720x1280`
   default, and the first Editor-authored `classic.scene` Canvas bridge.
+- The current static catalog accounts for 862 packaged game assets: 784 PNG, 59 WAV, 3 MP3,
+  and 16 fonts; 107 additional Android `res/` PNG are classified separately.
+- The full recovered APK game-asset corpus is copied unchanged under `game/assets/game/` and
+  its current Creator raster/audio imports are covered by staging and metadata validators.
+  The staging manifest's consumer/UUID fields remain incomplete and do not yet measure the
+  subset that the playable slice consumes.
+- Presentation restoration is complete only when the canonical user-supplied sample project
+  has 100% inventory, staging, and consumer coverage for every resource actually present.
+- No canonical graphics, animation frame, sound, music, font, shader/material, level/layout,
+  progression, or other game resource may be silently omitted or substituted.
 - Creator's Android API 21+ floor is an explicit platform-envelope change from the original
   application's minimum SDK 9.
 - The original APK, `libgame.so`, Cocos2d-x runtime, decompiler output, and recovered C++ are
@@ -46,10 +59,15 @@ replay, and device comparison are unavailable and are not project gates.
   with explicit unknowns for unresolved behavior.
 - Static evidence is reproducible, hashed, traceable, and separated from the
   ship-ready Creator project.
-- Visual, timing, input, physics, score, audio, save, and progression behavior maps from
-  evidence to contracts, reconstruction fixtures, tests, and Creator implementation.
+- Visual, layout, animation, shader/material, audio, level/progression, timing, input, physics,
+  score, state, and save behavior maps from evidence to contracts, reconstruction fixtures,
+  tests, and Creator implementation.
 - The Android build contains only the clean-room TypeScript/Creator implementation and assets
   whose use is permitted for the chosen release scope.
+- `99%` is the future acceptance target for a versioned static-contract/resource fidelity
+  metric covering visuals/layout/animation, audio, shaders/materials/rendering,
+  levels/progression, and gameplay/physics/timing/input/state. Its denominator, weighting, and
+  residual-gap list stay unresolved until the canonical sample-project manifest/root is resolved.
 
 ## Non-goals
 
@@ -80,9 +98,13 @@ replay, and device comparison are unavailable and are not project gates.
   claim of empirically proven 100% runtime identity.
 - Private preservation, source publication, and public store release are distinct outcomes.
   The intended release scope remains unresolved.
+- Technical fidelity does not authorize release. If rights block exact reuse, release blocks
+  pending an explicit user decision; assets must not be silently omitted or substituted.
 - Public release requires documented permission or measured replacements for the product
   name, artwork, fonts, music, trademarks, and other third-party material.
-- Git is initialized on `main` with no commits yet. The curated/ignored boundary remains
+- The canonical sample-project resource manifest/root remains unresolved; until it is resolved,
+  the `99%` metric cannot be finalized and residual gaps cannot be enumerated completely.
+- Git is initialized on `main` with a committed foundation. The curated/ignored boundary remains
   mandatory for staging and commits.
 
 ## Phase 1 acceptance

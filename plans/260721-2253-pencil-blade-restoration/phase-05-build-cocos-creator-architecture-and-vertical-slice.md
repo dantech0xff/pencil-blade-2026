@@ -14,8 +14,11 @@ effort: "2-4 weeks"
 Create the production project in the latest stable Cocos Creator and prove one complete
 Classic loop implemented independently in TypeScript with Creator Physics2D. The editor
 foundation now exists under `game/`. Creator has reopened that exact root and serialized the
-first `classic.scene` with the resolution/session bridge and four-slot input component; the
-remaining scene/prefab map still needs to be completed before this phase can close.
+first `classic.scene` with resolution/session, four-slot input, and a bounded generated
+normal-fruit loop. All 862 recovered APK game assets are staged and imported; the current loop
+uses exact background, intro/terminal text, intact/cut fruit, critical-particle, and core-audio
+resources. The remaining scene/prefab map, consumer coverage, and full Classic scope still need
+to be completed before this phase can close.
 
 ## Context Links
 
@@ -96,7 +99,7 @@ ray-cast, and contact contracts. Any compatibility adjustment stays explicit at 
 - [x] Proposed Creator architecture and C++-to-TypeScript ownership map
 - [ ] Editor-generated project structure and final serialized-component map
 - [x] Deterministic time/random/input seams
-- [ ] Lossless Creator resource import for the slice
+- [x] Lossless Creator resource import for the slice
 - [ ] Complete Classic vertical slice
 - [ ] Automated contract/traceability and prohibited-runtime audit
 - [x] Static-evidence readiness gates recorded with evidence IDs
@@ -111,18 +114,29 @@ Current Editor integration:
 
 - Project default design resolution is `720x1280`; runtime resolution selection preserves the
   recovered physical-width `720` branch and the `480x800` fallback through `SHOW_ALL`.
-- `assets/scenes/classic.scene` is Editor-serialized and attaches `BladeInputController` plus
-  `ClassicSceneController` to Canvas.
-- Resolved gravity/sleep/solver properties are configured, while automatic Physics2D simulation
-  is held off and its accumulator reset until the timestep policy is reviewed.
-- Preview opens at `720x1280`, current Creator Console counters remain zero, Creator's bundled
-  strict TypeScript compiler passes, and the deterministic vertical-slice suite passes `66/66`.
-- No original presentation asset has been imported because content rights remain unknown.
+- `assets/scenes/classic.scene` is Editor-serialized and attaches `BladeInputController`,
+  `ClassicSceneController`, and `ClassicGameplayController` to Canvas.
+- Resolved gravity/sleep/solver properties are configured. Automatic Physics2D simulation stays
+  off; a custom post-update system performs the recovered one-per-frame variable step with
+  explicit synchronization and a project-owned deferred-mutation boundary.
+- All 862 recovered APK game assets (784 PNG, 59 WAV, 3 MP3, and 16 fonts) are staged
+  byte-for-byte under the Creator bundle. The current import validator covers 934 generated
+  metadata sidecars; the manifest's per-asset consumer and UUID fields still require backfill.
+- Preview opens at `720x1280` and demonstrates first-swipe start, exact ordinary-fruit
+  spawning/trajectory, cut halves, core audio, cut/score, misses, game over, and retry.
+- The current playable slice is not presentation-complete; the exact staging gate is complete
+  for the recovered APK corpus, but 100% consumer coverage and canonical sample-project
+  completeness remain open. Release rights are a separate review.
+- Current Creator Console error counters remain zero, Creator's bundled strict TypeScript
+  compiler passes, and the deterministic vertical-slice suite passes `115/115`.
 
 ## Current Blockers
 
 - Completion of the remaining scene, prefab, and serialized component ownership map.
-- Live Creator Physics2D timestep validation.
+- Deterministic trajectory, contact, exact ray-order, and deferred lifecycle validation on
+  the custom variable-step boundary.
+- Canonical sample-project resource manifest/root resolution so the presentation coverage gate
+  and `99%` metric can be finalized.
 - Electric-field compatibility decisions.
 - Android build validation and real APK/AAB post-build audit.
 - Rights review for original assets and product identity.

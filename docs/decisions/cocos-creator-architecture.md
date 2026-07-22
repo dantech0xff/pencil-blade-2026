@@ -1,6 +1,6 @@
 # Cocos Creator Architecture Decision
 
-Status: in progress; first Editor scene integration established
+Status: in progress; recovered-resource Classic checkpoint integrated
 Date: 2026-07-22
 
 ## Decision
@@ -11,10 +11,11 @@ domain modules with explicit clock, RNG, input, persistence, and command ports. 
 components, prefabs, tweens, audio, and Physics2D calls are adapters rather than owners of
 gameplay state.
 
-The workspace now contains the Creator foundation and the Classic contract/test baseline,
-and Creator has reopened the exact root and serialized the first Classic Canvas bridge. The
-remaining scene/prefab map and unresolved physics compatibility decisions keep the architecture
-decision in progress.
+The workspace now contains the Creator foundation, Classic contract/test baseline, all 862
+exact recovered APK game assets in a Creator bundle, and a bounded normal-fruit loop using
+the recovered background, text, intact/cut fruit, critical-particle, and core-audio resources.
+The remaining scene/prefab map, eight deferred toss controllers, most presentation consumers,
+and runtime physics-equivalence gate keep the architecture decision in progress.
 
 ## Dependency Direction
 
@@ -50,9 +51,10 @@ game/assets/scripts/
   creator/
     classic-physics-adapter.ts
     blade-input-controller.ts
-    spawn-factory.ts
     classic-scene-controller.ts
-    score-presenter.ts
+    classic-gameplay-controller.ts
+    classic-entity-registry.ts
+    classic-generated-fruit.ts
     audio-adapter.ts
     creator-storage-adapter.ts
 ```
@@ -63,10 +65,14 @@ must not.
 ## Current Workspace Boundary
 
 - `game/assets/scripts/domain/` contains the pure Classic modules.
-- `game/assets/scripts/creator/` contains the Physics2D, resolution, blade-input, and Classic
-  scene bridges.
-- `game/assets/scenes/classic.scene` is Editor-authored and attaches `BladeInputController`
-  plus `ClassicSceneController` to Canvas.
+- `game/assets/scripts/creator/` contains the Physics2D, resolution, blade-input, Classic
+  scene, generated-entity, resource, audio/effect, and bounded gameplay bridges.
+- `game/assets/scenes/classic.scene` is Editor-authored and attaches `BladeInputController`,
+  `ClassicSceneController`, and `ClassicGameplayController` to Canvas.
+- `game/assets/game/` contains byte-identical copies of all 862 recovered APK game assets.
+  The current Classic subset uses exact rasters and audio, but consumer/UUID coverage is not
+  complete and the canonical sample-project root remains unresolved. Release rights are
+  tracked separately.
 - `tests/reconstruction/vertical-slice/` contains the current Classic regression suite.
 - `scripts/audit-creator-build.mjs` contains the post-build archive audit.
 - `game/library/` is generated Creator cache and is not hand-authored gameplay source.
@@ -105,12 +111,14 @@ The adapter must encode the intentionally non-uniform Creator API units:
 | Angular velocity | radians/s | pass numerically unchanged |
 | Rotation | legacy Cocos2d-x node property `-bodyAngle` | use Creator's stock positive body-angle synchronization or prove rendered equivalence |
 
-The native layer calls `Step(frameDt * worldSpeed, 10, 10)`. Creator documents a fixed
-timestep. The adapter must first test a supported equivalent step surface; otherwise the
-chosen fixed-step/time-scaling behavior is an explicit inference with its own tests. It may
-not be called recovered. Until that decision is reviewed, the first scene disables automatic
-Physics2D simulation and resets the accumulator after configuring recovered world properties;
-it neither changes `fixedTimeStep` nor invokes a manual step.
+The native layer calls `Step(frameDt * worldSpeed, 10, 10)`. The pinned Creator 3.8.8 public
+manual-step surface supports the selected mapping: automatic simulation is disabled, and one
+project-owned `System.postUpdate` performs sync-in, one float32 `frameDt * worldSpeed` step
+with configured `10/10` iterations, queued lifecycle mutations, sync-out, and debug draw.
+Creator's public manual step does not expose its private stepping/delayed-lifecycle flag, so
+all project-owned physics mutations must use the adapter's after-step queue. The mapping is
+resolved; full backend equivalence still requires runtime trajectory, ray-order, contact, and
+destruction validation.
 
 Two `ERaycast2DType.All` queries run forward then reverse after the physics step. Concatenate
 results without sorting or collider-level deduplication, apply the recovered domain filters,
@@ -128,18 +136,28 @@ and queue destruction until after the physics callback boundary.
 | Classic mode-0 music resume asymmetry | preserve for first fidelity build |
 | BombElectric unsafe `PreSolve` layout | unresolved; never reproduce unsafe pointer behavior |
 | BombElectric zero-height fixture | unresolved Creator compatibility policy |
-| Native variable step on Creator fixed scheduler | unresolved integration policy |
+| Native variable step on Creator scheduler | resolved as `public-manual-variable-step-post-update` on pinned 3.8.8 |
+| Creator Physics2D runtime equivalence | pending trajectory, ray-order, contact, and lifecycle validation |
 
 Each unresolved row blocks only the affected behavior from being labeled recovered.
+
+`ClassicSceneController` and `ClassicGameplayController` are scene-lifetime owners in this
+slice. They remain enabled together until Canvas destruction; component enable/disable is not
+the pause mechanism.
 
 ## Presentation and Asset Boundary
 
 - Domain emits presentation/audio commands; Creator adapters interpret them.
 - Asset references use logical IDs from the static catalog, never paths into
   `.forensics-work`.
-- Only a rights-reviewed vertical-slice manifest may copy source bytes under `game/assets`.
+- The vertical-slice manifest may copy exact source bytes under `game/assets` for technical
+  reconstruction; release rights determine whether those bytes can ship or must be replaced.
 - Import settings must prevent accidental trimming, recompression, resampling, or font
   substitution unless the reconstruction policy explicitly permits it.
+- The `99%` fidelity metric is a future-state, versioned cross-domain measure spanning
+  visuals/layout/animation, audio, shader/material/rendering, level/progression, and
+  gameplay/physics/timing/input/state. Its exact denominator, weighting, and residual-gap list
+  stay unresolved until the canonical resource manifest/root is resolved.
 
 ## Persistence Boundary
 
@@ -152,7 +170,8 @@ legacy keys, but no JNI/native compatibility layer is permitted.
 1. Pure domain tests for timers, RNG draw order, toss graph, combo/score/fail, and state.
 2. Physics adapter tests for units, gravity, fixture formulas/filters, velocity identity,
    ray order/duplicates, bounds, and deferred destruction.
-3. Creator integration tests for the selected fixed-step policy and rendered rotation.
+3. Creator integration tests for the selected public manual variable-step policy, dynamic
+   trajectories, post-step synchronization, deferred lifecycle behavior, and rendered rotation.
 4. Presentation/resource tests against registered hashes, geometry, and command order.
 5. Build-content audit rejecting APKs, `libgame.so`, extracted native/decompiler output,
    old Cocos2d-x code/runtime, secrets, and obsolete platform SDKs. The audit hashes every
@@ -161,10 +180,15 @@ legacy keys, but no JNI/native compatibility layer is permitted.
 
 ## Current Blockers
 
-- Local Cocos Creator 3.8.8 and Dashboard bundles fail strict signature verification.
-- The first Editor scene map is authoritative, but the remaining scenes, prefabs, presenters,
-  and spawn factories are not authored yet.
-- BombElectric contact compatibility and Creator timestep strategy need reviewed decisions.
+- The Classic Canvas map is authoritative for the three scene components, but the remaining
+  scenes, prefabs, presentation consumers, and non-normal toss factories are not authored yet.
+- Creator Preview has exercised exact ordinary-fruit presentation, trajectories, cut halves,
+  core audio, cut/score, three-miss game over, and scene-reload retry. Exact contact, ray
+  traversal order, deferred destruction, and deterministic trajectory equivalence still need
+  an executable harness.
+- The canonical sample-project resource manifest/root remains unresolved; presentation
+  completion and the `99%` metric both stay blocked on that source.
+- BombElectric contact compatibility remains unresolved.
 - TimeManager callback hardening and any post-fidelity reference-counted multi-bomb variant
   need explicit compatibility decisions; they do not block the first preserved contract.
 - Original content rights remain unknown.

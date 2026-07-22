@@ -26,8 +26,9 @@ does not copy or mechanically translate native instructions.
 5. If the object's virtual `IsFruit()` returns true, `ComboManager::CheckCombo` receives the
    body's position converted back to legacy world units.
 6. The object's virtual `Cut(previousWorldPoint, currentWorldPoint)` is invoked. For a
-   `Fruit`, the notification path supplies body position, fruit ID, and `Fruit::GetScore()`
-   to the active mode.
+   `Fruit`, `Fruit::Cut` first creates and launches the exact bottom/top `CutFruit` pair,
+   then requests the base cut sound and optional critical sound, then its notification path
+   supplies body position, fruit ID, and `Fruit::GetScore()` to the active mode.
 7. `ClassicModeLayer::FruitCut` applies the special-fruit effect, then calls
    `ScoreManager::AddScore`.
 
@@ -82,6 +83,29 @@ recovered entity name or collision category.
 
 `Fruit::GetScore` at `0x00150B60` returns `1` normally and `10` when the fruit's critical
 flag is set. `Fruit::CutNotification` sends that value and `Fruit::getID()` to the mode.
+
+### Ordinary-fruit split and side-effect order
+
+`Fruit::Cut(...)` at `0x00150648` recovers this order before notification/score mutation:
+
+1. Normalize `currentCutPoint - previousCutPoint` and rotate it by `+pi/2` and `-pi/2`.
+2. Compute the shared split angle, orient the normals against the raw source Box2D angle,
+   assign bottom then top, and scale exactly one direction by `0.5` according to strict
+   `bottomDirection.y < 0`.
+3. Create `CutFruit(world, fruitId, 1)` for the exact cut-bottom raster, then
+   `CutFruit(world, fruitId, 0)` for the exact cut-top raster.
+4. Set their positions/angle and half source angular velocity, attach bottom then top at
+   z-order `1`, and apply the recovered centre impulses bottom then top.
+5. Request the fruit-ID cut sound; when critical, request `Sounds/critical.wav` immediately
+   after it.
+6. Invoke `Fruit::CutNotification`, which reaches combo-independent Classic score handling.
+
+The split angle intentionally preserves the native `WrapAngle` defect: raw angles outside
+`[-pi,pi)` are reduced by repeated `2/pi` steps, not `2*pi`. Full float32 geometry, fixture,
+impulse, gravity, fade, and deferred-destruction rules live in
+[`classic-physics-contract.md`](classic-physics-contract.md). This ordering is recovered from
+static code and must not be replaced by source-linear-velocity inheritance or a target-owned
+cut-half lifetime.
 
 `ClassicModeLayer::FruitCut(position, fruitId, suppliedScore)` at `0x00149108` applies:
 
@@ -201,6 +225,7 @@ subsequent calls return without starting the presentation again.
 | Four touch-to-blade tracks | `BladeInputController` | map pointer IDs to four reusable tracks; preserve previous/current world-unit points |
 | Post-step cut query | `ClassicCutQuery2D` | run after the physics step for every active non-zero segment while cut input is enabled |
 | Fixture-to-domain lookup | `Cuttable2D` component | explicit `nodeTag`, `cutDisabled`, `isFruit`, and `cut(segment)` contract; no native object model |
+| Ordinary-fruit split presentation | `ClassicCutHalfMotion` plus `ClassicCutHalfPresenter` | snapshot raw source angle/angular velocity/mass/position before intact-body disposal; create exact cut-bottom then cut-top, apply recovered centre impulses, advance the `0.75s` action fade separately from post-step bounds, and preserve presentation -> audio -> notification/score order |
 | Combo cluster | `ComboService` | timer/count state driven by deterministic delta and accepted fruit-cut positions; emit objective, presentation-create, score, presentation-attach, conditional-sound, and reset commands in recovered order |
 | Authoritative/display/pending score | `ScoreService` plus `ScorePresenter` | keep score mutation independent of tweens and labels |
 | Miss strikes and terminal state | `ClassicFailService` / `ClassicModeController` | three-strike counter, one-shot game-over transition, separate animation callback |
@@ -226,22 +251,26 @@ Phase 5 must add tests for at least these cases:
 5. Null user data, tag `1437`, and disabled cut objects are skipped in recovered order.
 6. A fruit registers combo position before its cut callback; a non-fruit does not.
 7. Normal and critical fruit scores are `1` and `10`; IDs `13` and `14` submit fixed `10`.
-8. Two cuts inside the rolling window produce no combo bonus; three produce `+3`; a gap
+8. Ordinary cuts create bottom then top from exact paired rasters, preserve the recovered
+   split-angle/one-half-direction rules, apply normal/critical centre impulses, then request
+   base/critical audio before score notification. Both halves fade at `0.75s` on the action
+   clock and dispose through the unlocked-world boundary.
+9. Two cuts inside the rolling window produce no combo bonus; three produce `+3`; a gap
    greater than `0.25` closes the cluster. Assert the accepted order
    `objective -> create item -> score -> attach -> conditional sound -> reset`. With effects
    enabled, sound consumes one shared RNG draw after score/attach; with effects disabled, it
    consumes none.
-9. Double-score accumulates signed pending values, flushes `pending * 2`, and clears state;
+10. Double-score accumulates signed pending values, flushes `pending * 2`, and clears state;
    early disable uses the same flush path.
-10. Every completed miss indicator checks the current count; once it is `3`, all still-pending
+11. Every completed miss indicator checks the current count; once it is `3`, all still-pending
     callbacks may invoke the registered callback, while guarded Classic game over transitions
     only once. Restart clears the count.
-11. Bomb hit disables cuts and stops tosses, then stops physics before `-10`;
+12. Bomb hit disables cuts and stops tosses, then stops physics before `-10`;
     `AfterBombHit` performs guarded game over before resuming physics. A pending third-miss
     callback may enter game over during the hold without preventing the later resume.
-12. One collected ray containing two distinct bombs can attach two explosions even though
+13. One collected ray containing two distinct bombs can attach two explosions even though
     the first hit disables subsequent ray queries; duplicate reports for one bomb cut it once.
-13. Displayed score converges upward by ten-percent chunks or one, and downward by one.
+14. Displayed score converges upward by ten-percent chunks or one, and downward by one.
 
 These fixtures validate the recovered implementation contract. They are not golden traces
 from an original runtime, which is unavailable.
@@ -255,6 +284,7 @@ from an original runtime, which is unavailable.
 | Tag/disabled/is-fruit/cut filter order | recovered | high; call path plus vtable addends |
 | No value-level fixture deduplication | recovered | high; address comparison and append path agree; long-term bug compatibility remains a product decision |
 | Fruit, critical, special-ID, combo, double, miss, and bomb score rules | recovered | high; dual-disassembly agreement on branches/constants |
+| Ordinary cut-half geometry, body motion, presentation/audio/notification order | recovered | high; full `Fruit::Cut` and `CutFruit` static ranges plus exact resource pairs |
 | Node tag `1437` semantic name | unknown | trace tag setters and entity constructors |
 | Bomb physics-stop virtual | recovered | high; Classic vtable slot resolves to `PhysicsLayer::StopPhysicsWorld(bool)` and the callee's flag use agrees |
 | Game-over presentation layout/timing | recovered | high; complete action/callback path is recorded in `classic-time-state-contract.md` and `classic-presentation-contract.md` |

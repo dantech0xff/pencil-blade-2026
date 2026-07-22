@@ -2,16 +2,18 @@
 
 ## Result
 
-Phase 05 moved from a pre-scaffold plan to an active foundation state. The workspace now has
-the empty Cocos Creator 3.8.8 `game/` project shell, pure TypeScript domain modules, the
-Creator Physics2D adapter, vertical-slice contract tests, and the build-audit script. Creator
-has now reopened the exact project root, imported the current scripts, and authored the first
-`classic.scene` source.
+Phase 05 moved from a pre-scaffold plan through the foundation into a bounded playable state.
+The workspace now has the Cocos Creator 3.8.8 `game/` project, pure TypeScript domain modules,
+the Creator Physics2D adapter, vertical-slice contract tests, the build-audit script, and an
+Editor-authored `classic.scene` with normal-fruit gameplay. All 862 recovered APK game assets
+are staged byte-for-byte and imported into the Creator bundle. The loop now consumes exact
+background, intro/terminal text, nine intact/cut fruit sets, four critical particles, and 20
+core audio clips. This is still a bounded checkpoint, not the end state.
 
-The phase is still in progress. Canvas now owns the Editor-serialized `BladeInputController`
-and `ClassicSceneController`, but the complete scene/prefab/component map is not finished.
-
-Checklist state: `4/16` Phase 05 items proven (`25%`); `12/16` remain open.
+The phase is still in progress. Canvas now owns `BladeInputController`,
+`ClassicSceneController`, and `ClassicGameplayController`, but eight toss controllers,
+bombs/specials, pause/menu/results, remaining resource consumers, Android output, and the
+complete scene/prefab/component map remain open.
 
 ## Review Findings
 
@@ -35,22 +37,46 @@ native boundary and preserved-library fingerprints, parses central-directory rec
 and rejects ambiguous, duplicate, or payload-bearing directory entries. Independent re-review
 found no remaining actionable issue in this focused scope.
 
-The exact `game/` root was then opened in Creator 3.8.8. The Editor imported four additional
-runtime-integration scripts and serialized `assets/scenes/classic.scene`. Project settings now
+The exact `game/` root was then opened in Creator 3.8.8. The Editor imported the runtime
+integration scripts and serialized `assets/scenes/classic.scene`. Project settings now
 use a `720x1280` default; the runtime adapter selects `720x1280` for physical frame widths at
 least `720` and `480x800` below that boundary. The scene controller configures only recovered
 gravity/sleep/iteration properties, disables automatic simulation, resets the physics
-accumulator, relays ordered session commands, and never auto-completes the intro. This keeps
-Creator's default fixed step from becoming an implicit compatibility decision. The blade
-component binds global touch input to the recovered four-slot tracker.
+accumulator, relays ordered session commands, and binds global touch input to the recovered
+four-slot tracker.
 
-No original artwork, audio, or font was copied. The content-rights claim remains unknown and
-the presentation contract does not authorize import.
+Static inspection of the native director/scheduler path and the pinned Creator 3.8.8 source
+resolved the timestep mapping as `public-manual-variable-step-post-update`: one float32
+`frameDt * worldSpeed` step with `10/10` iterations in a project-owned post-update system,
+with explicit transform synchronization and deferred project lifecycle mutations. Full
+runtime physics equivalence remains pending.
+
+The playable slice starts on the first swipe, runs only the recovered normal-free controller,
+and spawns exact intact fruit rasters with recovered fixtures and kinematics. Blade rays,
+duplicate cut scoring, score smoothing, combo wiring, ordinary cut-bottom/cut-top bodies,
+recovered impulses/fade, critical-particle planning/presentation, and exact toss/swish/cut/
+critical/combo audio are implemented. Bounds and misses reach game over at three misses, and
+tap-to-retry reloads the scene. The other eight Classic controllers are recorded as deferred
+instead of being silently simulated.
+
+The staging pipeline copies all 862 recovered APK game assets without recompression or byte
+changes. Creator imported the corpus and the validator checks its current 934 metadata
+sidecars, untrimmed/full raster geometry, and audio metadata. The manifest's per-asset
+consumer/UUID fields remain unpopulated, so this does not claim 100% runtime consumer coverage.
+
+Rights clearance remains separate from technical fidelity. The current slice is playable, but
+it is not presentation-complete until runtime consumer coverage reaches 100% for the canonical
+sample-project manifest/root. Exact recovered artwork, audio, and fonts are now present for
+technical restoration as requested; their release rights remain unresolved and independent
+from the fidelity work.
 
 ## Remaining Blockers
 
 - Completion of scene, prefab, and serialized component ownership beyond the first Canvas bridge.
-- Live Creator Physics2D timestep validation.
+- Deterministic trajectory, contact, exact ray-order, and deferred-lifecycle validation for
+  full Creator Physics2D equivalence.
+- Canonical sample-project resource manifest/root resolution for the future `99%` metric and
+  the final presentation coverage gate.
 - Electric-field compatibility decisions.
 - Android build validation and real APK/AAB post-build audit.
 - Rights review for original assets and product identity.
@@ -59,17 +85,19 @@ the presentation contract does not authorize import.
 
 - `git diff --check`: clean
 - `node $HOME/.claude/scripts/validate-docs.cjs docs/`: clean
-- `node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/reconstruction/vertical-slice/*.test.ts`: `66/66` pass
+- `node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/reconstruction/vertical-slice/*.test.ts`: `115/115` pass
+- `node --test tests/stage-creator-assets-test.mjs tests/validate-creator-resource-meta-test.mjs`: `29/29` pass
 - `node scripts/audit-creator-build.mjs <build.apk|build.aab>`: documented as the build audit entry point
 - `node --test tests/audit-creator-build-test.mjs`: `8/8` synthetic checks pass
 - Creator 3.8.8 bundled TypeScript compiler: pass
 - reconstruction-policy positive and negative checks: pass
-- Creator preview: opens at `720x1280`; no runtime error overlay observed and Editor Console
-  counters remain zero
+- Creator Preview: opens at `720x1280`, loads the exact core resource subset, plays audio at
+  60 FPS, and shows no runtime error overlay; Editor Console error count remains zero
 
 ## Unresolved Questions
 
-- Which Creator timestep strategy can preserve the recovered variable-step contract without
-  using an unsupported private API?
+- Which deterministic Creator harness should close the remaining contact, exact ray-order,
+  trajectory, and deferred-destruction runtime checks?
 - Which installed NDK and CMake pair should be pinned for the first Android build?
-- What rights or replacement policy will authorize the first presentation-asset manifest?
+- What rights or replacement policy will authorize a distributable build containing the
+  recovered presentation assets?

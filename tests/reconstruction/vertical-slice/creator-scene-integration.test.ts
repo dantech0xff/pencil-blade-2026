@@ -17,13 +17,16 @@ interface SerializedObject {
   readonly [key: string]: unknown;
 }
 
-test('Editor-authored Classic scene resolves both Canvas script components through their metas', () => {
+test('Editor-authored Classic scene resolves all Canvas script components through their metas', () => {
   const scene = readJson<SerializedObject[]>('game/assets/scenes/classic.scene');
   const bladeMeta = readJson<{ imported: boolean; uuid: string }>(
     'game/assets/scripts/creator/blade-input-controller.ts.meta',
   );
   const sceneControllerMeta = readJson<{ imported: boolean; uuid: string }>(
     'game/assets/scripts/creator/classic-scene-controller.ts.meta',
+  );
+  const gameplayControllerMeta = readJson<{ imported: boolean; uuid: string }>(
+    'game/assets/scripts/creator/classic-gameplay-controller.ts.meta',
   );
   const canvas = scene.find((entry) => entry.__type__ === 'cc.Node' && entry._name === 'Canvas');
   assert.ok(canvas?._components);
@@ -35,7 +38,12 @@ test('Editor-authored Classic scene resolves both Canvas script components throu
 
   assert.equal(bladeMeta.imported, true);
   assert.equal(sceneControllerMeta.imported, true);
-  assert.deepEqual(scriptTypes.map(decodeCreatorUuid), [bladeMeta.uuid, sceneControllerMeta.uuid]);
+  assert.equal(gameplayControllerMeta.imported, true);
+  assert.deepEqual(scriptTypes.map(decodeCreatorUuid), [
+    bladeMeta.uuid,
+    sceneControllerMeta.uuid,
+    gameplayControllerMeta.uuid,
+  ]);
 });
 
 test('Classic project and serialized Canvas start from the canonical high portrait profile', () => {
@@ -53,19 +61,203 @@ test('Classic project and serialized Canvas start from the canonical high portra
   assert.ok(canvasSize);
 });
 
-test('Creator bridge holds automatic physics and emits initial state only after onEnable', () => {
+test('Creator bridge owns recovered variable stepping and emits initial state after onEnable', () => {
   const physicsSource = readText('game/assets/scripts/creator/classic-physics-adapter.ts');
   const sceneSource = readText('game/assets/scripts/creator/classic-scene-controller.ts');
+  const physicsAdapterStart = physicsSource.indexOf('export class ClassicPhysicsAdapter');
+  const physicsConstructorStart = physicsSource.indexOf('  constructor(', physicsAdapterStart);
+  const physicsConfigureStart = physicsSource.indexOf(
+    '  configureResolvedWorldProperties()',
+    physicsConstructorStart,
+  );
+  const physicsConstructor = physicsSource.slice(physicsConstructorStart, physicsConfigureStart);
+  const configurePhysics = extractMethod(physicsSource, 'configureResolvedWorldProperties');
+  const restorePhysics = extractMethod(physicsSource, 'restorePreviousWorldProperties');
   const onLoad = extractMethod(sceneSource, 'onLoad');
   const start = extractMethod(sceneSource, 'start');
+  const onDestroy = extractMethod(sceneSource, 'onDestroy');
 
   assert.match(physicsSource, /autoSimulation = false/);
   assert.match(physicsSource, /resetAccumulator\(\)/);
   assert.doesNotMatch(physicsSource, /fixedTimeStep\s*=/);
-  assert.doesNotMatch(physicsSource, /\.step\(/);
+  assert.match(physicsSource, /class ClassicVariablePhysicsSystem extends System/);
+  assert.match(physicsSource, /postUpdate\(frameDeltaSeconds: number\)/);
+  assert.match(physicsSource, /this\.physics\.step\(deltaSeconds\)/);
+  assert.match(physicsSource, /syncSceneToPhysics\(\)/);
+  assert.match(physicsSource, /syncPhysicsToScene\(\)/);
+  assert.doesNotMatch(physicsConstructor, /this\.previousState\s*=/);
+  assert.match(
+    configurePhysics,
+    /this\.previousState = capturePreviousPhysicsState\(this\.physics\)/,
+  );
+  assert.match(restorePhysics, /this\.previousState = null/);
+  assert.match(onLoad, /startVariableSimulation/);
   assert.doesNotMatch(onLoad, /CLASSIC_RESOLUTION_APPLIED_EVENT|emitSessionSnapshot/);
+  assert.match(start, /enableClassicSpeedUp/);
   assert.match(start, /CLASSIC_RESOLUTION_APPLIED_EVENT/);
   assert.match(start, /emitSessionSnapshot/);
+  assert.match(onDestroy, /restorePreviousWorldProperties/);
+});
+
+test('generated Classic slice uses recovered normal-free and stable post-step cut batches', () => {
+  const gameplaySource = readText('game/assets/scripts/creator/classic-gameplay-controller.ts');
+  const registrySource = readText('game/assets/scripts/creator/classic-entity-registry.ts');
+  const fruitSource = readText('game/assets/scripts/creator/classic-generated-fruit.ts');
+  const physicsSource = readText('game/assets/scripts/creator/classic-physics-adapter.ts');
+
+  assert.match(gameplaySource, /new ClassicFreeTossStrategy/);
+  assert.match(gameplaySource, /controllerId: 'a9'/);
+  assert.match(gameplaySource, /effectsEnabled: this\.effectsEnabled/);
+  assert.match(gameplaySource, /this\.combo\.update\(deltaSeconds, this\.effectsEnabled\(\)\)/);
+  assert.doesNotMatch(gameplaySource, /effectsEnabled: \(\) => false/);
+  assert.match(gameplaySource, /if \(registry\.size > 0\)/);
+  assert.match(gameplaySource, /runRayQueryCutBatch/);
+  assert.match(gameplaySource, /raycastAll\(plan\.forward\.start, plan\.forward\.end\)/);
+  assert.match(gameplaySource, /raycastAll\(plan\.reverse\.start, plan\.reverse\.end\)/);
+  assert.match(registrySource, /entity\.cutWithinRayQuery/);
+  assert.match(registrySource, /entity\.completeRayQueryCuts/);
+  assert.match(fruitSource, /this\.node\.active = false/);
+  assert.match(fruitSource, /sourceBodyMass = this\.body\.getMass\(\)/);
+  assert.match(fruitSource, /sourceAngleRadians: this\.bodyAngleRadiansSnapshot\(\)/);
+  assert.match(fruitSource, /sourceAngularVelocityRadiansPerSecond: this\.body\.angularVelocity/);
+  assert.match(fruitSource, /rawBody\.GetAngle\.call\(rawBody\)/);
+  assert.doesNotMatch(fruitSource, /PhysicsSystem2D/);
+  assert.match(physicsSource, /new Vec2\(startWorld\.x, startWorld\.y\)/);
+  assert.match(physicsSource, /fruitCollisionMask/);
+});
+
+test('Classic presentation loads the exact game bundle before using recovered fruit rasters', () => {
+  const bundleMeta = readJson<{
+    imported: boolean;
+    userData: { isBundle?: boolean };
+  }>('game/assets/game.meta');
+  const loaderSource = readText('game/assets/scripts/creator/classic-resource-loader.ts');
+  const gameplaySource = readText('game/assets/scripts/creator/classic-gameplay-controller.ts');
+  const fruitSource = readText('game/assets/scripts/creator/classic-generated-fruit.ts');
+
+  assert.equal(bundleMeta.imported, true);
+  assert.equal(bundleMeta.userData.isBundle, true);
+  assert.match(loaderSource, /CLASSIC_RESOURCE_BUNDLE_NAME = 'game'/);
+  assert.match(loaderSource, /assetManager\.loadBundle\(CLASSIC_RESOURCE_BUNDLE_NAME/);
+  assert.match(loaderSource, /canonicalRasterToSpriteFrameBundlePath\(resource\.canonicalPath\)/);
+  assert.match(loaderSource, /\/spriteFrame/);
+  assert.match(loaderSource, /bundle\.load\(paths, SpriteFrame/);
+  assert.match(loaderSource, /error !== null && error !== undefined/);
+  assert.match(loaderSource, /assertSpriteFrameDimensions/);
+  assert.match(loaderSource, /getClassicCriticalParticleResource/);
+  assert.match(loaderSource, /criticalParticles/);
+
+  assert.match(gameplaySource, /await loadClassicSliceResourceCatalog\(assetTree\)/);
+  assert.match(gameplaySource, /resourceCatalog: resources/);
+  assert.match(gameplaySource, /playRecoveredIntro\(viewport, resources\)/);
+  assert.doesNotMatch(gameplaySource, /Swipe to start/);
+  assert.match(gameplaySource, /\.to\(0\.5, \{ position:/);
+  assert.match(gameplaySource, /\.delay\(0\.5\)/);
+  assert.match(gameplaySource, /this\.sceneController\.completeIntro\(\)/);
+
+  assert.match(fruitSource, /this\.node\.addComponent\(Sprite\)/);
+  assert.match(fruitSource, /visuals\.intact\.spriteFrame/);
+  assert.match(fruitSource, /spriteWidthWorldUnits: visuals\.intact\.dimensions\.width/);
+  assert.match(fruitSource, /spriteHeightWorldUnits: visuals\.intact\.dimensions\.height/);
+  assert.doesNotMatch(fruitSource, /Graphics|CLASSIC_GENERATED_FRUIT_VISUAL_SIZE|64x64/);
+});
+
+test('Classic audio preload and event consumers use the exact recovered clips', () => {
+  const audioSource = readText('game/assets/scripts/creator/classic-audio-presenter.ts');
+  const gameplaySource = readText('game/assets/scripts/creator/classic-gameplay-controller.ts');
+  const registrySource = readText('game/assets/scripts/creator/classic-entity-registry.ts');
+  const visualLoadIndex = gameplaySource.indexOf(
+    'resources = await loadClassicSliceResourceCatalog(assetTree)',
+  );
+  const audioLoadIndex = gameplaySource.indexOf(
+    'audioPresenter = await ClassicAudioPresenter.load(this.node)',
+  );
+
+  assert.notEqual(visualLoadIndex, -1);
+  assert.ok(audioLoadIndex > visualLoadIndex);
+  assert.match(audioSource, /CLASSIC_CORE_AUDIO_PATHS\.map\(canonicalResourceToBundlePath\)/);
+  assert.match(audioSource, /bundle\.load\(bundlePaths, AudioClip/);
+  assert.match(audioSource, /error !== null && error !== undefined/);
+  assert.match(audioSource, /audioSource\.playOneShot\(clip, TARGET_ONE_SHOT_VOLUME_SCALE\)/);
+  assert.doesNotMatch(audioSource, /canonicalRasterToSpriteFrameBundlePath|\/spriteFrame/);
+
+  assert.match(registrySource, /case 'play-toss-sound':[\s\S]*onPlayTossSound\(command\.sound\)/);
+  assert.match(gameplaySource, /onPlayTossSound: \(sound\) => audioPresenter\.playOneShot\(sound\)/);
+  assert.match(gameplaySource, /getClassicFruitCutAudioSequence\(event\.fruitId, event\.critical\)/);
+  assert.match(gameplaySource, /getClassicComboAudioPath\(command\.soundIndex\)/);
+  assert.match(gameplaySource, /new ClassicSwishAudioGate\(this\.random\)/);
+  assert.match(gameplaySource, /this\.swishAudio\.request\([\s\S]*event\.shouldPlaySwish/);
+  assert.match(gameplaySource, /this\.scheduleOnce\(this\.onSwishCooldownComplete, instruction\.delaySeconds\)/);
+  assert.match(gameplaySource, /this\.unschedule\(this\.onSwishCooldownComplete\)/);
+});
+
+test('ordinary cuts present exact recovered halves before audio and scoring', () => {
+  const gameplaySource = readText('game/assets/scripts/creator/classic-gameplay-controller.ts');
+  const presenterSource = readText('game/assets/scripts/creator/classic-cut-half-presenter.ts');
+  const cutHandlerStart = gameplaySource.indexOf(
+    '  private onFruitCut(event: ClassicGeneratedFruitCutEvent): void {',
+  );
+  const cutPresentationStart = gameplaySource.indexOf(
+    '  private presentRecoveredCutHalves(event: ClassicGeneratedFruitCutEvent): void {',
+  );
+  assert.notEqual(cutHandlerStart, -1);
+  assert.notEqual(cutPresentationStart, -1);
+  const cutHandler = gameplaySource.slice(cutHandlerStart, cutPresentationStart);
+
+  const visualIndex = cutHandler.indexOf('this.presentRecoveredCutHalves(event)');
+  const audioIndex = cutHandler.indexOf('getClassicFruitCutAudioSequence');
+  const scoreIndex = cutHandler.indexOf('createClassicFruitCutCommands');
+  assert.ok(visualIndex >= 0 && audioIndex > visualIndex && scoreIndex > audioIndex);
+
+  assert.match(gameplaySource, /createClassicCutHalfMotion\(\{/);
+  assert.match(gameplaySource, /bottomHeightWorldUnits: visuals\.cutBottom\.dimensions\.height/);
+  assert.match(gameplaySource, /topHeightWorldUnits: visuals\.cutTop\.dimensions\.height/);
+  assert.match(gameplaySource, /sourceAngleRadians: event\.sourceAngleRadians/);
+  assert.match(gameplaySource, /sourceBodyMass: event\.sourceBodyMass/);
+  assert.match(gameplaySource, /presenter\.attach\(this\.node, 1\)/);
+  assert.match(gameplaySource, /presenter\.updateAction\(deltaSeconds\)/);
+  assert.match(gameplaySource, /presenter\.evaluateBounds\(viewport\)/);
+  assert.match(gameplaySource, /this\.disposeCutHalfPresenters\(\)/);
+
+  assert.match(presenterSource, /nativePart: 1,[\s\S]*part: 'bottom'/);
+  assert.match(presenterSource, /nativePart: 0,[\s\S]*part: 'top'/);
+  assert.match(presenterSource, /body\.gravityScale = CLASSIC_CUT_HALF_GRAVITY_SCALE/);
+  assert.match(presenterSource, /body\.linearVelocity = new Vec2\(0, 0\)/);
+  assert.match(presenterSource, /applyLinearImpulseToCenter\([\s\S]*true/);
+  assert.match(presenterSource, /this\.queueAll\('fade-complete'\)/);
+});
+
+test('critical cut halves preserve per-half update RNG and exact particle consumers', () => {
+  const gameplaySource = readText('game/assets/scripts/creator/classic-gameplay-controller.ts');
+  const plannerSource = readText('game/assets/scripts/domain/classic-critical-particle-plan.ts');
+  const physicsStart = gameplaySource.indexOf(
+    '  private readonly onPhysicsStepped = (event: ClassicPhysicsSteppedEvent): void => {',
+  );
+  const cutStart = gameplaySource.indexOf(
+    '  private onFruitCut(event: ClassicGeneratedFruitCutEvent): void {',
+  );
+  assert.notEqual(physicsStart, -1);
+  assert.ok(cutStart > physicsStart);
+  const postPhysics = gameplaySource.slice(physicsStart, cutStart);
+  const boundsIndex = postPhysics.indexOf('presenter.evaluateBounds(viewport)');
+  const particleIndex = postPhysics.indexOf('this.emitRecoveredCriticalParticles(presenter)');
+  assert.ok(boundsIndex >= 0 && particleIndex > boundsIndex);
+
+  assert.match(gameplaySource, /const existingCutHalfPresenters = \[\.\.\.this\.cutHalfPresenters\]/);
+  assert.match(gameplaySource, /if \(event\.critical\) \{[\s\S]*this\.criticalCutHalfPresenters\.add\(presenter\)/);
+  assert.match(gameplaySource, /for \(const half of cutHalves\.halves\)/);
+  assert.match(gameplaySource, /if \(half\.disposalQueued\)/);
+  assert.match(gameplaySource, /createClassicCriticalParticleUpdateCommands\([\s\S]*critical,[\s\S]*this\.random/);
+  assert.match(gameplaySource, /resources\.criticalParticles\[command\.resourceIndex - 1\]/);
+  assert.match(gameplaySource, /positionWorldUnits: \{ x: position\.x, y: position\.y \}/);
+  assert.match(gameplaySource, /presenter\.attach\(this\.node\)/);
+  assert.match(gameplaySource, /this\.criticalParticlePresenters\.delete\(presenter\)/);
+  assert.match(gameplaySource, /presenter\.updateAction\(deltaSeconds\)/);
+
+  assert.match(plannerSource, /drawInclusive\(random, 0, 3\)/);
+  assert.match(plannerSource, /drawInclusive\(random, 1, 4\)/);
+  assert.match(plannerSource, /drawInclusive\(random, -10, 10\)/);
+  assert.match(plannerSource, /CLASSIC_CRITICAL_PARTICLE_SCALE_OUT_ACTION_SECONDS = Math\.fround\(1\.5\)/);
 });
 
 function readJson<T>(relativePath: string): T {

@@ -90,6 +90,7 @@ jq -e '
     "positionAndGeometryToCreatorWorldUnits": 32,
     "rayEndpointsToCreatorWorldUnits": 1
   } and
+  .rules.compatibility.creatorTimestepMapping == "public-manual-variable-step-post-update" and
   .rules.compatibility.bidirectionalRayFixtureDuplicates == "preserve-order-and-duplicates" and
   .rules.compatibility.concurrentCountMaxPlusOne == "preserve" and
   .rules.compatibility.effectsComboRngDraw == "preserve-shared-stream" and
@@ -128,7 +129,7 @@ jq -e '
       "blocks": "bomb-electric-recovered-label"
     },
     {
-      "id": "creator-timestep-mapping",
+      "id": "creator-physics-runtime-validation",
       "status": "unresolved",
       "blocks": "physics-integration-equivalence-label"
     },

@@ -1,9 +1,9 @@
 /**
  * Pure values at the recovered Box2D -> Cocos Creator Physics2D boundary.
  *
- * Timestep equivalence is intentionally absent. The original uses a variable
- * `frameDt * worldSpeed` step while Creator 3.8.8 defaults to a fixed-step
- * accumulator. That policy remains unresolved and must be integration-tested.
+ * The original uses one variable `frameDt * worldSpeed` step while Creator 3.8.8
+ * defaults to a fixed-step accumulator. The Creator adapter therefore owns an
+ * explicit manual-step compatibility boundary.
  */
 
 export interface Point2D {
@@ -15,7 +15,7 @@ export interface ClassicPhysicsConfiguration {
   readonly allowSleep: true;
   readonly gravityWorldUnitsPerSecondSquared: Point2D;
   readonly positionIterations: 10;
-  readonly timestepPolicy: 'unresolved';
+  readonly timestepPolicy: 'variable-frame-delta-times-world-speed';
   readonly velocityIterations: 10;
 }
 
@@ -29,7 +29,7 @@ export const CLASSIC_PHYSICS_CONFIGURATION: ClassicPhysicsConfiguration = Object
   allowSleep: true,
   gravityWorldUnitsPerSecondSquared: Object.freeze({ x: 0, y: -320 }),
   positionIterations: 10,
-  timestepPolicy: 'unresolved',
+  timestepPolicy: 'variable-frame-delta-times-world-speed',
   velocityIterations: 10,
 });
 

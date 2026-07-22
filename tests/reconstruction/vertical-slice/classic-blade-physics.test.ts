@@ -100,7 +100,7 @@ test('physics constants preserve the recovered Creator boundary', () => {
     allowSleep: true,
     gravityWorldUnitsPerSecondSquared: { x: 0, y: -320 },
     positionIterations: 10,
-    timestepPolicy: 'unresolved',
+    timestepPolicy: 'variable-frame-delta-times-world-speed',
     velocityIterations: 10,
   });
 });

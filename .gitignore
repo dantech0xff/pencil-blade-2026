@@ -20,6 +20,7 @@
 /game/temp/
 /game/build/
 /game/profiles/
+/game/.creator/asset-template/
 
 # Local tooling, credentials, and OS files
 /repomix-output.xml

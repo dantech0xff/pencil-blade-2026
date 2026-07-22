@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "policyId": "pencil-blade-static-reconstruction",
-  "policyVersion": "1.0.0",
+  "policyVersion": "1.0.2",
   "method": {
     "scope": "classic-vertical-slice",
     "evidenceMode": "static-only",
@@ -36,8 +36,8 @@
       {
         "id": "DER-CLASSIC-PHYSICS-001",
         "path": "forensics/contracts/classic-physics-contract.md",
-        "sha256": "0fae0d4645f89f6f26f50a77796388c6593d22b2e71fa210ae6eb9eb012f82e6",
-        "bytes": 29745
+        "sha256": "a654a1292a670d234abce032f0ddfc4a8443ea09007e22b22ed140726e940028",
+        "bytes": 33475
       },
       {
         "id": "DER-CLASSIC-TOSS-001",
@@ -48,8 +48,8 @@
       {
         "id": "DER-CLASSIC-CUT-SCORE-001",
         "path": "forensics/contracts/classic-cut-score-contract.md",
-        "sha256": "01debadda1d9bee37d3d5734aca318fb93302f5ab89e2a2beece1a5ba7010be0",
-        "bytes": 16991
+        "sha256": "be9e4afb0449d2eadb821e6bca3c289b9d2aa5f162dcc86e0fd3d21fc0ad56d5",
+        "bytes": 19418
       },
       {
         "id": "DER-CLASSIC-TIME-STATE-001",
@@ -170,6 +170,7 @@
         "angularVelocityToCreatorScale": 1,
         "creatorRotation": "stock-positive-body-angle-sync"
       },
+      "creatorTimestepMapping": "public-manual-variable-step-post-update",
       "bidirectionalRayFixtureDuplicates": "preserve-order-and-duplicates",
       "concurrentCountMaxPlusOne": "preserve",
       "effectsComboRngDraw": "preserve-shared-stream",
@@ -212,7 +213,7 @@
         "blocks": "bomb-electric-recovered-label"
       },
       {
-        "id": "creator-timestep-mapping",
+        "id": "creator-physics-runtime-validation",
         "status": "unresolved",
         "blocks": "physics-integration-equivalence-label"
       },
