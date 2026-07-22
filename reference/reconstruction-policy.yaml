@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "policyId": "pencil-blade-static-reconstruction",
+  "policyVersion": "1.0.0",
+  "method": {
+    "scope": "classic-vertical-slice",
+    "evidenceMode": "static-only",
+    "originalRuntimeAvailable": false,
+    "originalRuntimeObserved": false,
+    "originalRuntimeRequired": false,
+    "apkInstallationAllowed": false,
+    "apkExecutionAllowed": false,
+    "nativeExecutionAllowed": false,
+    "mechanicalTranslationAllowed": false,
+    "target": {
+      "engine": "Cocos Creator",
+      "version": "3.8.8",
+      "language": "TypeScript",
+      "physics": "Physics2D"
+    }
+  },
+  "evidence": {
+    "sources": [
+      {
+        "id": "SRC-APK-001",
+        "sha256": "95225733d46473f2b155737e8c83b567e028342257c747c0faac6ed4ab87e7aa",
+        "bytes": 35817225
+      },
+      {
+        "id": "DER-NATIVE-001",
+        "sha256": "55385c170f08c45c6a36358c6cac6f4b82104475ae8d2efd22c9187d1038500e",
+        "bytes": 4734880
+      }
+    ],
+    "contracts": [
+      {
+        "id": "DER-CLASSIC-PHYSICS-001",
+        "path": "forensics/contracts/classic-physics-contract.md",
+        "sha256": "0fae0d4645f89f6f26f50a77796388c6593d22b2e71fa210ae6eb9eb012f82e6",
+        "bytes": 29745
+      },
+      {
+        "id": "DER-CLASSIC-TOSS-001",
+        "path": "forensics/contracts/classic-toss-contract.md",
+        "sha256": "7c74b6f2473ded9acf1e7aa7e50961296267b09570949d039106cc0498da878f",
+        "bytes": 27952
+      },
+      {
+        "id": "DER-CLASSIC-CUT-SCORE-001",
+        "path": "forensics/contracts/classic-cut-score-contract.md",
+        "sha256": "01debadda1d9bee37d3d5734aca318fb93302f5ab89e2a2beece1a5ba7010be0",
+        "bytes": 16991
+      },
+      {
+        "id": "DER-CLASSIC-TIME-STATE-001",
+        "path": "forensics/contracts/classic-time-state-contract.md",
+        "sha256": "b72e910d47e19fe04b22c9fa048ce1a0a48c3b81318d3f2675b62867558f737f",
+        "bytes": 39563
+      },
+      {
+        "id": "DER-CLASSIC-PRESENTATION-001",
+        "path": "forensics/contracts/classic-presentation-contract.md",
+        "sha256": "06619b1cf3e17b3d030d1d8a79488f7e1d82ea50f62f67b086df8c824b6ed7b6",
+        "bytes": 31362
+      }
+    ]
+  },
+  "coverage": {
+    "metric": "registered-policy-contract-claims",
+    "requiredClaimIds": [
+      "CLM-CLASSIC-PHYSICS-UNITS",
+      "CLM-CLASSIC-FIXTURES",
+      "CLM-CLASSIC-TOSS-RNG",
+      "CLM-CLASSIC-TOSS-GRAPH",
+      "CLM-CLASSIC-BLADE-QUERY",
+      "CLM-CLASSIC-FRUIT-SCORE",
+      "CLM-CLASSIC-COMBO",
+      "CLM-CLASSIC-DOUBLE-SCORE",
+      "CLM-CLASSIC-FAIL-GAMEOVER",
+      "CLM-CLASSIC-UNTIMED-START",
+      "CLM-CLASSIC-WORLD-SPEED-PAUSE",
+      "CLM-CLASSIC-BOMB-TERMINATION",
+      "CLM-TIME-MANAGER-LIFECYCLE",
+      "CLM-CLASSIC-RESOLUTION-PROFILE",
+      "CLM-CLASSIC-PRESENTATION-ASSETS",
+      "CLM-CLASSIC-PRESENTATION-FLOW",
+      "CLM-CLASSIC-AUDIO-BOUNDARY"
+    ],
+    "requiredClaimContracts": {
+      "CLM-CLASSIC-PHYSICS-UNITS": [
+        "DER-CLASSIC-PHYSICS-001"
+      ],
+      "CLM-CLASSIC-FIXTURES": [
+        "DER-CLASSIC-PHYSICS-001"
+      ],
+      "CLM-CLASSIC-TOSS-RNG": [
+        "DER-CLASSIC-TOSS-001"
+      ],
+      "CLM-CLASSIC-TOSS-GRAPH": [
+        "DER-CLASSIC-TOSS-001"
+      ],
+      "CLM-CLASSIC-BLADE-QUERY": [
+        "DER-CLASSIC-PHYSICS-001",
+        "DER-CLASSIC-CUT-SCORE-001"
+      ],
+      "CLM-CLASSIC-FRUIT-SCORE": [
+        "DER-CLASSIC-CUT-SCORE-001"
+      ],
+      "CLM-CLASSIC-COMBO": [
+        "DER-CLASSIC-CUT-SCORE-001"
+      ],
+      "CLM-CLASSIC-DOUBLE-SCORE": [
+        "DER-CLASSIC-CUT-SCORE-001"
+      ],
+      "CLM-CLASSIC-FAIL-GAMEOVER": [
+        "DER-CLASSIC-CUT-SCORE-001",
+        "DER-CLASSIC-TOSS-001",
+        "DER-CLASSIC-TIME-STATE-001"
+      ],
+      "CLM-CLASSIC-UNTIMED-START": [
+        "DER-CLASSIC-TOSS-001",
+        "DER-CLASSIC-TIME-STATE-001",
+        "DER-CLASSIC-PRESENTATION-001"
+      ],
+      "CLM-CLASSIC-WORLD-SPEED-PAUSE": [
+        "DER-CLASSIC-PHYSICS-001",
+        "DER-CLASSIC-TIME-STATE-001"
+      ],
+      "CLM-CLASSIC-BOMB-TERMINATION": [
+        "DER-CLASSIC-PHYSICS-001",
+        "DER-CLASSIC-CUT-SCORE-001",
+        "DER-CLASSIC-TIME-STATE-001",
+        "DER-CLASSIC-PRESENTATION-001"
+      ],
+      "CLM-TIME-MANAGER-LIFECYCLE": [
+        "DER-CLASSIC-TIME-STATE-001"
+      ],
+      "CLM-CLASSIC-RESOLUTION-PROFILE": [
+        "DER-CLASSIC-PRESENTATION-001"
+      ],
+      "CLM-CLASSIC-PRESENTATION-ASSETS": [
+        "DER-CLASSIC-PRESENTATION-001"
+      ],
+      "CLM-CLASSIC-PRESENTATION-FLOW": [
+        "DER-CLASSIC-TIME-STATE-001",
+        "DER-CLASSIC-PRESENTATION-001"
+      ],
+      "CLM-CLASSIC-AUDIO-BOUNDARY": [
+        "DER-CLASSIC-PRESENTATION-001"
+      ]
+    },
+    "requiredStatus": "recovered",
+    "requiredEvidenceTier": 1,
+    "requireContractEligible": true,
+    "requireNoContradictions": true,
+    "minimumConfidence": 0.99,
+    "minimumRecoveredFraction": 1.0,
+    "inferredTreatment": "excluded",
+    "unknownTreatment": "blocks-affected-scope"
+  },
+  "rules": {
+    "compatibility": {
+      "units": {
+        "legacyWorldUnitsPerBox2DMetre": 32,
+        "positionAndGeometryToCreatorWorldUnits": 32,
+        "rayEndpointsToCreatorWorldUnits": 1,
+        "nativeGravityMetresPerSecondSquared": [0, -10],
+        "creatorGravityWorldUnitsPerSecondSquared": [0, -320],
+        "linearVelocityToCreatorScale": 1,
+        "angularVelocityToCreatorScale": 1,
+        "creatorRotation": "stock-positive-body-angle-sync"
+      },
+      "bidirectionalRayFixtureDuplicates": "preserve-order-and-duplicates",
+      "concurrentCountMaxPlusOne": "preserve",
+      "effectsComboRngDraw": "preserve-shared-stream",
+      "separateAudioOrVfxRng": "disabled",
+      "nativeLrand48SequenceParity": "not-claimed",
+      "unsafeBombElectricPointerLayout": "forbidden",
+      "sameQueryMultiBomb": "preserve-independent-explosions-and-last-writer-physics-stop",
+      "classicModeZeroMusicResumeAsymmetry": "preserve"
+    },
+    "assetFidelity": {
+      "sourceBytes": "sha256-exact",
+      "geometry": "exact",
+      "trim": "forbidden",
+      "recompression": "forbidden",
+      "audioResampling": "forbidden",
+      "fontSubstitution": "forbidden",
+      "visualTolerance": null,
+      "audioTolerance": null,
+      "unknownRights": "not-ship-ready"
+    },
+    "cleanRoom": {
+      "forbiddenProductionContent": [
+        "source-apk",
+        "libgame.so",
+        "decompiler-output",
+        "cocos2d-x-2.1.4-runtime",
+        "native-compatibility-bridge",
+        "emulation-layer"
+      ]
+    },
+    "openDecisions": [
+      {
+        "id": "bomb-electric-zero-height-fixture",
+        "status": "unresolved",
+        "blocks": "bomb-electric-recovered-label"
+      },
+      {
+        "id": "bomb-electric-contact-behavior",
+        "status": "unresolved",
+        "blocks": "bomb-electric-recovered-label"
+      },
+      {
+        "id": "creator-timestep-mapping",
+        "status": "unresolved",
+        "blocks": "physics-integration-equivalence-label"
+      },
+      {
+        "id": "time-manager-callback-hardening",
+        "status": "unresolved",
+        "blocks": "safe-divergence-decision"
+      },
+      {
+        "id": "multi-bomb-reference-counted-variant",
+        "status": "unresolved",
+        "blocks": "post-fidelity-safety-variant"
+      },
+      {
+        "id": "original-content-rights",
+        "status": "unknown-not-cleared",
+        "blocks": "shipping-original-content"
+      }
+    ]
+  }
+}

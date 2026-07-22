@@ -1,0 +1,32 @@
+# Immutable and offline evidence (never version as source code)
+*.apk
+*.apks
+*.xapk
+/offline-evidence/
+
+# Reproducible but non-versioned decoder and native-analysis output
+/.forensics-work/
+/jadx-output/
+/apktool-output/
+*.so
+
+# Raw historical/supporting media; keep only curated provenance and review notes
+/reference/historical-media/raw/
+/reference/external-material/
+
+# Cocos Creator generated state and builds
+/game/library/
+/game/local/
+/game/temp/
+/game/build/
+/game/profiles/
+
+# Local tooling, credentials, and OS files
+/repomix-output.xml
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+*.log
+.DS_Store
