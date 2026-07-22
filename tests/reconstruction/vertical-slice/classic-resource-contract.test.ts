@@ -4,10 +4,12 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import {
+  CLASSIC_BOMB_RESOURCES,
   CLASSIC_CRITICAL_PARTICLE_RESOURCES,
   CLASSIC_NORMAL_FRUIT_RESOURCES,
   canonicalResourceToBundlePath,
   canonicalRasterToSpriteFrameBundlePath,
+  getClassicBombResource,
   getClassicCriticalParticleResource,
   getClassicPresentationResources,
   getClassicNormalFruitResources,
@@ -44,6 +46,39 @@ test('ordinary fruit IDs map exactly to the recovered names and paired raster tr
     }
   }
   assert.equal(canonicalPaths.size, 54);
+});
+
+test('standard Classic bomb ID 0 maps only to the recovered bomb_X rasters', () => {
+  assert.deepEqual(CLASSIC_BOMB_RESOURCES, {
+    '480x800': {
+      canonicalPath: '480x800/Bomb/bomb_X.png',
+      dimensions: { width: 80, height: 108 },
+    },
+    '720x1280': {
+      canonicalPath: '720x1280/Bomb/bomb_X.png',
+      dimensions: { width: 121, height: 161 },
+    },
+  });
+
+  for (const tree of ['480x800', '720x1280'] as const) {
+    const resource = getClassicBombResource(0, tree);
+    assert.equal(resource.canonicalPath, `${tree}/Bomb/bomb_X.png`);
+    assertStagedRasterGeometry(resource);
+  }
+});
+
+test('Creator loader includes one bomb descriptor and a runtime-validating catalog getter', () => {
+  const loaderSource = readText('game/assets/scripts/creator/classic-resource-loader.ts');
+
+  assert.match(
+    loaderSource,
+    /descriptor\(bombKey\(0\), getClassicBombResource\(0, assetTree\)\)/,
+  );
+  assert.match(loaderSource, /const bombResource = requireLoadedBomb\(assetTree, loadedByKey\)/);
+  assert.match(loaderSource, /bomb\(bombId: number\): LoadedClassicRasterResource/);
+  assert.match(loaderSource, /getClassicBombResource\(bombId, this\.assetTree\)/);
+  assert.match(loaderSource, /function bombKey\(bombId: ClassicBombId\): string/);
+  assert.doesNotMatch(loaderSource, /getClassicBombResource\(1,/);
 });
 
 test('contract dimensions match every staged PNG IHDR and untrimmed SpriteFrame', () => {
@@ -183,12 +218,62 @@ test('resource lookup rejects IDs and trees outside the recovered contract', () 
     () => getClassicCriticalParticleResource(1, '1080x1920' as never),
     RangeError,
   );
+  assert.throws(() => getClassicBombResource(-1, '480x800'), RangeError);
+  assert.throws(() => getClassicBombResource(1, '720x1280'), RangeError);
+  assert.throws(() => getClassicBombResource(Number.NaN, '480x800'), RangeError);
+  assert.throws(
+    () => getClassicBombResource(0, '1080x1920' as never),
+    RangeError,
+  );
 });
 
+function assertStagedRasterGeometry(resource: {
+  readonly canonicalPath: string;
+  readonly dimensions: { readonly height: number; readonly width: number };
+}): void {
+  assert.equal(STAGED_PATHS.has(resource.canonicalPath), true, resource.canonicalPath);
+
+  const image = readBinary(`game/assets/game/${resource.canonicalPath}`);
+  assert.equal(image.readUInt32BE(16), resource.dimensions.width, resource.canonicalPath);
+  assert.equal(image.readUInt32BE(20), resource.dimensions.height, resource.canonicalPath);
+
+  const meta = readJson<{
+    readonly subMetas: Readonly<Record<string, {
+      readonly importer: string;
+      readonly userData: {
+        readonly height: number;
+        readonly rawHeight: number;
+        readonly rawWidth: number;
+        readonly trimType: string;
+        readonly width: number;
+      };
+    }>>;
+  }>(`game/assets/game/${resource.canonicalPath}.meta`);
+  const spriteFrame = Object.values(meta.subMetas).find((entry) => entry.importer === 'sprite-frame');
+  assert.ok(spriteFrame, resource.canonicalPath);
+  assert.deepEqual({
+    width: spriteFrame.userData.width,
+    height: spriteFrame.userData.height,
+    rawWidth: spriteFrame.userData.rawWidth,
+    rawHeight: spriteFrame.userData.rawHeight,
+    trimType: spriteFrame.userData.trimType,
+  }, {
+    width: resource.dimensions.width,
+    height: resource.dimensions.height,
+    rawWidth: resource.dimensions.width,
+    rawHeight: resource.dimensions.height,
+    trimType: 'none',
+  }, resource.canonicalPath);
+}
+
 function readJson<T>(relativePath: string): T {
-  return JSON.parse(readFileSync(`${REPOSITORY_ROOT}${relativePath}`, 'utf8')) as T;
+  return JSON.parse(readText(relativePath)) as T;
 }
 
 function readBinary(relativePath: string): Buffer {
   return readFileSync(`${REPOSITORY_ROOT}${relativePath}`);
+}
+
+function readText(relativePath: string): string {
+  return readFileSync(`${REPOSITORY_ROOT}${relativePath}`, 'utf8');
 }

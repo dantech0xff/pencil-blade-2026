@@ -8,9 +8,11 @@ import {
   CLASSIC_CRITICAL_PARTICLE_RESOURCES,
   CLASSIC_NORMAL_FRUIT_RESOURCES,
   canonicalRasterToSpriteFrameBundlePath,
+  getClassicBombResource,
   getClassicCriticalParticleResource,
   getClassicNormalFruitResources,
   getClassicPresentationResources,
+  type ClassicBombId,
   type ClassicCriticalParticleIndex,
   type ClassicNormalFruitId,
   type ClassicNormalFruitRasterSet,
@@ -52,6 +54,7 @@ export class ClassicSliceResourceCatalog {
   readonly criticalParticles: LoadedClassicCriticalParticleResources;
   readonly presentation: LoadedClassicPresentationResources;
 
+  private readonly bombResource: LoadedClassicRasterResource;
   private readonly normalFruitResources: readonly LoadedClassicNormalFruitResources[];
 
   constructor(
@@ -59,11 +62,13 @@ export class ClassicSliceResourceCatalog {
     presentation: LoadedClassicPresentationResources,
     normalFruitResources: readonly LoadedClassicNormalFruitResources[],
     criticalParticles: LoadedClassicCriticalParticleResources,
+    bombResource: LoadedClassicRasterResource,
   ) {
     if (normalFruitResources.length !== CLASSIC_NORMAL_FRUIT_RESOURCES.length) {
       throw new Error('Classic resource catalog requires all nine ordinary fruits');
     }
     this.assetTree = assetTree;
+    this.bombResource = bombResource;
     this.criticalParticles = criticalParticles;
     this.presentation = presentation;
     this.normalFruitResources = Object.freeze([...normalFruitResources]);
@@ -74,6 +79,14 @@ export class ClassicSliceResourceCatalog {
       throw new RangeError('fruitId must identify an ordinary Classic fruit from 0 through 8');
     }
     return this.normalFruitResources[fruitId];
+  }
+
+  bomb(bombId: number): LoadedClassicRasterResource {
+    const contract = getClassicBombResource(bombId, this.assetTree);
+    if (this.bombResource.canonicalPath !== contract.canonicalPath) {
+      throw new Error(`Classic bomb resource mismatch for ${contract.canonicalPath}`);
+    }
+    return this.bombResource;
   }
 }
 
@@ -103,6 +116,7 @@ export async function loadClassicSliceResourceCatalog(
   }
 
   const presentation = requireLoadedPresentation(assetTree, loadedByKey);
+  const bombResource = requireLoadedBomb(assetTree, loadedByKey);
   const normalFruitResources = CLASSIC_NORMAL_FRUIT_RESOURCES.map(({ fruitId }) => (
     requireLoadedNormalFruit(assetTree, fruitId, loadedByKey)
   ));
@@ -112,6 +126,7 @@ export async function loadClassicSliceResourceCatalog(
     presentation,
     normalFruitResources,
     criticalParticles,
+    bombResource,
   );
 }
 
@@ -125,6 +140,7 @@ function createSpriteLoadDescriptors(assetTree: ClassicAssetTree): readonly Spri
     descriptor('presentation.introLuck', presentation.introLuck),
     descriptor('presentation.terminalGame', presentation.terminalGame),
     descriptor('presentation.terminalOver', presentation.terminalOver),
+    descriptor(bombKey(0), getClassicBombResource(0, assetTree)),
   ];
   for (const definition of CLASSIC_NORMAL_FRUIT_RESOURCES) {
     const resources = getClassicNormalFruitResources(definition.fruitId, assetTree);
@@ -218,6 +234,15 @@ function requireLoadedNormalFruit(
   });
 }
 
+function requireLoadedBomb(
+  assetTree: ClassicAssetTree,
+  loadedByKey: ReadonlyMap<string, LoadedClassicRasterResource>,
+): LoadedClassicRasterResource {
+  const bombId: ClassicBombId = 0;
+  const contract = getClassicBombResource(bombId, assetTree);
+  return requireLoaded(bombKey(bombId), contract, loadedByKey);
+}
+
 function requireLoadedCriticalParticles(
   assetTree: ClassicAssetTree,
   loadedByKey: ReadonlyMap<string, LoadedClassicRasterResource>,
@@ -257,6 +282,10 @@ function fruitKey(
 
 function criticalParticleKey(index: ClassicCriticalParticleIndex): string {
   return `critical-particle.${index}`;
+}
+
+function bombKey(bombId: ClassicBombId): string {
+  return `bomb.${bombId}`;
 }
 
 function assertSpriteFrameDimensions(

@@ -10,13 +10,17 @@ import {
 } from 'cc';
 
 import { ClassicVariableStepRunner } from '../domain/classic-variable-step';
-import { FRUIT_COLLISION_FILTER } from '../domain/classic-fixture-rules';
+import {
+  BOMB_COLLISION_FILTER,
+  FRUIT_COLLISION_FILTER,
+} from '../domain/classic-fixture-rules';
 
 export const CLASSIC_VARIABLE_PHYSICS_SYSTEM_ID = 'CLASSIC_VARIABLE_PHYSICS';
 
 interface PreviousPhysicsState {
   readonly allowSleep: boolean;
   readonly autoSimulation: boolean;
+  readonly bombCollisionMask: number;
   readonly enable: boolean;
   readonly fruitCollisionMask: number;
   readonly gravity: Readonly<{ x: number; y: number }>;
@@ -85,6 +89,8 @@ export class ClassicPhysicsAdapter {
     this.physics.positionIterations = 10;
     this.physics.collisionMatrix[String(FRUIT_COLLISION_FILTER.categoryBits)]
       = FRUIT_COLLISION_FILTER.maskBits;
+    this.physics.collisionMatrix[String(BOMB_COLLISION_FILTER.categoryBits)]
+      = BOMB_COLLISION_FILTER.maskBits;
   }
 
   startVariableSimulation(
@@ -149,6 +155,8 @@ export class ClassicPhysicsAdapter {
     this.physics.positionIterations = previousState.positionIterations;
     this.physics.collisionMatrix[String(FRUIT_COLLISION_FILTER.categoryBits)]
       = previousState.fruitCollisionMask;
+    this.physics.collisionMatrix[String(BOMB_COLLISION_FILTER.categoryBits)]
+      = previousState.bombCollisionMask;
     this.physics.enable = previousState.enable;
     this.physics.autoSimulation = previousState.autoSimulation;
     this.previousState = null;
@@ -206,6 +214,7 @@ function capturePreviousPhysicsState(physics: PhysicsSystem2D): PreviousPhysicsS
   return Object.freeze({
     allowSleep: physics.allowSleep,
     autoSimulation: physics.autoSimulation,
+    bombCollisionMask: physics.collisionMatrix[String(BOMB_COLLISION_FILTER.categoryBits)],
     enable: physics.enable,
     fruitCollisionMask: physics.collisionMatrix[String(FRUIT_COLLISION_FILTER.categoryBits)],
     gravity: Object.freeze({ x: physics.gravity.x, y: physics.gravity.y }),

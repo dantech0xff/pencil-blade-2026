@@ -12,15 +12,26 @@ import { loadClassicGameResourceBundle } from './classic-resource-loader';
 
 const TARGET_ONE_SHOT_VOLUME_SCALE = 1;
 
+export interface ClassicRetainedAudioHandle {
+  readonly disposed: boolean;
+  readonly stopped: boolean;
+  dispose(): void;
+  stop(): void;
+}
+
 /** Loaded exact clips plus the target-side Creator playback adapter. */
 export class ClassicAudioPresenter {
   private readonly audioSource: AudioSource;
   private readonly clipsByCanonicalPath: ReadonlyMap<string, AudioClip>;
+  private readonly parent: Node;
+  private readonly retainedHandles = new Set<CreatorRetainedAudioHandle>();
 
   private constructor(
+    parent: Node,
     audioSource: AudioSource,
     clipsByCanonicalPath: ReadonlyMap<string, AudioClip>,
   ) {
+    this.parent = parent;
     this.audioSource = audioSource;
     this.clipsByCanonicalPath = clipsByCanonicalPath;
   }
@@ -47,10 +58,47 @@ export class ClassicAudioPresenter {
     const audioSource = parent.getComponent(AudioSource) ?? parent.addComponent(AudioSource);
     audioSource.loop = false;
     audioSource.volume = TARGET_ONE_SHOT_VOLUME_SCALE;
-    return new ClassicAudioPresenter(audioSource, clipsByCanonicalPath);
+    return new ClassicAudioPresenter(parent, audioSource, clipsByCanonicalPath);
   }
 
   playOneShot(canonicalPath: string): void {
+    const clip = this.requireClip(canonicalPath);
+    // Exact native gain/voice policy is unresolved. Unity gain preserves the clip bytes
+    // without inventing per-event attenuation while playOneShot permits recovered overlap.
+    this.audioSource.playOneShot(clip, TARGET_ONE_SHOT_VOLUME_SCALE);
+  }
+
+  playRetained(canonicalPath: string): ClassicRetainedAudioHandle {
+    if (!isValid(this.parent, true)) {
+      throw new Error('Classic audio parent is no longer valid');
+    }
+    const clip = this.requireClip(canonicalPath);
+    const voiceNode = new Node('ClassicRetainedAudio');
+    voiceNode.setParent(this.parent);
+    const voice = voiceNode.addComponent(AudioSource);
+    voice.playOnAwake = false;
+    voice.loop = false;
+    voice.volume = TARGET_ONE_SHOT_VOLUME_SCALE;
+    voice.clip = clip;
+
+    const handle = new CreatorRetainedAudioHandle(
+      voiceNode,
+      voice,
+      (disposed) => this.retainedHandles.delete(disposed),
+    );
+    this.retainedHandles.add(handle);
+    voice.play();
+    return handle;
+  }
+
+  stop(): void {
+    for (const handle of [...this.retainedHandles]) {
+      handle.dispose();
+    }
+    this.audioSource.stop();
+  }
+
+  private requireClip(canonicalPath: string): AudioClip {
     if (typeof canonicalPath !== 'string' || canonicalPath.length === 0) {
       throw new TypeError('canonicalPath must be a non-empty string');
     }
@@ -58,13 +106,55 @@ export class ClassicAudioPresenter {
     if (clip === undefined) {
       throw new Error(`Classic AudioClip was not loaded: ${canonicalPath}`);
     }
-    // Exact native gain/voice policy is unresolved. Unity gain preserves the clip bytes
-    // without inventing per-event attenuation while playOneShot permits recovered overlap.
-    this.audioSource.playOneShot(clip, TARGET_ONE_SHOT_VOLUME_SCALE);
+    return clip;
+  }
+}
+
+class CreatorRetainedAudioHandle implements ClassicRetainedAudioHandle {
+  private disposedValue = false;
+  private readonly onDisposed: (handle: CreatorRetainedAudioHandle) => void;
+  private stoppedValue = false;
+  private readonly voice: AudioSource;
+  private readonly voiceNode: Node;
+
+  constructor(
+    voiceNode: Node,
+    voice: AudioSource,
+    onDisposed: (handle: CreatorRetainedAudioHandle) => void,
+  ) {
+    this.voiceNode = voiceNode;
+    this.voice = voice;
+    this.onDisposed = onDisposed;
+  }
+
+  get disposed(): boolean {
+    return this.disposedValue;
+  }
+
+  get stopped(): boolean {
+    return this.stoppedValue;
   }
 
   stop(): void {
-    this.audioSource.stop();
+    if (this.stoppedValue) {
+      return;
+    }
+    this.stoppedValue = true;
+    if (isValid(this.voiceNode, true)) {
+      this.voice.stop();
+    }
+  }
+
+  dispose(): void {
+    if (this.disposedValue) {
+      return;
+    }
+    this.disposedValue = true;
+    this.stop();
+    if (isValid(this.voiceNode, true)) {
+      this.voiceNode.destroy();
+    }
+    this.onDisposed(this);
   }
 }
 

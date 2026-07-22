@@ -8,7 +8,8 @@ the Creator Physics2D adapter, vertical-slice contract tests, the build-audit sc
 Editor-authored `classic.scene` with normal-fruit gameplay. All 862 recovered APK game assets
 are staged byte-for-byte and imported into the Creator bundle. The loop now consumes exact
 background, intro/terminal/fail-marker art, nine intact/cut fruit sets, four critical particles,
-and 20 core audio clips. This is still a bounded checkpoint, not the end state.
+and 23 reviewed core/ordinary-bomb audio clips. This is still a bounded checkpoint, not the end
+state.
 
 The phase is still in progress. Canvas now owns `BladeInputController`,
 `ClassicSceneController`, and `ClassicGameplayController`, but eight toss controllers,
@@ -60,6 +61,17 @@ rasters, recovered entry and activation timing, one-second transient cleanup, an
 callback behavior before game over; tap-to-retry reloads the scene. The other eight Classic
 controllers are recorded as deferred instead of being silently simulated.
 
+The next static-evidence-safe bomb foundation is now present without enabling incomplete bomb
+gameplay. Bomb ID `0` loads its exact `bomb_X.png` raster for both profiles and creates the
+recovered anchored dynamic circle body/filter. Its first cut guards synchronously, zeros motion,
+and hands off to a future exact explosion owner; a pre-freeze hook preserves retained-audio stop
+ordering, and failed handoffs freeze then defer cleanup. Disposal otherwise remains deferred until
+`AfterBombHit`. The physics adapter now installs/restores both fruit and bomb collision rows.
+The exact `boomtoss`, `boomsound`, and `boomexplosion` clips are preloaded with isolated retained
+voice handles, while electric-only `boomhit` is excluded. Concurrent flat spawn batches now fail
+closed unless every entity sequence is contiguous and complete. Registry/controller activation
+remains deferred because exact procedural explosion triangles are still unresolved.
+
 The staging pipeline copies all 862 recovered APK game assets without recompression or byte
 changes. Creator imported the corpus and the validator checks its current 934 metadata
 sidecars, untrimmed/full raster geometry, and audio metadata. The manifest's per-asset
@@ -78,6 +90,9 @@ from the fidelity work.
   full Creator Physics2D equivalence.
 - Canonical sample-project resource manifest/root resolution for the future `99%` metric and
   the final presentation coverage gate.
+- Exact standard-bomb procedural triangle generation/rasterization and the dependent
+  registry/controller/explosion lifecycle integration; any distinct native lower-bound bomb
+  side effect is still unknown and is not substituted with Fruit's miss callback.
 - Electric-field compatibility decisions.
 - Android build validation and real APK/AAB post-build audit.
 - Rights review for original assets and product identity.
@@ -86,15 +101,16 @@ from the fidelity work.
 
 - `git diff --check`: clean
 - `node $HOME/.claude/scripts/validate-docs.cjs docs/`: clean
-- `node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/reconstruction/vertical-slice/*.test.ts`: `124/124` pass
+- `node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/reconstruction/vertical-slice/*.test.ts`: `142/142` pass
 - `node --test tests/stage-creator-assets-test.mjs tests/validate-creator-resource-meta-test.mjs`: `29/29` pass
 - `node scripts/audit-creator-build.mjs <build.apk|build.aab>`: documented as the build audit entry point
 - `node --test tests/audit-creator-build-test.mjs`: `8/8` synthetic checks pass
 - Creator 3.8.8 bundled TypeScript compiler: pass
 - reconstruction-policy positive and negative checks: pass
-- Last completed Creator Preview: opened at `720x1280`, loaded the exact core resource subset,
-  played audio at 60 FPS, and showed no runtime error overlay; a fresh fail-marker visual pass
-  is pending because the current macOS UI session is locked
+- Last completed Creator Preview: after invalidating Creator's stale generated-code cache,
+  opened at `720x1280`, loaded the exact core resource subset, played audio at 60 FPS, showed
+  the three exact green normal fail markers and all three exact red filled markers after misses,
+  and kept the Creator Console error counter at zero
 
 ## Unresolved Questions
 

@@ -9,9 +9,12 @@ resources, Java/metadata, or explicitly approved as inferences remain unknown. T
 Creator foundation now exists and the exact root has produced the first Editor-serialized
 Classic scene. All 862 recovered APK game assets are staged byte-for-byte and imported into
 the Creator bundle. The current playable loop consumes the exact paper background,
-intro/terminal text, ordinary intact/cut fruit, critical particles, and 20 core audio clips.
-This is a bounded Classic checkpoint, not presentation completion: most resource consumers
-and the full scene/prefab map remain open.
+intro/terminal/fail-marker art, ordinary intact/cut fruit, critical particles, and 23 reviewed
+core/ordinary-bomb audio clips. The exact standard-bomb raster, body, fixture, cut guard, and
+retained-audio seam are also implemented and tested, but bomb controllers remain deferred until
+the unresolved procedural explosion geometry can be restored without guessing. This is a
+bounded Classic checkpoint, not presentation completion: most resource consumers and the full
+scene/prefab map remain open.
 
 ## Authority and evidence
 

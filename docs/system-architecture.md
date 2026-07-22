@@ -7,8 +7,9 @@ The workspace now contains a Creator foundation under `game/`, pure TypeScript d
 Creator-facing adapters, deterministic contract tests, and an Editor-authored `classic.scene`.
 All 862 recovered APK game assets are staged byte-for-byte in the Creator `game` bundle.
 The Canvas now runs a bounded Classic loop using exact recovered background, text, fail-marker,
-ordinary fruit/cut-half, critical-particle, and core-audio resources. The full gameplay and
-presentation layer remains incomplete.
+ordinary fruit/cut-half, critical-particle, and core-audio resources. A separate exact standard-
+bomb resource/audio/entity foundation exists but is not scheduled in the loop while procedural
+explosion geometry remains unresolved. The full gameplay and presentation layer is incomplete.
 
 ## Dependency Direction
 
@@ -43,12 +44,12 @@ component enable/disable is not the pause boundary.
 
 | Boundary | Current rule |
 |---|---|
-| Physics2D | Recovered gravity, body and fixture values, ray-order behavior, and variable `frameDt * worldSpeed` stepping are encoded in pure modules. Automatic simulation stays off; a project-owned `System.postUpdate` performs one synchronized manual step and flushes project lifecycle mutations only after Box2D unlocks. |
-| Spawn and toss | Spawn ordering, intervals, fruit selection, and controller sequencing live in pure modules. |
+| Physics2D | Recovered gravity, body and fixture values, ray-order behavior, and variable `frameDt * worldSpeed` stepping are encoded in pure modules. Automatic simulation stays off; a project-owned `System.postUpdate` performs one synchronized manual step, installs/restores the exact fruit and bomb collision rows, and flushes project lifecycle mutations only after Box2D unlocks. |
+| Spawn and toss | Spawn ordering, intervals, fruit selection, and controller sequencing live in pure modules. Flattened Concurrent output is accepted only as ordered, contiguous, complete per-entity plans. |
 | Score, combo, fail | Score, combo window, double-score behavior, and the three-miss state are pure. A dedicated Creator presenter owns the exact normal/filled marker rasters, recovered entry/activation/transient action timings, and completion callbacks. |
 | Cut handling | Blade tracking and bidirectional ray planning are pure; the Creator gameplay bridge executes two ordered post-step raycasts and preserves repeated fixture dispatch until batch disposal. |
 | Cut presentation | Ordinary cuts instantiate exact bottom/top rasters, recovered body/fixture/impulse values, action-clock fade, and deferred disposal. Critical halves may emit exact recovered particle rasters with shared RNG ordering. |
-| Audio | A Creator adapter preloads 20 core recovered clips and interprets toss, swish, cut, critical, and combo commands without moving draw/order rules out of the domain. |
+| Audio | A Creator adapter preloads 23 reviewed clips and interprets toss, swish, cut, critical, and combo commands without moving draw/order rules out of the domain. Independent retained voices model the ordinary bomb's local handle/stop ownership; electric-only `boomhit` is deliberately excluded. |
 | Resource import | Staging and metadata validators prove exact bytes and current Creator raster/audio import geometry for the recovered APK corpus. Per-asset consumer and UUID coverage is not yet backfilled into the manifest. |
 | Resolution and input | The recovered `720` physical-width profile branch is pure; Creator applies its Show All policy and routes scene-wide touch input into four blade slots. |
 | Build boundary | Source-boundary tests reject trackable legacy integration. The separate fail-closed archive audit hashes every entry, parses ZIP records exactly, and inspects nested archives/ELF payloads; a real Creator artifact is still pending. |
@@ -61,5 +62,10 @@ component enable/disable is not the pause boundary.
 - Exact recovered APK resources are imported and the first Classic consumers are integrated;
   most of the 862 assets still need consumer mapping. The canonical sample-project root remains
   unresolved, so corpus completeness and the final fidelity denominator are still open.
+- Standard-bomb entry/cut state is implemented, but registry/controller activation and its
+  procedural full-quad/triangle explosion remain open. Triangle point generation and exact
+  rasterization are not replaced by a sprite or a target-side guess. Any distinct native
+  lower-bound bomb side effect also remains unknown; the entity does not reuse Fruit's miss
+  callback as a substitute.
 - Electric-field compatibility remains an unresolved adapter decision.
 - Rights for legacy art, music, fonts, name, and trademarks are still unknown.

@@ -17,8 +17,10 @@ foundation now exists under `game/`. Creator has reopened that exact root and se
 first `classic.scene` with resolution/session, four-slot input, and a bounded generated
 normal-fruit loop. All 862 recovered APK game assets are staged and imported; the current loop
 uses exact background, intro/terminal/fail-marker art, intact/cut fruit, critical-particle, and
-core-audio resources. The remaining scene/prefab map, consumer coverage, and full Classic scope
-still need to be completed before this phase can close.
+core-audio resources. The exact standard-bomb raster/audio/entity foundation is also implemented
+and tested, but is not scheduled into the playable loop until its unresolved procedural explosion
+geometry can be restored without guessing. The remaining scene/prefab map, consumer coverage,
+and full Classic scope still need to be completed before this phase can close.
 
 ## Context Links
 
@@ -122,15 +124,21 @@ Current Editor integration:
 - All 862 recovered APK game assets (784 PNG, 59 WAV, 3 MP3, and 16 fonts) are staged
   byte-for-byte under the Creator bundle. The current import validator covers 934 generated
   metadata sidecars; the manifest's per-asset consumer and UUID fields still require backfill.
-- The last completed Preview pass opened at `720x1280` and demonstrated first-swipe start,
-  exact ordinary-fruit spawning/trajectory, cut halves, core audio, cut/score, misses, game
-  over, and retry. Exact recovered fail-marker presentation has since replaced the generated
-  miss label and passes deterministic presenter/integration tests; a fresh visual pass is pending.
+- The exact standard Bomb ID `0` raster is cataloged; a tested Creator entity owns its recovered
+  `(0.5, 0.4)` anchor, dynamic circle fixture/filter, spawn mutations, first-cut guard, motion
+  freeze, audio-before-freeze hook, callback-failure cleanup, and deferred completion seam.
+  Three ordinary-bomb clips and isolated retained voice handles are loaded, while electric-only
+  `boomhit` remains excluded. The physics adapter installs and restores both fruit and bomb rows.
+- The last completed Preview pass opened at `720x1280` after clearing Creator's stale generated-
+  code cache and demonstrated first-swipe start, exact ordinary-fruit spawning/trajectory, cut
+  halves, core audio, cut/score, misses, game over, and retry. It also showed the three exact
+  green normal fail markers and all three exact red filled markers after misses; the Creator
+  Console error counter remained zero.
 - The current playable slice is not presentation-complete; the exact staging gate is complete
   for the recovered APK corpus, but 100% consumer coverage and canonical sample-project
   completeness remain open. Release rights are a separate review.
 - The last inspected Creator Console error counters were zero, Creator's bundled strict
-  TypeScript compiler passes, and the deterministic vertical-slice suite passes `124/124`.
+  TypeScript compiler passes, and the deterministic vertical-slice suite passes `142/142`.
 
 ## Current Blockers
 
@@ -139,6 +147,9 @@ Current Editor integration:
   the custom variable-step boundary.
 - Canonical sample-project resource manifest/root resolution so the presentation coverage gate
   and `99%` metric can be finalized.
+- Exact ordinary-bomb explosion point generation/rasterization plus safe registry/controller
+  lifecycle integration, including the unresolved native lower-bound side effect; no sprite
+  substitute, Fruit-miss substitution, or invented triangle pattern is accepted.
 - Electric-field compatibility decisions.
 - Android build validation and real APK/AAB post-build audit.
 - Rights review for original assets and product identity.

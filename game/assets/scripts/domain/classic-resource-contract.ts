@@ -35,6 +35,9 @@ export interface ClassicNormalFruitResourceDefinition {
   readonly rasters: Readonly<Record<ClassicAssetTree, ClassicNormalFruitRasterSet>>;
 }
 
+/** The only bomb ID scheduled by the recovered Classic runtime. */
+export type ClassicBombId = 0;
+
 export interface ClassicPresentationRasterSet {
   readonly background: ClassicRasterResource;
   readonly failFilled: ClassicRasterResource;
@@ -136,6 +139,12 @@ export const CLASSIC_PRESENTATION_RESOURCES: Readonly<Record<ClassicAssetTree, C
     }),
   });
 
+export const CLASSIC_BOMB_RESOURCES: Readonly<Record<ClassicAssetTree, ClassicRasterResource>>
+  = Object.freeze({
+    '480x800': createRaster('480x800/Bomb/bomb_X.png', [80, 108]),
+    '720x1280': createRaster('720x1280/Bomb/bomb_X.png', [121, 161]),
+  });
+
 export const CLASSIC_CRITICAL_PARTICLE_RESOURCES: Readonly<
   Record<ClassicAssetTree, ClassicCriticalParticleRasterSet>
 > = Object.freeze({
@@ -169,6 +178,19 @@ export function getClassicPresentationResources(
     throw new RangeError('assetTree must be 480x800 or 720x1280');
   }
   return CLASSIC_PRESENTATION_RESOURCES[assetTree];
+}
+
+export function getClassicBombResource(
+  bombId: number,
+  assetTree: ClassicAssetTree,
+): ClassicRasterResource {
+  if (!Number.isSafeInteger(bombId) || bombId !== 0) {
+    throw new RangeError('bombId must identify the standard Classic bomb with ID 0');
+  }
+  if (assetTree !== '480x800' && assetTree !== '720x1280') {
+    throw new RangeError('assetTree must be 480x800 or 720x1280');
+  }
+  return CLASSIC_BOMB_RESOURCES[assetTree];
 }
 
 export function getClassicCriticalParticleResource(

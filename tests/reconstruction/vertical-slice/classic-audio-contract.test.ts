@@ -5,11 +5,14 @@ import { fileURLToPath } from 'node:url';
 
 import {
   CLASSIC_CORE_AUDIO_PATHS,
+  CLASSIC_ELECTRIC_BOMB_HIT_AUDIO_PATH,
   CLASSIC_FRUIT_CUT_AUDIO_PATHS,
   CLASSIC_MODE_SELECTED_AUDIO_PATH,
+  CLASSIC_ORDINARY_BOMB_AUDIO_PATHS,
   CLASSIC_TOSS_AUDIO_PATH,
   getClassicComboAudioPath,
   getClassicFruitCutAudioSequence,
+  getClassicOrdinaryBombAudioPath,
   getClassicSwishAudioPath,
 } from '../../../game/assets/scripts/domain/classic-audio-contract.ts';
 import { canonicalResourceToBundlePath } from '../../../game/assets/scripts/domain/classic-resource-contract.ts';
@@ -20,9 +23,9 @@ const STAGING_MANIFEST = readJson<{
 }>('assets/catalog/creator-staging-manifest.json');
 const STAGED_PATHS = new Set(STAGING_MANIFEST.entries.map((entry) => entry.canonicalPath));
 
-test('all 20 recovered core clips are unique, staged, and imported as AudioClips', () => {
-  assert.equal(CLASSIC_CORE_AUDIO_PATHS.length, 20);
-  assert.equal(new Set(CLASSIC_CORE_AUDIO_PATHS).size, 20);
+test('all 23 recovered core and ordinary-bomb clips are unique, staged, and imported', () => {
+  assert.equal(CLASSIC_CORE_AUDIO_PATHS.length, 23);
+  assert.equal(new Set(CLASSIC_CORE_AUDIO_PATHS).size, 23);
   for (const canonicalPath of CLASSIC_CORE_AUDIO_PATHS) {
     assert.equal(STAGED_PATHS.has(canonicalPath), true, canonicalPath);
     const meta = readJson<{
@@ -41,6 +44,32 @@ test('all 20 recovered core clips are unique, staged, and imported as AudioClips
   }
   assert.equal(CLASSIC_MODE_SELECTED_AUDIO_PATH, 'Sounds/gameplayselected.wav');
   assert.equal(CLASSIC_TOSS_AUDIO_PATH, 'Sounds/tossfruit.wav');
+});
+
+test('ordinary-bomb audio paths stay exact and exclude the electric-only hit clip', () => {
+  assert.deepEqual(CLASSIC_ORDINARY_BOMB_AUDIO_PATHS, {
+    entry: 'Sounds/boomsound.wav',
+    explosion: 'Sounds/boomexplosion.wav',
+    toss: 'Sounds/boomtoss.wav',
+  });
+  assert.equal(CLASSIC_ELECTRIC_BOMB_HIT_AUDIO_PATH, 'Sounds/boomhit.wav');
+  assert.equal(CLASSIC_CORE_AUDIO_PATHS.includes(CLASSIC_ELECTRIC_BOMB_HIT_AUDIO_PATH), false);
+  assert.equal(
+    Object.values(CLASSIC_ORDINARY_BOMB_AUDIO_PATHS).includes(
+      CLASSIC_ELECTRIC_BOMB_HIT_AUDIO_PATH,
+    ),
+    false,
+  );
+  for (const event of ['entry', 'explosion', 'toss'] as const) {
+    assert.equal(
+      getClassicOrdinaryBombAudioPath(event),
+      CLASSIC_ORDINARY_BOMB_AUDIO_PATHS[event],
+    );
+    assert.equal(
+      CLASSIC_CORE_AUDIO_PATHS.includes(CLASSIC_ORDINARY_BOMB_AUDIO_PATHS[event]),
+      true,
+    );
+  }
 });
 
 test('normal fruit IDs preserve the recovered shared cut-sound switch', () => {
@@ -83,6 +112,7 @@ test('audio selectors reject values outside recovered switch domains', () => {
   assert.throws(() => getClassicFruitCutAudioSequence(0, 1 as never), TypeError);
   assert.throws(() => getClassicComboAudioPath(0), RangeError);
   assert.throws(() => getClassicComboAudioPath(4), RangeError);
+  assert.throws(() => getClassicOrdinaryBombAudioPath('hit' as never), RangeError);
 });
 
 function readJson<T>(relativePath: string): T {
