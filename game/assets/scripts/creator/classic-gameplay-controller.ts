@@ -19,8 +19,10 @@ import {
 } from '../domain/classic-cut-query';
 import type { BladeMoveResult } from '../domain/blade-tracks';
 import {
+  CLASSIC_MENU_BUTTON_AUDIO_PATH,
   getClassicComboAudioPath,
   getClassicFruitCutAudioSequence,
+  getClassicResultRankAudioPath,
 } from '../domain/classic-audio-contract';
 import { ClassicSwishAudioGate } from '../domain/classic-swish-audio-gate';
 import { createClassicCriticalParticleUpdateCommands } from '../domain/classic-critical-particle-plan';
@@ -45,17 +47,24 @@ import { FailService } from '../domain/fail-service';
 import { ModuloGameplayRandom, SeededTargetRawSource } from '../domain/gameplay-random';
 import type { ScoreCommand } from '../domain/score-service';
 import { ScoreService } from '../domain/score-service';
+import {
+  CLASSIC_INITIAL_LEADERBOARD,
+  CLASSIC_INITIAL_TOTAL_COINS,
+  calculateClassicResultCoinBonus,
+  classicLeaderboardPanelValues,
+  insertClassicResultScore,
+  type ClassicLeaderboard,
+} from '../domain/classic-result-ranking';
 import { TossTimer } from '../domain/toss-timer';
 import {
-  CLASSIC_BLADE_BEGAN_EVENT,
   CLASSIC_BLADE_MOVED_EVENT,
-  type ClassicBladeBeganEvent,
 } from './blade-input-controller';
 import { ClassicAudioPresenter } from './classic-audio-presenter';
 import { ClassicCriticalParticlePresenter } from './classic-critical-particle-presenter';
 import { ClassicCutHalfPresenter } from './classic-cut-half-presenter';
 import { ClassicEntityRegistry } from './classic-entity-registry';
 import { ClassicFailPresenter } from './classic-fail-presenter';
+import { ClassicResultPresenter } from './classic-result-presenter';
 import { ClassicScoreHudPresenter } from './classic-score-hud-presenter';
 import type {
   ClassicGeneratedFruitCutEvent,
@@ -79,6 +88,9 @@ export const CLASSIC_GAMEPLAY_COMMAND_EVENT = 'classic-gameplay-command';
 export const CLASSIC_GAMEPLAY_SNAPSHOT_EVENT = 'classic-gameplay-snapshot';
 export const CLASSIC_DEFERRED_TOSS_CONTROLLER_EVENT = 'classic-deferred-toss-controller';
 export const CLASSIC_RESOURCE_LOAD_FAILED_EVENT = 'classic-resource-load-failed';
+export const CLASSIC_RESULT_MENU_REQUESTED_EVENT = 'classic-result-menu-requested';
+export const CLASSIC_RESULT_REWARD_READY_EVENT = 'classic-result-reward-ready';
+export const CLASSIC_RESULT_RETRY_FAILED_EVENT = 'classic-result-retry-failed';
 
 const TARGET_REPLAY_SEED = 0x5042_4c44;
 const NORMAL_FREE_CONTROLLER: ClassicTossControllerId = 'normal-free';
@@ -98,9 +110,25 @@ export interface ClassicGameplaySnapshot {
   readonly strikes: number;
 }
 
+export interface ClassicResultMenuRequestedEvent {
+  readonly completedRunScore: number;
+}
+
+export interface ClassicResultRewardReadyEvent {
+  readonly bonusCoins: number;
+  readonly completedRunScore: number;
+  readonly totalCoins: number;
+}
+
+export interface ClassicResultRetryFailedEvent {
+  readonly message: string;
+  readonly reason: 'load-rejected' | 'scene-load-error';
+}
+
 /**
- * Playable Classic slice: first touch starts the recovered normal-free timer, exact recovered
- * fruit use Creator Physics2D, and post-step blade rays drive cut/score/combo.
+ * Playable Classic slice: the recovered intro gate starts the normal-free timer, exact
+ * recovered fruit use Creator Physics2D, post-step blade rays drive cut/score/combo, and the
+ * terminal callback replaces Classic presentation with the recovered result-entry shell.
  * This and ClassicSceneController are scene-lifetime components; do not toggle either one
  * independently to model pause or resume.
  */
@@ -129,8 +157,10 @@ export class ClassicGameplayController extends Component {
   private scoreHudRoot: Node | null = null;
   private worldPresentationRoot: Node | null = null;
   private failPresentationRoot: Node | null = null;
+  private resultPresentationRoot: Node | null = null;
   private registry: ClassicEntityRegistry | null = null;
   private failPresenter: ClassicFailPresenter | null = null;
+  private resultPresenter: ClassicResultPresenter | null = null;
   private scoreHudPresenter: ClassicScoreHudPresenter | null = null;
   private resourceCatalog: ClassicSliceResourceCatalog | null = null;
   private normalFree: ClassicFreeTossStrategy | null = null;
@@ -138,6 +168,11 @@ export class ClassicGameplayController extends Component {
   private introLuckNode: Node | null = null;
   private terminalGameNode: Node | null = null;
   private terminalOverNode: Node | null = null;
+  private classicLeaderboard: ClassicLeaderboard = CLASSIC_INITIAL_LEADERBOARD;
+  private resultConstructionRequested = false;
+  private resultMode: 0 | null = null;
+  private resultScore: number | null = null;
+  private totalCoins = CLASSIC_INITIAL_TOTAL_COINS;
   private gameOver = false;
   private shuttingDown = false;
 
@@ -154,7 +189,7 @@ export class ClassicGameplayController extends Component {
   }
 
   private async initializeRecoveredResources(
-    viewport: Readonly<{ width: number; height: number }>,
+    viewport: Readonly<{ x: number; y: number; width: number; height: number }>,
   ): Promise<void> {
     let loadedAudioPresenter: ClassicAudioPresenter | null = null;
     try {
@@ -234,7 +269,6 @@ export class ClassicGameplayController extends Component {
   };
 
   onEnable(): void {
-    this.node.on(CLASSIC_BLADE_BEGAN_EVENT, this.onBladeBegan, this);
     this.node.on(CLASSIC_BLADE_MOVED_EVENT, this.onBladeMoved, this);
     this.node.on(CLASSIC_PHYSICS_STEPPED_EVENT, this.onPhysicsStepped, this);
     this.node.on(CLASSIC_SESSION_COMMAND_EVENT, this.onSessionCommand, this);
@@ -246,7 +280,8 @@ export class ClassicGameplayController extends Component {
   }
 
   update(deltaSeconds: number): void {
-    if (this.sceneController?.sessionSnapshot().lifecycle === 'running' && !this.gameOver) {
+    const lifecycle = this.sceneController?.sessionSnapshot().lifecycle;
+    if (lifecycle === 'running' && !this.gameOver) {
       this.normalFree?.tick(deltaSeconds);
       this.applyComboCommands(this.combo.update(deltaSeconds, this.effectsEnabled()));
     }
@@ -257,14 +292,16 @@ export class ClassicGameplayController extends Component {
     for (const presenter of this.criticalParticlePresenters) {
       presenter.updateAction(deltaSeconds);
     }
-    this.failPresenter?.updateAction(deltaSeconds);
-    this.scoreHudPresenter?.updateAction(deltaSeconds);
-    this.applyScoreCommands(this.score.updateDisplayedScore());
-    this.updatePresentation();
+    this.resultPresenter?.updateAction(deltaSeconds);
+    if (lifecycle !== 'result-removed') {
+      this.failPresenter?.updateAction(deltaSeconds);
+      this.scoreHudPresenter?.updateAction(deltaSeconds);
+      this.applyScoreCommands(this.score.updateDisplayedScore());
+      this.updatePresentation();
+    }
   }
 
   onDisable(): void {
-    this.node.off(CLASSIC_BLADE_BEGAN_EVENT, this.onBladeBegan, this);
     this.node.off(CLASSIC_BLADE_MOVED_EVENT, this.onBladeMoved, this);
     this.node.off(CLASSIC_PHYSICS_STEPPED_EVENT, this.onPhysicsStepped, this);
     this.node.off(CLASSIC_SESSION_COMMAND_EVENT, this.onSessionCommand, this);
@@ -278,6 +315,26 @@ export class ClassicGameplayController extends Component {
   }
 
   private disposeRecoveredRuntime(): void {
+    this.disposeClassicModePresentation();
+    this.disposeResultPresentation();
+    if (this.recoveredBackgroundOpacity !== null) {
+      Tween.stopAllByTarget(this.recoveredBackgroundOpacity);
+    }
+    if (
+      this.recoveredBackgroundNode !== null
+      && isValid(this.recoveredBackgroundNode, true)
+    ) {
+      this.recoveredBackgroundNode.destroy();
+    }
+    this.recoveredBackgroundOpacity = null;
+    this.recoveredBackgroundNode = null;
+    this.audioPresenter?.stop();
+    this.audioPresenter = null;
+    this.resourceCatalog = null;
+  }
+
+  /** Removes only the native Classic layer's owned runtime and presentation. */
+  private disposeClassicModePresentation(): void {
     for (const node of [
       this.introGoodNode,
       this.introLuckNode,
@@ -293,21 +350,9 @@ export class ClassicGameplayController extends Component {
     this.introLuckNode = null;
     this.terminalGameNode = null;
     this.terminalOverNode = null;
-    if (this.recoveredBackgroundOpacity !== null) {
-      Tween.stopAllByTarget(this.recoveredBackgroundOpacity);
-    }
-    if (
-      this.recoveredBackgroundNode !== null
-      && isValid(this.recoveredBackgroundNode, true)
-    ) {
-      this.recoveredBackgroundNode.destroy();
-    }
-    this.recoveredBackgroundOpacity = null;
-    this.recoveredBackgroundNode = null;
     this.normalFree?.stop();
     this.normalFree = null;
-    this.audioPresenter?.stop();
-    this.audioPresenter = null;
+    this.deferredControllers.clear();
     this.disposeCutHalfPresenters();
     this.cutHalfPresenters.clear();
     this.criticalCutHalfPresenters.clear();
@@ -333,7 +378,18 @@ export class ClassicGameplayController extends Component {
     this.scoreHudRoot = null;
     this.worldPresentationRoot = null;
     this.failPresentationRoot = null;
-    this.resourceCatalog = null;
+  }
+
+  private disposeResultPresentation(): void {
+    this.resultPresenter?.dispose();
+    this.resultPresenter = null;
+    if (
+      this.resultPresentationRoot !== null
+      && isValid(this.resultPresentationRoot, true)
+    ) {
+      this.resultPresentationRoot.destroy();
+    }
+    this.resultPresentationRoot = null;
   }
 
   snapshot(): ClassicGameplaySnapshot {
@@ -348,15 +404,9 @@ export class ClassicGameplayController extends Component {
     });
   }
 
-  restart(): void {
-    director.loadScene('classic');
+  restart(onLaunched?: (error: Error | null) => void): boolean {
+    return director.loadScene('classic', onLaunched);
   }
-
-  private readonly onBladeBegan = (_event: ClassicBladeBeganEvent): void => {
-    if (this.gameOver) {
-      this.restart();
-    }
-  };
 
   private readonly onBladeMoved = (event: BladeMoveResult): void => {
     if (this.gameOver) {
@@ -394,18 +444,27 @@ export class ClassicGameplayController extends Component {
       this.score.addScore(command.value);
     } else if (command.type === 'show-game-over') {
       this.gameOver = true;
-      this.registry?.disposeAll();
       this.disposeCutHalfPresenters();
       this.playRecoveredTerminalPresentation();
+    } else if (command.type === 'stop-effects') {
+      this.audioPresenter?.stop();
+    } else if (command.type === 'construct-result') {
+      this.beginResultConstruction();
+    } else if (command.type === 'set-result-mode') {
+      this.setPendingResultMode(command.mode);
+    } else if (command.type === 'set-result-score') {
+      this.setPendingResultScore(command.score);
+    } else if (command.type === 'remove-classic') {
+      this.requireConfiguredResultTransition();
+      this.disposeClassicModePresentation();
+    } else if (command.type === 'attach-result') {
+      this.attachRecoveredResult(command.zOrder);
     }
     this.updatePresentation();
     this.emitSnapshot();
   };
 
   private readonly onPhysicsStepped = (event: ClassicPhysicsSteppedEvent): void => {
-    if (this.gameOver) {
-      return;
-    }
     const registry = this.registry;
     const sceneController = this.sceneController;
     if (registry === null || sceneController === null) {
@@ -640,7 +699,12 @@ export class ClassicGameplayController extends Component {
     this.node.emit(CLASSIC_DEFERRED_TOSS_CONTROLLER_EVENT, payload);
   }
 
-  private requireViewport(): Readonly<{ width: number; height: number }> {
+  private requireViewport(): Readonly<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }> {
     const visibleRect = this.sceneController?.resolutionSnapshot()?.visibleRect;
     if (visibleRect === undefined) {
       throw new Error('Classic resolution must be available before gameplay setup');
@@ -773,20 +837,160 @@ export class ClassicGameplayController extends Component {
       .delay(1)
       .to(0.75, { position: new Vec3(-viewport.width, viewport.height * 0.075, 0) })
       .call(() => {
-        game.destroy();
-        this.terminalGameNode = null;
+        this.sceneController?.displayScoreComplete(this.score.authoritativeScore);
       })
       .start();
     tween(over)
       .to(0.75, { position: new Vec3(0, -viewport.height * 0.075, 0) })
       .delay(1)
       .to(0.75, { position: new Vec3(viewport.width, -viewport.height * 0.075, 0) })
-      .call(() => {
-        over.destroy();
-        this.terminalOverNode = null;
-      })
       .start();
   }
+
+  private beginResultConstruction(): void {
+    if (this.resultConstructionRequested || this.resultPresenter !== null) {
+      throw new Error('Classic result construction can begin only once');
+    }
+    if (this.resourceCatalog === null) {
+      throw new Error('Classic result construction requires loaded resources');
+    }
+    this.resultConstructionRequested = true;
+    this.resultMode = null;
+    this.resultScore = null;
+  }
+
+  private setPendingResultMode(mode: 0): void {
+    if (!this.resultConstructionRequested || this.resultMode !== null) {
+      throw new Error('Classic result mode requires one pending construction');
+    }
+    this.resultMode = mode;
+  }
+
+  private setPendingResultScore(score: number): void {
+    if (!this.resultConstructionRequested || this.resultScore !== null) {
+      throw new Error('Classic result score requires one pending construction');
+    }
+    if (!Number.isSafeInteger(score)) {
+      throw new RangeError('Classic result score must be a safe integer');
+    }
+    this.resultScore = score;
+  }
+
+  private requireConfiguredResultTransition(): Readonly<{ mode: 0; score: number }> {
+    if (
+      !this.resultConstructionRequested
+      || this.resultMode !== 0
+      || this.resultScore === null
+    ) {
+      throw new Error('Classic result must be constructed, mode-set, and score-set first');
+    }
+    return Object.freeze({ mode: this.resultMode, score: this.resultScore });
+  }
+
+  private attachRecoveredResult(zOrder: 1): void {
+    const configured = this.requireConfiguredResultTransition();
+    const resources = this.resourceCatalog;
+    if (resources === null) {
+      throw new Error('Classic result attachment requires loaded resources');
+    }
+    if (zOrder !== 1 || this.resultPresenter !== null || this.resultPresentationRoot !== null) {
+      throw new Error('Classic result must attach once at recovered z-order 1');
+    }
+
+    const ranking = insertClassicResultScore(
+      configured.score,
+      this.classicLeaderboard,
+    );
+    const presenter = ClassicResultPresenter.create({
+      completedRunScore: configured.score,
+      fonts: resources.resultFonts,
+      panelValues: classicLeaderboardPanelValues(ranking.leaderboard),
+      resources: resources.result,
+      totalCoins: this.totalCoins,
+      viewport: this.requireViewport(),
+    }, {
+      onMenu: this.onResultMenu,
+      onRankPresentationBoundary: () => {
+        if (ranking.achievedRank !== null && this.effectsEnabled()) {
+          this.audioPresenter?.playOneShot(
+            getClassicResultRankAudioPath(ranking.achievedRank),
+          );
+        }
+      },
+      onRetry: this.onResultRetry,
+      onTotalCoinsEntranceComplete: this.onResultTotalCoinsEntranceComplete,
+    });
+    const root = createRecoveredPresenterRoot(this.node, 'ClassicResultPresentationRoot');
+    root.setSiblingIndex(zOrder);
+    try {
+      presenter.attach(root);
+    } catch (error) {
+      presenter.dispose();
+      root.destroy();
+      throw error;
+    }
+    this.classicLeaderboard = ranking.leaderboard;
+    this.resultPresentationRoot = root;
+    this.resultPresenter = presenter;
+  }
+
+  private readonly onResultRetry = (): void => {
+    if (this.effectsEnabled()) {
+      this.audioPresenter?.playOneShot(CLASSIC_MENU_BUTTON_AUDIO_PATH);
+    }
+    if (!this.restart(this.onResultRetrySceneLaunched)) {
+      this.rearmFailedResultRetry(
+        'load-rejected',
+        'Creator rejected the Classic scene reload request',
+      );
+    }
+  };
+
+  private readonly onResultRetrySceneLaunched = (error: Error | null): void => {
+    if (error !== null) {
+      this.rearmFailedResultRetry('scene-load-error', error.message);
+    }
+  };
+
+  private rearmFailedResultRetry(
+    reason: ClassicResultRetryFailedEvent['reason'],
+    message: string,
+  ): void {
+    if (!this.resultPresenter?.rearmNavigationAfterFailure('retry')) {
+      return;
+    }
+    const payload: ClassicResultRetryFailedEvent = Object.freeze({ message, reason });
+    this.node.emit(CLASSIC_RESULT_RETRY_FAILED_EVENT, payload);
+  }
+
+  private readonly onResultMenu = (): void => {
+    if (this.effectsEnabled()) {
+      this.audioPresenter?.playOneShot(CLASSIC_MENU_BUTTON_AUDIO_PATH);
+    }
+    const { score } = this.requireConfiguredResultTransition();
+    const payload: ClassicResultMenuRequestedEvent = Object.freeze({
+      completedRunScore: score,
+    });
+    // MainMenuLayer is not restored yet; retain the result while exposing the exact boundary.
+    this.node.emit(CLASSIC_RESULT_MENU_REQUESTED_EVENT, payload);
+  };
+
+  private readonly onResultTotalCoinsEntranceComplete = (): void => {
+    const { score } = this.requireConfiguredResultTransition();
+    const bonusCoins = calculateClassicResultCoinBonus(score);
+    const totalCoins = this.totalCoins + bonusCoins;
+    if (!Number.isSafeInteger(totalCoins)) {
+      throw new RangeError('Classic total coins must remain a safe integer');
+    }
+    this.totalCoins = totalCoins;
+    const payload: ClassicResultRewardReadyEvent = Object.freeze({
+      bonusCoins,
+      completedRunScore: score,
+      totalCoins,
+    });
+    // Exact reward rasters/actions follow this callback and remain the next bounded slice.
+    this.node.emit(CLASSIC_RESULT_REWARD_READY_EVENT, payload);
+  };
 
   private updatePresentation(): void {
     this.scoreHudPresenter?.setDisplayedScore(this.score.displayedScore);

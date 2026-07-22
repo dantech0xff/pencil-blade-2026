@@ -17,10 +17,13 @@ foundation now exists under `game/`. Creator has reopened that exact root and se
 first `classic.scene` with resolution/session, four-slot input, and a bounded generated
 normal-fruit loop. All 862 recovered APK game assets are staged and imported; the current loop
 uses exact background, intro/terminal/fail-marker art, score icon, best-score cup,
-double-score panel, Linds font, intact/cut fruit, critical-particle, and core-audio resources.
+double-score panel, Linds font, intact/cut fruit, critical-particle, core-audio, and the mode-0
+result-entry rasters/fonts/cues. The result boundary now implements the recovered completed-run
+score, leaderboard insertion, button states, entrance timings, and coin-bonus callback.
 The exact standard-bomb raster/audio/entity foundation is also implemented and tested, but is
 not scheduled into the playable loop until its unresolved procedural explosion geometry can be
-restored without guessing. The `classic_best_1` persistence adapter remains deferred. The
+restored without guessing. The `classic_best_1`, leaderboard, and coin persistence adapters
+remain deferred; result reward visuals and Main Menu replacement are also still open. The
 remaining scene/prefab map, consumer coverage, and full Classic scope still need to be
 completed before this phase can close.
 
@@ -122,7 +125,8 @@ Current Editor integration:
   `ClassicSceneController`, and `ClassicGameplayController` to Canvas.
 - Resolved gravity/sleep/solver properties are configured. Automatic Physics2D simulation stays
   off; a custom post-update system performs the recovered one-per-frame variable step with
-  explicit synchronization and a project-owned deferred-mutation boundary.
+  explicit synchronization and a project-owned deferred-mutation boundary. Removing Classic
+  for results unregisters that system and restores the prior Physics2D singleton properties.
 - All 862 recovered APK game assets (784 PNG, 59 WAV, 3 MP3, and 16 fonts) are staged
   byte-for-byte under the Creator bundle. The current import validator covers 934 generated
   metadata sidecars; the manifest's per-asset consumer and UUID fields still require backfill.
@@ -136,14 +140,26 @@ Current Editor integration:
   tracks the authoritative score service, while `classic_best_1` persistence remains deferred.
   Ordered Score HUD, World, and Fail roots prevent dynamically created gameplay nodes from
   crossing recovered equal-z presentation layers.
+- The exact mode-0 result entry is integrated at the terminal session boundary. It replaces
+  the Classic-owned roots while preserving the shared background/resources, creates the nine
+  recovered result rasters and two result fonts in native order, applies independent
+  `0.75 / 1.0 / 1.75`-second entrance actions, inserts the completed score using recovered
+  `>=` comparisons, and emits rank/menu cues at their recovered construction/click boundaries.
+  Retry uses a temporary scene-reload adapter, leaves the result mounted until the load is
+  accepted, rearms navigation after immediate or asynchronous failure, and tolerates parent-led
+  scene teardown. Main Menu replacement, persistent leaderboard and coin storage, and the
+  post-entry reward emitter remain explicit follow-up work.
 - The latest Preview pass opened at `720x1280` after clearing Creator's stale generated-code
   cache and demonstrated the recovered `GOOD / LUCK!` intro, exact ordinary-fruit spawning,
   score/best HUD, green-to-red fail-marker transitions, and 60 FPS with zero Creator Console
-  errors. The portrait mask prevented presentation leakage into the browser pillarbox.
+  errors. It then reached the exact 11-child result shell with the manual physics system absent;
+  an actual pointer click on Retry created a fresh running `classic` scene, re-registered manual
+  physics, and left the error overlay empty. The portrait mask prevented presentation leakage
+  into the browser pillarbox.
 - The current playable slice is not presentation-complete; the exact staging gate is complete
   for the recovered APK corpus, but 100% consumer coverage and canonical sample-project
   completeness remain open. Release rights are a separate review.
-- The deterministic vertical-slice suite passes `161/161`, and Creator's bundled strict
+- The deterministic vertical-slice suite passes `184/184`, and Creator's bundled strict
   TypeScript compiler passes.
 
 ## Current Blockers
@@ -157,6 +173,8 @@ Current Editor integration:
   lifecycle integration, including the unresolved native lower-bound side effect; no sprite
   substitute, Fruit-miss substitution, or invented triangle pattern is accepted.
 - The `classic_best_1` persistence adapter remains deferred/unimplemented.
+- Result leaderboard/coin persistence, exact post-entry reward visuals, and MainMenu replacement;
+  retry still uses scene reload rather than native same-parent reconstruction.
 - Electric-field compatibility decisions.
 - Android build validation and real APK/AAB post-build audit.
 - Rights review for original assets and product identity.

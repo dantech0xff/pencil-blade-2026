@@ -88,7 +88,14 @@ Verified starting point:
   Exact recovered fail-marker resources and action timings are now integrated,
   contract-tested, and visually verified in a fresh `720x1280` Preview after invalidating
   Creator's stale code cache. The score HUD is exact; `classic_best_1` persistence remains
-  deferred.
+  deferred. The static contracts and Creator boundary now also cover the exact mode-0 result
+  entry: completed-run score, result rasters/fonts, three-rank insertion and cues, selected
+  retry/menu frames, independent entrance actions, and the recovered coin-bonus callback.
+  A fresh Preview reached that 11-child shell, confirmed result removal restores the prior
+  Physics2D lifecycle, and reloaded a running Classic scene through an actual Retry click with
+  no error overlay. Retry remains mounted and rearms on immediate or asynchronous load failure.
+  Leaderboard/coin persistence, reward visuals, Main Menu replacement, and native same-parent
+  retry reconstruction remain open rather than being approximated.
   The exact standard-bomb raster/audio/entity foundation and Concurrent batch partition are
   also contract-tested, while bomb controllers remain deferred pending non-invented procedural
   explosion geometry. Project completion still requires the remaining resource consumers and

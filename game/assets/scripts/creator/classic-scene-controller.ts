@@ -113,8 +113,8 @@ export class ClassicSceneController extends Component {
     this.dispatch(this.session.afterBombHit());
   }
 
-  displayScoreComplete(bestScore: number): void {
-    this.dispatch(this.session.displayScoreComplete(bestScore));
+  displayScoreComplete(totalScore: number): void {
+    this.dispatch(this.session.displayScoreComplete(totalScore));
   }
 
   private dispatch(commands: readonly ClassicSessionCommand[]): void {
@@ -130,6 +130,11 @@ export class ClassicSceneController extends Component {
       this.bladeInput?.setCutEnabled(command.enabled);
     } else if (command.type === 'set-physics-stopped') {
       this.physics.setWorldStopped(command.stopped);
+    } else if (command.type === 'remove-classic') {
+      // Native removes the PhysicsLayer node and its pending 30-second action callbacks.
+      // Restore Creator's singleton immediately so the result layer owns no Classic stepping.
+      this.unschedule(this.onSpeedUpDelayComplete);
+      this.physics.restorePreviousWorldProperties();
     }
   }
 

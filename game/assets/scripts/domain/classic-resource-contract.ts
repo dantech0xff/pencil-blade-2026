@@ -55,6 +55,23 @@ export interface ClassicPresentationRasterSet {
   readonly terminalOver: ClassicRasterResource;
 }
 
+export interface ClassicResultRasterSet {
+  readonly background: ClassicRasterResource;
+  readonly bonusParticle: ClassicRasterResource;
+  readonly header: ClassicRasterResource;
+  readonly medalNone: ClassicRasterResource;
+  readonly menuNormal: ClassicRasterResource;
+  readonly menuSelected: ClassicRasterResource;
+  readonly retryNormal: ClassicRasterResource;
+  readonly retrySelected: ClassicRasterResource;
+  readonly totalCoins: ClassicRasterResource;
+}
+
+export interface ClassicResultFontSet {
+  readonly agencyB: ClassicFontResource;
+  readonly slabThing: ClassicFontResource;
+}
+
 export type ClassicCriticalParticleIndex = 1 | 2 | 3 | 4;
 
 export type ClassicCriticalParticleRasterSet = readonly [
@@ -110,6 +127,11 @@ export const CLASSIC_SCORE_HUD_FONT_RESOURCE: ClassicFontResource = Object.freez
   canonicalPath: 'Fonts/Linds.ttf',
 });
 
+export const CLASSIC_RESULT_FONT_RESOURCES: ClassicResultFontSet = Object.freeze({
+  agencyB: Object.freeze({ canonicalPath: 'Fonts/AgencyB.ttf' }),
+  slabThing: Object.freeze({ canonicalPath: 'Fonts/SlabThing.ttf' }),
+});
+
 export const CLASSIC_NORMAL_FRUIT_RESOURCES: readonly ClassicNormalFruitResourceDefinition[]
   = Object.freeze(NORMAL_FRUIT_NAMES.map((name, fruitId) => Object.freeze({
     fruitId: fruitId as ClassicNormalFruitId,
@@ -156,6 +178,56 @@ export const CLASSIC_PRESENTATION_RESOURCES: Readonly<Record<ClassicAssetTree, C
     }),
   });
 
+export const CLASSIC_RESULT_RESOURCES: Readonly<Record<ClassicAssetTree, ClassicResultRasterSet>>
+  = Object.freeze({
+    '480x800': Object.freeze({
+      background: createRaster(
+        '480x800/Interfaces/object-display-score-background.png',
+        [442, 407],
+      ),
+      bonusParticle: createRaster(
+        '480x800/Interfaces/object-bonus-particle.png',
+        [48, 46],
+      ),
+      header: createRaster('480x800/Interfaces/object-mode-results.png', [552, 118]),
+      medalNone: createRaster('480x800/Interfaces/object-medal-none.png', [104, 209]),
+      menuNormal: createRaster(
+        '480x800/Buttons/button-menu-score-normal.png',
+        [134, 129],
+      ),
+      menuSelected: createRaster(
+        '480x800/Buttons/button-menu-score-selected.png',
+        [134, 129],
+      ),
+      retryNormal: createRaster('480x800/Buttons/button-retry-normal.png', [111, 105]),
+      retrySelected: createRaster('480x800/Buttons/button-retry-selected.png', [112, 105]),
+      totalCoins: createRaster('480x800/Interfaces/total-coins.png', [334, 131]),
+    }),
+    '720x1280': Object.freeze({
+      background: createRaster(
+        '720x1280/Interfaces/object-display-score-background.png',
+        [662, 610],
+      ),
+      bonusParticle: createRaster(
+        '720x1280/Interfaces/object-bonus-particle.png',
+        [71, 68],
+      ),
+      header: createRaster('720x1280/Interfaces/object-mode-results.png', [792, 159]),
+      medalNone: createRaster('720x1280/Interfaces/object-medal-none.png', [154, 314]),
+      menuNormal: createRaster(
+        '720x1280/Buttons/button-menu-score-normal.png',
+        [201, 194],
+      ),
+      menuSelected: createRaster(
+        '720x1280/Buttons/button-menu-score-selected.png',
+        [200, 193],
+      ),
+      retryNormal: createRaster('720x1280/Buttons/button-retry-normal.png', [167, 158]),
+      retrySelected: createRaster('720x1280/Buttons/button-retry-selected.png', [167, 158]),
+      totalCoins: createRaster('720x1280/Interfaces/total-coins.png', [464, 160]),
+    }),
+  });
+
 export const CLASSIC_BOMB_RESOURCES: Readonly<Record<ClassicAssetTree, ClassicRasterResource>>
   = Object.freeze({
     '480x800': createRaster('480x800/Bomb/bomb_X.png', [80, 108]),
@@ -195,6 +267,15 @@ export function getClassicPresentationResources(
     throw new RangeError('assetTree must be 480x800 or 720x1280');
   }
   return CLASSIC_PRESENTATION_RESOURCES[assetTree];
+}
+
+export function getClassicResultResources(
+  assetTree: ClassicAssetTree,
+): ClassicResultRasterSet {
+  if (assetTree !== '480x800' && assetTree !== '720x1280') {
+    throw new RangeError('assetTree must be 480x800 or 720x1280');
+  }
+  return CLASSIC_RESULT_RESOURCES[assetTree];
 }
 
 export function getClassicBombResource(

@@ -22,12 +22,23 @@ export const SystemPriority = Object.freeze({ LOW: 100 });
 export class Vec2 {
   constructor(x = 0, y = 0) { this.x = x; this.y = y; }
 }
-export const director = Object.freeze({
+export const director = {
+  registeredId: null,
+  system: null,
+  unregisterCalls: 0,
   emit() {},
-  getSystem() { return null; },
-  registerSystem() {},
-  unregisterSystem() {},
-});
+  getSystem() { return this.system; },
+  registerSystem(id, system) {
+    this.registeredId = id;
+    this.system = system;
+  },
+  unregisterSystem(system) {
+    if (this.system === system) {
+      this.system = null;
+    }
+    this.unregisterCalls += 1;
+  },
+};
 `)}`;
 
 registerHooks({
@@ -48,6 +59,13 @@ registerHooks({
 const { ClassicPhysicsAdapter } = await import(
   '../../../game/assets/scripts/creator/classic-physics-adapter.ts'
 );
+const { director } = await import('cc') as {
+  director: {
+    registeredId: string | null;
+    system: unknown;
+    unregisterCalls: number;
+  };
+};
 
 test('physics adapter installs and restores exact fruit and bomb collision-matrix rows', () => {
   const physics = createPhysicsStub();
@@ -68,6 +86,9 @@ test('physics adapter installs and restores exact fruit and bomb collision-matri
 
   adapter.configureResolvedWorldProperties();
   assert.equal(physics.resetAccumulatorCalls, 1);
+  adapter.startVariableSimulation((deltaSeconds) => deltaSeconds, () => {});
+  assert.equal(director.registeredId, 'CLASSIC_VARIABLE_PHYSICS');
+  assert.notEqual(director.system, null);
   adapter.restorePreviousWorldProperties();
   assert.equal(
     physics.collisionMatrix[String(FRUIT_COLLISION_FILTER.categoryBits)],
@@ -78,6 +99,12 @@ test('physics adapter installs and restores exact fruit and bomb collision-matri
     originalBombMask,
   );
   assert.equal(physics.resetAccumulatorCalls, 2);
+  assert.equal(director.system, null);
+  assert.equal(director.unregisterCalls, 1);
+
+  adapter.restorePreviousWorldProperties();
+  assert.equal(physics.resetAccumulatorCalls, 2);
+  assert.equal(director.unregisterCalls, 1);
 });
 
 function createPhysicsStub() {

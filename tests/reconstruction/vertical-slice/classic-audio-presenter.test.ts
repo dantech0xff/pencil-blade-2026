@@ -154,7 +154,7 @@ interface CocosStub {
   readonly resetAudioStub: () => void;
 }
 
-test('preload requests the exact core batch including only ordinary bomb clips', async () => {
+test('preload requests the exact recovered core batch and excludes electric-only bomb audio', async () => {
   cc.resetAudioStub();
   const root = new cc.Node('Root');
   const presenter = await ClassicAudioPresenter.load(root as never);
@@ -163,7 +163,7 @@ test('preload requests the exact core batch including only ordinary bomb clips',
     cc.loadedBundlePaths,
     CLASSIC_CORE_AUDIO_PATHS.map(canonicalResourceToBundlePath),
   );
-  assert.equal(cc.loadedBundlePaths.length, 23);
+  assert.equal(cc.loadedBundlePaths.length, 27);
   assert.equal(
     cc.loadedBundlePaths.includes(
       canonicalResourceToBundlePath(CLASSIC_ELECTRIC_BOMB_HIT_AUDIO_PATH),

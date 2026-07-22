@@ -7,12 +7,15 @@ import {
   CLASSIC_CORE_AUDIO_PATHS,
   CLASSIC_ELECTRIC_BOMB_HIT_AUDIO_PATH,
   CLASSIC_FRUIT_CUT_AUDIO_PATHS,
+  CLASSIC_MENU_BUTTON_AUDIO_PATH,
   CLASSIC_MODE_SELECTED_AUDIO_PATH,
   CLASSIC_ORDINARY_BOMB_AUDIO_PATHS,
+  CLASSIC_RESULT_RANK_AUDIO_PATHS,
   CLASSIC_TOSS_AUDIO_PATH,
   getClassicComboAudioPath,
   getClassicFruitCutAudioSequence,
   getClassicOrdinaryBombAudioPath,
+  getClassicResultRankAudioPath,
   getClassicSwishAudioPath,
 } from '../../../game/assets/scripts/domain/classic-audio-contract.ts';
 import { canonicalResourceToBundlePath } from '../../../game/assets/scripts/domain/classic-resource-contract.ts';
@@ -23,9 +26,9 @@ const STAGING_MANIFEST = readJson<{
 }>('assets/catalog/creator-staging-manifest.json');
 const STAGED_PATHS = new Set(STAGING_MANIFEST.entries.map((entry) => entry.canonicalPath));
 
-test('all 23 recovered core and ordinary-bomb clips are unique, staged, and imported', () => {
-  assert.equal(CLASSIC_CORE_AUDIO_PATHS.length, 23);
-  assert.equal(new Set(CLASSIC_CORE_AUDIO_PATHS).size, 23);
+test('all 27 recovered core, menu, rank, and ordinary-bomb clips are unique and staged', () => {
+  assert.equal(CLASSIC_CORE_AUDIO_PATHS.length, 27);
+  assert.equal(new Set(CLASSIC_CORE_AUDIO_PATHS).size, 27);
   for (const canonicalPath of CLASSIC_CORE_AUDIO_PATHS) {
     assert.equal(STAGED_PATHS.has(canonicalPath), true, canonicalPath);
     const meta = readJson<{
@@ -43,6 +46,7 @@ test('all 23 recovered core and ordinary-bomb clips are unique, staged, and impo
     );
   }
   assert.equal(CLASSIC_MODE_SELECTED_AUDIO_PATH, 'Sounds/gameplayselected.wav');
+  assert.equal(CLASSIC_MENU_BUTTON_AUDIO_PATH, 'Sounds/menubuttonclick.wav');
   assert.equal(CLASSIC_TOSS_AUDIO_PATH, 'Sounds/tossfruit.wav');
 });
 
@@ -103,6 +107,17 @@ test('swish and combo draw indices map without remapping', () => {
   for (let index = 1; index <= 3; index += 1) {
     assert.equal(getClassicComboAudioPath(index), `Sounds/compo${index}.wav`);
   }
+  assert.deepEqual(CLASSIC_RESULT_RANK_AUDIO_PATHS, {
+    1: 'Sounds/firstplace.wav',
+    2: 'Sounds/secondplace.wav',
+    3: 'Sounds/thirdplace.wav',
+  });
+  for (let rank = 1; rank <= 3; rank += 1) {
+    assert.equal(
+      getClassicResultRankAudioPath(rank),
+      CLASSIC_RESULT_RANK_AUDIO_PATHS[rank as 1 | 2 | 3],
+    );
+  }
 });
 
 test('audio selectors reject values outside recovered switch domains', () => {
@@ -112,6 +127,8 @@ test('audio selectors reject values outside recovered switch domains', () => {
   assert.throws(() => getClassicFruitCutAudioSequence(0, 1 as never), TypeError);
   assert.throws(() => getClassicComboAudioPath(0), RangeError);
   assert.throws(() => getClassicComboAudioPath(4), RangeError);
+  assert.throws(() => getClassicResultRankAudioPath(0), RangeError);
+  assert.throws(() => getClassicResultRankAudioPath(4), RangeError);
   assert.throws(() => getClassicOrdinaryBombAudioPath('hit' as never), RangeError);
 });
 

@@ -111,15 +111,17 @@ export class ClassicSession {
     return Object.freeze(commands);
   }
 
-  displayScoreComplete(bestScore: number): readonly ClassicSessionCommand[] {
-    assertInteger(bestScore, 'bestScore');
+  displayScoreComplete(totalScore: number): readonly ClassicSessionCommand[] {
+    // The native callback names this getter `getBestScore`, but it reads the same
+    // authoritative field as `getTotalScore`; the result layer receives the completed run.
+    assertInteger(totalScore, 'totalScore');
     this.lifecycle = 'result-removed';
 
     return Object.freeze([
       Object.freeze({ type: 'stop-effects' }),
       Object.freeze({ type: 'construct-result' }),
       Object.freeze({ type: 'set-result-mode', mode: CLASSIC_MODE_ID }),
-      Object.freeze({ type: 'set-result-score', score: bestScore }),
+      Object.freeze({ type: 'set-result-score', score: totalScore }),
       Object.freeze({ type: 'remove-classic', cleanup: true }),
       Object.freeze({ type: 'attach-result', zOrder: 1 }),
     ]);

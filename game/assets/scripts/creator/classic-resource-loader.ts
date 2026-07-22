@@ -10,6 +10,7 @@ import {
 import {
   CLASSIC_CRITICAL_PARTICLE_RESOURCES,
   CLASSIC_NORMAL_FRUIT_RESOURCES,
+  CLASSIC_RESULT_FONT_RESOURCES,
   CLASSIC_SCORE_HUD_FONT_RESOURCE,
   canonicalResourceToBundlePath,
   canonicalRasterToSpriteFrameBundlePath,
@@ -17,12 +18,14 @@ import {
   getClassicCriticalParticleResource,
   getClassicNormalFruitResources,
   getClassicPresentationResources,
+  getClassicResultResources,
   type ClassicBombId,
   type ClassicCriticalParticleIndex,
   type ClassicFontResource,
   type ClassicNormalFruitId,
   type ClassicNormalFruitRasterSet,
   type ClassicRasterResource,
+  type ClassicResultFontSet,
 } from '../domain/classic-resource-contract';
 import type { ClassicAssetTree } from '../domain/resolution-profile-service';
 
@@ -62,10 +65,29 @@ export interface LoadedClassicPresentationResources {
   readonly terminalOver: LoadedClassicRasterResource;
 }
 
+export interface LoadedClassicResultResources {
+  readonly background: LoadedClassicRasterResource;
+  readonly bonusParticle: LoadedClassicRasterResource;
+  readonly header: LoadedClassicRasterResource;
+  readonly medalNone: LoadedClassicRasterResource;
+  readonly menuNormal: LoadedClassicRasterResource;
+  readonly menuSelected: LoadedClassicRasterResource;
+  readonly retryNormal: LoadedClassicRasterResource;
+  readonly retrySelected: LoadedClassicRasterResource;
+  readonly totalCoins: LoadedClassicRasterResource;
+}
+
+export interface LoadedClassicResultFonts {
+  readonly agencyB: LoadedClassicFontResource;
+  readonly slabThing: LoadedClassicFontResource;
+}
+
 export class ClassicSliceResourceCatalog {
   readonly assetTree: ClassicAssetTree;
   readonly criticalParticles: LoadedClassicCriticalParticleResources;
   readonly presentation: LoadedClassicPresentationResources;
+  readonly result: LoadedClassicResultResources;
+  readonly resultFonts: LoadedClassicResultFonts;
   readonly scoreFont: LoadedClassicFontResource;
 
   private readonly bombResource: LoadedClassicRasterResource;
@@ -78,6 +100,8 @@ export class ClassicSliceResourceCatalog {
     criticalParticles: LoadedClassicCriticalParticleResources,
     bombResource: LoadedClassicRasterResource,
     scoreFont: LoadedClassicFontResource,
+    result: LoadedClassicResultResources,
+    resultFonts: LoadedClassicResultFonts,
   ) {
     if (normalFruitResources.length !== CLASSIC_NORMAL_FRUIT_RESOURCES.length) {
       throw new Error('Classic resource catalog requires all nine ordinary fruits');
@@ -86,6 +110,8 @@ export class ClassicSliceResourceCatalog {
     this.bombResource = bombResource;
     this.criticalParticles = criticalParticles;
     this.presentation = presentation;
+    this.result = result;
+    this.resultFonts = resultFonts;
     this.scoreFont = scoreFont;
     this.normalFruitResources = Object.freeze([...normalFruitResources]);
   }
@@ -116,9 +142,10 @@ export async function loadClassicSliceResourceCatalog(
 ): Promise<ClassicSliceResourceCatalog> {
   const descriptors = createSpriteLoadDescriptors(assetTree);
   const bundle = await loadClassicGameResourceBundle();
-  const [spriteFrames, scoreFont] = await Promise.all([
+  const [spriteFrames, scoreFont, resultFonts] = await Promise.all([
     loadSpriteFrames(bundle, descriptors),
     loadClassicScoreFont(bundle),
+    loadClassicResultFonts(bundle),
   ]);
   const loadedByKey = new Map<string, LoadedClassicRasterResource>();
   for (let index = 0; index < descriptors.length; index += 1) {
@@ -135,6 +162,7 @@ export async function loadClassicSliceResourceCatalog(
   }
 
   const presentation = requireLoadedPresentation(assetTree, loadedByKey);
+  const result = requireLoadedResult(assetTree, loadedByKey);
   const bombResource = requireLoadedBomb(assetTree, loadedByKey);
   const normalFruitResources = CLASSIC_NORMAL_FRUIT_RESOURCES.map(({ fruitId }) => (
     requireLoadedNormalFruit(assetTree, fruitId, loadedByKey)
@@ -147,11 +175,14 @@ export async function loadClassicSliceResourceCatalog(
     criticalParticles,
     bombResource,
     scoreFont,
+    result,
+    resultFonts,
   );
 }
 
 function createSpriteLoadDescriptors(assetTree: ClassicAssetTree): readonly SpriteLoadDescriptor[] {
   const presentation = getClassicPresentationResources(assetTree);
+  const result = getClassicResultResources(assetTree);
   const descriptors: SpriteLoadDescriptor[] = [
     descriptor('presentation.background', presentation.background),
     descriptor('presentation.bestScoreCup', presentation.bestScoreCup),
@@ -163,6 +194,15 @@ function createSpriteLoadDescriptors(assetTree: ClassicAssetTree): readonly Spri
     descriptor('presentation.scoreIcon', presentation.scoreIcon),
     descriptor('presentation.terminalGame', presentation.terminalGame),
     descriptor('presentation.terminalOver', presentation.terminalOver),
+    descriptor('result.background', result.background),
+    descriptor('result.bonusParticle', result.bonusParticle),
+    descriptor('result.header', result.header),
+    descriptor('result.medalNone', result.medalNone),
+    descriptor('result.menuNormal', result.menuNormal),
+    descriptor('result.menuSelected', result.menuSelected),
+    descriptor('result.retryNormal', result.retryNormal),
+    descriptor('result.retrySelected', result.retrySelected),
+    descriptor('result.totalCoins', result.totalCoins),
     descriptor(bombKey(0), getClassicBombResource(0, assetTree)),
   ];
   for (const definition of CLASSIC_NORMAL_FRUIT_RESOURCES) {
@@ -249,6 +289,34 @@ function loadClassicScoreFont(bundle: AssetManager.Bundle): Promise<LoadedClassi
   });
 }
 
+function loadClassicResultFonts(bundle: AssetManager.Bundle): Promise<LoadedClassicResultFonts> {
+  return Promise.all([
+    loadClassicResultFont(bundle, 'agencyB', CLASSIC_RESULT_FONT_RESOURCES.agencyB),
+    loadClassicResultFont(bundle, 'slabThing', CLASSIC_RESULT_FONT_RESOURCES.slabThing),
+  ]).then(([agencyB, slabThing]) => Object.freeze({ agencyB, slabThing }));
+}
+
+function loadClassicResultFont(
+  bundle: AssetManager.Bundle,
+  key: keyof ClassicResultFontSet,
+  resource: ClassicFontResource,
+): Promise<LoadedClassicFontResource> {
+  const bundlePath = canonicalResourceToBundlePath(resource.canonicalPath);
+  return new Promise((resolve, reject) => {
+    bundle.load(bundlePath, Cocos.Font, (error, font) => {
+      if (error !== null && error !== undefined) {
+        reject(new Error(`Failed to load Classic result font ${key}: ${error.message}`));
+        return;
+      }
+      if (font === null || font === undefined) {
+        reject(new Error(`Creator returned no Classic result font for ${resource.canonicalPath}`));
+        return;
+      }
+      resolve(Object.freeze({ ...resource, font }));
+    });
+  });
+}
+
 function requireLoadedPresentation(
   assetTree: ClassicAssetTree,
   loadedByKey: ReadonlyMap<string, LoadedClassicRasterResource>,
@@ -273,6 +341,28 @@ function requireLoadedPresentation(
     scoreIcon: requireLoaded('presentation.scoreIcon', contract.scoreIcon, loadedByKey),
     terminalGame: requireLoaded('presentation.terminalGame', contract.terminalGame, loadedByKey),
     terminalOver: requireLoaded('presentation.terminalOver', contract.terminalOver, loadedByKey),
+  });
+}
+
+function requireLoadedResult(
+  assetTree: ClassicAssetTree,
+  loadedByKey: ReadonlyMap<string, LoadedClassicRasterResource>,
+): LoadedClassicResultResources {
+  const contract = getClassicResultResources(assetTree);
+  return Object.freeze({
+    background: requireLoaded('result.background', contract.background, loadedByKey),
+    bonusParticle: requireLoaded(
+      'result.bonusParticle',
+      contract.bonusParticle,
+      loadedByKey,
+    ),
+    header: requireLoaded('result.header', contract.header, loadedByKey),
+    medalNone: requireLoaded('result.medalNone', contract.medalNone, loadedByKey),
+    menuNormal: requireLoaded('result.menuNormal', contract.menuNormal, loadedByKey),
+    menuSelected: requireLoaded('result.menuSelected', contract.menuSelected, loadedByKey),
+    retryNormal: requireLoaded('result.retryNormal', contract.retryNormal, loadedByKey),
+    retrySelected: requireLoaded('result.retrySelected', contract.retrySelected, loadedByKey),
+    totalCoins: requireLoaded('result.totalCoins', contract.totalCoins, loadedByKey),
   });
 }
 

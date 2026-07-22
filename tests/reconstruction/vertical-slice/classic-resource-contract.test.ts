@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -7,6 +8,8 @@ import {
   CLASSIC_BOMB_RESOURCES,
   CLASSIC_CRITICAL_PARTICLE_RESOURCES,
   CLASSIC_NORMAL_FRUIT_RESOURCES,
+  CLASSIC_RESULT_FONT_RESOURCES,
+  CLASSIC_RESULT_RESOURCES,
   CLASSIC_SCORE_HUD_FONT_RESOURCE,
   canonicalResourceToBundlePath,
   canonicalRasterToSpriteFrameBundlePath,
@@ -14,6 +17,7 @@ import {
   getClassicCriticalParticleResource,
   getClassicPresentationResources,
   getClassicNormalFruitResources,
+  getClassicResultResources,
 } from '../../../game/assets/scripts/domain/classic-resource-contract.ts';
 import {
   CLASSIC_SCORE_HUD_FONT_CANONICAL_PATH,
@@ -297,6 +301,171 @@ test('Creator loader exposes exact score HUD SpriteFrames and fail-closed Font l
   assert.match(loaderSource, /bombResource,[\s\S]*?scoreFont,[\s\S]*?\);/);
 });
 
+test('Classic result rasters preserve exact canonical paths and paired dimensions', () => {
+  assert.deepEqual(CLASSIC_RESULT_RESOURCES, {
+    '480x800': {
+      background: {
+        canonicalPath: '480x800/Interfaces/object-display-score-background.png',
+        dimensions: { width: 442, height: 407 },
+      },
+      bonusParticle: {
+        canonicalPath: '480x800/Interfaces/object-bonus-particle.png',
+        dimensions: { width: 48, height: 46 },
+      },
+      header: {
+        canonicalPath: '480x800/Interfaces/object-mode-results.png',
+        dimensions: { width: 552, height: 118 },
+      },
+      medalNone: {
+        canonicalPath: '480x800/Interfaces/object-medal-none.png',
+        dimensions: { width: 104, height: 209 },
+      },
+      menuNormal: {
+        canonicalPath: '480x800/Buttons/button-menu-score-normal.png',
+        dimensions: { width: 134, height: 129 },
+      },
+      menuSelected: {
+        canonicalPath: '480x800/Buttons/button-menu-score-selected.png',
+        dimensions: { width: 134, height: 129 },
+      },
+      retryNormal: {
+        canonicalPath: '480x800/Buttons/button-retry-normal.png',
+        dimensions: { width: 111, height: 105 },
+      },
+      retrySelected: {
+        canonicalPath: '480x800/Buttons/button-retry-selected.png',
+        dimensions: { width: 112, height: 105 },
+      },
+      totalCoins: {
+        canonicalPath: '480x800/Interfaces/total-coins.png',
+        dimensions: { width: 334, height: 131 },
+      },
+    },
+    '720x1280': {
+      background: {
+        canonicalPath: '720x1280/Interfaces/object-display-score-background.png',
+        dimensions: { width: 662, height: 610 },
+      },
+      bonusParticle: {
+        canonicalPath: '720x1280/Interfaces/object-bonus-particle.png',
+        dimensions: { width: 71, height: 68 },
+      },
+      header: {
+        canonicalPath: '720x1280/Interfaces/object-mode-results.png',
+        dimensions: { width: 792, height: 159 },
+      },
+      medalNone: {
+        canonicalPath: '720x1280/Interfaces/object-medal-none.png',
+        dimensions: { width: 154, height: 314 },
+      },
+      menuNormal: {
+        canonicalPath: '720x1280/Buttons/button-menu-score-normal.png',
+        dimensions: { width: 201, height: 194 },
+      },
+      menuSelected: {
+        canonicalPath: '720x1280/Buttons/button-menu-score-selected.png',
+        dimensions: { width: 200, height: 193 },
+      },
+      retryNormal: {
+        canonicalPath: '720x1280/Buttons/button-retry-normal.png',
+        dimensions: { width: 167, height: 158 },
+      },
+      retrySelected: {
+        canonicalPath: '720x1280/Buttons/button-retry-selected.png',
+        dimensions: { width: 167, height: 158 },
+      },
+      totalCoins: {
+        canonicalPath: '720x1280/Interfaces/total-coins.png',
+        dimensions: { width: 464, height: 160 },
+      },
+    },
+  });
+
+  for (const tree of ['480x800', '720x1280'] as const) {
+    const result = getClassicResultResources(tree);
+    assert.equal(result, CLASSIC_RESULT_RESOURCES[tree]);
+    for (const resource of Object.values(result)) {
+      assertStagedRasterGeometry(resource);
+    }
+  }
+});
+
+test('Classic result fonts preserve exact TTF paths, bytes, hashes, and Creator imports', () => {
+  assert.deepEqual(CLASSIC_RESULT_FONT_RESOURCES, {
+    agencyB: { canonicalPath: 'Fonts/AgencyB.ttf' },
+    slabThing: { canonicalPath: 'Fonts/SlabThing.ttf' },
+  });
+
+  assertStagedFontProvenance(CLASSIC_RESULT_FONT_RESOURCES.agencyB, {
+    bytes: 60656,
+    fileName: 'AgencyB.ttf',
+    sha256: '4fde694cc486b55266f7561c685fbd9153ea0003f0c0c39fc744b132051d40c5',
+  });
+  assertStagedFontProvenance(CLASSIC_RESULT_FONT_RESOURCES.slabThing, {
+    bytes: 161488,
+    fileName: 'SlabThing.ttf',
+    sha256: '9e07461cbe34a525fe36222710f6067712c6a956f732e2a0d963bdb3d7e151a8',
+  });
+
+  assert.equal(
+    canonicalResourceToBundlePath(CLASSIC_RESULT_FONT_RESOURCES.agencyB.canonicalPath),
+    'Fonts/AgencyB',
+  );
+  assert.equal(
+    canonicalResourceToBundlePath(CLASSIC_RESULT_FONT_RESOURCES.slabThing.canonicalPath),
+    'Fonts/SlabThing',
+  );
+});
+
+test('Creator loader includes the exact result SpriteFrames and fail-closed result fonts', () => {
+  const loaderSource = readText('game/assets/scripts/creator/classic-resource-loader.ts');
+  const resultFields = [
+    'background',
+    'bonusParticle',
+    'header',
+    'medalNone',
+    'menuNormal',
+    'menuSelected',
+    'retryNormal',
+    'retrySelected',
+    'totalCoins',
+  ];
+
+  for (const field of resultFields) {
+    assert.match(
+      loaderSource,
+      new RegExp(`descriptor\\('result\\.${field}', result\\.${field}\\)`),
+      field,
+    );
+    assert.match(
+      loaderSource,
+      new RegExp(`${field}: requireLoaded\\([\\s\\S]*?'result\\.${field}'`),
+      field,
+    );
+  }
+
+  assert.match(loaderSource, /readonly result: LoadedClassicResultResources/);
+  assert.match(loaderSource, /readonly resultFonts: LoadedClassicResultFonts/);
+  assert.match(loaderSource, /const result = requireLoadedResult\(assetTree, loadedByKey\)/);
+  assert.match(loaderSource, /loadClassicResultFonts\(bundle\)/);
+  assert.match(
+    loaderSource,
+    /loadClassicResultFont\(bundle, 'agencyB', CLASSIC_RESULT_FONT_RESOURCES\.agencyB\)/,
+  );
+  assert.match(
+    loaderSource,
+    /loadClassicResultFont\(bundle, 'slabThing', CLASSIC_RESULT_FONT_RESOURCES\.slabThing\)/,
+  );
+  assert.match(loaderSource, /canonicalResourceToBundlePath\(resource\.canonicalPath\)/);
+  assert.match(loaderSource, /bundle\.load\(bundlePath, Cocos\.Font, \(error, font\) =>/);
+  assert.match(loaderSource, /if \(font === null \|\| font === undefined\)/);
+  assert.match(loaderSource, /Creator returned no Classic result font for \$\{resource\.canonicalPath\}/);
+  assert.match(
+    loaderSource,
+    /scoreFont,[\s\S]*?result,[\s\S]*?resultFonts,[\s\S]*?\);/,
+  );
+});
+
 test('all eight critical particle rasters preserve recovered Criticles paths and geometry', () => {
   assert.deepEqual(
     CLASSIC_CRITICAL_PARTICLE_RESOURCES['480x800'].map(({ dimensions }) => dimensions),
@@ -358,6 +527,7 @@ test('resource lookup rejects IDs and trees outside the recovered contract', () 
     () => getClassicCriticalParticleResource(1, '1080x1920' as never),
     RangeError,
   );
+  assert.throws(() => getClassicResultResources('1080x1920' as never), RangeError);
   assert.throws(() => getClassicBombResource(-1, '480x800'), RangeError);
   assert.throws(() => getClassicBombResource(1, '720x1280'), RangeError);
   assert.throws(() => getClassicBombResource(Number.NaN, '480x800'), RangeError);
@@ -374,6 +544,12 @@ function assertStagedRasterGeometry(resource: {
   assert.equal(STAGED_PATHS.has(resource.canonicalPath), true, resource.canonicalPath);
 
   const image = readBinary(`game/assets/game/${resource.canonicalPath}`);
+  const staged = STAGED_ENTRIES.get(resource.canonicalPath);
+  assert.ok(staged, resource.canonicalPath);
+  assert.equal(staged.targetPath, `game/assets/game/${resource.canonicalPath}`);
+  assert.equal(staged.cocosType, 'cc.ImageAsset');
+  assert.equal(staged.bytes, image.length);
+  assert.equal(staged.sha256, sha256(image));
   assert.equal(image.readUInt32BE(16), resource.dimensions.width, resource.canonicalPath);
   assert.equal(image.readUInt32BE(20), resource.dimensions.height, resource.canonicalPath);
 
@@ -404,6 +580,58 @@ function assertStagedRasterGeometry(resource: {
     rawHeight: resource.dimensions.height,
     trimType: 'none',
   }, resource.canonicalPath);
+}
+
+function assertStagedFontProvenance(
+  resource: { readonly canonicalPath: string },
+  expected: {
+    readonly bytes: number;
+    readonly fileName: string;
+    readonly sha256: string;
+  },
+): void {
+  const staged = STAGED_ENTRIES.get(resource.canonicalPath);
+  assert.ok(staged, resource.canonicalPath);
+  assert.deepEqual({
+    bytes: staged.bytes,
+    canonicalPath: staged.canonicalPath,
+    cocosType: staged.cocosType,
+    sha256: staged.sha256,
+    targetPath: staged.targetPath,
+  }, {
+    bytes: expected.bytes,
+    canonicalPath: resource.canonicalPath,
+    cocosType: 'cc.TTFFont',
+    sha256: expected.sha256,
+    targetPath: `game/assets/game/${resource.canonicalPath}`,
+  });
+
+  const font = readBinary(`game/assets/game/${resource.canonicalPath}`);
+  assert.equal(font.length, expected.bytes);
+  assert.equal(font.readUInt32BE(0), 0x0001_0000);
+  assert.equal(sha256(font), expected.sha256);
+
+  const meta = readJson<{
+    readonly files: readonly string[];
+    readonly imported: boolean;
+    readonly importer: string;
+    readonly subMetas: Readonly<Record<string, unknown>>;
+  }>(`game/assets/game/${resource.canonicalPath}.meta`);
+  assert.deepEqual({
+    files: meta.files,
+    imported: meta.imported,
+    importer: meta.importer,
+    subMetas: meta.subMetas,
+  }, {
+    files: ['.json', expected.fileName],
+    imported: true,
+    importer: 'ttf-font',
+    subMetas: {},
+  });
+}
+
+function sha256(content: Buffer): string {
+  return createHash('sha256').update(content).digest('hex');
 }
 
 function readJson<T>(relativePath: string): T {

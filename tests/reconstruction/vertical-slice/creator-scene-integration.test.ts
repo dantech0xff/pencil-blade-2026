@@ -364,6 +364,71 @@ test('misses use exact recovered marker resources and the 0.25-second callback b
   assert.match(presenterSource, /destroyTransient\(transient\)/);
 });
 
+test('terminal completion replaces Classic with the recovered result shell and explicit deferred seams', () => {
+  const gameplaySource = readText('game/assets/scripts/creator/classic-gameplay-controller.ts');
+  const sceneSource = readText('game/assets/scripts/creator/classic-scene-controller.ts');
+  const terminalStart = gameplaySource.indexOf('  private playRecoveredTerminalPresentation(): void {');
+  const resultStart = gameplaySource.indexOf('  private beginResultConstruction(): void {');
+  assert.notEqual(terminalStart, -1);
+  assert.ok(resultStart > terminalStart);
+  const terminalSource = gameplaySource.slice(terminalStart, resultStart);
+
+  assert.doesNotMatch(gameplaySource, /CLASSIC_BLADE_BEGAN_EVENT|onBladeBegan/);
+  assert.match(
+    terminalSource,
+    /displayScoreComplete\(this\.score\.authoritativeScore\)/,
+  );
+  assert.doesNotMatch(terminalSource, /game\.destroy\(\)|over\.destroy\(\)/);
+  assert.match(gameplaySource, /command\.type === 'stop-effects'[\s\S]*?audioPresenter\?\.stop\(\)/);
+  assert.match(gameplaySource, /command\.type === 'construct-result'[\s\S]*?beginResultConstruction\(\)/);
+  assert.match(gameplaySource, /command\.type === 'remove-classic'[\s\S]*?disposeClassicModePresentation\(\)/);
+  assert.match(gameplaySource, /command\.type === 'attach-result'[\s\S]*?attachRecoveredResult\(command\.zOrder\)/);
+  assert.match(
+    sceneSource,
+    /command\.type === 'remove-classic'[\s\S]*?unschedule\(this\.onSpeedUpDelayComplete\)[\s\S]*?physics\.restorePreviousWorldProperties\(\)/,
+  );
+
+  assert.match(gameplaySource, /ClassicResultPresenter\.create\(\{/);
+  assert.match(gameplaySource, /fonts: resources\.resultFonts/);
+  assert.match(gameplaySource, /resources: resources\.result/);
+  assert.match(gameplaySource, /panelValues: classicLeaderboardPanelValues\(ranking\.leaderboard\)/);
+  assert.match(gameplaySource, /totalCoins: this\.totalCoins/);
+  assert.match(gameplaySource, /presenter\.attach\(root\)/);
+  assert.match(gameplaySource, /getClassicResultRankAudioPath\(ranking\.achievedRank\)/);
+
+  const retryStart = gameplaySource.indexOf('  private readonly onResultRetry');
+  const menuStart = gameplaySource.indexOf('  private readonly onResultMenu');
+  assert.notEqual(retryStart, -1);
+  assert.ok(menuStart > retryStart);
+  const retrySource = gameplaySource.slice(retryStart, menuStart);
+  assert.ok(retrySource.indexOf('CLASSIC_MENU_BUTTON_AUDIO_PATH') >= 0);
+  assert.ok(
+    retrySource.indexOf('CLASSIC_MENU_BUTTON_AUDIO_PATH')
+      < retrySource.indexOf('this.restart(this.onResultRetrySceneLaunched)'),
+  );
+  assert.doesNotMatch(retrySource, /disposeResultPresentation\(\)/);
+  assert.match(
+    retrySource,
+    /if \(!this\.restart\(this\.onResultRetrySceneLaunched\)\)/,
+  );
+  assert.match(
+    retrySource,
+    /onResultRetrySceneLaunched[\s\S]*?error !== null[\s\S]*?rearmFailedResultRetry\('scene-load-error'/,
+  );
+  assert.match(
+    retrySource,
+    /rearmNavigationAfterFailure\('retry'\)[\s\S]*?CLASSIC_RESULT_RETRY_FAILED_EVENT/,
+  );
+  assert.match(
+    gameplaySource,
+    /restart\(onLaunched\?: \(error: Error \| null\) => void\): boolean \{[\s\S]*?return director\.loadScene\('classic', onLaunched\)/,
+  );
+  assert.match(gameplaySource, /CLASSIC_RESULT_MENU_REQUESTED_EVENT/);
+  assert.match(gameplaySource, /calculateClassicResultCoinBonus\(score\)/);
+  assert.match(gameplaySource, /CLASSIC_RESULT_REWARD_READY_EVENT/);
+  assert.doesNotMatch(gameplaySource, /new MainMenuLayer|scorescreen\.wav/);
+});
+
 function readJson<T>(relativePath: string): T {
   return JSON.parse(readText(relativePath)) as T;
 }
