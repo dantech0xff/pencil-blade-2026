@@ -143,7 +143,9 @@ export class ClassicFailPresenter {
   }
 
   attach(parent: Node): void {
-    if (!isValid(parent, true) || !parent.activeInHierarchy) {
+    // A replacement Classic layer is assembled while detached, then attached to the exact
+    // parent captured from Result. Accept that locally-active construction boundary.
+    if (!isValid(parent, true) || !parent.active) {
       throw new Error('Classic fail-presenter parent must be valid and active');
     }
     if (this.disposedValue) {

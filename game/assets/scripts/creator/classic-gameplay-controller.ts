@@ -8,7 +8,6 @@ import {
   UIOpacity,
   UITransform,
   Vec3,
-  director,
   game,
   isValid,
   tween,
@@ -52,6 +51,10 @@ import { ScoreService } from '../domain/score-service';
 import {
   classicLeaderboardPanelValues,
 } from '../domain/classic-result-ranking';
+import {
+  createClassicResultNavigationCommands,
+  type ClassicResultNavigationCommand,
+} from '../domain/classic-result-navigation';
 import { TossTimer } from '../domain/toss-timer';
 import {
   CLASSIC_BLADE_MOVED_EVENT,
@@ -125,7 +128,39 @@ export interface ClassicResultRewardReadyEvent {
 
 export interface ClassicResultRetryFailedEvent {
   readonly message: string;
-  readonly reason: 'load-rejected' | 'scene-load-error';
+  readonly reason: 'restart-error';
+}
+
+interface ClassicRetryRestartContext {
+  readonly audioPresenter: ClassicAudioPresenter;
+  readonly mode: 0;
+  readonly previousRunState: ClassicRetryRunStateSnapshot;
+  readonly resources: ClassicSliceResourceCatalog;
+  readonly resultRoot: Node;
+  readonly score: number;
+  readonly sceneController: ClassicSceneController;
+  readonly viewport: Readonly<{ x: number; y: number; width: number; height: number }>;
+}
+
+interface ClassicRetryRunStateSnapshot {
+  readonly combo: ComboService;
+  readonly deferredControllers: readonly ClassicTossControllerId[];
+  readonly fail: FailService;
+  readonly gameOver: boolean;
+  readonly planner: ClassicSpawnPlanner;
+  readonly score: ScoreService;
+  readonly swishAudio: ClassicSwishAudioGate;
+}
+
+interface ClassicRetryRestartState {
+  capturedParent: Node | null;
+  resultCleanupCommitted: boolean;
+  resultDetached: boolean;
+}
+
+interface ClassicRetryResultCleanupToken {
+  readonly presenter: ClassicResultPresenter;
+  readonly root: Node;
 }
 
 /**
@@ -141,13 +176,13 @@ export class ClassicGameplayController extends Component {
   private readonly random = new ModuloGameplayRandom(
     new SeededTargetRawSource(TARGET_REPLAY_SEED),
   );
-  private readonly planner = new ClassicSpawnPlanner({
+  private planner = new ClassicSpawnPlanner({
     random: this.random,
     sampleKinematics: sampleSpawnKinematics,
   });
-  private readonly swishAudio = new ClassicSwishAudioGate(this.random);
-  private readonly combo = new ComboService(this.random);
-  private readonly fail = new FailService();
+  private swishAudio = new ClassicSwishAudioGate(this.random);
+  private combo = new ComboService(this.random);
+  private fail = new FailService();
   private score = new ScoreService();
   private readonly deferredControllers = new Set<ClassicTossControllerId>();
   private readonly cutHalfPresenters = new Set<ClassicCutHalfPresenter>();
@@ -157,6 +192,7 @@ export class ClassicGameplayController extends Component {
   private audioPresenter: ClassicAudioPresenter | null = null;
   private recoveredBackgroundNode: Node | null = null;
   private recoveredBackgroundOpacity: UIOpacity | null = null;
+  private classicModeRoot: Node | null = null;
   private scoreHudRoot: Node | null = null;
   private worldPresentationRoot: Node | null = null;
   private failPresentationRoot: Node | null = null;
@@ -232,6 +268,50 @@ export class ClassicGameplayController extends Component {
       const audioPresenter = loadedAudioPresenter;
       this.audioPresenter = audioPresenter;
       this.resourceCatalog = resources;
+      this.createRecoveredBackground(resources);
+      this.constructRecoveredClassicMode(
+        viewport,
+        resources,
+        sceneController,
+        audioPresenter,
+      );
+      this.attachRecoveredClassicMode(1);
+      this.updatePresentation();
+      this.emitSnapshot();
+    } catch (error) {
+      if (loadedAudioPresenter !== null && loadedAudioPresenter !== this.audioPresenter) {
+        loadedAudioPresenter.stop();
+      }
+      this.disposeRecoveredRuntime();
+      throw error;
+    }
+  }
+
+  /** Native constructs the replacement layer before adding it back to the same parent. */
+  private constructRecoveredClassicMode(
+    viewport: Readonly<{ x: number; y: number; width: number; height: number }>,
+    resources: ClassicSliceResourceCatalog,
+    sceneController: ClassicSceneController,
+    audioPresenter: ClassicAudioPresenter,
+  ): void {
+    if (
+      this.classicModeRoot !== null
+      || this.registry !== null
+      || this.normalFree !== null
+    ) {
+      throw new Error('Classic mode can be constructed only when no run is attached');
+    }
+
+    const classicModeRoot = new Node('ClassicModeRoot');
+    classicModeRoot.layer = this.node.layer;
+    // Presenter constructors use recovered world coordinates while this root is detached.
+    // Stage the future parent's world transform now, then preserve it at the native attach
+    // boundary so Canvas translation does not offset the assembled HUD a second time.
+    classicModeRoot.setWorldPosition(this.node.worldPosition);
+    classicModeRoot.setWorldRotation(this.node.worldRotation);
+    classicModeRoot.setWorldScale(this.node.worldScale);
+    this.classicModeRoot = classicModeRoot;
+    try {
       this.registry = new ClassicEntityRegistry({
         callAfterStep: (mutation) => sceneController.callAfterPhysicsStep(mutation),
         onDispose: () => this.emitSnapshot(),
@@ -261,17 +341,26 @@ export class ClassicGameplayController extends Component {
           this.emitSnapshot();
         },
       });
-      this.createRecoveredPresentation(viewport, resources);
-      this.playRecoveredIntro(viewport, resources);
-      this.updatePresentation();
-      this.emitSnapshot();
+      this.createRecoveredPresentation(classicModeRoot, viewport, resources);
+      this.playRecoveredIntro(classicModeRoot, viewport, resources);
     } catch (error) {
-      if (loadedAudioPresenter !== null && loadedAudioPresenter !== this.audioPresenter) {
-        loadedAudioPresenter.stop();
-      }
-      this.disposeRecoveredRuntime();
+      this.disposeClassicModePresentation();
       throw error;
     }
+  }
+
+  private attachRecoveredClassicMode(zOrder: 1): void {
+    const root = this.classicModeRoot;
+    if (
+      zOrder !== 1
+      || root === null
+      || !isValid(root, true)
+      || root.parent !== null
+    ) {
+      throw new Error('Classic mode must attach once at recovered z-order 1');
+    }
+    root.setParent(this.node, true);
+    root.setSiblingIndex(zOrder);
   }
 
   private readonly onRecoveredResourceInitializationFailed = (error: unknown): void => {
@@ -352,6 +441,16 @@ export class ClassicGameplayController extends Component {
 
   /** Removes only the native Classic layer's owned runtime and presentation. */
   private disposeClassicModePresentation(): void {
+    const classicModeRoot = this.classicModeRoot;
+    if (
+      classicModeRoot !== null
+      && isValid(classicModeRoot, true)
+      && classicModeRoot.parent !== null
+    ) {
+      // `destroy()` is deferred in Creator. Match native remove-with-cleanup by making the
+      // parent boundary synchronous before Result or a rollback can attach a replacement.
+      classicModeRoot.removeFromParent();
+    }
     for (const node of [
       this.introGoodNode,
       this.introLuckNode,
@@ -395,16 +494,23 @@ export class ClassicGameplayController extends Component {
     this.scoreHudRoot = null;
     this.worldPresentationRoot = null;
     this.failPresentationRoot = null;
+    if (classicModeRoot !== null && isValid(classicModeRoot, true)) {
+      classicModeRoot.destroy();
+    }
+    this.classicModeRoot = null;
   }
 
   private disposeResultPresentation(): void {
+    const root = this.resultPresentationRoot;
+    if (root !== null && isValid(root, true)) {
+      // Creator defers destroy until the end of the frame. Native Retry removes Result from
+      // the captured parent synchronously before constructing its replacement.
+      root.removeFromParent();
+    }
     this.resultPresenter?.dispose();
     this.resultPresenter = null;
-    if (
-      this.resultPresentationRoot !== null
-      && isValid(this.resultPresentationRoot, true)
-    ) {
-      this.resultPresentationRoot.destroy();
+    if (root !== null && isValid(root, true)) {
+      root.destroy();
     }
     this.resultPresentationRoot = null;
   }
@@ -419,10 +525,6 @@ export class ClassicGameplayController extends Component {
       score: score.authoritativeScore,
       strikes: this.fail.count,
     });
-  }
-
-  restart(onLaunched?: (error: Error | null) => void): boolean {
-    return director.loadScene('classic', onLaunched);
   }
 
   private readonly onBladeMoved = (event: BladeMoveResult): void => {
@@ -739,12 +841,14 @@ export class ClassicGameplayController extends Component {
     return visibleRect;
   }
 
-  private readonly effectsEnabled = (): boolean => true;
+  private readonly effectsEnabled = (): boolean => (
+    this.settingsRuntime?.state.snapshot.effectsEnabled ?? true
+  );
 
-  private createRecoveredPresentation(
-    viewport: Readonly<{ width: number; height: number }>,
-    resources: ClassicSliceResourceCatalog,
-  ): void {
+  private createRecoveredBackground(resources: ClassicSliceResourceCatalog): void {
+    if (this.recoveredBackgroundNode !== null || this.recoveredBackgroundOpacity !== null) {
+      throw new Error('Recovered Classic background can attach only once');
+    }
     const background = createRecoveredSpriteNode(
       this.node,
       'ClassicRecoveredPaperBackground',
@@ -756,8 +860,14 @@ export class ClassicGameplayController extends Component {
     this.recoveredBackgroundOpacity = opacity;
     opacity.opacity = 0;
     tween(opacity).to(0.5, { opacity: 255 }).start();
+  }
 
-    const scoreHudRoot = createRecoveredPresenterRoot(this.node, 'ClassicScoreHudRoot');
+  private createRecoveredPresentation(
+    parent: Node,
+    viewport: Readonly<{ width: number; height: number }>,
+    resources: ClassicSliceResourceCatalog,
+  ): void {
+    const scoreHudRoot = createRecoveredPresenterRoot(parent, 'ClassicScoreHudRoot');
     this.scoreHudRoot = scoreHudRoot;
     this.scoreHudPresenter = ClassicScoreHudPresenter.create({
       bestScoreCupResource: resources.presentation.bestScoreCup,
@@ -773,11 +883,11 @@ export class ClassicGameplayController extends Component {
     });
     this.scoreHudPresenter.attach(scoreHudRoot);
     this.worldPresentationRoot = createRecoveredPresenterRoot(
-      this.node,
+      parent,
       'ClassicWorldPresentationRoot',
     );
     const failPresentationRoot = createRecoveredPresenterRoot(
-      this.node,
+      parent,
       'ClassicFailPresentationRoot',
     );
     this.failPresentationRoot = failPresentationRoot;
@@ -794,6 +904,7 @@ export class ClassicGameplayController extends Component {
   }
 
   private playRecoveredIntro(
+    parent: Node,
     viewport: Readonly<{ width: number; height: number }>,
     resources: ClassicSliceResourceCatalog,
   ): void {
@@ -801,13 +912,13 @@ export class ClassicGameplayController extends Component {
     const luckY = -viewport.height * 0.025;
     const outside = viewport.width * 0.75;
     const good = createRecoveredSpriteNode(
-      this.node,
+      parent,
       'ClassicRecoveredIntroGood',
       resources.presentation.introGood,
     );
     this.introGoodNode = good;
     const luck = createRecoveredSpriteNode(
-      this.node,
+      parent,
       'ClassicRecoveredIntroLuck',
       resources.presentation.introLuck,
     );
@@ -844,13 +955,14 @@ export class ClassicGameplayController extends Component {
     if (resources === null || this.terminalGameNode !== null || this.terminalOverNode !== null) {
       return;
     }
+    const parent = this.requireClassicModeRoot();
     const game = createRecoveredSpriteNode(
-      this.node,
+      parent,
       'ClassicRecoveredTerminalGame',
       resources.presentation.terminalGame,
     );
     const over = createRecoveredSpriteNode(
-      this.node,
+      parent,
       'ClassicRecoveredTerminalOver',
       resources.presentation.terminalOver,
     );
@@ -960,31 +1072,285 @@ export class ClassicGameplayController extends Component {
   }
 
   private readonly onResultRetry = (): void => {
-    if (this.effectsEnabled()) {
-      this.audioPresenter?.playOneShot(CLASSIC_MENU_BUTTON_AUDIO_PATH);
-    }
-    if (!this.restart(this.onResultRetrySceneLaunched)) {
-      this.rearmFailedResultRetry(
-        'load-rejected',
-        'Creator rejected the Classic scene reload request',
-      );
+    try {
+      this.restartRecoveredClassicRunSameParent();
+    } catch (error) {
+      const failure = error instanceof Error ? error : new Error(String(error));
+      this.reportFailedResultRetry(failure.message);
+      console.error(failure);
     }
   };
 
-  private readonly onResultRetrySceneLaunched = (error: Error | null): void => {
-    if (error !== null) {
-      this.rearmFailedResultRetry('scene-load-error', error.message);
-    }
-  };
+  private restartRecoveredClassicRunSameParent(): void {
+    const retryContext = this.createRetryRestartContext();
+    const retryState: ClassicRetryRestartState = {
+      capturedParent: null,
+      resultCleanupCommitted: false,
+      resultDetached: false,
+    };
+    const commands = createClassicResultNavigationCommands({
+      effectsEnabled: this.effectsEnabled(),
+      mode: retryContext.mode,
+      route: 'retry',
+    });
 
-  private rearmFailedResultRetry(
-    reason: ClassicResultRetryFailedEvent['reason'],
-    message: string,
+    try {
+      for (const command of commands) {
+        this.applyRetryNavigationCommand(command, retryContext, retryState);
+      }
+    } catch (error) {
+      this.rollbackFailedRetry(retryContext, retryState);
+      throw error;
+    }
+    this.updatePresentation();
+    this.emitSnapshot();
+  }
+
+  private createRetryRestartContext(): ClassicRetryRestartContext {
+    const configured = this.requireConfiguredResultTransition();
+    const resultRoot = this.requireAttachedResultPresentationRoot();
+    const resources = this.resourceCatalog;
+    const sceneController = this.sceneController;
+    const audioPresenter = this.audioPresenter;
+    if (resources === null || sceneController === null || audioPresenter === null) {
+      throw new Error('Classic Retry requires loaded scene, resource, and audio owners');
+    }
+    if (this.classicModeRoot !== null || this.registry !== null || this.normalFree !== null) {
+      throw new Error('Classic Retry requires the previous Classic layer to be removed');
+    }
+    this.requireSettingsRuntime();
+    return {
+      audioPresenter,
+      mode: configured.mode,
+      previousRunState: Object.freeze({
+        combo: this.combo,
+        deferredControllers: Object.freeze([...this.deferredControllers]),
+        fail: this.fail,
+        gameOver: this.gameOver,
+        planner: this.planner,
+        score: this.score,
+        swishAudio: this.swishAudio,
+      }),
+      resources,
+      resultRoot,
+      score: configured.score,
+      sceneController,
+      viewport: this.requireViewport(),
+    };
+  }
+
+  private applyRetryNavigationCommand(
+    command: ClassicResultNavigationCommand,
+    retryContext: ClassicRetryRestartContext,
+    retryState: ClassicRetryRestartState,
   ): void {
-    if (!this.resultPresenter?.rearmNavigationAfterFailure('retry')) {
+    switch (command.type) {
+      case 'request-menu-button-audio':
+        retryContext.audioPresenter.playOneShot(command.canonicalPath);
+        return;
+      case 'capture-result-parent':
+        retryState.capturedParent = retryContext.resultRoot.parent;
+        return;
+      case 'remove-result':
+        this.removeResultForRetry(command, retryContext, retryState);
+        return;
+      case 'construct-classic':
+        this.constructClassicForRetry(retryContext);
+        return;
+      case 'attach-classic-to-captured-parent':
+        this.attachClassicForRetry(command, retryContext, retryState);
+        return;
+      default:
+        throwUnexpectedRetryCommand(command);
+    }
+  }
+
+  private removeResultForRetry(
+    command: Extract<ClassicResultNavigationCommand, { type: 'remove-result' }>,
+    retryContext: ClassicRetryRestartContext,
+    retryState: ClassicRetryRestartState,
+  ): void {
+    if (
+      retryState.capturedParent !== this.node
+      || command.cleanup !== true
+      || retryContext.resultRoot !== this.resultPresentationRoot
+      || this.resultPresenter === null
+      || retryContext.resultRoot.parent !== retryState.capturedParent
+    ) {
+      throw new Error('Classic Retry must capture the Result parent before cleanup');
+    }
+    // Removal is synchronous; Creator cleanup remains a same-stack commit token until the
+    // fresh layer attaches, allowing an exceptional constructor/physics failure to restore
+    // the already-presented Result without replaying rank or coin side effects.
+    retryContext.resultRoot.removeFromParent();
+    retryState.resultDetached = true;
+  }
+
+  private constructClassicForRetry(retryContext: ClassicRetryRestartContext): void {
+    this.resetRecoveredClassicRunState();
+    this.constructRecoveredClassicMode(
+      retryContext.viewport,
+      retryContext.resources,
+      retryContext.sceneController,
+      retryContext.audioPresenter,
+    );
+  }
+
+  private attachClassicForRetry(
+    command: Extract<ClassicResultNavigationCommand, { type: 'attach-classic-to-captured-parent' }>,
+    retryContext: ClassicRetryRestartContext,
+    retryState: ClassicRetryRestartState,
+  ): void {
+    if (retryState.capturedParent !== this.node) {
+      throw new Error('Classic Retry lost the captured Result parent boundary');
+    }
+    let restartPrepared = false;
+    let resultCleanup: ClassicRetryResultCleanupToken;
+    try {
+      // Fresh session/physics state belongs to construction. Prepare it before CHILD_ADDED,
+      // then make the native parent attachment the transaction's final visible boundary.
+      retryContext.sceneController.restartClassicLayer();
+      restartPrepared = true;
+      this.attachRecoveredClassicMode(command.zOrder);
+      resultCleanup = this.assertRemovedResultReadyForCleanup(retryContext, retryState);
+      retryContext.sceneController.commitClassicLayerRestart();
+      restartPrepared = false;
+    } catch (error) {
+      if (restartPrepared) {
+        retryContext.sceneController.rollbackClassicLayerRestart();
+      }
+      this.disposeClassicModePresentation();
+      throw error;
+    }
+    // Cleanup runs beyond the reversible boundary. Even an unexpected reporting failure must
+    // not re-enter the catch above and destroy the newly committed Classic layer.
+    this.commitRemovedResultForRetry(retryState, resultCleanup);
+  }
+
+  private assertRemovedResultReadyForCleanup(
+    retryContext: ClassicRetryRestartContext,
+    retryState: ClassicRetryRestartState,
+  ): ClassicRetryResultCleanupToken {
+    if (
+      !retryState.resultDetached
+      || retryState.resultCleanupCommitted
+      || retryContext.resultRoot.parent !== null
+      || retryContext.resultRoot !== this.resultPresentationRoot
+      || this.resultPresenter === null
+    ) {
+      throw new Error('Classic Retry Result cleanup can commit only after synchronous removal');
+    }
+    return Object.freeze({
+      presenter: this.resultPresenter,
+      root: retryContext.resultRoot,
+    });
+  }
+
+  private commitRemovedResultForRetry(
+    retryState: ClassicRetryRestartState,
+    cleanup: ClassicRetryResultCleanupToken,
+  ): void {
+    // The replacement is already visible and scene/physics state is committed. Publish the
+    // logical Result disposal first, then make engine cleanup best-effort: a presenter/tween
+    // cleanup exception cannot roll the scene back into a mixed fresh-session/old-run state.
+    this.resultPresentationRoot = null;
+    this.resultPresenter = null;
+    retryState.resultCleanupCommitted = true;
+    retryState.resultDetached = false;
+
+    const cleanupFailures: unknown[] = [];
+    try {
+      cleanup.presenter.dispose();
+    } catch (error) {
+      cleanupFailures.push(error);
+    }
+    try {
+      if (isValid(cleanup.root, true)) {
+        cleanup.root.destroy();
+      }
+    } catch (error) {
+      cleanupFailures.push(error);
+    }
+    if (cleanupFailures.length > 0) {
+      const details = cleanupFailures
+        .map((error) => error instanceof Error ? error.message : String(error))
+        .join('; ');
+      console.error(new Error(
+        `Classic Retry committed with Result cleanup failures: ${details}`,
+      ));
+    }
+  }
+
+  private rollbackFailedRetry(
+    retryContext: ClassicRetryRestartContext,
+    retryState: ClassicRetryRestartState,
+  ): void {
+    if (retryState.resultCleanupCommitted || !retryState.resultDetached) {
       return;
     }
-    const payload: ClassicResultRetryFailedEvent = Object.freeze({ message, reason });
+    const parent = retryState.capturedParent;
+    if (
+      parent === null
+      || !isValid(parent, true)
+      || retryContext.resultRoot !== this.resultPresentationRoot
+      || !isValid(retryContext.resultRoot, true)
+      || retryContext.resultRoot.parent !== null
+      || this.resultPresenter === null
+    ) {
+      throw new Error('Classic Retry cannot restore its detached Result after failure');
+    }
+
+    this.disposeClassicModePresentation();
+    this.planner = retryContext.previousRunState.planner;
+    this.swishAudio = retryContext.previousRunState.swishAudio;
+    this.combo = retryContext.previousRunState.combo;
+    this.fail = retryContext.previousRunState.fail;
+    this.score = retryContext.previousRunState.score;
+    this.deferredControllers.clear();
+    for (const controller of retryContext.previousRunState.deferredControllers) {
+      this.deferredControllers.add(controller);
+    }
+    this.resultConstructionRequested = true;
+    this.resultMode = retryContext.mode;
+    this.resultScore = retryContext.score;
+    this.gameOver = retryContext.previousRunState.gameOver;
+    parent.addChild(retryContext.resultRoot);
+    retryContext.resultRoot.setSiblingIndex(1);
+    this.resultPresenter.rearmNavigationAfterFailure('retry');
+    retryState.resultDetached = false;
+    this.emitSnapshot();
+  }
+
+  private resetRecoveredClassicRunState(): void {
+    this.unschedule(this.onSwishCooldownComplete);
+    this.planner = new ClassicSpawnPlanner({
+      random: this.random,
+      sampleKinematics: sampleSpawnKinematics,
+    });
+    this.swishAudio = new ClassicSwishAudioGate(this.random);
+    this.combo = new ComboService(this.random);
+    this.fail = new FailService();
+    this.score = new ScoreService(
+      0,
+      0,
+      this.requireSettingsRuntime().state.snapshot.leaderboard.first,
+    );
+    this.deferredControllers.clear();
+    this.resultConstructionRequested = false;
+    this.resultMode = null;
+    this.resultScore = null;
+    this.gameOver = false;
+  }
+
+  private reportFailedResultRetry(message: string): void {
+    // Context/audio validation can fail before the transactional removal token exists.
+    if (this.resultPresenter?.state.navigation === 'retry') {
+      this.resultPresenter.rearmNavigationAfterFailure('retry');
+    }
+    const payload: ClassicResultRetryFailedEvent = Object.freeze({
+      message,
+      reason: 'restart-error',
+    });
     this.node.emit(CLASSIC_RESULT_RETRY_FAILED_EVENT, payload);
   }
 
@@ -1034,6 +1400,31 @@ export class ClassicGameplayController extends Component {
       throw new Error('Recovered score presentation requires loaded resources');
     }
     return presenter;
+  }
+
+  private requireAttachedResultPresentationRoot(): Node {
+    const resultRoot = this.resultPresentationRoot;
+    if (
+      resultRoot === null
+      || !isValid(resultRoot, true)
+      || resultRoot.parent !== this.node
+    ) {
+      throw new Error('Classic Retry requires Result attached to its recovered parent');
+    }
+    return resultRoot;
+  }
+
+  private requireClassicModeRoot(): Node {
+    const root = this.classicModeRoot;
+    if (
+      root === null
+      || !isValid(root, true)
+      || root.parent !== this.node
+      || !root.activeInHierarchy
+    ) {
+      throw new Error('Recovered Classic presentation requires its active mode root');
+    }
+    return root;
   }
 
   private requireWorldPresentationRoot(): Node {
@@ -1098,4 +1489,8 @@ function isSpawnCommand(
   command: ClassicTossStrategyCommand,
 ): command is ClassicSpawnCommand {
   return 'entityOccurrenceId' in command;
+}
+
+function throwUnexpectedRetryCommand(command: ClassicResultNavigationCommand): never {
+  throw new Error(`Classic Retry received unsupported command ${command.type}`);
 }

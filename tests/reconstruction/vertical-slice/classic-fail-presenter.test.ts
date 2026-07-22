@@ -324,6 +324,19 @@ test('duplicate strikes, premature use, invalid resources, and disposal reject s
     viewport: { width: 480, height: 800 },
   };
   const completed: number[] = [];
+  const detachedAncestor = new cc.Node('DetachedAncestor');
+  detachedAncestor.active = false;
+  const detachedActiveParent = new cc.Node('DetachedActiveParent');
+  detachedActiveParent.setParent(detachedAncestor);
+  assert.equal(detachedActiveParent.active, true);
+  assert.equal(detachedActiveParent.activeInHierarchy, false);
+  const detachedPresenter = ClassicFailPresenter.create(
+    input,
+    { onIndicatorComplete() {} },
+  );
+  assert.doesNotThrow(() => detachedPresenter.attach(detachedActiveParent as never));
+  assert.equal(detachedPresenter.dispose(), true);
+
   const presenter = ClassicFailPresenter.create(
     input,
     { onIndicatorComplete: (strike) => completed.push(strike) },

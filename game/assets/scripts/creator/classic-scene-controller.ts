@@ -31,6 +31,12 @@ export interface ClassicPhysicsSteppedEvent {
   readonly deltaSeconds: number;
 }
 
+interface ClassicLayerRestartRollbackState {
+  readonly classicLayerRemovedForResult: boolean;
+  readonly session: ClassicSession;
+  readonly worldSpeed: ClassicWorldSpeed;
+}
+
 /**
  * Root bridge for resolved Classic session, resolution, and Physics2D behavior.
  * Scene-lifetime owner: keep this component enabled until node destruction; disabling it is
@@ -39,12 +45,14 @@ export interface ClassicPhysicsSteppedEvent {
 @ccclass('ClassicSceneController')
 @requireComponent(BladeInputController)
 export class ClassicSceneController extends Component {
-  private readonly session = new ClassicSession();
+  private session = new ClassicSession();
   private readonly physics = new ClassicPhysicsAdapter();
   private readonly resolution = new ClassicResolutionAdapter();
-  private readonly worldSpeed = new ClassicWorldSpeed();
+  private worldSpeed = new ClassicWorldSpeed();
   private bladeInput: BladeInputController | null = null;
   private appliedResolution: AppliedClassicResolution | null = null;
+  private classicLayerRemovedForResult = false;
+  private pendingLayerRestartRollback: ClassicLayerRestartRollbackState | null = null;
 
   onLoad(): void {
     const bladeInput = this.getComponent(BladeInputController);
@@ -117,6 +125,86 @@ export class ClassicSceneController extends Component {
     this.dispatch(this.session.displayScoreComplete(totalScore));
   }
 
+  /** Reattaches a fresh Classic layer under the existing scene parent after Result removal. */
+  restartClassicLayer(): void {
+    if (
+      this.session.snapshot().lifecycle !== 'result-removed'
+      || !this.classicLayerRemovedForResult
+      || this.pendingLayerRestartRollback !== null
+    ) {
+      throw new Error('Classic layer can restart only after Result removes the previous layer');
+    }
+    const bladeInput = this.bladeInput;
+    if (bladeInput === null) {
+      throw new Error('Classic blade input must be available before layer restart');
+    }
+
+    const freshSession = new ClassicSession();
+    const freshWorldSpeed = new ClassicWorldSpeed();
+    this.pendingLayerRestartRollback = Object.freeze({
+      classicLayerRemovedForResult: this.classicLayerRemovedForResult,
+      session: this.session,
+      worldSpeed: this.worldSpeed,
+    });
+    this.unschedule(this.onSpeedUpDelayComplete);
+    try {
+      this.physics.configureResolvedWorldProperties();
+      this.physics.startVariableSimulation(
+        (frameDeltaSeconds) => freshWorldSpeed.physicsStepDelta(frameDeltaSeconds),
+        (variableDeltaSeconds) => this.afterPhysicsStep(variableDeltaSeconds),
+      );
+
+      this.session = freshSession;
+      this.worldSpeed = freshWorldSpeed;
+      this.classicLayerRemovedForResult = false;
+      bladeInput.resetForFreshClassicLayer();
+      this.applyWorldSpeedCommands(freshWorldSpeed.enableClassicSpeedUp());
+      this.emitSessionSnapshot();
+    } catch (error) {
+      this.restorePendingClassicLayerRestart();
+      throw error;
+    }
+  }
+
+  /** Commits only after the staged Classic node has joined the captured native parent. */
+  commitClassicLayerRestart(): void {
+    if (
+      this.pendingLayerRestartRollback === null
+      || this.session.snapshot().lifecycle !== 'intro'
+      || this.classicLayerRemovedForResult
+    ) {
+      throw new Error('Classic layer restart can commit only after fresh activation');
+    }
+    this.pendingLayerRestartRollback = null;
+  }
+
+  /** Restores the exact post-Result boundary if Creator rejects the final node attachment. */
+  rollbackClassicLayerRestart(): void {
+    if (this.pendingLayerRestartRollback === null) {
+      throw new Error('Classic layer restart has no pending rollback');
+    }
+    this.restorePendingClassicLayerRestart();
+    this.emitSessionSnapshot();
+  }
+
+  private restorePendingClassicLayerRestart(): void {
+    const rollback = this.pendingLayerRestartRollback;
+    if (rollback === null) {
+      throw new Error('Classic layer restart rollback state is missing');
+    }
+    const bladeInput = this.bladeInput;
+    if (bladeInput === null) {
+      throw new Error('Classic blade input must survive layer restart rollback');
+    }
+    this.unschedule(this.onSpeedUpDelayComplete);
+    this.physics.restorePreviousWorldProperties();
+    this.session = rollback.session;
+    this.worldSpeed = rollback.worldSpeed;
+    this.classicLayerRemovedForResult = rollback.classicLayerRemovedForResult;
+    bladeInput.setCutEnabled(rollback.session.snapshot().cutEnabled);
+    this.pendingLayerRestartRollback = null;
+  }
+
   private dispatch(commands: readonly ClassicSessionCommand[]): void {
     for (const command of commands) {
       this.applyResolvedCommand(command);
@@ -135,6 +223,7 @@ export class ClassicSceneController extends Component {
       // Restore Creator's singleton immediately so the result layer owns no Classic stepping.
       this.unschedule(this.onSpeedUpDelayComplete);
       this.physics.restorePreviousWorldProperties();
+      this.classicLayerRemovedForResult = true;
     }
   }
 

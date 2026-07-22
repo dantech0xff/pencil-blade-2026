@@ -58,6 +58,12 @@ export class BladeInputController extends Component {
     this.cutEnabled = enabled;
   }
 
+  /** Reinitializes the per-layer touch state before a fresh Classic layer is attached. */
+  resetForFreshClassicLayer(): void {
+    this.tracks = new BladeTracks();
+    this.cutEnabled = true;
+  }
+
   snapshot(): readonly BladeTrackSnapshot[] {
     return this.tracks.snapshot();
   }

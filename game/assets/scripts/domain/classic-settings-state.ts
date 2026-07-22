@@ -12,13 +12,17 @@ export const CLASSIC_TOTAL_COINS_STORAGE_KEY = 'total_coins';
 export const CLASSIC_BEST_1_STORAGE_KEY = 'classic_best_1';
 export const CLASSIC_BEST_2_STORAGE_KEY = 'classic_best_2';
 export const CLASSIC_BEST_3_STORAGE_KEY = 'classic_best_3';
+export const CLASSIC_EFFECTS_ENABLED_STORAGE_KEY = 'enable_effect';
 
 export interface ClassicInt32PreferencePort {
   readInt32(key: string, defaultValue: number): number;
   writeInt32(key: string, value: number): void;
+  readBoolean(key: string, defaultValue: boolean): boolean;
+  writeBoolean(key: string, value: boolean): void;
 }
 
 export interface ClassicSettingsSnapshot {
+  readonly effectsEnabled: boolean;
   readonly leaderboard: ClassicLeaderboard;
   readonly totalCoins: number;
 }
@@ -28,17 +32,20 @@ export interface ClassicSettingsSnapshot {
  * Result mutations stay in memory until an explicit lifecycle save checkpoint.
  */
 export class ClassicSettingsState {
+  private readonly effectsEnabledValue: boolean;
   private leaderboardValue: ClassicLeaderboard;
   private totalCoinsValue: number;
 
   private constructor(snapshot: ClassicSettingsSnapshot) {
     assertSnapshot(snapshot);
+    this.effectsEnabledValue = snapshot.effectsEnabled;
     this.leaderboardValue = freezeLeaderboard(snapshot.leaderboard);
     this.totalCoinsValue = snapshot.totalCoins;
   }
 
   static defaults(): ClassicSettingsState {
     return new ClassicSettingsState(Object.freeze({
+      effectsEnabled: true,
       leaderboard: CLASSIC_INITIAL_LEADERBOARD,
       totalCoins: CLASSIC_INITIAL_TOTAL_COINS,
     }));
@@ -46,7 +53,7 @@ export class ClassicSettingsState {
 
   static load(port: ClassicInt32PreferencePort): ClassicSettingsState {
     assertPort(port);
-    // This is the recovered relative order of the Classic-relevant integer subset.
+    // This is the recovered relative order of the implemented Classic Settings subset.
     const totalCoins = port.readInt32(
       CLASSIC_TOTAL_COINS_STORAGE_KEY,
       CLASSIC_INITIAL_TOTAL_COINS,
@@ -54,7 +61,9 @@ export class ClassicSettingsState {
     const first = port.readInt32(CLASSIC_BEST_1_STORAGE_KEY, 0);
     const second = port.readInt32(CLASSIC_BEST_2_STORAGE_KEY, 0);
     const third = port.readInt32(CLASSIC_BEST_3_STORAGE_KEY, 0);
+    const effectsEnabled = port.readBoolean(CLASSIC_EFFECTS_ENABLED_STORAGE_KEY, true);
     return new ClassicSettingsState(Object.freeze({
+      effectsEnabled,
       leaderboard: Object.freeze({ first, second, third }),
       totalCoins,
     }));
@@ -62,6 +71,7 @@ export class ClassicSettingsState {
 
   get snapshot(): ClassicSettingsSnapshot {
     return Object.freeze({
+      effectsEnabled: this.effectsEnabledValue,
       leaderboard: freezeLeaderboard(this.leaderboardValue),
       totalCoins: this.totalCoinsValue,
     });
@@ -86,6 +96,7 @@ export class ClassicSettingsState {
     port.writeInt32(CLASSIC_BEST_1_STORAGE_KEY, this.leaderboardValue.first);
     port.writeInt32(CLASSIC_BEST_2_STORAGE_KEY, this.leaderboardValue.second);
     port.writeInt32(CLASSIC_BEST_3_STORAGE_KEY, this.leaderboardValue.third);
+    port.writeBoolean(CLASSIC_EFFECTS_ENABLED_STORAGE_KEY, this.effectsEnabledValue);
   }
 }
 
@@ -95,14 +106,21 @@ function assertPort(port: ClassicInt32PreferencePort): void {
     || typeof port !== 'object'
     || typeof port.readInt32 !== 'function'
     || typeof port.writeInt32 !== 'function'
+    || typeof port.readBoolean !== 'function'
+    || typeof port.writeBoolean !== 'function'
   ) {
-    throw new TypeError('Classic settings port must provide int32 read and write operations');
+    throw new TypeError(
+      'Classic settings port must provide int32 read and write operations plus boolean read and write operations',
+    );
   }
 }
 
 function assertSnapshot(snapshot: ClassicSettingsSnapshot): void {
   if (snapshot === null || typeof snapshot !== 'object') {
     throw new TypeError('Classic settings snapshot must be an object');
+  }
+  if (typeof snapshot.effectsEnabled !== 'boolean') {
+    throw new TypeError('effectsEnabled must be a boolean');
   }
   assertSignedInt32(snapshot.totalCoins, 'totalCoins');
   const leaderboard = snapshot.leaderboard;

@@ -149,7 +149,10 @@ test('Classic presentation loads the exact game bundle before using recovered fr
 
   assert.match(gameplaySource, /await loadClassicSliceResourceCatalog\(assetTree\)/);
   assert.match(gameplaySource, /resourceCatalog: resources/);
-  assert.match(gameplaySource, /playRecoveredIntro\(viewport, resources\)/);
+  assert.match(
+    gameplaySource,
+    /playRecoveredIntro\(classicModeRoot, viewport, resources\)/,
+  );
   assert.doesNotMatch(gameplaySource, /Swipe to start/);
   assert.match(gameplaySource, /\.to\(0\.5, \{ position:/);
   assert.match(gameplaySource, /\.delay\(0\.5\)/);
@@ -182,12 +185,12 @@ test('Classic score HUD replaces the provisional label and routes smoothing thro
   assert.match(gameplaySource, /fontResource: resources\.scoreFont/);
   assert.match(
     gameplaySource,
-    /createRecoveredPresenterRoot\(this\.node, 'ClassicScoreHudRoot'\)/,
+    /createRecoveredPresenterRoot\(parent, 'ClassicScoreHudRoot'\)/,
   );
   assert.match(gameplaySource, /this\.scoreHudPresenter\.attach\(scoreHudRoot\)/);
   assert.match(
     gameplaySource,
-    /createRecoveredPresenterRoot\([\s\S]*?this\.node,[\s\S]*?'ClassicFailPresentationRoot'/,
+    /createRecoveredPresenterRoot\([\s\S]*?parent,[\s\S]*?'ClassicFailPresentationRoot'/,
   );
   assert.match(gameplaySource, /this\.failPresenter\.attach\(failPresentationRoot\)/);
   assert.ok(scoreRootIndex >= 0 && worldRootIndex > scoreRootIndex);
@@ -407,27 +410,170 @@ test('terminal completion replaces Classic with the recovered result shell and e
   assert.notEqual(retryStart, -1);
   assert.ok(menuStart > retryStart);
   const retrySource = gameplaySource.slice(retryStart, menuStart);
-  assert.ok(retrySource.indexOf('CLASSIC_MENU_BUTTON_AUDIO_PATH') >= 0);
-  assert.ok(
-    retrySource.indexOf('CLASSIC_MENU_BUTTON_AUDIO_PATH')
-      < retrySource.indexOf('this.restart(this.onResultRetrySceneLaunched)'),
+  const retryApplySource = extractMemberBlock(
+    gameplaySource,
+    '  private applyRetryNavigationCommand(',
   );
-  assert.doesNotMatch(retrySource, /disposeResultPresentation\(\)/);
+  const retryTransactionSource = extractMemberBlock(
+    gameplaySource,
+    '  private restartRecoveredClassicRunSameParent(',
+  );
+  const retryResetSource = extractMemberBlock(
+    gameplaySource,
+    '  private resetRecoveredClassicRunState(',
+  );
+  const retryAttachmentSource = extractMemberBlock(
+    gameplaySource,
+    '  private attachClassicForRetry(',
+  );
+  const retryRemovalSource = extractMemberBlock(
+    gameplaySource,
+    '  private removeResultForRetry(',
+  );
+  const retryCleanupSource = extractMemberBlock(
+    gameplaySource,
+    '  private commitRemovedResultForRetry(',
+  );
+  const retryRollbackSource = extractMemberBlock(
+    gameplaySource,
+    '  private rollbackFailedRetry(',
+  );
+  const resultDisposalSource = extractMemberBlock(
+    gameplaySource,
+    '  private disposeResultPresentation(',
+  );
+  const modeConstructionSource = extractMemberBlock(
+    gameplaySource,
+    '  private constructRecoveredClassicMode(',
+  );
+  const modeAttachmentSource = extractMemberBlock(
+    gameplaySource,
+    '  private attachRecoveredClassicMode(',
+  );
+  const modeDisposalSource = extractMemberBlock(
+    gameplaySource,
+    '  private disposeClassicModePresentation(',
+  );
+  assertOrderedSubstrings(retrySource, [
+    'const retryContext = this.createRetryRestartContext()',
+    'const commands = createClassicResultNavigationCommands({',
+    'effectsEnabled: this.effectsEnabled()',
+    'mode: retryContext.mode',
+    "route: 'retry'",
+    'this.applyRetryNavigationCommand(command, retryContext, retryState)',
+    'this.updatePresentation()',
+    'this.emitSnapshot()',
+  ]);
+  assertOrderedSubstrings(retryApplySource, [
+    "case 'request-menu-button-audio':",
+    "case 'capture-result-parent':",
+    "case 'remove-result':",
+    "case 'construct-classic':",
+    "case 'attach-classic-to-captured-parent':",
+  ]);
+  assert.match(
+    retryApplySource,
+    /retryContext\.audioPresenter\.playOneShot\(command\.canonicalPath\)/,
+  );
+  assert.match(retryApplySource, /retryState\.capturedParent = retryContext\.resultRoot\.parent/);
+  assert.match(
+    retryApplySource,
+    /this\.removeResultForRetry\(command, retryContext, retryState\)/,
+  );
+  assert.match(retryApplySource, /this\.constructClassicForRetry\(retryContext\)/);
+  assert.match(
+    retryApplySource,
+    /this\.attachClassicForRetry\(command, retryContext, retryState\)/,
+  );
+  assertOrderedSubstrings(resultDisposalSource, [
+    'root.removeFromParent()',
+    'this.resultPresenter?.dispose()',
+    'root.destroy()',
+  ]);
+  assertOrderedSubstrings(modeConstructionSource, [
+    'classicModeRoot.setWorldPosition(this.node.worldPosition)',
+    'classicModeRoot.setWorldRotation(this.node.worldRotation)',
+    'classicModeRoot.setWorldScale(this.node.worldScale)',
+    'this.createRecoveredPresentation(classicModeRoot, viewport, resources)',
+  ]);
+  assert.match(modeAttachmentSource, /root\.setParent\(this\.node, true\)/);
+  assertOrderedSubstrings(modeDisposalSource, [
+    'classicModeRoot.removeFromParent()',
+    'this.failPresenter?.dispose()',
+    'classicModeRoot.destroy()',
+  ]);
+  assertOrderedSubstrings(retryAttachmentSource, [
+    'retryContext.sceneController.restartClassicLayer()',
+    'this.attachRecoveredClassicMode(command.zOrder)',
+    'this.assertRemovedResultReadyForCleanup(retryContext, retryState)',
+    'retryContext.sceneController.commitClassicLayerRestart()',
+    'this.commitRemovedResultForRetry(retryState, resultCleanup)',
+  ]);
+  assert.match(
+    retryAttachmentSource,
+    /catch \(error\)[\s\S]*?rollbackClassicLayerRestart\(\)[\s\S]*?disposeClassicModePresentation\(\)/,
+  );
+  assert.match(retryRemovalSource, /retryContext\.resultRoot\.removeFromParent\(\)/);
+  assert.doesNotMatch(retryRemovalSource, /disposeResultPresentation\(\)/);
+  assertOrderedSubstrings(retryCleanupSource, [
+    'this.resultPresentationRoot = null',
+    'this.resultPresenter = null',
+    'retryState.resultCleanupCommitted = true',
+    'cleanup.presenter.dispose()',
+    'cleanup.root.destroy()',
+  ]);
+  assert.match(
+    retryCleanupSource,
+    /cleanupFailures\.length > 0[\s\S]*?new Error\([\s\S]*?committed with Result cleanup failures/,
+  );
+  assert.doesNotMatch(retryCleanupSource, /disposeResultPresentation\(\)/);
+  assertOrderedSubstrings(retryRollbackSource, [
+    'this.disposeClassicModePresentation()',
+    'this.planner = retryContext.previousRunState.planner',
+    'this.swishAudio = retryContext.previousRunState.swishAudio',
+    'this.combo = retryContext.previousRunState.combo',
+    'this.fail = retryContext.previousRunState.fail',
+    'this.score = retryContext.previousRunState.score',
+    'this.resultConstructionRequested = true',
+    'this.resultMode = retryContext.mode',
+    'this.resultScore = retryContext.score',
+    'parent.addChild(retryContext.resultRoot)',
+    'retryContext.resultRoot.setSiblingIndex(1)',
+    "this.resultPresenter.rearmNavigationAfterFailure('retry')",
+    'this.emitSnapshot()',
+  ]);
+  assert.doesNotMatch(
+    retryRollbackSource,
+    /recordClassicResultScore|awardClassicResultCoins|attachRecoveredResult/,
+  );
+  assert.match(
+    retryTransactionSource,
+    /catch \(error\)[\s\S]*?rollbackFailedRetry\(retryContext, retryState\)[\s\S]*?throw error/,
+  );
+  assert.match(
+    retryResetSource,
+    /this\.planner = new ClassicSpawnPlanner\([\s\S]*?this\.swishAudio = new ClassicSwishAudioGate\(this\.random\)[\s\S]*?this\.combo = new ComboService\(this\.random\)[\s\S]*?this\.fail = new FailService\(\)/,
+  );
+  assert.match(
+    retryResetSource,
+    /new ScoreService\([\s\S]*?this\.requireSettingsRuntime\(\)\.state\.snapshot\.leaderboard\.first/,
+  );
   assert.match(
     retrySource,
-    /if \(!this\.restart\(this\.onResultRetrySceneLaunched\)\)/,
+    /createRetryRestartContext\(\): ClassicRetryRestartContext \{[\s\S]*?this\.requireSettingsRuntime\(\)[\s\S]*?previousRunState: Object\.freeze\(\{[\s\S]*?fail: this\.fail[\s\S]*?planner: this\.planner[\s\S]*?score: this\.score[\s\S]*?swishAudio: this\.swishAudio[\s\S]*?viewport: this\.requireViewport\(\)/,
   );
   assert.match(
-    retrySource,
-    /onResultRetrySceneLaunched[\s\S]*?error !== null[\s\S]*?rearmFailedResultRetry\('scene-load-error'/,
+    gameplaySource,
+    /requireAttachedResultPresentationRoot\(\): Node \{[\s\S]*?resultRoot\.parent !== this\.node/,
   );
   assert.match(
     retrySource,
     /rearmNavigationAfterFailure\('retry'\)[\s\S]*?CLASSIC_RESULT_RETRY_FAILED_EVENT/,
   );
+  assert.doesNotMatch(retrySource, /director|loadScene|settingsRuntime\?\.save/);
   assert.match(
-    gameplaySource,
-    /restart\(onLaunched\?: \(error: Error \| null\) => void\): boolean \{[\s\S]*?return director\.loadScene\('classic', onLaunched\)/,
+    sceneSource,
+    /restartClassicLayer\(\): void \{[\s\S]*?new ClassicSession\(\)[\s\S]*?new ClassicWorldSpeed\(\)[\s\S]*?resetForFreshClassicLayer\(\)[\s\S]*?catch \(error\)[\s\S]*?restorePreviousWorldProperties\(\)/,
   );
   assert.match(gameplaySource, /CLASSIC_RESULT_MENU_REQUESTED_EVENT/);
   assert.match(gameplaySource, /state\.awardClassicResultCoins\(score\)/);
@@ -474,6 +620,26 @@ function extractMethod(source: string, methodName: string): string {
   const nextMethod = source.indexOf('\n  }\n\n  ', methodStart);
   assert.notEqual(nextMethod, -1);
   return source.slice(methodStart, nextMethod + 4);
+}
+
+function extractMemberBlock(source: string, memberStart: string): string {
+  const start = source.indexOf(memberStart);
+  assert.notEqual(start, -1);
+  const nextPrivate = source.indexOf('\n  private ', start + memberStart.length);
+  const nextFunction = source.indexOf('\nfunction ', start + memberStart.length);
+  const endCandidates = [nextPrivate, nextFunction].filter((index) => index >= 0);
+  assert.ok(endCandidates.length > 0);
+  return source.slice(start, Math.min(...endCandidates));
+}
+
+function assertOrderedSubstrings(source: string, orderedSubstrings: readonly string[]): void {
+  let currentIndex = -1;
+  for (const substring of orderedSubstrings) {
+    const nextIndex = source.indexOf(substring, currentIndex + 1);
+    assert.notEqual(nextIndex, -1, `missing substring: ${substring}`);
+    assert.ok(nextIndex > currentIndex, `substring out of order: ${substring}`);
+    currentIndex = nextIndex;
+  }
 }
 
 function decodeCreatorUuid(compressed: string): string {

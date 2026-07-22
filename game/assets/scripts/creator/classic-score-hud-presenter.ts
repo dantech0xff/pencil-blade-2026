@@ -268,7 +268,10 @@ export class ClassicScoreHudPresenter {
   }
 
   attach(parent: Node): void {
-    if (!isValid(parent, true) || !parent.activeInHierarchy) {
+    // Retry mirrors the native callback by fully constructing a fresh Classic layer before
+    // adding that layer to the captured Result parent. Its presenter roots are therefore
+    // locally active but intentionally detached during assembly.
+    if (!isValid(parent, true) || !parent.active) {
       throw new Error('Classic score-HUD parent must be valid and active');
     }
     if (this.disposedValue) {

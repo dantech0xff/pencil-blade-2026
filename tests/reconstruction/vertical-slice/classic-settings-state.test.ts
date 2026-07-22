@@ -23,25 +23,37 @@ const {
   CLASSIC_BEST_1_STORAGE_KEY,
   CLASSIC_BEST_2_STORAGE_KEY,
   CLASSIC_BEST_3_STORAGE_KEY,
+  CLASSIC_EFFECTS_ENABLED_STORAGE_KEY,
   CLASSIC_TOTAL_COINS_STORAGE_KEY,
   ClassicSettingsState,
 } = await import('../../../game/assets/scripts/domain/classic-settings-state.ts');
 
 class RecordingPort implements ClassicInt32PreferencePort {
-  readonly reads: Array<readonly [string, number]> = [];
-  readonly writes: Array<readonly [string, number]> = [];
-  private readonly values: Readonly<Record<string, number>>;
+  readonly reads: Array<readonly [string, number | boolean]> = [];
+  readonly writes: Array<readonly [string, number | boolean]> = [];
+  private readonly values: Readonly<Record<string, number | boolean>>;
 
-  constructor(values: Readonly<Record<string, number>> = {}) {
+  constructor(values: Readonly<Record<string, number | boolean>> = {}) {
     this.values = values;
   }
 
   readInt32(key: string, defaultValue: number): number {
     this.reads.push([key, defaultValue]);
-    return this.values[key] ?? defaultValue;
+    const value = this.values[key];
+    return typeof value === 'number' ? value : defaultValue;
   }
 
   writeInt32(key: string, value: number): void {
+    this.writes.push([key, value]);
+  }
+
+  readBoolean(key: string, defaultValue: boolean): boolean {
+    this.reads.push([key, defaultValue]);
+    const value = this.values[key];
+    return typeof value === 'boolean' ? value : defaultValue;
+  }
+
+  writeBoolean(key: string, value: boolean): void {
     this.writes.push([key, value]);
   }
 }
@@ -51,14 +63,17 @@ const RECOVERED_READS = [
   [CLASSIC_BEST_1_STORAGE_KEY, 0],
   [CLASSIC_BEST_2_STORAGE_KEY, 0],
   [CLASSIC_BEST_3_STORAGE_KEY, 0],
+  [CLASSIC_EFFECTS_ENABLED_STORAGE_KEY, true],
 ] as const;
 
 test('Classic settings load exact keys and defaults in recovered relative order', () => {
   const port = new RecordingPort();
   const state = ClassicSettingsState.load(port);
 
+  assert.equal(CLASSIC_EFFECTS_ENABLED_STORAGE_KEY, 'enable_effect');
   assert.deepEqual(port.reads, RECOVERED_READS);
   assert.deepEqual(state.snapshot, {
+    effectsEnabled: true,
     leaderboard: { first: 0, second: 0, third: 0 },
     totalCoins: 2014,
   });
@@ -72,9 +87,11 @@ test('loaded first place seeds the shared Classic leaderboard baseline', () => {
     [CLASSIC_BEST_1_STORAGE_KEY]: 30,
     [CLASSIC_BEST_2_STORAGE_KEY]: 20,
     [CLASSIC_BEST_3_STORAGE_KEY]: 10,
+    [CLASSIC_EFFECTS_ENABLED_STORAGE_KEY]: false,
   }));
 
   assert.deepEqual(state.snapshot, {
+    effectsEnabled: false,
     leaderboard: { first: 30, second: 20, third: 10 },
     totalCoins: 900,
   });
@@ -101,6 +118,7 @@ test('result mutations remain memory-only until explicit save checkpoint', () =>
     [CLASSIC_BEST_1_STORAGE_KEY, 40],
     [CLASSIC_BEST_2_STORAGE_KEY, 0],
     [CLASSIC_BEST_3_STORAGE_KEY, 0],
+    [CLASSIC_EFFECTS_ENABLED_STORAGE_KEY, true],
   ]);
 });
 

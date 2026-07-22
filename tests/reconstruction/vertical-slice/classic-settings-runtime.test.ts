@@ -52,16 +52,32 @@ test('Creator preference adapter round-trips canonical signed int32 decimals', (
   assert.equal(port.readInt32('negative', 0), -456);
 });
 
+test('Creator preference adapter round-trips canonical lowercase booleans', () => {
+  const storage = new MemoryStorage();
+  const port = new ClassicCreatorInt32PreferencePort(storage);
+
+  assert.equal(port.readBoolean('missing-true', true), true);
+  assert.equal(port.readBoolean('missing-false', false), false);
+  port.writeBoolean('enabled', true);
+  port.writeBoolean('disabled', false);
+  assert.equal(storage.values.get('enabled'), 'true');
+  assert.equal(storage.values.get('disabled'), 'false');
+  assert.equal(port.readBoolean('enabled', false), true);
+  assert.equal(port.readBoolean('disabled', true), false);
+});
+
 test('runtime keeps mutations in memory and writes only on save', () => {
   const storage = new MemoryStorage();
   storage.values.set('total_coins', '3000');
   storage.values.set('classic_best_1', '30');
   storage.values.set('classic_best_2', '20');
   storage.values.set('classic_best_3', '10');
+  storage.values.set('enable_effect', 'false');
   const runtime = new ClassicSettingsRuntime(
     new ClassicCreatorInt32PreferencePort(storage),
   );
   assert.equal(runtime.loadFailure, null);
+  assert.equal(runtime.state.snapshot.effectsEnabled, false);
 
   runtime.state.recordClassicResultScore(40);
   runtime.state.awardClassicResultCoins(10);
@@ -73,6 +89,7 @@ test('runtime keeps mutations in memory and writes only on save', () => {
   assert.equal(storage.values.get('classic_best_1'), '40');
   assert.equal(storage.values.get('classic_best_2'), '30');
   assert.equal(storage.values.get('classic_best_3'), '20');
+  assert.equal(storage.values.get('enable_effect'), 'false');
 });
 
 test('Creator preference adapter fails closed on malformed or out-of-range data', () => {
@@ -83,8 +100,14 @@ test('Creator preference adapter fails closed on malformed or out-of-range data'
     storage.values.set('bad', invalid);
     assert.throws(() => port.readInt32('bad', 0));
   }
+  for (const invalid of ['', 'TRUE', 'False', '1', '0', ' true ', 'yes']) {
+    storage.values.set('bad', invalid);
+    assert.throws(() => port.readBoolean('bad', true), /canonical lowercase boolean/);
+  }
   assert.throws(() => port.readInt32('', 0), /non-empty string/);
   assert.throws(() => port.writeInt32('bad', 0x8000_0000), /signed 32-bit integer/);
+  assert.throws(() => port.readBoolean('bad', 'true' as never), /must be a boolean/);
+  assert.throws(() => port.writeBoolean('bad', 1 as never), /must be a boolean/);
   assert.throws(
     () => new ClassicCreatorInt32PreferencePort(null as never),
     /must provide getItem and setItem/,
@@ -97,23 +120,33 @@ test('Creator preference adapter fails closed on malformed or out-of-range data'
     () => new ClassicCreatorInt32PreferencePort(foreignStorage as never).readInt32('bad', 0),
     /not a string/,
   );
+  assert.throws(
+    () => new ClassicCreatorInt32PreferencePort(foreignStorage as never).readBoolean('bad', true),
+    /not a string/,
+  );
 });
 
 test('runtime recovers corrupt or unreadable target storage to exact defaults', () => {
   const corruptStorage = new MemoryStorage();
-  corruptStorage.values.set('total_coins', 'not-an-int');
+  corruptStorage.values.set('total_coins', '3000');
+  corruptStorage.values.set('classic_best_1', '30');
+  corruptStorage.values.set('classic_best_2', '20');
+  corruptStorage.values.set('classic_best_3', '10');
+  corruptStorage.values.set('enable_effect', 'TRUE');
   const corruptRuntime = new ClassicSettingsRuntime(
     new ClassicCreatorInt32PreferencePort(corruptStorage),
   );
 
-  assert.match(corruptRuntime.loadFailure?.message ?? '', /canonical decimal int32/);
+  assert.match(corruptRuntime.loadFailure?.message ?? '', /canonical lowercase boolean/);
   assert.deepEqual(corruptRuntime.state.snapshot, {
+    effectsEnabled: true,
     leaderboard: { first: 0, second: 0, third: 0 },
     totalCoins: 2014,
   });
   assert.throws(() => corruptRuntime.save(), /save is disabled after load recovery/);
-  assert.equal(corruptStorage.values.get('total_coins'), 'not-an-int');
-  assert.equal(corruptStorage.values.has('classic_best_1'), false);
+  assert.equal(corruptStorage.values.get('total_coins'), '3000');
+  assert.equal(corruptStorage.values.get('classic_best_1'), '30');
+  assert.equal(corruptStorage.values.get('enable_effect'), 'TRUE');
 
   const readFailure = new Error('storage unavailable');
   let unavailableWrites = 0;
@@ -124,6 +157,12 @@ test('runtime recovers corrupt or unreadable target storage to exact defaults', 
     writeInt32() {
       unavailableWrites += 1;
     },
+    readBoolean() {
+      throw readFailure;
+    },
+    writeBoolean() {
+      unavailableWrites += 1;
+    },
   });
   assert.equal(unavailableRuntime.loadFailure, readFailure);
   assert.equal(unavailableRuntime.state.snapshot.totalCoins, 2014);
@@ -131,6 +170,6 @@ test('runtime recovers corrupt or unreadable target storage to exact defaults', 
   assert.equal(unavailableWrites, 0);
   assert.throws(
     () => new ClassicSettingsRuntime(null as never),
-    /requires an int32 preference port/,
+    /requires an int32 and boolean preference port/,
   );
 });

@@ -10,7 +10,10 @@ export interface ClassicStringStorage {
   setItem(key: string, value: string): void;
 }
 
-/** Adapts Creator's string storage to the native signed-integer Settings surface. */
+/**
+ * Adapts Creator's string storage to the recovered Settings subset.
+ * Target booleans use only the canonical lowercase strings `true` and `false`.
+ */
 export class ClassicCreatorInt32PreferencePort implements ClassicInt32PreferencePort {
   private readonly storage: ClassicStringStorage;
 
@@ -42,9 +45,34 @@ export class ClassicCreatorInt32PreferencePort implements ClassicInt32Preference
     assertSignedInt32(value, 'value');
     this.storage.setItem(key, String(value));
   }
+
+  readBoolean(key: string, defaultValue: boolean): boolean {
+    assertStorageKey(key);
+    assertBoolean(defaultValue, 'defaultValue');
+    const stored = this.storage.getItem(key);
+    if (stored === null) {
+      return defaultValue;
+    }
+    if (typeof stored !== 'string') {
+      throw new Error(`Classic boolean preference ${key} is not a string`);
+    }
+    if (stored === 'true') {
+      return true;
+    }
+    if (stored === 'false') {
+      return false;
+    }
+    throw new Error(`Classic boolean preference ${key} is not a canonical lowercase boolean`);
+  }
+
+  writeBoolean(key: string, value: boolean): void {
+    assertStorageKey(key);
+    assertBoolean(value, 'value');
+    this.storage.setItem(key, value ? 'true' : 'false');
+  }
 }
 
-/** Stable process-owned Settings state shared across Creator scene-reload compatibility. */
+/** Stable process-owned Settings state shared across recovered same-parent layer replacements. */
 export class ClassicSettingsRuntime {
   /** Target-only recovery diagnostic; native normal-state load order remains unchanged. */
   readonly loadFailure: Error | null;
@@ -101,8 +129,10 @@ function assertPreferencePort(port: ClassicInt32PreferencePort): void {
     || typeof port !== 'object'
     || typeof port.readInt32 !== 'function'
     || typeof port.writeInt32 !== 'function'
+    || typeof port.readBoolean !== 'function'
+    || typeof port.writeBoolean !== 'function'
   ) {
-    throw new TypeError('Classic settings runtime requires an int32 preference port');
+    throw new TypeError('Classic settings runtime requires an int32 and boolean preference port');
   }
 }
 
@@ -119,6 +149,12 @@ function assertSignedInt32(value: number, label: string): void {
     || value > 0x7fff_ffff
   ) {
     throw new RangeError(`${label} must be a signed 32-bit integer`);
+  }
+}
+
+function assertBoolean(value: unknown, label: string): asserts value is boolean {
+  if (typeof value !== 'boolean') {
+    throw new TypeError(`${label} must be a boolean`);
   }
 }
 

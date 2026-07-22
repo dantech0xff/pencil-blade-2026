@@ -649,6 +649,16 @@ test('attachment, action sequencing, assets, font, lifecycle, and scores reject 
     /onScoreIconScaleUpComplete/,
   );
 
+  const detachedAncestor = new cc.Node('DetachedAncestor');
+  detachedAncestor.active = false;
+  const detachedActiveParent = new cc.Node('DetachedActiveParent');
+  detachedActiveParent.setParent(detachedAncestor);
+  assert.equal(detachedActiveParent.active, true);
+  assert.equal(detachedActiveParent.activeInHierarchy, false);
+  const detachedPresenter = ClassicScoreHudPresenter.create(validInput, lifecycle);
+  assert.doesNotThrow(() => detachedPresenter.attach(detachedActiveParent as never));
+  assert.equal(detachedPresenter.dispose(), true);
+
   const presenter = ClassicScoreHudPresenter.create(validInput, lifecycle);
   assert.throws(() => presenter.setDisplayedScore(1), /must be attached/);
   assert.throws(
