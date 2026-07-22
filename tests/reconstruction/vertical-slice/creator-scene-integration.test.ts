@@ -149,6 +149,18 @@ test('Classic presentation loads the exact game bundle before using recovered fr
 
   assert.match(gameplaySource, /await loadClassicSliceResourceCatalog\(assetTree\)/);
   assert.match(gameplaySource, /resourceCatalog: resources/);
+  const backgroundStart = gameplaySource.indexOf(
+    '  private createRecoveredBackground(resources: ClassicSliceResourceCatalog): void {',
+  );
+  const presentationStart = gameplaySource.indexOf(
+    '  private createRecoveredPresentation(',
+    backgroundStart,
+  );
+  assert.notEqual(backgroundStart, -1);
+  assert.ok(presentationStart > backgroundStart);
+  const backgroundSource = gameplaySource.slice(backgroundStart, presentationStart);
+  assert.match(backgroundSource, /background\.setSiblingIndex\(0\)/);
+  assert.doesNotMatch(backgroundSource, /UIOpacity|opacity\s*=\s*0|tween\(/);
   assert.match(
     gameplaySource,
     /playRecoveredIntro\(classicModeRoot, viewport, resources\)/,
@@ -379,7 +391,17 @@ test('terminal completion replaces Classic with the recovered result shell and e
   assert.ok(resultStart > terminalStart);
   const terminalSource = gameplaySource.slice(terminalStart, resultStart);
 
-  assert.doesNotMatch(gameplaySource, /CLASSIC_BLADE_BEGAN_EVENT|onBladeBegan/);
+  assert.match(gameplaySource, /CLASSIC_BLADE_BEGAN_EVENT/);
+  assert.match(gameplaySource, /CLASSIC_BLADE_ENDED_EVENT/);
+  assert.match(gameplaySource, /ClassicBladePresenter\.create\(\{/);
+  assert.match(gameplaySource, /resource: resources\.defaultBlade/);
+  assert.match(gameplaySource, /selectedBladeId: 0/);
+  assert.match(gameplaySource, /if \(!presenter\.isClaimed\(event\.segment\.slot\)\)/);
+  assert.match(gameplaySource, /presenter\.move\(event\.segment\.slot, event\.segment\.current\)/);
+  assert.match(gameplaySource, /if \(presenter !== null && !presenter\.isClaimed\(event\.slot\)\)/);
+  assert.match(gameplaySource, /if \(presenter !== null && presenter\.isClaimed\(event\.slot\)\)/);
+  assert.match(gameplaySource, /this\.bladePresenter\?\.updateFrame\(\)/);
+  assert.match(gameplaySource, /this\.bladePresenter\?\.dispose\(\)/);
   assert.match(
     terminalSource,
     /displayScoreComplete\(this\.score\.authoritativeScore\)/,

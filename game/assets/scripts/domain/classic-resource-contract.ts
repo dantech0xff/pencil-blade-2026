@@ -42,6 +42,9 @@ export interface ClassicNormalFruitResourceDefinition {
 /** The only bomb ID scheduled by the recovered Classic runtime. */
 export type ClassicBombId = 0;
 
+/** The clean-install blade selection restored by the bounded Classic slice. */
+export type ClassicDefaultBladeId = 0;
+
 export interface ClassicPresentationRasterSet {
   readonly background: ClassicRasterResource;
   readonly bestScoreCup: ClassicRasterResource;
@@ -255,6 +258,13 @@ export const CLASSIC_BOMB_RESOURCES: Readonly<Record<ClassicAssetTree, ClassicRa
     '720x1280': createRaster('720x1280/Bomb/bomb_X.png', [121, 161]),
   });
 
+export const CLASSIC_DEFAULT_BLADE_RESOURCES: Readonly<
+  Record<ClassicAssetTree, ClassicRasterResource>
+> = Object.freeze({
+  '480x800': createRaster('480x800/Blades/blade0.png', [256, 256]),
+  '720x1280': createRaster('720x1280/Blades/blade0.png', [256, 256]),
+});
+
 export const CLASSIC_CRITICAL_PARTICLE_RESOURCES: Readonly<
   Record<ClassicAssetTree, ClassicCriticalParticleRasterSet>
 > = Object.freeze({
@@ -310,6 +320,19 @@ export function getClassicBombResource(
     throw new RangeError('assetTree must be 480x800 or 720x1280');
   }
   return CLASSIC_BOMB_RESOURCES[assetTree];
+}
+
+export function getClassicDefaultBladeResource(
+  selectedBladeId: number,
+  assetTree: ClassicAssetTree,
+): ClassicRasterResource {
+  if (!Number.isSafeInteger(selectedBladeId) || selectedBladeId !== 0) {
+    throw new RangeError('selectedBladeId must identify the bounded default BasicBlade with ID 0');
+  }
+  if (assetTree !== '480x800' && assetTree !== '720x1280') {
+    throw new RangeError('assetTree must be 480x800 or 720x1280');
+  }
+  return CLASSIC_DEFAULT_BLADE_RESOURCES[assetTree];
 }
 
 export function getClassicCriticalParticleResource(

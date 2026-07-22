@@ -47,8 +47,59 @@ export class SpriteFrame {
     this.destroyed = false;
     this.originalSize = new Size(width, height);
     this.rect = { width, height };
+    this.texture = Object.freeze({ width, height });
+    this.uv = [0, 1, 1, 1, 0, 0, 1, 0];
   }
 }
+
+export class Material {
+  constructor() { this.destroyed = false; this.properties = {}; }
+  reset(options) { this.resetOptions = options; }
+  setProperty(name, value) { this.properties[name] = value; }
+  destroy() { this.destroyed = true; }
+}
+
+export class Mesh {
+  constructor(name = '') {
+    this.destroyed = false;
+    this.name = name;
+    this.renderingSubMeshes = [];
+  }
+  reset(options) {
+    this.data = options.data;
+    this.resetOptions = options;
+    this.struct = options.struct;
+    this.renderingSubMeshes = [{
+      drawInfo: { vertexCount: 0 },
+      invalidateGeometricInfo() {},
+      vertexBuffers: [{ update() {} }],
+    }];
+  }
+  destroy() { this.destroyed = true; }
+}
+
+export class MeshRenderer {
+  constructor() { this.mesh = null; this.sharedMaterials = []; }
+  setSharedMaterial(material, index) { this.sharedMaterials[index] = material; }
+  onGeometryChanged() {}
+}
+
+export class UIMeshRenderer {}
+
+export const gfx = Object.freeze({
+  Attribute: class Attribute {
+    constructor(name, format, normalized = false) {
+      this.name = name; this.format = format; this.normalized = normalized;
+    }
+  },
+  AttributeName: Object.freeze({
+    ATTR_COLOR: 'ATTR_COLOR',
+    ATTR_POSITION: 'ATTR_POSITION',
+    ATTR_TEX_COORD: 'ATTR_TEX_COORD',
+  }),
+  Format: Object.freeze({ RG32F: 'RG32F', RGBA8: 'RGBA8' }),
+  PrimitiveMode: Object.freeze({ TRIANGLE_STRIP: 'TRIANGLE_STRIP' }),
+});
 
 export class UITransform {
   constructor() {
@@ -157,6 +208,13 @@ export class Node {
     return component;
   }
   getComponent(Type) { return this.components.get(Type) ?? null; }
+  inverseTransformPoint(out, point) {
+    const world = this.worldPosition;
+    out.x = point.x - world.x;
+    out.y = point.y - world.y;
+    out.z = point.z - world.z;
+    return out;
+  }
   setPosition(valueOrX, y, z) { this.position = vector3(valueOrX, y, z); }
   setScale(valueOrX, y, z) { this.scale = vector3(valueOrX, y, z); }
   setRotationFromEuler(valueOrX, y, z) { this.rotation = vector3(valueOrX, y, z); }
@@ -413,6 +471,9 @@ const {
   CLASSIC_RESULT_RETRY_FAILED_EVENT,
   ClassicGameplayController,
 } = await import('../../../game/assets/scripts/creator/classic-gameplay-controller.ts');
+const { ClassicBladePresenter } = await import(
+  '../../../game/assets/scripts/creator/classic-blade-presenter.ts'
+);
 const { ClassicSceneController } = await import(
   '../../../game/assets/scripts/creator/classic-scene-controller.ts'
 );
@@ -421,6 +482,7 @@ const { BladeInputController } = await import(
 );
 const {
   CLASSIC_SCORE_HUD_FONT_RESOURCE,
+  getClassicDefaultBladeResource,
   getClassicPresentationResources,
 } = await import('../../../game/assets/scripts/domain/classic-resource-contract.ts');
 const { ClassicSpawnPlanner } = await import(
@@ -568,6 +630,117 @@ class CountingRandom {
     return (this.nextRawNonNegativeInt() % 10) / 10;
   }
 }
+
+test('blade ownership reconciles when resource loading finishes during an active touch', () => {
+  cc.resetRuntime();
+  const canvas = new cc.Node('Canvas');
+  const gameplay = addComponent(canvas, ClassicGameplayController);
+
+  invokePrivate<void>(gameplay, 'onBladeBegan', {
+    point: { x: 1, y: 2 },
+    slot: 0,
+    touchId: 41,
+  });
+
+  const presenter = createAttachedBladePresenter(canvas);
+  setPrivate(gameplay, 'bladePresenter', presenter);
+  invokePrivate<void>(gameplay, 'onBladeMoved', {
+    segment: {
+      current: { x: 10, y: 20 },
+      previous: { x: 1, y: 2 },
+      slot: 0,
+      touchId: 41,
+    },
+    shouldPlaySwish: false,
+  });
+
+  assert.equal(presenter.snapshot()[0]?.claimed, true);
+  assert.equal(presenter.snapshot()[0]?.state, 0);
+  assert.deepEqual(presenter.snapshot()[0]?.points, [{ x: 10, y: 20 }]);
+
+  invokePrivate<void>(gameplay, 'onBladeEnded', {
+    cancelled: false,
+    slot: 0,
+    touchId: 41,
+  });
+  assert.equal(presenter.snapshot()[0]?.claimed, false);
+  assert.equal(presenter.snapshot()[0]?.state, 4);
+});
+
+test('an end arriving after attachment for a pre-attachment gesture is safely ignored', () => {
+  cc.resetRuntime();
+  const canvas = new cc.Node('Canvas');
+  const gameplay = addComponent(canvas, ClassicGameplayController);
+
+  invokePrivate<void>(gameplay, 'onBladeBegan', {
+    point: { x: 3, y: 4 },
+    slot: 1,
+    touchId: 42,
+  });
+  invokePrivate<void>(gameplay, 'onBladeMoved', {
+    segment: {
+      current: { x: 8, y: 9 },
+      previous: { x: 3, y: 4 },
+      slot: 1,
+      touchId: 42,
+    },
+    shouldPlaySwish: false,
+  });
+
+  const presenter = createAttachedBladePresenter(canvas);
+  setPrivate(gameplay, 'bladePresenter', presenter);
+  invokePrivate<void>(gameplay, 'onBladeEnded', {
+    cancelled: false,
+    slot: 1,
+    touchId: 42,
+  });
+
+  assert.deepEqual(presenter.snapshot()[1], {
+    claimed: false,
+    currentWidth: 4.099999904632568,
+    geometry: null,
+    points: [],
+    slot: 1,
+    state: 0,
+  });
+});
+
+test('a touch completed before resource attachment leaves no synthetic blade ownership', () => {
+  cc.resetRuntime();
+  const canvas = new cc.Node('Canvas');
+  const gameplay = addComponent(canvas, ClassicGameplayController);
+
+  invokePrivate<void>(gameplay, 'onBladeBegan', {
+    point: { x: 5, y: 6 },
+    slot: 2,
+    touchId: 43,
+  });
+  invokePrivate<void>(gameplay, 'onBladeMoved', {
+    segment: {
+      current: { x: 11, y: 12 },
+      previous: { x: 5, y: 6 },
+      slot: 2,
+      touchId: 43,
+    },
+    shouldPlaySwish: false,
+  });
+  invokePrivate<void>(gameplay, 'onBladeEnded', {
+    cancelled: false,
+    slot: 2,
+    touchId: 43,
+  });
+
+  const presenter = createAttachedBladePresenter(canvas);
+  setPrivate(gameplay, 'bladePresenter', presenter);
+  assert.deepEqual(presenter.snapshot()[2], {
+    claimed: false,
+    currentWidth: 4.099999904632568,
+    geometry: null,
+    points: [],
+    slot: 2,
+    state: 0,
+  });
+});
 
 test('successful Retry commits a fresh Classic root to the captured parent at z-order 1', () => {
   const fixture = createRetryFixture();
@@ -823,6 +996,7 @@ function createRetryFixture(): RetryFixture {
 
 function createResourceCatalog(): object {
   const contracts = getClassicPresentationResources('720x1280');
+  const bladeContract = getClassicDefaultBladeResource(0, '720x1280');
   const presentation = Object.fromEntries(
     Object.entries(contracts).map(([key, contract]) => {
       const raster = contract as Readonly<{
@@ -837,6 +1011,13 @@ function createResourceCatalog(): object {
   );
   return Object.freeze({
     assetTree: '720x1280',
+    defaultBlade: Object.freeze({
+      ...bladeContract,
+      spriteFrame: new cc.SpriteFrame(
+        bladeContract.dimensions.width,
+        bladeContract.dimensions.height,
+      ),
+    }),
     normalFruit() {
       throw new Error('Retry construction must not spawn before the intro gate');
     },
@@ -846,6 +1027,24 @@ function createResourceCatalog(): object {
       font: new cc.Font(),
     }),
   });
+}
+
+function createAttachedBladePresenter(parent: StubNode) {
+  const bladeContract = getClassicDefaultBladeResource(0, '720x1280');
+  const presenter = ClassicBladePresenter.create({
+    assetTree: '720x1280',
+    resource: Object.freeze({
+      ...bladeContract,
+      spriteFrame: new cc.SpriteFrame(
+        bladeContract.dimensions.width,
+        bladeContract.dimensions.height,
+      ),
+    }),
+    selectedBladeId: 0,
+    viewportWidth: 720,
+  });
+  presenter.attach(parent as never);
+  return presenter;
 }
 
 function createSettingsRuntime(counters: PersistenceCounters): SettingsRuntimeProbe {

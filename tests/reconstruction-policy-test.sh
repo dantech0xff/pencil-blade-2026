@@ -178,7 +178,11 @@ while IFS="$tab" read -r evidence_id relative_path expected_hash expected_bytes;
     DER-CLASSIC-TOSS-001:forensics/contracts/classic-toss-contract.md | \
     DER-CLASSIC-CUT-SCORE-001:forensics/contracts/classic-cut-score-contract.md | \
     DER-CLASSIC-TIME-STATE-001:forensics/contracts/classic-time-state-contract.md | \
-    DER-CLASSIC-PRESENTATION-001:forensics/contracts/classic-presentation-contract.md) ;;
+    DER-CLASSIC-PRESENTATION-001:forensics/contracts/classic-presentation-contract.md | \
+    DER-BASIC-BLADE-001:forensics/contracts/basic-blade-presentation-contract.md | \
+    DER-MAIN-MENU-PRESENTATION-001:forensics/contracts/main-menu-presentation-contract.md | \
+    DER-MODE-SELECT-PRESENTATION-001:forensics/contracts/mode-select-presentation-contract.md | \
+    DER-SHARED-GAME-SCENE-PRESENTATION-001:forensics/contracts/shared-game-scene-presentation-contract.md) ;;
     *) fail "unexpected contract id/path tuple: $evidence_id:$relative_path" ;;
   esac
 

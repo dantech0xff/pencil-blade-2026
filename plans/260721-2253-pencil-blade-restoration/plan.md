@@ -8,7 +8,7 @@ tags: [feature, android, game-preservation, reverse-engineering, cocos-creator, 
 blockedBy: []
 blocks: []
 created: "2026-07-21"
-updated: "2026-07-22"
+updated: "2026-07-23"
 createdBy: "ck:plan"
 source: skill
 ---
@@ -101,6 +101,18 @@ Verified starting point:
   parent Result->Retry cycle at the captured parent without a reload or error overlay. Main
   Menu replacement/exit-save and full first-launch Settings initialization remain open rather
   than being approximated.
+  Phase 5A now prioritizes fidelity gaps visible in the playable slice. The default selected
+  BasicBlade has a statically recovered four-slot lifecycle, exact `blade0.png` resource,
+  ten-point limit, frame-based disposal, and textured triangle-strip geometry; its exact default
+  implementation is now review-passed with four persistent fixed-capacity meshes. Main Menu and
+  Mode Select each have independently recovered GREEN owned-subtree contracts. The shared
+  Background/Leaf/Theme contract corrects the old tag-vs-z interpretation, recovers the inert
+  background/theme fades and seven-leaf world, and makes both clean/default full composites GREEN
+  across contracts. The Mode Select rail/navigation/lock state and exact 45-particle/225-draw
+  unlock burst are now pure-model review-passed. The shared seven-leaf model is also review-passed,
+  with `Step(dt,5,5)` isolated behind a real physics adapter boundary and ordered same-frame
+  respawn commands. Runtime app-shell integration, Main Menu/shared/Mode Select presenters, and
+  RopeButton/FruitButton physics remain open; no placeholder destination screen is authorized.
   The exact standard-bomb raster/audio/entity foundation and Concurrent batch partition are
   also contract-tested, while bomb controllers remain deferred pending non-invented procedural
   explosion geometry. Project completion still requires the remaining resource consumers and

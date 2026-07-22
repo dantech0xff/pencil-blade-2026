@@ -5,7 +5,6 @@ import {
   Node,
   Sprite,
   Tween,
-  UIOpacity,
   UITransform,
   Vec3,
   game,
@@ -57,9 +56,14 @@ import {
 } from '../domain/classic-result-navigation';
 import { TossTimer } from '../domain/toss-timer';
 import {
+  CLASSIC_BLADE_BEGAN_EVENT,
+  CLASSIC_BLADE_ENDED_EVENT,
   CLASSIC_BLADE_MOVED_EVENT,
+  type ClassicBladeBeganEvent,
+  type ClassicBladeEndedEvent,
 } from './blade-input-controller';
 import { ClassicAudioPresenter } from './classic-audio-presenter';
+import { ClassicBladePresenter } from './classic-blade-presenter';
 import { ClassicCriticalParticlePresenter } from './classic-critical-particle-presenter';
 import { ClassicCutHalfPresenter } from './classic-cut-half-presenter';
 import { ClassicEntityRegistry } from './classic-entity-registry';
@@ -191,7 +195,6 @@ export class ClassicGameplayController extends Component {
   private sceneController: ClassicSceneController | null = null;
   private audioPresenter: ClassicAudioPresenter | null = null;
   private recoveredBackgroundNode: Node | null = null;
-  private recoveredBackgroundOpacity: UIOpacity | null = null;
   private classicModeRoot: Node | null = null;
   private scoreHudRoot: Node | null = null;
   private worldPresentationRoot: Node | null = null;
@@ -199,6 +202,7 @@ export class ClassicGameplayController extends Component {
   private resultPresentationRoot: Node | null = null;
   private registry: ClassicEntityRegistry | null = null;
   private failPresenter: ClassicFailPresenter | null = null;
+  private bladePresenter: ClassicBladePresenter | null = null;
   private resultPresenter: ClassicResultPresenter | null = null;
   private scoreHudPresenter: ClassicScoreHudPresenter | null = null;
   private resourceCatalog: ClassicSliceResourceCatalog | null = null;
@@ -296,6 +300,7 @@ export class ClassicGameplayController extends Component {
   ): void {
     if (
       this.classicModeRoot !== null
+      || this.bladePresenter !== null
       || this.registry !== null
       || this.normalFree !== null
     ) {
@@ -374,7 +379,9 @@ export class ClassicGameplayController extends Component {
 
   onEnable(): void {
     game.on(Game.EVENT_HIDE, this.onGameHidden, this);
+    this.node.on(CLASSIC_BLADE_BEGAN_EVENT, this.onBladeBegan, this);
     this.node.on(CLASSIC_BLADE_MOVED_EVENT, this.onBladeMoved, this);
+    this.node.on(CLASSIC_BLADE_ENDED_EVENT, this.onBladeEnded, this);
     this.node.on(CLASSIC_PHYSICS_STEPPED_EVENT, this.onPhysicsStepped, this);
     this.node.on(CLASSIC_SESSION_COMMAND_EVENT, this.onSessionCommand, this);
   }
@@ -385,6 +392,7 @@ export class ClassicGameplayController extends Component {
   }
 
   update(deltaSeconds: number): void {
+    this.bladePresenter?.updateFrame();
     const lifecycle = this.sceneController?.sessionSnapshot().lifecycle;
     if (lifecycle === 'running' && !this.gameOver) {
       this.normalFree?.tick(deltaSeconds);
@@ -408,7 +416,9 @@ export class ClassicGameplayController extends Component {
 
   onDisable(): void {
     game.off(Game.EVENT_HIDE, this.onGameHidden, this);
+    this.node.off(CLASSIC_BLADE_BEGAN_EVENT, this.onBladeBegan, this);
     this.node.off(CLASSIC_BLADE_MOVED_EVENT, this.onBladeMoved, this);
+    this.node.off(CLASSIC_BLADE_ENDED_EVENT, this.onBladeEnded, this);
     this.node.off(CLASSIC_PHYSICS_STEPPED_EVENT, this.onPhysicsStepped, this);
     this.node.off(CLASSIC_SESSION_COMMAND_EVENT, this.onSessionCommand, this);
   }
@@ -423,16 +433,12 @@ export class ClassicGameplayController extends Component {
   private disposeRecoveredRuntime(): void {
     this.disposeClassicModePresentation();
     this.disposeResultPresentation();
-    if (this.recoveredBackgroundOpacity !== null) {
-      Tween.stopAllByTarget(this.recoveredBackgroundOpacity);
-    }
     if (
       this.recoveredBackgroundNode !== null
       && isValid(this.recoveredBackgroundNode, true)
     ) {
       this.recoveredBackgroundNode.destroy();
     }
-    this.recoveredBackgroundOpacity = null;
     this.recoveredBackgroundNode = null;
     this.audioPresenter?.stop();
     this.audioPresenter = null;
@@ -476,6 +482,8 @@ export class ClassicGameplayController extends Component {
       presenter.dispose();
     }
     this.criticalParticlePresenters.clear();
+    this.bladePresenter?.dispose();
+    this.bladePresenter = null;
     this.failPresenter?.dispose();
     this.failPresenter = null;
     this.scoreHudPresenter?.dispose();
@@ -528,6 +536,16 @@ export class ClassicGameplayController extends Component {
   }
 
   private readonly onBladeMoved = (event: BladeMoveResult): void => {
+    const presenter = this.bladePresenter;
+    if (presenter !== null) {
+      // Creator loads the exact texture asynchronously. A gesture can begin before the
+      // presenter attaches and move afterward; lazily restore only its ownership, never a
+      // synthetic begin point, so that target loading cannot turn a valid touch into a crash.
+      if (!presenter.isClaimed(event.segment.slot)) {
+        presenter.begin(event.segment.slot);
+      }
+      presenter.move(event.segment.slot, event.segment.current);
+    }
     if (this.gameOver) {
       return;
     }
@@ -540,6 +558,22 @@ export class ClassicGameplayController extends Component {
       } else {
         this.scheduleOnce(this.onSwishCooldownComplete, instruction.delaySeconds);
       }
+    }
+  };
+
+  private readonly onBladeBegan = (event: ClassicBladeBeganEvent): void => {
+    const presenter = this.bladePresenter;
+    if (presenter !== null && !presenter.isClaimed(event.slot)) {
+      presenter.begin(event.slot);
+    }
+  };
+
+  private readonly onBladeEnded = (event: ClassicBladeEndedEvent): void => {
+    // Native cancellation is unresolved. Creator cancellation follows the bounded cleanup
+    // inference documented by the BasicBlade contract so a slot cannot retain ownership.
+    const presenter = this.bladePresenter;
+    if (presenter !== null && presenter.isClaimed(event.slot)) {
+      presenter.end(event.slot);
     }
   };
 
@@ -846,7 +880,7 @@ export class ClassicGameplayController extends Component {
   );
 
   private createRecoveredBackground(resources: ClassicSliceResourceCatalog): void {
-    if (this.recoveredBackgroundNode !== null || this.recoveredBackgroundOpacity !== null) {
+    if (this.recoveredBackgroundNode !== null) {
       throw new Error('Recovered Classic background can attach only once');
     }
     const background = createRecoveredSpriteNode(
@@ -856,10 +890,8 @@ export class ClassicGameplayController extends Component {
     );
     this.recoveredBackgroundNode = background;
     background.setSiblingIndex(0);
-    const opacity = background.addComponent(UIOpacity);
-    this.recoveredBackgroundOpacity = opacity;
-    opacity.opacity = 0;
-    tween(opacity).to(0.5, { opacity: 255 }).start();
+    // Legacy BackgroundLayer queues FadeIn before adding its sprite, but never calls its base
+    // onEnter. The action remains paused and the default-opaque texture is effective behavior.
   }
 
   private createRecoveredPresentation(
@@ -886,6 +918,13 @@ export class ClassicGameplayController extends Component {
       parent,
       'ClassicWorldPresentationRoot',
     );
+    this.bladePresenter = ClassicBladePresenter.create({
+      assetTree: resources.assetTree,
+      resource: resources.defaultBlade,
+      selectedBladeId: 0,
+      viewportWidth: viewport.width,
+    });
+    this.bladePresenter.attach(this.worldPresentationRoot);
     const failPresentationRoot = createRecoveredPresenterRoot(
       parent,
       'ClassicFailPresentationRoot',

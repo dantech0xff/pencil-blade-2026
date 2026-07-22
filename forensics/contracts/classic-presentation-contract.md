@@ -1,6 +1,7 @@
 # Classic Presentation Contract
 
-Status: bounded recovery complete, static evidence only
+Status: bounded recovery complete, static evidence only; shared-root dispatch corrected by
+exact vtable resolution on 2026-07-23
 
 This contract defines the minimum Classic-mode presentation needed for a clean-room Cocos
 Creator 3.8 implementation. It covers resource selection, logical layout, anchors, z-order,
@@ -143,22 +144,33 @@ are not minimum required presentation nodes.
 
 ## Scene, parent, and z-order contract
 
-`GameScene::onEnter` adds these children in order:
+`GameScene::onEnter` assigns tags and adds these children in order:
 
-| Child | z-order |
-|---|---:|
-| `BackgroundLayer` | `0` |
-| `LeafLayer` | `1` |
-| `ThemeLayer` | `2` |
-| `MainMenuLayer` | `3` |
+| Child | tag | z-order |
+|---|---:|---:|
+| `BackgroundLayer` | `0` | `1` |
+| `LeafLayer` | `1` | `1` |
+| `ThemeLayer` | `2` | `1` |
+| `MainMenuLayer` | `3` | `1` |
 
-`BackgroundLayer` places the selected paper sprite at `C`, runs `FadeIn(0.5)`, and adds it
-at z-order `1` inside the background layer. No explicit anchor setter is present, so its
-center anchor is inferred from the legacy `CCSprite` default.
+The values `0,1,2,3` are `CCNode::setTag` arguments, not child z-orders. Exact vtable
+resolution maps child slot `+272` to `CCNode::setTag(int)` at `0x001A3DA6` and parent slot
+`+200` to `CCNode::addChild(child,int)` at `0x001A455C`. All four roots therefore share z-order
+`1`; their recovered draw relationship depends on the insertion order above.
+
+`BackgroundLayer` places the selected paper sprite at `C`, queues `FadeIn(0.5)`, and adds it
+at local z-order `1`. It does not call `CCLayer::onEnter`. `CCNode::runAction` at `0x001A52D8`
+passes `!m_bRunning` to the action manager, and adding the sprite cannot enter it because the
+overridden layer remains non-running. The nominal fade therefore stays paused with no effective
+opacity change; the paper renders immediately at its default full opacity. Creator preserves
+the effective opaque frame and does not animate this inert action. No explicit anchor setter is
+present, so the center anchor is inferred from the legacy `CCSprite` default.
 
 When Classic is selected, the mode selector is removed from its current parent with cleanup
-enabled. A new Classic layer is added to that same parent at z-order `1`. This recovered
-same-parent replacement does not require inventing a separate native scene.
+enabled. A new Classic layer is added to that same parent at z-order `1`. Because the removed
+Mode Select and every surviving shared root use equal z-order `1`, the replacement is appended
+after the surviving roots and renders above them. This recovered same-parent replacement does
+not require inventing a separate native scene.
 
 Within Classic, all nine toss controllers, the fail manager, start sprites, dynamic tossed
 objects, bomb explosion node, terminal text, and the shared HUD presentation use z-order `1`
@@ -466,7 +478,7 @@ not add a sound merely because a matching-looking WAV exists in the resource map
 |---|---|---|
 | bootstrap tree/design choice | `ResolutionProfileService` | select `480x800` or `720x1280` with the recovered `720` frame-width boundary; expose logical `W/H` and visible rect |
 | logical resource names | `ClassicAssetCatalog` | map one logical key to the selected variant; never derive world positions from raster dimensions |
-| paper background | `BackgroundRoot` + `PaperBackground` prefab | center on visible rect, center anchor, z/sibling priority below gameplay, `0.5` fade |
+| paper background | `BackgroundRoot` + `PaperBackground` prefab | center on visible rect, center anchor, equal-z insertion before gameplay, default full opacity; do not animate the nominal paused `0.5` fade |
 | Classic replacement | `ModeFlowController` | selection audio -> deterministic `0.75` delay -> same-container Classic replacement |
 | start gate | `ClassicStartGate` prefab | explicit center anchors and two concurrent recovered tracks; keep cuts enabled and emit the controller-start command only from `LUCK` completion |
 | live HUD | `ClassicHud` Canvas/prefab | explicit anchors, logical formulas, scale fonts from `W/480`; bind labels to score service |
@@ -533,7 +545,8 @@ with the following static and Creator-side tests:
    respectively; content layout remains normalized to logical `W/H` and `VisibleRect` under
    both profiles. Reject use of `getWinSizeInPixels`, device framebuffer pixels, or raw raster
    dimensions in position formulas.
-4. Assert background center/fade and root priorities `0,1,2,3`.
+4. Assert background center/default opacity, queued-but-paused native fade classification,
+   root tags `0,1,2,3`, and equal-z `1` insertion order.
 5. With a fake clock, assert selection audio -> `0.75` delay -> same-parent Classic
    replacement at the captured parent. Effects off must emit no selection-audio command.
 6. Assert `GOOD` and `LUCK` start concurrently with exact positions and three `0.5`-second

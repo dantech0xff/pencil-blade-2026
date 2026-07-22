@@ -23,6 +23,14 @@ score, leaderboard insertion, button states, entrance timings, delayed 100-sprit
 reward tree, and coin-bonus callback. The five Classic-relevant Settings values now persist
 through a process-owned Creator adapter at the recovered app-hide checkpoint, with
 `enable_effect` defaulting to `true`.
+The active Phase 5A checkpoint now closes visible fidelity gaps in evidence order. The default
+BasicBlade implementation is review-passed. Main Menu and Mode Select owned subtrees are both
+GREEN, and the separate shared Background/Leaf/Theme contract makes their clean/default logical
+composites GREEN across contracts. Mode Select rail/navigation/lock and its exact 45-particle
+unlock burst are now review-passed pure domain code. Shared Leaf placement, world-step, ordered
+respawn, and display synchronization are likewise review-passed behind an injected physics port.
+Runtime app-shell/presenter integration remains pending.
+Checkpoint report: [Blade and navigation foundations](reports/journal-2026-07-23-blade-navigation-foundations.md).
 The exact standard-bomb raster/audio/entity foundation is also implemented and tested, but is
 not scheduled into the playable loop until its unresolved procedural explosion geometry can be
 restored without guessing. Full first-launch Settings initialization and the Main Menu
@@ -64,6 +72,107 @@ Creator components adapt those rules to scene lifecycle, rendering, audio, stora
 platform services. Creator Physics2D is the production simulation layer behind a narrow
 adapter configured from recovered gravity, timestep, body/fixture, filtering, velocity,
 ray-cast, and contact contracts. Any compatibility adjustment stays explicit at that boundary.
+
+## Phase 5A: Fidelity-First Blade and Navigation Checkpoint
+
+Status: in progress. Continue this phase rather than creating a second restoration plan.
+
+### Evidence gate
+
+- BasicBlade is green-gated after independent static cross-check: four touch slots, default
+  selection `0`, paired-tree `Blades/blade0.png`, maximum ten stored points, overflow pop of
+  two oldest points, frame-based disposal, width formula, textured vertex layout, UV mapping,
+  and triangle-strip topology are recoverable without an original runtime. Its pure model,
+  exact resource loader, persistent four-mesh presenter, raw-touch integration, and asynchronous
+  attachment boundary are implemented and review-passed.
+- Main Menu's owned foreground is green-gated for visible construction after dual static recovery established its
+  required asset consumers, both-tree dimensions, viewport-relative positions, equal-z insertion
+  order, wheels, total-coins panel, three FruitButtons, toggle initialization, entry actions, and
+  repeating review-heart behavior. Legacy review/store/platform effects remain outside this gate.
+- Mode Select's owned foreground is GREEN: exact assets, root/local orders, title/back/rope entry,
+  six-card rail, seven-link RopeButtons, frame-based `2`-unit carousel snap, FruitButtons, locks,
+  `2500`-coin persistence asymmetry, 45-particle unlock burst, audio, and same-parent navigation
+  are recovered and reviewed. No destination-mode presentation is implied by constructor mapping.
+- Shared Background, Leaf, and Theme are GREEN in their separate contract. `0/1/2/3` are tags,
+  while all shared roots use z-order `1` and draw by Background -> Leaf -> Theme -> current-screen
+  insertion. Background/Theme fades are queued but remain paused; seven leaves use an independent
+  `Step(dt,5,5)` world and exact RNG/body/render protocol. Do not animate the inert fades or couple
+  leaves to gameplay physics.
+- Advanced blade particles, DragonBlade, and CentipedeBlade remain separate gates. Default
+  blade ID `0` emits no move particles, so they do not block the first visible trail.
+
+### Ordered work
+
+1. **Complete:** curate and review a versioned BasicBlade presentation contract from the static corpus.
+2. **Complete:** implement a pure four-slot trail model with exact point, geometry, UV, width, and disposal
+   semantics; keep it independent from post-physics cut rays in `BladeTracks`.
+3. **Complete:** load the exact paired `blade0.png` resources and render four persistent dynamic textured meshes through
+   a dedicated Creator presenter at recovered z-order `1`.
+4. **Complete:** integrate began/moved/ended events and per-frame disposal without changing cut, swish,
+   physics, score, result, or retry ownership.
+5. **Contract complete; implementation pending:** implement the exact Main Menu visible shell,
+   actions, toggles, FruitButtons, and audio/navigation gates.
+6. **Pure domain complete; presenter pending:** Mode Select rail, navigation, locks, persistence
+   asymmetry, and the exact 45-particle/225-draw burst are review-passed. Implement its exact
+   presenter and RopeButton/FruitButton physics without destination placeholders.
+7. **Leaf domain complete; shared presenters pending:** the exact resource/body/RNG/display model,
+   `Step(dt,5,5)` port, and ordered same-frame respawn operations are review-passed. Build the
+   Background/Leaf/Theme Creator owners while preserving equal-z append order and inert fades.
+8. Refactor scene boot behind one persistent app-shell host so Classic controllers are passive
+   until the recovered Mode Select handoff; preserve existing Result/Retry transactions.
+9. **Complete for this source checkpoint:** focused tests, `282/282` vertical-slice tests,
+   strict Creator TypeScript, `38/38` source/staging tests, reconstruction policy, and
+   prohibited-runtime/source-boundary checks pass. A real built artifact remains a later gate.
+10. **Complete:** independent reviews found and closed the Mode Select per-particle burst and
+    Shared Leaf physics-respawn gaps; contracts, evidence, plan, and architecture docs now state
+    only the completed model/presenter boundaries.
+
+### Expected files
+
+- Create: ../../forensics/contracts/basic-blade-presentation-contract.md
+- Create: ../../forensics/contracts/main-menu-presentation-contract.md
+- Create: ../../forensics/contracts/mode-select-presentation-contract.md
+- Create: ../../forensics/contracts/shared-game-scene-presentation-contract.md
+- Create: ../../game/assets/scripts/domain/basic-blade-trail.ts
+- Create: ../../game/assets/scripts/domain/mode-select-state.ts
+- Create: ../../game/assets/scripts/domain/shared-leaf-layer.ts
+- Create: ../../game/assets/scripts/creator/classic-blade-presenter.ts
+- Update: ../../game/assets/scripts/domain/classic-resource-contract.ts
+- Update: ../../game/assets/scripts/creator/classic-resource-loader.ts
+- Update: ../../game/assets/scripts/creator/classic-gameplay-controller.ts
+- Create/update focused tests under ../../tests/reconstruction/vertical-slice/
+- Update evidence/policy registers only after contract review and exact artifact hashing
+
+### Acceptance criteria
+
+- Touch-down and the first two move samples issue no draw. The third move produces the first
+  four-vertex draw submission, but its native leading cross-section is degenerate; a later
+  non-collinear sample can produce the first visible area. Every submitted mesh uses exactly
+  `2 * (N - 1)` vertices.
+- Each of four slots is independent and reusable. Eleven pushes retain the recovered order by
+  removing exactly the two oldest points when the ten-point limit is exceeded.
+- Release disposal removes one oldest point per rendered update and divides width by float32
+  `1.1`; the trail becomes invisible below three points and then resets to base width.
+- Base width is float32 `((viewportWidth - 480) * 0.0025 + 3.5)`.
+- Both resolution trees use the exact `256x256` default blade bytes; no `Graphics` line, glow,
+  smoothing, additive effect, invented particle, or replacement texture is introduced.
+- Creator rendering uses a textured unlit compatibility material and explicitly records the
+  unresolved legacy sprite blend/filter state; that inference is not counted as recovered
+  pixel identity.
+- Existing Classic gameplay, cut queries, audio, result, retry, persistence, physics, and
+  resource contracts remain passing.
+- Main Menu, Mode Select, and shared layers may be implemented only from their reviewed contracts.
+  Destination-mode screens remain blocked until their own presentation contracts exist.
+
+### Risks and rollback
+
+- Creator 3.8.8 does not expose the legacy GL sprite path directly. Keep the material boundary
+  isolated so blend/filter reconciliation can change without changing the recovered mesh model.
+- Native disposal is frame-count based, so wall-clock trail duration varies with frame rate by
+  contract; do not convert it to elapsed-time fading.
+- Static contracts cannot claim pixel-golden equivalence to the unavailable original runtime.
+- Rollback is localized to the blade presenter, resource entries, and event subscriptions; it
+  does not alter saved data, scene replacement, or the authoritative Classic session.
 
 ## Related Code Files
 
@@ -173,7 +282,7 @@ Current Editor integration:
 - The current playable slice is not presentation-complete; the exact staging gate is complete
   for the recovered APK corpus, but 100% consumer coverage and canonical sample-project
   completeness remain open. Release rights are a separate review.
-- The deterministic vertical-slice suite passes `238/238`, and Creator's bundled strict
+- The deterministic vertical-slice suite passes `282/282`, and Creator's bundled strict
   TypeScript compiler passes.
 
 ## Current Blockers

@@ -16,6 +16,7 @@ import {
   canonicalRasterToSpriteFrameBundlePath,
   getClassicBombResource,
   getClassicCriticalParticleResource,
+  getClassicDefaultBladeResource,
   getClassicNormalFruitResources,
   getClassicPresentationResources,
   getClassicResultResources,
@@ -88,6 +89,7 @@ export interface LoadedClassicResultFonts {
 export class ClassicSliceResourceCatalog {
   readonly assetTree: ClassicAssetTree;
   readonly criticalParticles: LoadedClassicCriticalParticleResources;
+  readonly defaultBlade: LoadedClassicRasterResource;
   readonly presentation: LoadedClassicPresentationResources;
   readonly result: LoadedClassicResultResources;
   readonly resultFonts: LoadedClassicResultFonts;
@@ -102,6 +104,7 @@ export class ClassicSliceResourceCatalog {
     normalFruitResources: readonly LoadedClassicNormalFruitResources[],
     criticalParticles: LoadedClassicCriticalParticleResources,
     bombResource: LoadedClassicRasterResource,
+    defaultBlade: LoadedClassicRasterResource,
     scoreFont: LoadedClassicFontResource,
     result: LoadedClassicResultResources,
     resultFonts: LoadedClassicResultFonts,
@@ -112,6 +115,7 @@ export class ClassicSliceResourceCatalog {
     this.assetTree = assetTree;
     this.bombResource = bombResource;
     this.criticalParticles = criticalParticles;
+    this.defaultBlade = defaultBlade;
     this.presentation = presentation;
     this.result = result;
     this.resultFonts = resultFonts;
@@ -171,12 +175,14 @@ export async function loadClassicSliceResourceCatalog(
     requireLoadedNormalFruit(assetTree, fruitId, loadedByKey)
   ));
   const criticalParticles = requireLoadedCriticalParticles(assetTree, loadedByKey);
+  const defaultBlade = requireLoadedDefaultBlade(assetTree, loadedByKey);
   return new ClassicSliceResourceCatalog(
     assetTree,
     presentation,
     normalFruitResources,
     criticalParticles,
     bombResource,
+    defaultBlade,
     scoreFont,
     result,
     resultFonts,
@@ -210,6 +216,7 @@ function createSpriteLoadDescriptors(assetTree: ClassicAssetTree): readonly Spri
     descriptor('result.retrySelected', result.retrySelected),
     descriptor('result.totalCoins', result.totalCoins),
     descriptor(bombKey(0), getClassicBombResource(0, assetTree)),
+    descriptor(defaultBladeKey(0), getClassicDefaultBladeResource(0, assetTree)),
   ];
   for (const definition of CLASSIC_NORMAL_FRUIT_RESOURCES) {
     const resources = getClassicNormalFruitResources(definition.fruitId, assetTree);
@@ -419,6 +426,15 @@ function requireLoadedCriticalParticles(
   })) as LoadedClassicCriticalParticleResources;
 }
 
+function requireLoadedDefaultBlade(
+  assetTree: ClassicAssetTree,
+  loadedByKey: ReadonlyMap<string, LoadedClassicRasterResource>,
+): LoadedClassicRasterResource {
+  const selectedBladeId = 0;
+  const contract = getClassicDefaultBladeResource(selectedBladeId, assetTree);
+  return requireLoaded(defaultBladeKey(selectedBladeId), contract, loadedByKey);
+}
+
 function requireLoaded(
   key: string,
   contract: ClassicRasterResource,
@@ -448,6 +464,10 @@ function criticalParticleKey(index: ClassicCriticalParticleIndex): string {
 
 function bombKey(bombId: ClassicBombId): string {
   return `bomb.${bombId}`;
+}
+
+function defaultBladeKey(selectedBladeId: 0): string {
+  return `blade.${selectedBladeId}`;
 }
 
 function assertSpriteFrameDimensions(

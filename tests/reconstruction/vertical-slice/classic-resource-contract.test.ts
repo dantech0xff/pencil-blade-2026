@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import {
   CLASSIC_BOMB_RESOURCES,
   CLASSIC_CRITICAL_PARTICLE_RESOURCES,
+  CLASSIC_DEFAULT_BLADE_RESOURCES,
   CLASSIC_NORMAL_FRUIT_RESOURCES,
   CLASSIC_RESULT_FONT_RESOURCES,
   CLASSIC_RESULT_RESOURCES,
@@ -15,6 +16,7 @@ import {
   canonicalRasterToSpriteFrameBundlePath,
   getClassicBombResource,
   getClassicCriticalParticleResource,
+  getClassicDefaultBladeResource,
   getClassicPresentationResources,
   getClassicNormalFruitResources,
   getClassicResultResources,
@@ -82,6 +84,36 @@ test('standard Classic bomb ID 0 maps only to the recovered bomb_X rasters', () 
   }
 });
 
+test('default BasicBlade ID 0 uses the exact byte-identical RGB texture in both trees', () => {
+  assert.deepEqual(CLASSIC_DEFAULT_BLADE_RESOURCES, {
+    '480x800': {
+      canonicalPath: '480x800/Blades/blade0.png',
+      dimensions: { width: 256, height: 256 },
+    },
+    '720x1280': {
+      canonicalPath: '720x1280/Blades/blade0.png',
+      dimensions: { width: 256, height: 256 },
+    },
+  });
+
+  const low = readBinary('game/assets/game/480x800/Blades/blade0.png');
+  const high = readBinary('game/assets/game/720x1280/Blades/blade0.png');
+  assert.equal(low.equals(high), true);
+
+  for (const tree of ['480x800', '720x1280'] as const) {
+    const resource = getClassicDefaultBladeResource(0, tree);
+    const image = readBinary(`game/assets/game/${resource.canonicalPath}`);
+    assertStagedRasterGeometry(resource);
+    assert.equal(image.length, 634);
+    assert.equal(image[24], 8, `${resource.canonicalPath} bit depth`);
+    assert.equal(image[25], 2, `${resource.canonicalPath} PNG color type`);
+    assert.equal(
+      sha256(image),
+      '32713af6c40cf4e9a0b48e87fed53c37cb32818b14143020db22787c336559d8',
+    );
+  }
+});
+
 test('Creator loader includes one bomb descriptor and a runtime-validating catalog getter', () => {
   const loaderSource = readText('game/assets/scripts/creator/classic-resource-loader.ts');
 
@@ -94,6 +126,25 @@ test('Creator loader includes one bomb descriptor and a runtime-validating catal
   assert.match(loaderSource, /getClassicBombResource\(bombId, this\.assetTree\)/);
   assert.match(loaderSource, /function bombKey\(bombId: ClassicBombId\): string/);
   assert.doesNotMatch(loaderSource, /getClassicBombResource\(1,/);
+});
+
+test('Creator loader exposes the exact default BasicBlade SpriteFrame', () => {
+  const loaderSource = readText('game/assets/scripts/creator/classic-resource-loader.ts');
+
+  assert.match(
+    loaderSource,
+    /descriptor\(defaultBladeKey\(0\), getClassicDefaultBladeResource\(0, assetTree\)\)/,
+  );
+  assert.match(
+    loaderSource,
+    /const defaultBlade = requireLoadedDefaultBlade\(assetTree, loadedByKey\)/,
+  );
+  assert.match(loaderSource, /readonly defaultBlade: LoadedClassicRasterResource/);
+  assert.match(loaderSource, /function defaultBladeKey\(selectedBladeId: 0\): string/);
+  assert.match(
+    loaderSource,
+    /getClassicDefaultBladeResource\(selectedBladeId, assetTree\)/,
+  );
 });
 
 test('contract dimensions match every staged PNG IHDR and untrimmed SpriteFrame', () => {
@@ -560,6 +611,13 @@ test('resource lookup rejects IDs and trees outside the recovered contract', () 
   assert.throws(() => getClassicBombResource(Number.NaN, '480x800'), RangeError);
   assert.throws(
     () => getClassicBombResource(0, '1080x1920' as never),
+    RangeError,
+  );
+  assert.throws(() => getClassicDefaultBladeResource(-1, '480x800'), RangeError);
+  assert.throws(() => getClassicDefaultBladeResource(1, '720x1280'), RangeError);
+  assert.throws(() => getClassicDefaultBladeResource(Number.NaN, '480x800'), RangeError);
+  assert.throws(
+    () => getClassicDefaultBladeResource(0, '1080x1920' as never),
     RangeError,
   );
 });
