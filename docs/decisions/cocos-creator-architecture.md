@@ -14,6 +14,9 @@ gameplay state.
 The workspace now contains the Creator foundation, Classic contract/test baseline, all 862
 exact recovered APK game assets in a Creator bundle, and a bounded normal-fruit loop using
 the recovered background, text, intact/cut fruit, critical-particle, and core-audio resources.
+The exact score HUD now adds the recovered score icon, best-score cup, double-score panel,
+and `Fonts/Linds.ttf` through a dedicated presenter, while `classic_best_1` persistence
+remains deferred.
 The remaining scene/prefab map, eight deferred toss controllers, most presentation consumers,
 and runtime physics-equivalence gate keep the architecture decision in progress.
 
@@ -143,7 +146,11 @@ Each unresolved row blocks only the affected behavior from being labeled recover
 
 `ClassicSceneController` and `ClassicGameplayController` are scene-lifetime owners in this
 slice. They remain enabled together until Canvas destruction; component enable/disable is not
-the pause mechanism.
+the pause mechanism. The score HUD presenter is a dedicated boundary for the recovered score
+icon, best-score state updates, double-score panel, and Linds font. The gameplay controller owns
+ordered Score HUD, World, and Fail roots; all generated fruits, cut halves, and critical
+particles attach to World so equal-z insertion cannot reorder presentation layers. Fail markers
+preserve their recovered `1 -> 2 -> 3` order inside the Fail root.
 
 ## Presentation and Asset Boundary
 

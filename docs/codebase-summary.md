@@ -6,9 +6,9 @@ Generated from `repomix-output.xml` on 2026-07-22.
 
 | Metric | Value |
 |---|---|
-| Files packed | 137 |
-| Total tokens | 478,999 |
-| Total characters | 1,749,584 |
+| Files packed | 1,123 |
+| Total tokens | 1,586,592 |
+| Total characters | 5,346,491 |
 | Output format | XML |
 
 ## Current Workspace Shape
@@ -31,6 +31,7 @@ Generated from `repomix-output.xml` on 2026-07-22.
 | `game/assets/scripts/creator/blade-input-controller.ts` | Global Cocos touch input mapped to the recovered four blade slots. |
 | `game/assets/scripts/creator/classic-scene-controller.ts` | Canvas bridge for resolution, variable Physics2D stepping, blade rays, and ordered session commands. |
 | `game/assets/scripts/creator/classic-gameplay-controller.ts` | Bounded Classic coordinator for resource loading, intro, normal-free tosses, cuts, exact core audio/effects, score/combo, exact miss presentation, game over, and retry. |
+| `game/assets/scripts/domain/classic-score-hud-presentation.ts`, `game/assets/scripts/creator/classic-score-hud-presenter.ts` | Exact recovered score icon, best-score cup, double-score panel, `Fonts/Linds.ttf`, entry fade, icon pulse, overlapping double-score presentation, and best-score state display. |
 | `game/assets/scripts/creator/classic-entity-registry.ts`, `classic-generated-fruit.ts` | Runtime normal-fruit ownership using exact intact rasters, recovered fixtures/kinematics, bounds, duplicate cut dispatch, and deferred disposal. |
 | `game/assets/scripts/creator/classic-generated-bomb.ts`, `game/assets/scripts/domain/classic-spawn-plan-batch.ts` | Foundation-only standard Bomb ID `0` entity with exact raster/fixture/cut guard plus fail-closed partitioning of flattened Concurrent spawn batches; not yet wired into playable controllers. |
 | `game/assets/scripts/creator/classic-cut-half-presenter.ts`, `classic-critical-particle-presenter.ts`, `classic-fail-presenter.ts` | Exact ordinary cut-half resources, recovered motion/fade/critical particles, and exact three-marker miss presentation. |
@@ -47,6 +48,8 @@ Generated from `repomix-output.xml` on 2026-07-22.
 - Reconstructing Pencil Blade from static evidence only.
 - Keeping the original APK, `libgame.so`, and legacy engine runtime as evidence, not runtime dependencies.
 - Building the Classic slice as clean TypeScript with Creator adapters at the boundary.
+- Rendering the exact Classic score HUD with authoritative best-score updates while leaving
+  the `classic_best_1` persistence adapter deferred.
 - Documenting unresolved gates instead of folding them into recovered behavior.
 - The canonical sample-project resource root/manifest remains unresolved; presentation coverage
   cannot be finalized until that source is resolved.
@@ -55,6 +58,7 @@ Generated from `repomix-output.xml` on 2026-07-22.
 
 - Scene, prefab, and serialized component map completion beyond the first Canvas bridge.
 - Creator Physics2D runtime-equivalence validation and electric-field compatibility.
+- `classic_best_1` persistence adapter implementation for best-score storage.
 - Eight deferred toss controllers plus bomb registry/explosion integration, specials,
   pause/menu/results, and remaining audio/effect/presentation consumers.
 - Technical fidelity is separate from release rights; rights review can still block release

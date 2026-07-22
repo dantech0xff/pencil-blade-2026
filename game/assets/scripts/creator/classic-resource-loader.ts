@@ -1,12 +1,17 @@
+import * as Cocos from 'cc';
+
 import {
   AssetManager,
   SpriteFrame,
   assetManager,
+  type Font,
 } from 'cc';
 
 import {
   CLASSIC_CRITICAL_PARTICLE_RESOURCES,
   CLASSIC_NORMAL_FRUIT_RESOURCES,
+  CLASSIC_SCORE_HUD_FONT_RESOURCE,
+  canonicalResourceToBundlePath,
   canonicalRasterToSpriteFrameBundlePath,
   getClassicBombResource,
   getClassicCriticalParticleResource,
@@ -14,6 +19,7 @@ import {
   getClassicPresentationResources,
   type ClassicBombId,
   type ClassicCriticalParticleIndex,
+  type ClassicFontResource,
   type ClassicNormalFruitId,
   type ClassicNormalFruitRasterSet,
   type ClassicRasterResource,
@@ -24,6 +30,10 @@ export const CLASSIC_RESOURCE_BUNDLE_NAME = 'game';
 
 export interface LoadedClassicRasterResource extends ClassicRasterResource {
   readonly spriteFrame: SpriteFrame;
+}
+
+export interface LoadedClassicFontResource extends ClassicFontResource {
+  readonly font: Font;
 }
 
 export interface LoadedClassicNormalFruitResources {
@@ -41,10 +51,13 @@ export type LoadedClassicCriticalParticleResources = readonly [
 
 export interface LoadedClassicPresentationResources {
   readonly background: LoadedClassicRasterResource;
+  readonly bestScoreCup: LoadedClassicRasterResource;
+  readonly doubleScorePanel: LoadedClassicRasterResource;
   readonly failFilled: LoadedClassicRasterResource;
   readonly failNormal: LoadedClassicRasterResource;
   readonly introGood: LoadedClassicRasterResource;
   readonly introLuck: LoadedClassicRasterResource;
+  readonly scoreIcon: LoadedClassicRasterResource;
   readonly terminalGame: LoadedClassicRasterResource;
   readonly terminalOver: LoadedClassicRasterResource;
 }
@@ -53,6 +66,7 @@ export class ClassicSliceResourceCatalog {
   readonly assetTree: ClassicAssetTree;
   readonly criticalParticles: LoadedClassicCriticalParticleResources;
   readonly presentation: LoadedClassicPresentationResources;
+  readonly scoreFont: LoadedClassicFontResource;
 
   private readonly bombResource: LoadedClassicRasterResource;
   private readonly normalFruitResources: readonly LoadedClassicNormalFruitResources[];
@@ -63,6 +77,7 @@ export class ClassicSliceResourceCatalog {
     normalFruitResources: readonly LoadedClassicNormalFruitResources[],
     criticalParticles: LoadedClassicCriticalParticleResources,
     bombResource: LoadedClassicRasterResource,
+    scoreFont: LoadedClassicFontResource,
   ) {
     if (normalFruitResources.length !== CLASSIC_NORMAL_FRUIT_RESOURCES.length) {
       throw new Error('Classic resource catalog requires all nine ordinary fruits');
@@ -71,6 +86,7 @@ export class ClassicSliceResourceCatalog {
     this.bombResource = bombResource;
     this.criticalParticles = criticalParticles;
     this.presentation = presentation;
+    this.scoreFont = scoreFont;
     this.normalFruitResources = Object.freeze([...normalFruitResources]);
   }
 
@@ -100,7 +116,10 @@ export async function loadClassicSliceResourceCatalog(
 ): Promise<ClassicSliceResourceCatalog> {
   const descriptors = createSpriteLoadDescriptors(assetTree);
   const bundle = await loadClassicGameResourceBundle();
-  const spriteFrames = await loadSpriteFrames(bundle, descriptors);
+  const [spriteFrames, scoreFont] = await Promise.all([
+    loadSpriteFrames(bundle, descriptors),
+    loadClassicScoreFont(bundle),
+  ]);
   const loadedByKey = new Map<string, LoadedClassicRasterResource>();
   for (let index = 0; index < descriptors.length; index += 1) {
     const descriptor = descriptors[index];
@@ -127,6 +146,7 @@ export async function loadClassicSliceResourceCatalog(
     normalFruitResources,
     criticalParticles,
     bombResource,
+    scoreFont,
   );
 }
 
@@ -134,10 +154,13 @@ function createSpriteLoadDescriptors(assetTree: ClassicAssetTree): readonly Spri
   const presentation = getClassicPresentationResources(assetTree);
   const descriptors: SpriteLoadDescriptor[] = [
     descriptor('presentation.background', presentation.background),
+    descriptor('presentation.bestScoreCup', presentation.bestScoreCup),
+    descriptor('presentation.doubleScorePanel', presentation.doubleScorePanel),
     descriptor('presentation.failFilled', presentation.failFilled),
     descriptor('presentation.failNormal', presentation.failNormal),
     descriptor('presentation.introGood', presentation.introGood),
     descriptor('presentation.introLuck', presentation.introLuck),
+    descriptor('presentation.scoreIcon', presentation.scoreIcon),
     descriptor('presentation.terminalGame', presentation.terminalGame),
     descriptor('presentation.terminalOver', presentation.terminalOver),
     descriptor(bombKey(0), getClassicBombResource(0, assetTree)),
@@ -205,6 +228,27 @@ function loadSpriteFrames(
   });
 }
 
+function loadClassicScoreFont(bundle: AssetManager.Bundle): Promise<LoadedClassicFontResource> {
+  const canonicalPath = CLASSIC_SCORE_HUD_FONT_RESOURCE.canonicalPath;
+  const bundlePath = canonicalResourceToBundlePath(canonicalPath);
+  return new Promise((resolve, reject) => {
+    bundle.load(bundlePath, Cocos.Font, (error, font) => {
+      if (error !== null && error !== undefined) {
+        reject(new Error(`Failed to load Classic score font: ${error.message}`));
+        return;
+      }
+      if (font === null || font === undefined) {
+        reject(new Error(`Creator returned no Classic score font for ${canonicalPath}`));
+        return;
+      }
+      resolve(Object.freeze({
+        ...CLASSIC_SCORE_HUD_FONT_RESOURCE,
+        font,
+      }));
+    });
+  });
+}
+
 function requireLoadedPresentation(
   assetTree: ClassicAssetTree,
   loadedByKey: ReadonlyMap<string, LoadedClassicRasterResource>,
@@ -212,10 +256,21 @@ function requireLoadedPresentation(
   const contract = getClassicPresentationResources(assetTree);
   return Object.freeze({
     background: requireLoaded('presentation.background', contract.background, loadedByKey),
+    bestScoreCup: requireLoaded(
+      'presentation.bestScoreCup',
+      contract.bestScoreCup,
+      loadedByKey,
+    ),
+    doubleScorePanel: requireLoaded(
+      'presentation.doubleScorePanel',
+      contract.doubleScorePanel,
+      loadedByKey,
+    ),
     failFilled: requireLoaded('presentation.failFilled', contract.failFilled, loadedByKey),
     failNormal: requireLoaded('presentation.failNormal', contract.failNormal, loadedByKey),
     introGood: requireLoaded('presentation.introGood', contract.introGood, loadedByKey),
     introLuck: requireLoaded('presentation.introLuck', contract.introLuck, loadedByKey),
+    scoreIcon: requireLoaded('presentation.scoreIcon', contract.scoreIcon, loadedByKey),
     terminalGame: requireLoaded('presentation.terminalGame', contract.terminalGame, loadedByKey),
     terminalOver: requireLoaded('presentation.terminalOver', contract.terminalOver, loadedByKey),
   });

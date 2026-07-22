@@ -42,15 +42,21 @@ type DisplayedScoreScalePhase = 'idle' | 'up' | 'down';
 export class ScoreService {
   private authoritativeScoreValue: number;
   private displayedScoreValue: number;
+  private readonly savedBestScoreValue: number;
+  private bestScoreValue: number;
+  private bestScoreIsNewValue = false;
   private pendingDoubleScoreValue = 0;
   private doubleScoreActiveValue = false;
   private displayedScoreScalePhase: DisplayedScoreScalePhase = 'idle';
 
-  constructor(initialAuthoritativeScore = 0, initialDisplayedScore = 0) {
+  constructor(initialAuthoritativeScore = 0, initialDisplayedScore = 0, initialBestScore = 0) {
     assertSafeInteger(initialAuthoritativeScore, 'initialAuthoritativeScore');
     assertSafeInteger(initialDisplayedScore, 'initialDisplayedScore');
+    assertSafeInteger(initialBestScore, 'initialBestScore');
     this.authoritativeScoreValue = initialAuthoritativeScore;
     this.displayedScoreValue = initialDisplayedScore;
+    this.savedBestScoreValue = initialBestScore;
+    this.bestScoreValue = initialBestScore;
   }
 
   get authoritativeScore(): number {
@@ -59,6 +65,14 @@ export class ScoreService {
 
   get displayedScore(): number {
     return this.displayedScoreValue;
+  }
+
+  get bestScore(): number {
+    return this.bestScoreValue;
+  }
+
+  get bestScoreIsNew(): boolean {
+    return this.bestScoreIsNewValue;
   }
 
   get pendingDoubleScore(): number {
@@ -124,6 +138,15 @@ export class ScoreService {
       return NO_SCORE_COMMANDS;
     }
 
+    return this.flushDoubleScore();
+  }
+
+  /** Native delayed callbacks remain unguarded even after an earlier public disable. */
+  completeDoubleScoreDelay(): readonly ScoreCommand[] {
+    return this.flushDoubleScore();
+  }
+
+  private flushDoubleScore(): readonly ScoreCommand[] {
     const doubledPending = checkedMultiply(
       this.pendingDoubleScoreValue,
       2,
@@ -150,17 +173,15 @@ export class ScoreService {
    * report the scale-up callback; downward smoothing subtracts one immediately.
    */
   updateDisplayedScore(): readonly ScoreCommand[] {
+    let commands = NO_SCORE_COMMANDS;
     if (this.displayedScoreValue > this.authoritativeScoreValue) {
       this.displayedScoreValue = checkedAdd(this.displayedScoreValue, -1, 'displayed score');
-      return NO_SCORE_COMMANDS;
-    }
-
-    if (
+    } else if (
       this.displayedScoreValue < this.authoritativeScoreValue
       && this.displayedScoreScalePhase === 'idle'
     ) {
       this.displayedScoreScalePhase = 'up';
-      return Object.freeze([
+      commands = Object.freeze([
         Object.freeze({
           type: 'start-displayed-score-scale-up',
           durationSeconds: DISPLAY_SCORE_SCALE_SECONDS,
@@ -169,7 +190,8 @@ export class ScoreService {
       ]);
     }
 
-    return NO_SCORE_COMMANDS;
+    this.updateBestScorePresentation();
+    return commands;
   }
 
   /**
@@ -209,6 +231,22 @@ export class ScoreService {
       throw new Error('Displayed-score scale-down is not active');
     }
     this.displayedScoreScalePhase = 'idle';
+  }
+
+  /** Best presentation follows the authoritative total after the smoothing decision. */
+  private updateBestScorePresentation(): void {
+    if (this.authoritativeScoreValue > this.bestScoreValue) {
+      this.bestScoreValue = this.authoritativeScoreValue;
+      this.bestScoreIsNewValue = true;
+      return;
+    }
+    if (
+      this.authoritativeScoreValue < this.savedBestScoreValue
+      && this.bestScoreValue > this.savedBestScoreValue
+    ) {
+      this.bestScoreValue = this.savedBestScoreValue;
+      this.bestScoreIsNewValue = false;
+    }
   }
 }
 

@@ -38,6 +38,10 @@ the restoration plan depends on.
   generated graphics or default fonts silently. Do not document the current subset as
   presentation-complete until the canonical technical resource manifest passes 100% inventory,
   staging, and consumer coverage. Track release rights separately.
+- Keep the exact Classic score HUD in its dedicated presenter/domain pair, including the
+  recovered score icon, best-score cup, double-score panel, Linds font, entry fade, icon
+  pulse, and overlap-safe double-score actions. Leave `classic_best_1` persistence deferred
+  until the save-layer adapter exists.
 - Keep generated Creator cache files out of hand-authored logic.
 
 ## Testing Rules

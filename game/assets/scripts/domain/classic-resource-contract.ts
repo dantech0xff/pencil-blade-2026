@@ -23,6 +23,10 @@ export interface ClassicRasterResource {
   readonly dimensions: ClassicRasterDimensions;
 }
 
+export interface ClassicFontResource {
+  readonly canonicalPath: string;
+}
+
 export interface ClassicNormalFruitRasterSet {
   readonly cutBottom: ClassicRasterResource;
   readonly cutTop: ClassicRasterResource;
@@ -40,10 +44,13 @@ export type ClassicBombId = 0;
 
 export interface ClassicPresentationRasterSet {
   readonly background: ClassicRasterResource;
+  readonly bestScoreCup: ClassicRasterResource;
+  readonly doubleScorePanel: ClassicRasterResource;
   readonly failFilled: ClassicRasterResource;
   readonly failNormal: ClassicRasterResource;
   readonly introGood: ClassicRasterResource;
   readonly introLuck: ClassicRasterResource;
+  readonly scoreIcon: ClassicRasterResource;
   readonly terminalGame: ClassicRasterResource;
   readonly terminalOver: ClassicRasterResource;
 }
@@ -99,6 +106,10 @@ const CRITICAL_PARTICLE_DIMENSIONS = {
   '720x1280': [[52, 52], [77, 76], [65, 66], [77, 76]],
 } as const;
 
+export const CLASSIC_SCORE_HUD_FONT_RESOURCE: ClassicFontResource = Object.freeze({
+  canonicalPath: 'Fonts/Linds.ttf',
+});
+
 export const CLASSIC_NORMAL_FRUIT_RESOURCES: readonly ClassicNormalFruitResourceDefinition[]
   = Object.freeze(NORMAL_FRUIT_NAMES.map((name, fruitId) => Object.freeze({
     fruitId: fruitId as ClassicNormalFruitId,
@@ -121,19 +132,25 @@ export const CLASSIC_PRESENTATION_RESOURCES: Readonly<Record<ClassicAssetTree, C
   = Object.freeze({
     '480x800': Object.freeze({
       background: createRaster('480x800/Backgrounds/paperbackground0.png', [480, 800]),
+      bestScoreCup: createRaster('480x800/Interfaces/object-score-best-cup.png', [49, 52]),
+      doubleScorePanel: createRaster('480x800/Interfaces/object-score-double.png', [134, 115]),
       failFilled: createRaster('480x800/Interfaces/object-x-filled.png', [49, 48]),
       failNormal: createRaster('480x800/Interfaces/object-x-normal.png', [49, 48]),
       introGood: createRaster('480x800/Text/text-good.png', [112, 25]),
       introLuck: createRaster('480x800/Text/text-luck.png', [112, 33]),
+      scoreIcon: createRaster('480x800/Interfaces/object-score-sprite.png', [55, 55]),
       terminalGame: createRaster('480x800/Text/text-game.png', [269, 51]),
       terminalOver: createRaster('480x800/Text/text-over.png', [216, 85]),
     }),
     '720x1280': Object.freeze({
       background: createRaster('720x1280/Backgrounds/paperbackground0.png', [720, 1280]),
+      bestScoreCup: createRaster('720x1280/Interfaces/object-score-best-cup.png', [73, 77]),
+      doubleScorePanel: createRaster('720x1280/Interfaces/object-score-double.png', [200, 172]),
       failFilled: createRaster('720x1280/Interfaces/object-x-filled.png', [73, 73]),
       failNormal: createRaster('720x1280/Interfaces/object-x-normal.png', [72, 71]),
       introGood: createRaster('720x1280/Text/text-good.png', [168, 37]),
       introLuck: createRaster('720x1280/Text/text-luck.png', [168, 50]),
+      scoreIcon: createRaster('720x1280/Interfaces/object-score-sprite.png', [82, 82]),
       terminalGame: createRaster('720x1280/Text/text-game.png', [404, 76]),
       terminalOver: createRaster('720x1280/Text/text-over.png', [324, 126]),
     }),

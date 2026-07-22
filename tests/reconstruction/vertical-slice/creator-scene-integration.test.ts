@@ -162,6 +162,79 @@ test('Classic presentation loads the exact game bundle before using recovered fr
   assert.doesNotMatch(fruitSource, /Graphics|CLASSIC_GENERATED_FRUIT_VISUAL_SIZE|64x64/);
 });
 
+test('Classic score HUD replaces the provisional label and routes smoothing through the icon presenter', () => {
+  const gameplaySource = readText('game/assets/scripts/creator/classic-gameplay-controller.ts');
+  const presenterSource = readText('game/assets/scripts/creator/classic-score-hud-presenter.ts');
+  const presenterUpdateIndex = gameplaySource.indexOf(
+    'this.scoreHudPresenter?.updateAction(deltaSeconds)',
+  );
+  const scoreUpdateIndex = gameplaySource.indexOf(
+    'this.score.updateDisplayedScore()',
+  );
+  const scoreRootIndex = gameplaySource.indexOf("'ClassicScoreHudRoot'");
+  const worldRootIndex = gameplaySource.indexOf("'ClassicWorldPresentationRoot'");
+  const failRootIndex = gameplaySource.indexOf("'ClassicFailPresentationRoot'");
+
+  assert.match(gameplaySource, /ClassicScoreHudPresenter\.create\(\{/);
+  assert.match(gameplaySource, /scoreIconResource: resources\.presentation\.scoreIcon/);
+  assert.match(gameplaySource, /bestScoreCupResource: resources\.presentation\.bestScoreCup/);
+  assert.match(gameplaySource, /doubleScorePanelResource: resources\.presentation\.doubleScorePanel/);
+  assert.match(gameplaySource, /fontResource: resources\.scoreFont/);
+  assert.match(
+    gameplaySource,
+    /createRecoveredPresenterRoot\(this\.node, 'ClassicScoreHudRoot'\)/,
+  );
+  assert.match(gameplaySource, /this\.scoreHudPresenter\.attach\(scoreHudRoot\)/);
+  assert.match(
+    gameplaySource,
+    /createRecoveredPresenterRoot\([\s\S]*?this\.node,[\s\S]*?'ClassicFailPresentationRoot'/,
+  );
+  assert.match(gameplaySource, /this\.failPresenter\.attach\(failPresentationRoot\)/);
+  assert.ok(scoreRootIndex >= 0 && worldRootIndex > scoreRootIndex);
+  assert.ok(failRootIndex > worldRootIndex);
+  assert.match(
+    gameplaySource,
+    /applySpawnPlan\([\s\S]*?spawnCommands,[\s\S]*?this\.requireWorldPresentationRoot\(\)/,
+  );
+  assert.match(
+    gameplaySource,
+    /presenter\.attach\(this\.requireWorldPresentationRoot\(\), 1\)/,
+  );
+  assert.match(gameplaySource, /presenter\.attach\(this\.requireWorldPresentationRoot\(\)\)/);
+  assert.ok(presenterUpdateIndex >= 0 && scoreUpdateIndex > presenterUpdateIndex);
+  assert.match(gameplaySource, /presenter\.startScoreIconScaleUp\(command\.durationSeconds, command\.targetScale\)/);
+  assert.match(gameplaySource, /presenter\.startScoreIconScaleDown\(command\.durationSeconds, command\.targetScale\)/);
+  assert.match(
+    gameplaySource,
+    /startDoubleScorePanelIntro\([\s\S]*?command\.introDurationSeconds,[\s\S]*?command\.activeDelaySeconds/,
+  );
+  assert.match(gameplaySource, /startDoubleScorePanelExit\([\s\S]*?command\.exitDurationSeconds/);
+  assert.match(
+    gameplaySource,
+    /onDoubleScoreActiveDelayComplete[\s\S]*?score\.completeDoubleScoreDelay\(\)/,
+  );
+  assert.match(gameplaySource, /this\.scoreHudPresenter\?\.setDisplayedScore\(this\.score\.displayedScore\)/);
+  assert.match(gameplaySource, /this\.scoreHudPresenter\?\.setBestScore\(this\.score\.bestScore, this\.score\.bestScoreIsNew\)/);
+  assert.match(
+    gameplaySource,
+    /initializeRecoveredResources\(viewport\)\.catch\([\s\S]*?onRecoveredResourceInitializationFailed/,
+  );
+  assert.match(
+    gameplaySource,
+    /this\.shuttingDown[\s\S]*?!isValid\(this\.node, true\)[\s\S]*?!this\.node\.activeInHierarchy/,
+  );
+  assert.match(
+    gameplaySource,
+    /catch \(error\) \{[\s\S]*?disposeRecoveredRuntime\(\);[\s\S]*?throw error/,
+  );
+  assert.doesNotMatch(gameplaySource, /ClassicGeneratedScore|`SCORE \$\{|setContentSize\(260, 90\)|fontSize \+ 8/);
+  assert.match(presenterSource, /label\.lineHeight\s*=\s*layout\.fontSize/);
+  assert.match(presenterSource, /node\.addComponent\(Mask\)/);
+  assert.doesNotMatch(presenterSource, /mask\.(?:type|inverted)\s*=/);
+  assert.match(presenterSource, /ClassicDoubleScoreViewportClip/);
+  assert.doesNotMatch(presenterSource, /setContentSize\(260, 90\)/);
+});
+
 test('Classic audio preload and event consumers use the exact recovered clips', () => {
   const audioSource = readText('game/assets/scripts/creator/classic-audio-presenter.ts');
   const gameplaySource = readText('game/assets/scripts/creator/classic-gameplay-controller.ts');
@@ -170,7 +243,7 @@ test('Classic audio preload and event consumers use the exact recovered clips', 
     'resources = await loadClassicSliceResourceCatalog(assetTree)',
   );
   const audioLoadIndex = gameplaySource.indexOf(
-    'audioPresenter = await ClassicAudioPresenter.load(this.node)',
+    'loadedAudioPresenter = await ClassicAudioPresenter.load(this.node)',
   );
 
   assert.notEqual(visualLoadIndex, -1);
@@ -214,7 +287,10 @@ test('ordinary cuts present exact recovered halves before audio and scoring', ()
   assert.match(gameplaySource, /topHeightWorldUnits: visuals\.cutTop\.dimensions\.height/);
   assert.match(gameplaySource, /sourceAngleRadians: event\.sourceAngleRadians/);
   assert.match(gameplaySource, /sourceBodyMass: event\.sourceBodyMass/);
-  assert.match(gameplaySource, /presenter\.attach\(this\.node, 1\)/);
+  assert.match(
+    gameplaySource,
+    /presenter\.attach\(this\.requireWorldPresentationRoot\(\), 1\)/,
+  );
   assert.match(gameplaySource, /presenter\.updateAction\(deltaSeconds\)/);
   assert.match(gameplaySource, /presenter\.evaluateBounds\(viewport\)/);
   assert.match(gameplaySource, /this\.disposeCutHalfPresenters\(\)/);
@@ -250,7 +326,10 @@ test('critical cut halves preserve per-half update RNG and exact particle consum
   assert.match(gameplaySource, /createClassicCriticalParticleUpdateCommands\([\s\S]*critical,[\s\S]*this\.random/);
   assert.match(gameplaySource, /resources\.criticalParticles\[command\.resourceIndex - 1\]/);
   assert.match(gameplaySource, /positionWorldUnits: \{ x: position\.x, y: position\.y \}/);
-  assert.match(gameplaySource, /presenter\.attach\(this\.node\)/);
+  assert.match(
+    gameplaySource,
+    /presenter\.attach\(this\.requireWorldPresentationRoot\(\)\)/,
+  );
   assert.match(gameplaySource, /this\.criticalParticlePresenters\.delete\(presenter\)/);
   assert.match(gameplaySource, /presenter\.updateAction\(deltaSeconds\)/);
 

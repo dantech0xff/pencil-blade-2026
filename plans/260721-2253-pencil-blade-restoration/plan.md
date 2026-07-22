@@ -44,6 +44,9 @@ Verified starting point:
 - Use Cocos Creator Physics2D as the production physics layer. Recover gravity, timestep,
   bodies, fixtures, velocities, collision filters, ray casts, and scoring reactions from
   the native binary/resources and express them as testable contracts.
+- Keep the exact Classic score HUD in the recovered slice, including the score icon,
+  best-score cup, double-score panel, and `Fonts/Linds.ttf`; `classic_best_1` persistence
+  remains deferred.
 - Android is primary. Creator 3.8 requires API 21+, so original min SDK 9 is a documented platform-envelope change.
 - Keep archival/decompiled material separate from ship-ready content and rights status.
 - Presentation restoration is complete only after 100% inventory, staging, and consumer
@@ -81,9 +84,11 @@ Verified starting point:
 - Phase 5 starts after the Classic presentation subset and gameplay/physics contracts are ready.
   That static subset is now registered. Creator has imported the exact recovered APK corpus,
   serialized the first `classic.scene`, and exercised exact background/text/ordinary-fruit,
-  cut-half, critical-particle, and core-audio consumers in the bounded Classic loop. Exact
-  recovered fail-marker resources and action timings are now integrated, contract-tested, and
-  visually verified in a fresh `720x1280` Preview after invalidating Creator's stale code cache.
+  cut-half, critical-particle, score-HUD, and core-audio consumers in the bounded Classic loop.
+  Exact recovered fail-marker resources and action timings are now integrated,
+  contract-tested, and visually verified in a fresh `720x1280` Preview after invalidating
+  Creator's stale code cache. The score HUD is exact; `classic_best_1` persistence remains
+  deferred.
   The exact standard-bomb raster/audio/entity foundation and Concurrent batch partition are
   also contract-tested, while bomb controllers remain deferred pending non-invented procedural
   explosion geometry. Project completion still requires the remaining resource consumers and

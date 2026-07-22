@@ -9,7 +9,6 @@ import {
 import {
   CLASSIC_FAIL_ACTIVATION_ACTION_SECONDS,
   CLASSIC_FAIL_ENTRY_ACTION_SECONDS,
-  CLASSIC_FAIL_MARKER_Z_ORDER,
   CLASSIC_FAIL_TRANSIENT_ACTION_SECONDS,
   createClassicFailActivationPlan,
   createClassicFailMarkerLayouts,
@@ -155,10 +154,12 @@ export class ClassicFailPresenter {
     }
 
     this.parent = parent;
-    for (const marker of this.markers) {
+    for (let index = 0; index < this.markers.length; index += 1) {
+      const marker = this.markers[index];
       marker.node.layer = parent.layer;
       marker.node.setParent(parent, true);
-      marker.node.setSiblingIndex(CLASSIC_FAIL_MARKER_Z_ORDER);
+      // FruitFailManager retains strike 1 -> 2 -> 3 insertion order at equal native z.
+      marker.node.setSiblingIndex(index);
       marker.node.active = true;
     }
     this.attachedValue = true;
@@ -295,11 +296,13 @@ export class ClassicFailPresenter {
     const spriteNode = createRasterNode('ClassicTransientFailMarker', this.filledResource).node;
     spriteNode.setPosition(0, 0, 0);
     spriteNode.setParent(node);
-    spriteNode.setSiblingIndex(CLASSIC_FAIL_MARKER_Z_ORDER);
+    spriteNode.setSiblingIndex(0);
     node.layer = parent.layer;
     spriteNode.layer = parent.layer;
     node.setParent(parent, true);
-    node.setSiblingIndex(CLASSIC_FAIL_MARKER_Z_ORDER);
+    // Native transient fail animations arrive after the persistent markers and after older
+    // transients on the same manager target.
+    node.setSiblingIndex(parent.children.length - 1);
     node.active = true;
     spriteNode.active = true;
     this.transients.push({ elapsedActionSeconds: 0, node, spriteNode });

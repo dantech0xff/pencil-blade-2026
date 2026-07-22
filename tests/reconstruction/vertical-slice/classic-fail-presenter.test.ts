@@ -71,7 +71,14 @@ export class Node {
     if (parent !== null) parent.children.push(this);
     if (keepWorldTransform) this.setWorldPosition(world.x, world.y, world.z);
   }
-  setSiblingIndex(index) { this.lastRequestedSiblingIndex = index; }
+  setSiblingIndex(index) {
+    this.lastRequestedSiblingIndex = index;
+    if (this.parent === null) return;
+    const current = this.parent.children.indexOf(this);
+    if (current >= 0) this.parent.children.splice(current, 1);
+    const bounded = Math.max(0, Math.min(index, this.parent.children.length));
+    this.parent.children.splice(bounded, 0, this);
+  }
   destroy() { this.destroyed = true; this.active = false; this.setParent(null, true); }
 }
 
@@ -157,11 +164,17 @@ test('persistent markers use exact profile resources, entry layout, scale, ancho
     parent.layer = 31;
     parent.setPosition(100, 200, 0);
     presenter.attach(parent as never);
-    for (const marker of presenter.markers) {
+    for (let index = 0; index < presenter.markers.length; index += 1) {
+      const marker = presenter.markers[index];
       assert.equal(marker.node.layer, 31);
-      assert.equal(marker.node.lastRequestedSiblingIndex, 1);
+      assert.equal(marker.node.lastRequestedSiblingIndex, index);
       assert.deepEqual(vector(marker.node.worldPosition), marker.layout.initialWorldPosition);
     }
+    assert.deepEqual(parent.children.map(({ name }) => name), [
+      'ClassicFailMarker-1',
+      'ClassicFailMarker-2',
+      'ClassicFailMarker-3',
+    ]);
   }
 });
 
@@ -216,6 +229,15 @@ test('each miss swaps the exact filled raster, animates 5x to normal in 0.25s, a
     { x: 100, y: 96 },
     { x: 200, y: 96 },
     { x: 300, y: 96 },
+  ]);
+  const presentationRoot = presenter.markers[0].node.parent as unknown as StubNode;
+  assert.deepEqual(presentationRoot.children.map(({ name }) => name), [
+    'ClassicFailMarker-1',
+    'ClassicFailMarker-2',
+    'ClassicFailMarker-3',
+    'ClassicTransientFailAnimation',
+    'ClassicTransientFailAnimation',
+    'ClassicTransientFailAnimation',
   ]);
 
   presenter.updateAction(0.125);

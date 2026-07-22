@@ -1,8 +1,6 @@
 import {
   _decorator,
-  Color,
   Component,
-  Label,
   Node,
   Sprite,
   Tween,
@@ -10,6 +8,7 @@ import {
   UITransform,
   Vec3,
   director,
+  isValid,
   tween,
 } from 'cc';
 
@@ -57,6 +56,7 @@ import { ClassicCriticalParticlePresenter } from './classic-critical-particle-pr
 import { ClassicCutHalfPresenter } from './classic-cut-half-presenter';
 import { ClassicEntityRegistry } from './classic-entity-registry';
 import { ClassicFailPresenter } from './classic-fail-presenter';
+import { ClassicScoreHudPresenter } from './classic-score-hud-presenter';
 import type {
   ClassicGeneratedFruitCutEvent,
   ClassicGeneratedFruitMissEvent,
@@ -124,11 +124,16 @@ export class ClassicGameplayController extends Component {
   private readonly criticalParticlePresenters = new Set<ClassicCriticalParticlePresenter>();
   private sceneController: ClassicSceneController | null = null;
   private audioPresenter: ClassicAudioPresenter | null = null;
+  private recoveredBackgroundNode: Node | null = null;
+  private recoveredBackgroundOpacity: UIOpacity | null = null;
+  private scoreHudRoot: Node | null = null;
+  private worldPresentationRoot: Node | null = null;
+  private failPresentationRoot: Node | null = null;
   private registry: ClassicEntityRegistry | null = null;
   private failPresenter: ClassicFailPresenter | null = null;
+  private scoreHudPresenter: ClassicScoreHudPresenter | null = null;
   private resourceCatalog: ClassicSliceResourceCatalog | null = null;
   private normalFree: ClassicFreeTossStrategy | null = null;
-  private scoreLabel: Label | null = null;
   private introGoodNode: Node | null = null;
   private introLuckNode: Node | null = null;
   private terminalGameNode: Node | null = null;
@@ -143,70 +148,90 @@ export class ClassicGameplayController extends Component {
     }
     this.sceneController = sceneController;
     const viewport = this.requireViewport();
-    void this.initializeRecoveredResources(viewport);
+    void this.initializeRecoveredResources(viewport).catch(
+      this.onRecoveredResourceInitializationFailed,
+    );
   }
 
   private async initializeRecoveredResources(
     viewport: Readonly<{ width: number; height: number }>,
   ): Promise<void> {
-    const sceneController = this.sceneController;
-    if (sceneController === null) {
-      throw new Error('Classic scene controller must be available before resource loading');
-    }
-    const assetTree = sceneController.resolutionSnapshot()?.profile.assetTree;
-    if (assetTree === undefined) {
-      throw new Error('Classic resolution profile must be available before resource loading');
-    }
-    let resources: ClassicSliceResourceCatalog;
-    let audioPresenter: ClassicAudioPresenter;
+    let loadedAudioPresenter: ClassicAudioPresenter | null = null;
     try {
+      const sceneController = this.sceneController;
+      if (sceneController === null) {
+        throw new Error('Classic scene controller must be available before resource loading');
+      }
+      const assetTree = sceneController.resolutionSnapshot()?.profile.assetTree;
+      if (assetTree === undefined) {
+        throw new Error('Classic resolution profile must be available before resource loading');
+      }
       // Load the bundle-backed visual catalog first so audio reuses the registered bundle.
       // This avoids issuing two first-load requests against Creator's bundle registry.
-      resources = await loadClassicSliceResourceCatalog(assetTree);
-      audioPresenter = await ClassicAudioPresenter.load(this.node);
-    } catch (error) {
-      if (!this.shuttingDown) {
-        const failure = error instanceof Error ? error : new Error(String(error));
-        this.node.emit(CLASSIC_RESOURCE_LOAD_FAILED_EVENT, failure);
-        console.error(failure);
+      const resources = await loadClassicSliceResourceCatalog(assetTree);
+      loadedAudioPresenter = await ClassicAudioPresenter.load(this.node);
+      if (
+        this.shuttingDown
+        || !isValid(this.node, true)
+        || !this.node.activeInHierarchy
+      ) {
+        loadedAudioPresenter.stop();
+        return;
       }
-      return;
+
+      const audioPresenter = loadedAudioPresenter;
+      this.audioPresenter = audioPresenter;
+      this.resourceCatalog = resources;
+      this.registry = new ClassicEntityRegistry({
+        callAfterStep: (mutation) => sceneController.callAfterPhysicsStep(mutation),
+        onDispose: () => this.emitSnapshot(),
+        onFruitCut: (event) => this.onFruitCut(event),
+        onFruitMiss: (event) => this.onFruitMiss(event),
+        onPlayTossSound: (sound) => audioPresenter.playOneShot(sound),
+        resourceCatalog: resources,
+      });
+      this.normalFree = new ClassicFreeTossStrategy({
+        controllerId: 'a9',
+        random: this.random,
+        interval: { lowSeconds: 0.5, highSeconds: 3 },
+        createTimer: (options) => new TossTimer(options),
+        planner: this.planner,
+        tossType: 0,
+        direction: CLASSIC_TOSS_DIRECTION.UP,
+        viewport: () => this.requireViewport(),
+        effectsEnabled: this.effectsEnabled,
+        commandSink: (commands) => {
+          const spawnCommands = requireSpawnCommands(commands);
+          this.registry?.applySpawnPlan(
+            spawnCommands,
+            this.requireWorldPresentationRoot(),
+            this.requireViewport(),
+          );
+          this.emitCommands(commands);
+          this.emitSnapshot();
+        },
+      });
+      this.createRecoveredPresentation(viewport, resources);
+      this.playRecoveredIntro(viewport, resources);
+      this.updatePresentation();
+      this.emitSnapshot();
+    } catch (error) {
+      if (loadedAudioPresenter !== null && loadedAudioPresenter !== this.audioPresenter) {
+        loadedAudioPresenter.stop();
+      }
+      this.disposeRecoveredRuntime();
+      throw error;
     }
-    if (this.shuttingDown) {
-      return;
-    }
-    this.audioPresenter = audioPresenter;
-    this.resourceCatalog = resources;
-    this.registry = new ClassicEntityRegistry({
-      callAfterStep: (mutation) => sceneController.callAfterPhysicsStep(mutation),
-      onDispose: () => this.emitSnapshot(),
-      onFruitCut: (event) => this.onFruitCut(event),
-      onFruitMiss: (event) => this.onFruitMiss(event),
-      onPlayTossSound: (sound) => audioPresenter.playOneShot(sound),
-      resourceCatalog: resources,
-    });
-    this.normalFree = new ClassicFreeTossStrategy({
-      controllerId: 'a9',
-      random: this.random,
-      interval: { lowSeconds: 0.5, highSeconds: 3 },
-      createTimer: (options) => new TossTimer(options),
-      planner: this.planner,
-      tossType: 0,
-      direction: CLASSIC_TOSS_DIRECTION.UP,
-      viewport: () => this.requireViewport(),
-      effectsEnabled: this.effectsEnabled,
-      commandSink: (commands) => {
-        const spawnCommands = requireSpawnCommands(commands);
-        this.registry?.applySpawnPlan(spawnCommands, this.node, this.requireViewport());
-        this.emitCommands(commands);
-        this.emitSnapshot();
-      },
-    });
-    this.createRecoveredPresentation(viewport, resources);
-    this.playRecoveredIntro(viewport, resources);
-    this.updatePresentation();
-    this.emitSnapshot();
   }
+
+  private readonly onRecoveredResourceInitializationFailed = (error: unknown): void => {
+    if (this.shuttingDown || !isValid(this.node, true)) {
+      return;
+    }
+    const failure = error instanceof Error ? error : new Error(String(error));
+    this.node.emit(CLASSIC_RESOURCE_LOAD_FAILED_EVENT, failure);
+    console.error(failure);
+  };
 
   onEnable(): void {
     this.node.on(CLASSIC_BLADE_BEGAN_EVENT, this.onBladeBegan, this);
@@ -233,6 +258,7 @@ export class ClassicGameplayController extends Component {
       presenter.updateAction(deltaSeconds);
     }
     this.failPresenter?.updateAction(deltaSeconds);
+    this.scoreHudPresenter?.updateAction(deltaSeconds);
     this.applyScoreCommands(this.score.updateDisplayedScore());
     this.updatePresentation();
   }
@@ -246,22 +272,42 @@ export class ClassicGameplayController extends Component {
 
   onDestroy(): void {
     this.shuttingDown = true;
+    this.unschedule(this.onSwishCooldownComplete);
+    this.swishAudio.unlock();
+    this.disposeRecoveredRuntime();
+  }
+
+  private disposeRecoveredRuntime(): void {
     for (const node of [
       this.introGoodNode,
       this.introLuckNode,
       this.terminalGameNode,
       this.terminalOverNode,
     ]) {
-      if (node !== null) {
+      if (node !== null && isValid(node, true)) {
         Tween.stopAllByTarget(node);
+        node.destroy();
       }
     }
+    this.introGoodNode = null;
+    this.introLuckNode = null;
+    this.terminalGameNode = null;
+    this.terminalOverNode = null;
+    if (this.recoveredBackgroundOpacity !== null) {
+      Tween.stopAllByTarget(this.recoveredBackgroundOpacity);
+    }
+    if (
+      this.recoveredBackgroundNode !== null
+      && isValid(this.recoveredBackgroundNode, true)
+    ) {
+      this.recoveredBackgroundNode.destroy();
+    }
+    this.recoveredBackgroundOpacity = null;
+    this.recoveredBackgroundNode = null;
     this.normalFree?.stop();
+    this.normalFree = null;
     this.audioPresenter?.stop();
-    this.unschedule(this.onDisplayedScoreScaleUpComplete);
-    this.unschedule(this.onDisplayedScoreScaleDownComplete);
-    this.unschedule(this.onSwishCooldownComplete);
-    this.swishAudio.unlock();
+    this.audioPresenter = null;
     this.disposeCutHalfPresenters();
     this.cutHalfPresenters.clear();
     this.criticalCutHalfPresenters.clear();
@@ -271,7 +317,23 @@ export class ClassicGameplayController extends Component {
     this.criticalParticlePresenters.clear();
     this.failPresenter?.dispose();
     this.failPresenter = null;
+    this.scoreHudPresenter?.dispose();
+    this.scoreHudPresenter = null;
     this.registry?.disposeAll();
+    this.registry = null;
+    for (const root of [
+      this.scoreHudRoot,
+      this.worldPresentationRoot,
+      this.failPresentationRoot,
+    ]) {
+      if (root !== null && isValid(root, true)) {
+        root.destroy();
+      }
+    }
+    this.scoreHudRoot = null;
+    this.worldPresentationRoot = null;
+    this.failPresentationRoot = null;
+    this.resourceCatalog = null;
   }
 
   snapshot(): ClassicGameplaySnapshot {
@@ -447,7 +509,7 @@ export class ClassicGameplayController extends Component {
         }
       },
     });
-    presenter.attach(this.node, 1);
+    presenter.attach(this.requireWorldPresentationRoot(), 1);
     this.cutHalfPresenters.add(presenter);
     if (event.critical) {
       this.criticalCutHalfPresenters.add(presenter);
@@ -477,7 +539,7 @@ export class ClassicGameplayController extends Component {
         }, {
           onDisposed: () => this.criticalParticlePresenters.delete(presenter),
         });
-        presenter.attach(this.node);
+        presenter.attach(this.requireWorldPresentationRoot());
         this.criticalParticlePresenters.add(presenter);
       }
     }
@@ -526,18 +588,21 @@ export class ClassicGameplayController extends Component {
 
   private applyScoreCommands(commands: readonly ScoreCommand[]): void {
     for (const command of commands) {
-      if (command.type === 'start-displayed-score-scale-up') {
-        this.scoreLabel?.node.setScale(command.targetScale, command.targetScale, 1);
-        this.scheduleOnce(
-          this.onDisplayedScoreScaleUpComplete,
-          command.durationSeconds,
+      if (command.type === 'start-double-score-presentation') {
+        this.requireScoreHudPresenter().startDoubleScorePanelIntro(
+          command.introDurationSeconds,
+          command.activeDelaySeconds,
         );
+      } else if (command.type === 'finish-double-score-presentation') {
+        this.requireScoreHudPresenter().startDoubleScorePanelExit(
+          command.exitDurationSeconds,
+        );
+      } else if (command.type === 'start-displayed-score-scale-up') {
+        const presenter = this.requireScoreHudPresenter();
+        presenter.startScoreIconScaleUp(command.durationSeconds, command.targetScale);
       } else if (command.type === 'start-displayed-score-scale-down') {
-        this.scoreLabel?.node.setScale(command.targetScale, command.targetScale, 1);
-        this.scheduleOnce(
-          this.onDisplayedScoreScaleDownComplete,
-          command.durationSeconds,
-        );
+        const presenter = this.requireScoreHudPresenter();
+        presenter.startScoreIconScaleDown(command.durationSeconds, command.targetScale);
       }
     }
     this.emitCommands(commands);
@@ -550,6 +615,12 @@ export class ClassicGameplayController extends Component {
 
   private readonly onDisplayedScoreScaleDownComplete = (): void => {
     this.score.completeDisplayedScoreScaleDown();
+  };
+
+  private readonly onDoubleScoreActiveDelayComplete = (): void => {
+    this.applyScoreCommands(this.score.completeDoubleScoreDelay());
+    this.updatePresentation();
+    this.emitSnapshot();
   };
 
   private recordDeferredController(
@@ -588,18 +659,37 @@ export class ClassicGameplayController extends Component {
       'ClassicRecoveredPaperBackground',
       resources.presentation.background,
     );
+    this.recoveredBackgroundNode = background;
     background.setSiblingIndex(0);
     const opacity = background.addComponent(UIOpacity);
+    this.recoveredBackgroundOpacity = opacity;
     opacity.opacity = 0;
     tween(opacity).to(0.5, { opacity: 255 }).start();
 
-    this.scoreLabel = createLabel(
+    const scoreHudRoot = createRecoveredPresenterRoot(this.node, 'ClassicScoreHudRoot');
+    this.scoreHudRoot = scoreHudRoot;
+    this.scoreHudPresenter = ClassicScoreHudPresenter.create({
+      bestScoreCupResource: resources.presentation.bestScoreCup,
+      doubleScorePanelResource: resources.presentation.doubleScorePanel,
+      fontResource: resources.scoreFont,
+      initialBestScore: this.score.bestScore,
+      scoreIconResource: resources.presentation.scoreIcon,
+      viewport,
+    }, {
+      onDoubleScoreActiveDelayComplete: this.onDoubleScoreActiveDelayComplete,
+      onScoreIconScaleDownComplete: this.onDisplayedScoreScaleDownComplete,
+      onScoreIconScaleUpComplete: this.onDisplayedScoreScaleUpComplete,
+    });
+    this.scoreHudPresenter.attach(scoreHudRoot);
+    this.worldPresentationRoot = createRecoveredPresenterRoot(
       this.node,
-      'ClassicGeneratedScore',
-      -viewport.width / 2 + 120,
-      viewport.height / 2 - 70,
-      34,
+      'ClassicWorldPresentationRoot',
     );
+    const failPresentationRoot = createRecoveredPresenterRoot(
+      this.node,
+      'ClassicFailPresentationRoot',
+    );
+    this.failPresentationRoot = failPresentationRoot;
     this.failPresenter = ClassicFailPresenter.create({
       filledResource: resources.presentation.failFilled,
       normalResource: resources.presentation.failNormal,
@@ -609,7 +699,7 @@ export class ClassicGameplayController extends Component {
         this.applyFailCommands(this.fail.completeIndicator());
       },
     });
-    this.failPresenter.attach(this.node);
+    this.failPresenter.attach(failPresentationRoot);
   }
 
   private playRecoveredIntro(
@@ -624,12 +714,12 @@ export class ClassicGameplayController extends Component {
       'ClassicRecoveredIntroGood',
       resources.presentation.introGood,
     );
+    this.introGoodNode = good;
     const luck = createRecoveredSpriteNode(
       this.node,
       'ClassicRecoveredIntroLuck',
       resources.presentation.introLuck,
     );
-    this.introGoodNode = good;
     this.introLuckNode = luck;
     good.setPosition(-outside, goodY, 0);
     luck.setPosition(outside, luckY, 0);
@@ -699,9 +789,25 @@ export class ClassicGameplayController extends Component {
   }
 
   private updatePresentation(): void {
-    if (this.scoreLabel !== null) {
-      this.scoreLabel.string = `SCORE ${this.score.displayedScore}`;
+    this.scoreHudPresenter?.setDisplayedScore(this.score.displayedScore);
+    this.scoreHudPresenter?.setBestScore(this.score.bestScore, this.score.bestScoreIsNew);
+    this.scoreHudPresenter?.setPendingDoubleScore(this.score.pendingDoubleScore);
+  }
+
+  private requireScoreHudPresenter(): ClassicScoreHudPresenter {
+    const presenter = this.scoreHudPresenter;
+    if (presenter === null) {
+      throw new Error('Recovered score presentation requires loaded resources');
     }
+    return presenter;
+  }
+
+  private requireWorldPresentationRoot(): Node {
+    const root = this.worldPresentationRoot;
+    if (root === null || !isValid(root, true) || !root.activeInHierarchy) {
+      throw new Error('Classic world presentation requires its active recovered root');
+    }
+    return root;
   }
 
   private emitCommands(commands: readonly unknown[]): void {
@@ -738,24 +844,11 @@ function createRecoveredSpriteNode(
   return node;
 }
 
-function createLabel(
-  parent: Node,
-  name: string,
-  x: number,
-  y: number,
-  fontSize: number,
-): Label {
+function createRecoveredPresenterRoot(parent: Node, name: string): Node {
   const node = new Node(name);
   node.layer = parent.layer;
-  node.addComponent(UITransform).setContentSize(260, 90);
-  const label = node.addComponent(Label);
-  label.color = new Color(45, 52, 58, 255);
-  label.fontSize = fontSize;
-  label.horizontalAlign = Label.HorizontalAlign.CENTER;
-  label.lineHeight = fontSize + 8;
-  parent.addChild(node);
-  node.setPosition(x, y, 0);
-  return label;
+  node.setParent(parent);
+  return node;
 }
 
 function requireSpawnCommands(

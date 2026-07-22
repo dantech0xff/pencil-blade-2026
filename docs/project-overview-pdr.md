@@ -9,12 +9,13 @@ resources, Java/metadata, or explicitly approved as inferences remain unknown. T
 Creator foundation now exists and the exact root has produced the first Editor-serialized
 Classic scene. All 862 recovered APK game assets are staged byte-for-byte and imported into
 the Creator bundle. The current playable loop consumes the exact paper background,
-intro/terminal/fail-marker art, ordinary intact/cut fruit, critical particles, and 23 reviewed
-core/ordinary-bomb audio clips. The exact standard-bomb raster, body, fixture, cut guard, and
-retained-audio seam are also implemented and tested, but bomb controllers remain deferred until
-the unresolved procedural explosion geometry can be restored without guessing. This is a
-bounded Classic checkpoint, not presentation completion: most resource consumers and the full
-scene/prefab map remain open.
+intro/terminal/fail-marker art, score icon, best-score cup, double-score panel, Linds font,
+ordinary intact/cut fruit, critical particles, and 23 reviewed core/ordinary-bomb audio clips.
+The exact standard-bomb raster, body, fixture, cut guard, and retained-audio seam are also
+implemented and tested, but bomb controllers remain deferred until the unresolved procedural
+explosion geometry can be restored without guessing. The `classic_best_1` persistence adapter
+is still deferred and unimplemented. This is a bounded Classic checkpoint, not presentation
+completion: most resource consumers and the full scene/prefab map remain open.
 
 ## Authority and evidence
 
@@ -46,6 +47,9 @@ replay, and device comparison are unavailable and are not project gates.
   its current Creator raster/audio imports are covered by staging and metadata validators.
   The staging manifest's consumer/UUID fields remain incomplete and do not yet measure the
   subset that the playable slice consumes.
+- The Classic score HUD now uses the exact recovered score icon, best-score cup,
+  double-score panel, and `Fonts/Linds.ttf`. Best-score display follows the authoritative
+  score service, while the `classic_best_1` persistence adapter remains deferred.
 - Presentation restoration is complete only when the canonical user-supplied sample project
   has 100% inventory, staging, and consumer coverage for every resource actually present.
 - No canonical graphics, animation frame, sound, music, font, shader/material, level/layout,
@@ -65,6 +69,8 @@ replay, and device comparison are unavailable and are not project gates.
 - Visual, layout, animation, shader/material, audio, level/progression, timing, input, physics,
   score, state, and save behavior maps from evidence to contracts, reconstruction fixtures,
   tests, and Creator implementation.
+- Best-score presentation in the Classic HUD is exact; the `classic_best_1` persistence adapter
+  remains a separate save-layer task.
 - The Android build contains only the clean-room TypeScript/Creator implementation and assets
   whose use is permitted for the chosen release scope.
 - `99%` is the future acceptance target for a versioned static-contract/resource fidelity

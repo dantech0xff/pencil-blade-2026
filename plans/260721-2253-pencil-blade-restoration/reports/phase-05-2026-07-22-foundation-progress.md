@@ -7,14 +7,15 @@ The workspace now has the Cocos Creator 3.8.8 `game/` project, pure TypeScript d
 the Creator Physics2D adapter, vertical-slice contract tests, the build-audit script, and an
 Editor-authored `classic.scene` with normal-fruit gameplay. All 862 recovered APK game assets
 are staged byte-for-byte and imported into the Creator bundle. The loop now consumes exact
-background, intro/terminal/fail-marker art, nine intact/cut fruit sets, four critical particles,
-and 23 reviewed core/ordinary-bomb audio clips. This is still a bounded checkpoint, not the end
-state.
+background, intro/terminal/fail-marker art, score icon, best-score cup, double-score panel,
+Linds font, nine intact/cut fruit sets, four critical particles, and 23 reviewed core/ordinary-
+bomb audio clips. This is still a bounded checkpoint, not the end state. The `classic_best_1`
+persistence adapter remains deferred.
 
 The phase is still in progress. Canvas now owns `BladeInputController`,
-`ClassicSceneController`, and `ClassicGameplayController`, but eight toss controllers,
-bombs/specials, pause/menu/results, remaining resource consumers, Android output, and the
-complete scene/prefab/component map remain open.
+`ClassicSceneController`, `ClassicGameplayController`, and the score HUD presenter, but eight
+toss controllers, bombs/specials, pause/menu/results, remaining resource consumers, Android
+output, the complete scene/prefab/component map, and `classic_best_1` persistence remain open.
 
 ## Review Findings
 
@@ -30,7 +31,7 @@ slash-terminated entries.
 
 Updated the plan, Phase 05 spec, architecture decision, PDR, codebase summary, code standards,
 system architecture, contract map, and readiness reports so they reflect the live `game/`
-foundation while keeping Phase 5 in progress.
+foundation and exact score HUD while keeping Phase 5 in progress.
 
 Added a separate fail-closed APK/AAB audit. It hashes every entry independent of extension,
 recurses through bounded ZIP payloads, recognizes ELF content against the Cocos Creator 3.8.8
@@ -54,12 +55,13 @@ runtime physics equivalence remains pending.
 
 The playable slice starts on the first swipe, runs only the recovered normal-free controller,
 and spawns exact intact fruit rasters with recovered fixtures and kinematics. Blade rays,
-duplicate cut scoring, score smoothing, combo wiring, ordinary cut-bottom/cut-top bodies,
-recovered impulses/fade, critical-particle planning/presentation, and exact toss/swish/cut/
-critical/combo audio are implemented. Bounds and misses use the exact three persistent marker
-rasters, recovered entry and activation timing, one-second transient cleanup, and shared-count
-callback behavior before game over; tap-to-retry reloads the scene. The other eight Classic
-controllers are recorded as deferred instead of being silently simulated.
+duplicate cut scoring, displayed-score smoothing, best-score state updates, combo wiring,
+ordinary cut-bottom/cut-top bodies, recovered impulses/fade, critical-particle planning/
+presentation, and exact toss/swish/cut/critical/combo audio are implemented. Bounds and misses
+use the exact three persistent marker rasters, recovered entry and activation timing, one-second
+transient cleanup, and shared-count callback behavior before game over; tap-to-retry reloads the
+scene. The other eight Classic controllers are recorded as deferred instead of being silently
+simulated.
 
 The next static-evidence-safe bomb foundation is now present without enabling incomplete bomb
 gameplay. Bomb ID `0` loads its exact `bomb_X.png` raster for both profiles and creates the
@@ -76,6 +78,8 @@ The staging pipeline copies all 862 recovered APK game assets without recompress
 changes. Creator imported the corpus and the validator checks its current 934 metadata
 sidecars, untrimmed/full raster geometry, and audio metadata. The manifest's per-asset
 consumer/UUID fields remain unpopulated, so this does not claim 100% runtime consumer coverage.
+The exact score HUD now consumes the recovered score icon, best-score cup, double-score panel,
+and `Fonts/Linds.ttf`, while `classic_best_1` persistence remains deferred.
 
 Rights clearance remains separate from technical fidelity. The current slice is playable, but
 it is not presentation-complete until runtime consumer coverage reaches 100% for the canonical
@@ -101,16 +105,17 @@ from the fidelity work.
 
 - `git diff --check`: clean
 - `node $HOME/.claude/scripts/validate-docs.cjs docs/`: clean
-- `node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/reconstruction/vertical-slice/*.test.ts`: `142/142` pass
+- `node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/reconstruction/vertical-slice/*.test.ts`: `161/161` pass
 - `node --test tests/stage-creator-assets-test.mjs tests/validate-creator-resource-meta-test.mjs`: `29/29` pass
 - `node scripts/audit-creator-build.mjs <build.apk|build.aab>`: documented as the build audit entry point
 - `node --test tests/audit-creator-build-test.mjs`: `8/8` synthetic checks pass
+- `node --test tests/*.mjs`: `38/38` pass
 - Creator 3.8.8 bundled TypeScript compiler: pass
 - reconstruction-policy positive and negative checks: pass
-- Last completed Creator Preview: after invalidating Creator's stale generated-code cache,
-  opened at `720x1280`, loaded the exact core resource subset, played audio at 60 FPS, showed
-  the three exact green normal fail markers and all three exact red filled markers after misses,
-  and kept the Creator Console error counter at zero
+- Latest Creator Preview: after invalidating Creator's stale generated-code cache, opened at
+  `720x1280`, showed the exact score/best HUD, recovered `GOOD / LUCK!` intro and fruit tosses,
+  green-to-red fail-marker transitions, no pillarbox leakage, 60 FPS, and zero Creator Console
+  errors
 
 ## Unresolved Questions
 

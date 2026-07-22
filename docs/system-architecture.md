@@ -6,10 +6,11 @@ Pencil Blade is being rebuilt as a static-evidence, clean-room Cocos Creator 3.8
 The workspace now contains a Creator foundation under `game/`, pure TypeScript domain modules,
 Creator-facing adapters, deterministic contract tests, and an Editor-authored `classic.scene`.
 All 862 recovered APK game assets are staged byte-for-byte in the Creator `game` bundle.
-The Canvas now runs a bounded Classic loop using exact recovered background, text, fail-marker,
-ordinary fruit/cut-half, critical-particle, and core-audio resources. A separate exact standard-
-bomb resource/audio/entity foundation exists but is not scheduled in the loop while procedural
-explosion geometry remains unresolved. The full gameplay and presentation layer is incomplete.
+The Canvas now runs a bounded Classic loop using exact recovered background, text, score-HUD,
+fail-marker, ordinary fruit/cut-half, critical-particle, and core-audio resources. A separate
+exact standard-bomb resource/audio/entity foundation exists but is not scheduled in the loop
+while procedural explosion geometry remains unresolved. The full gameplay and presentation
+layer is incomplete.
 
 ## Dependency Direction
 
@@ -27,6 +28,12 @@ The dependency direction is one-way. Domain modules do not import `cc`. Creator 
 the domain to scene lifecycle, rendering, audio, storage, and Physics2D.
 The current scene and gameplay controllers are enabled together for the Canvas lifetime;
 component enable/disable is not the pause boundary.
+
+ClassicGameplayController creates three ordered, zero-transform presentation roots beneath
+Canvas: ClassicScoreHudRoot, ClassicWorldPresentationRoot, then
+ClassicFailPresentationRoot. Fruits, cut halves, and critical particles stay inside the World
+root, so dynamic creation cannot cross the recovered equal-z HUD/fail ordering. Persistent fail
+markers retain their recovered `1 -> 2 -> 3` insertion order inside the Fail root.
 
 ## Layer Map
 
@@ -46,7 +53,7 @@ component enable/disable is not the pause boundary.
 |---|---|
 | Physics2D | Recovered gravity, body and fixture values, ray-order behavior, and variable `frameDt * worldSpeed` stepping are encoded in pure modules. Automatic simulation stays off; a project-owned `System.postUpdate` performs one synchronized manual step, installs/restores the exact fruit and bomb collision rows, and flushes project lifecycle mutations only after Box2D unlocks. |
 | Spawn and toss | Spawn ordering, intervals, fruit selection, and controller sequencing live in pure modules. Flattened Concurrent output is accepted only as ordered, contiguous, complete per-entity plans. |
-| Score, combo, fail | Score, combo window, double-score behavior, and the three-miss state are pure. A dedicated Creator presenter owns the exact normal/filled marker rasters, recovered entry/activation/transient action timings, and completion callbacks. |
+| Score HUD, combo, fail | Score, combo window, double-score behavior, best-score updates/state, and the three-miss state are pure. Dedicated Creator presenters own the exact score icon, best-score cup, double-score panel, `Fonts/Linds.ttf`, recovered entry fade, score-icon pulse, overlapping double-score actions, and the normal/filled marker rasters with their action timings and completion callbacks. The `classic_best_1` persistence adapter remains deferred. |
 | Cut handling | Blade tracking and bidirectional ray planning are pure; the Creator gameplay bridge executes two ordered post-step raycasts and preserves repeated fixture dispatch until batch disposal. |
 | Cut presentation | Ordinary cuts instantiate exact bottom/top rasters, recovered body/fixture/impulse values, action-clock fade, and deferred disposal. Critical halves may emit exact recovered particle rasters with shared RNG ordering. |
 | Audio | A Creator adapter preloads 23 reviewed clips and interprets toss, swish, cut, critical, and combo commands without moving draw/order rules out of the domain. Independent retained voices model the ordinary bomb's local handle/stop ownership; electric-only `boomhit` is deliberately excluded. |
@@ -67,5 +74,7 @@ component enable/disable is not the pause boundary.
   rasterization are not replaced by a sprite or a target-side guess. Any distinct native
   lower-bound bomb side effect also remains unknown; the entity does not reuse Fruit's miss
   callback as a substitute.
+- The `classic_best_1` persistence adapter is still deferred; best-score presentation is
+  integrated, but the save-layer hook itself is not authored yet.
 - Electric-field compatibility remains an unresolved adapter decision.
 - Rights for legacy art, music, fonts, name, and trademarks are still unknown.

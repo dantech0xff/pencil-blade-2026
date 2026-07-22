@@ -91,6 +91,31 @@ test('early double-score disable uses the same flush path and re-enable clears p
   assert.equal(score.pendingDoubleScore, 0);
 });
 
+test('stale double-score delay callbacks flush unconditionally like the native callback', () => {
+  const score = new ScoreService();
+  score.enableDoubleScore();
+  score.addScore(3);
+  score.disableDoubleScore();
+  assert.equal(score.authoritativeScore, 6);
+
+  assert.deepEqual(score.completeDoubleScoreDelay(), [
+    { type: 'finish-double-score-presentation', exitDurationSeconds: 1 },
+    { type: 'disable-bonus', bonusId: 10 },
+  ]);
+  assert.equal(score.authoritativeScore, 6);
+
+  score.enableDoubleScore();
+  score.addScore(4);
+  score.completeDoubleScoreDelay();
+  assert.equal(score.authoritativeScore, 14);
+  assert.equal(score.doubleScoreActive, false);
+  assert.deepEqual(score.completeDoubleScoreDelay(), [
+    { type: 'finish-double-score-presentation', exitDurationSeconds: 1 },
+    { type: 'disable-bonus', bonusId: 10 },
+  ]);
+  assert.equal(score.authoritativeScore, 14);
+});
+
 test('displayed score smooths upward by ten-percent chunks or one and downward by one', () => {
   const upward = new ScoreService(100, 0);
   assert.deepEqual(upward.updateDisplayedScore(), [{
@@ -116,6 +141,31 @@ test('displayed score smooths upward by ten-percent chunks or one and downward b
   assert.equal(downward.displayedScore, 1);
   downward.updateDisplayedScore();
   assert.equal(downward.displayedScore, 0);
+});
+
+test('best score follows the authoritative total after smoothing and restores only below baseline', () => {
+  const score = new ScoreService(0, 0, 25);
+
+  score.addScore(30);
+  assert.deepEqual(score.updateDisplayedScore(), [{
+    type: 'start-displayed-score-scale-up',
+    durationSeconds: DISPLAY_SCORE_SCALE_SECONDS,
+    targetScale: 1.25,
+  }]);
+  assert.equal(score.displayedScore, 0);
+  assert.equal(score.bestScore, 30);
+  assert.equal(score.bestScoreIsNew, true);
+
+  score.addScore(-5);
+  score.updateDisplayedScore();
+  assert.equal(score.bestScore, 30);
+  assert.equal(score.bestScoreIsNew, true);
+
+  score.addScore(-1);
+  score.updateDisplayedScore();
+  assert.equal(score.bestScore, 25);
+  assert.equal(score.bestScoreIsNew, false);
+  assert.throws(() => new ScoreService(0, 0, 0.5), /initialBestScore/);
 });
 
 test('combo remains open at exactly 0.25 and closes only beyond it', () => {
