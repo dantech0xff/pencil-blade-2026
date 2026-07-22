@@ -19,6 +19,7 @@ import {
   type ClassicResultRgb,
   type ClassicResultViewport,
 } from '../domain/classic-result-presentation';
+import type { ClassicResultParticleExplosionRandom } from '../domain/classic-result-particle-explosion';
 import {
   CLASSIC_RESULT_FONT_RESOURCES,
   getClassicResultResources,
@@ -31,6 +32,8 @@ import type {
   LoadedClassicResultFonts,
   LoadedClassicResultResources,
 } from './classic-resource-loader';
+import { ClassicResultParticleExplosionPresenter } from './classic-result-particle-explosion-presenter';
+import { ClassicResultRewardPresenter } from './classic-result-reward-presenter';
 
 const CLASSIC_ASSET_TREES = Object.freeze(['480x800', '720x1280'] as const);
 const MAX_OPACITY = 255;
@@ -41,8 +44,9 @@ export type ClassicResultPanelValues = readonly [number, number, number];
 export interface ClassicResultPresenterInput {
   readonly completedRunScore: number;
   readonly fonts: LoadedClassicResultFonts;
-  /** Visual order is ClassicBest_1, ClassicBest_3, ClassicBest_2. */
+  /** Visual order is ClassicBest_1, ClassicBest_2, ClassicBest_3. */
   readonly panelValues: ClassicResultPanelValues;
+  readonly random: ClassicResultParticleExplosionRandom;
   readonly resources: LoadedClassicResultResources;
   readonly totalCoins: number;
   readonly viewport: ClassicResultViewport;
@@ -52,7 +56,8 @@ export interface ClassicResultPresenterLifecycle {
   readonly onMenu: () => void;
   readonly onRankPresentationBoundary: () => void;
   readonly onRetry: () => void;
-  readonly onTotalCoinsEntranceComplete: () => void;
+  /** Returns the already-accounted native signed-int32 bonus for the reward label. */
+  readonly onTotalCoinsEntranceComplete: () => number;
 }
 
 export interface PresentedClassicResultSprite {
@@ -82,6 +87,8 @@ export interface ClassicResultPresenterState {
   readonly attached: boolean;
   readonly disposed: boolean;
   readonly navigation: ClassicResultNavigation;
+  readonly particleBurstStarted: boolean;
+  readonly rewardPresented: boolean;
   readonly scorePanelElapsedActionSeconds: number;
   readonly shellElapsedActionSeconds: number;
   readonly totalCoinsElapsedActionSeconds: number;
@@ -101,8 +108,10 @@ export class ClassicResultPresenter {
   readonly medalNone: PresentedClassicResultFadingSprite;
   readonly menuButton: PresentedClassicResultButton;
   readonly panelLabels: PanelLabelTuple;
+  readonly particleExplosionPresenter: ClassicResultParticleExplosionPresenter;
   readonly resultHeader: PresentedClassicResultFadingSprite;
   readonly retryButton: PresentedClassicResultButton;
+  readonly rewardPresenter: ClassicResultRewardPresenter;
   readonly scorePanel: PresentedClassicResultFadingSprite;
   readonly totalCoinsLabel: PresentedClassicResultLabel;
   readonly totalCoinsPanel: PresentedClassicResultFadingSprite;
@@ -206,6 +215,11 @@ export class ClassicResultPresenter {
       input.resources.totalCoins,
       this.layout.totalCoinsPanel,
     );
+    this.particleExplosionPresenter = ClassicResultParticleExplosionPresenter.create({
+      random: input.random,
+      resource: input.resources.bonusParticle,
+      viewport: input.viewport,
+    });
     this.totalCoinsLabel = createLabel(
       'ClassicResultTotalCoinsLabel',
       input.fonts.slabThing.font,
@@ -214,9 +228,16 @@ export class ClassicResultPresenter {
       CLASSIC_RESULT_WHITE,
     );
     this.positionTotalCoinsLabel();
+    this.rewardPresenter = ClassicResultRewardPresenter.create({
+      badgeResource: input.resources.bonusCoinsBadge,
+      coinResource: input.resources.coin,
+      effectResource: input.resources.bonusCoinsEffect,
+      fontResource: input.fonts.slabThing,
+      viewport: input.viewport,
+    }, {
+      onAwardCoins: lifecycle.onTotalCoinsEntranceComplete,
+    });
 
-    // object-bonus-particle belongs to a later recovered emitter callback. The exact texture
-    // is validated with the input set, but a static sprite would invent result behavior.
     this.registerButtonEvents();
   }
 
@@ -242,6 +263,8 @@ export class ClassicResultPresenter {
       attached: this.attachedValue,
       disposed: this.disposedValue,
       navigation: this.navigationValue,
+      particleBurstStarted: this.particleExplosionPresenter.state.burstStarted,
+      rewardPresented: this.rewardPresenter.state.presented,
       scorePanelElapsedActionSeconds: this.scorePanelElapsedActionSecondsValue,
       shellElapsedActionSeconds: this.shellElapsedActionSecondsValue,
       totalCoinsElapsedActionSeconds: this.totalCoinsElapsedActionSecondsValue,
@@ -290,6 +313,11 @@ export class ClassicResultPresenter {
       node.active = true;
     }
     this.resetWorldPresentation();
+    this.particleExplosionPresenter.attachBetween(
+      parent,
+      this.totalCoinsPanel.node,
+      this.totalCoinsLabel.node,
+    );
     this.attachedValue = true;
   }
 
@@ -299,6 +327,36 @@ export class ClassicResultPresenter {
       return;
     }
     this.assertActive('update actions');
+
+    if (this.totalCoinsEntranceCompleteValue) {
+      this.advanceActionSegment(unscaledDeltaSeconds);
+      return;
+    }
+
+    const secondsUntilReward = Math.max(
+      0,
+      this.layout.totalCoinsPanel.actionSeconds
+        - this.totalCoinsElapsedActionSecondsValue,
+    );
+    const leadingSeconds = Math.min(unscaledDeltaSeconds, secondsUntilReward);
+    this.advanceActionSegment(leadingSeconds);
+
+    if (
+      this.totalCoinsElapsedActionSecondsValue
+      === this.layout.totalCoinsPanel.actionSeconds
+    ) {
+      this.presentRewardAtEntranceBoundary();
+    }
+
+    const trailingSeconds = unscaledDeltaSeconds - leadingSeconds;
+    if (trailingSeconds > 0) {
+      this.advanceActionSegment(trailingSeconds);
+    }
+  }
+
+  private advanceActionSegment(unscaledDeltaSeconds: number): void {
+    this.particleExplosionPresenter.updateAction(unscaledDeltaSeconds);
+    this.rewardPresenter.updateAction(unscaledDeltaSeconds);
 
     this.scorePanelElapsedActionSecondsValue = advanceAction(
       this.scorePanelElapsedActionSecondsValue,
@@ -336,14 +394,15 @@ export class ClassicResultPresenter {
       this.totalCoinsElapsedActionSecondsValue,
     );
     this.positionTotalCoinsLabel();
+  }
 
-    if (
-      !this.totalCoinsEntranceCompleteValue
-      && this.totalCoinsElapsedActionSecondsValue === this.layout.totalCoinsPanel.actionSeconds
-    ) {
-      this.totalCoinsEntranceCompleteValue = true;
-      this.lifecycle.onTotalCoinsEntranceComplete();
+  private presentRewardAtEntranceBoundary(): void {
+    this.totalCoinsEntranceCompleteValue = true;
+    const parent = this.totalCoinsPanel.node.parent;
+    if (parent === null || !isValid(parent, true) || !parent.activeInHierarchy) {
+      throw new Error('Classic result reward requires the active result parent');
     }
+    this.rewardPresenter.present(parent);
   }
 
   /** Explicit scene-teardown path. Returns false after the first disposal. */
@@ -354,6 +413,8 @@ export class ClassicResultPresenter {
     this.disposedValue = true;
     this.attachedValue = false;
     this.unregisterButtonEvents();
+    this.rewardPresenter.dispose();
+    this.particleExplosionPresenter.dispose();
     for (const node of this.rootNodes()) {
       if (isValid(node, true)) {
         node.destroy();
@@ -606,7 +667,15 @@ function assertInput(input: ClassicResultPresenterInput): ClassicResultRasterSet
   }
   formatClassicResultScore(input.completedRunScore);
   assertPanelValues(input.panelValues);
-  assertSafeInteger(input.totalCoins, 'totalCoins');
+  assertSignedInt32(input.completedRunScore, 'completedRunScore');
+  assertSignedInt32(input.totalCoins, 'totalCoins');
+  if (
+    input.random === null
+    || typeof input.random !== 'object'
+    || typeof input.random.nextIntInclusive !== 'function'
+  ) {
+    throw new TypeError('random must provide nextIntInclusive(minimum, maximum)');
+  }
   const presentation = assertResources(input.resources);
   assertFonts(input.fonts);
   createClassicResultLayout(input.viewport, {
@@ -632,7 +701,10 @@ function assertResources(resources: LoadedClassicResultResources): ClassicResult
   }
   for (const key of [
     'background',
+    'bonusCoinsBadge',
+    'bonusCoinsEffect',
     'bonusParticle',
+    'coin',
     'header',
     'medalNone',
     'menuNormal',
@@ -651,7 +723,10 @@ function resourcesMatch(
   expected: ClassicResultRasterSet,
 ): boolean {
   return resources.background?.canonicalPath === expected.background.canonicalPath
+    && resources.bonusCoinsBadge?.canonicalPath === expected.bonusCoinsBadge.canonicalPath
+    && resources.bonusCoinsEffect?.canonicalPath === expected.bonusCoinsEffect.canonicalPath
     && resources.bonusParticle?.canonicalPath === expected.bonusParticle.canonicalPath
+    && resources.coin?.canonicalPath === expected.coin.canonicalPath
     && resources.header?.canonicalPath === expected.header.canonicalPath
     && resources.medalNone?.canonicalPath === expected.medalNone.canonicalPath
     && resources.menuNormal?.canonicalPath === expected.menuNormal.canonicalPath
@@ -723,7 +798,7 @@ function assertPanelValues(values: ClassicResultPanelValues): void {
     throw new TypeError('panelValues must contain exactly three values in visual order');
   }
   for (let index = 0; index < values.length; index += 1) {
-    assertSafeInteger(values[index], `panelValues[${index}]`);
+    assertSignedInt32(values[index], `panelValues[${index}]`);
   }
 }
 
@@ -748,6 +823,13 @@ function assertLifecycle(lifecycle: ClassicResultPresenterLifecycle): void {
 function assertSafeInteger(value: number, label: string): void {
   if (!Number.isSafeInteger(value)) {
     throw new RangeError(`${label} must be a safe integer`);
+  }
+}
+
+function assertSignedInt32(value: number, label: string): void {
+  assertSafeInteger(value, label);
+  if (value < -0x8000_0000 || value > 0x7fff_ffff) {
+    throw new RangeError(`${label} must fit a signed 32-bit integer`);
   }
 }
 

@@ -19,11 +19,13 @@ normal-fruit loop. All 862 recovered APK game assets are staged and imported; th
 uses exact background, intro/terminal/fail-marker art, score icon, best-score cup,
 double-score panel, Linds font, intact/cut fruit, critical-particle, core-audio, and the mode-0
 result-entry rasters/fonts/cues. The result boundary now implements the recovered completed-run
-score, leaderboard insertion, button states, entrance timings, and coin-bonus callback.
+score, leaderboard insertion, button states, entrance timings, delayed 100-sprite burst,
+reward tree, and coin-bonus callback. The four Classic-relevant Settings integers now persist
+through a process-owned Creator adapter at the recovered app-hide checkpoint.
 The exact standard-bomb raster/audio/entity foundation is also implemented and tested, but is
 not scheduled into the playable loop until its unresolved procedural explosion geometry can be
-restored without guessing. The `classic_best_1`, leaderboard, and coin persistence adapters
-remain deferred; result reward visuals and Main Menu replacement are also still open. The
+restored without guessing. Full first-launch Settings initialization, the Main Menu save/replace
+path, and native same-parent Retry reconstruction remain open. The
 remaining scene/prefab map, consumer coverage, and full Classic scope still need to be
 completed before this phase can close.
 
@@ -137,29 +139,39 @@ Current Editor integration:
   `boomhit` remains excluded. The physics adapter installs and restores both fruit and bomb rows.
 - The exact score HUD is integrated: the score icon, best-score cup, double-score panel,
   entry fade, icon pulse, and overlap-safe double-score actions are recovered. Score display
-  tracks the authoritative score service, while `classic_best_1` persistence remains deferred.
+  tracks the authoritative score service, seeded from persisted `classic_best_1`.
   Ordered Score HUD, World, and Fail roots prevent dynamically created gameplay nodes from
   crossing recovered equal-z presentation layers.
 - The exact mode-0 result entry is integrated at the terminal session boundary. It replaces
   the Classic-owned roots while preserving the shared background/resources, creates the nine
-  recovered result rasters and two result fonts in native order, applies independent
+  shell rasters plus the three reward rasters and two result fonts in native order, applies independent
   `0.75 / 1.0 / 1.75`-second entrance actions, inserts the completed score using recovered
   `>=` comparisons, and emits rank/menu cues at their recovered construction/click boundaries.
+  At `1.65` seconds its custom emitter consumes exactly five shared-RNG draws for each of 100
+  sprites; at `1.75` seconds it creates effect, coin, badge, performs signed-int32 accounting,
+  then creates the bonus label. The effect repeats `+360` degrees every `2.5` seconds and the
+  emitter removes its retained scale-zero particles at `11.15` seconds.
   Retry uses a temporary scene-reload adapter, leaves the result mounted until the load is
   accepted, rearms navigation after immediate or asynchronous failure, and tolerates parent-led
-  scene teardown. Main Menu replacement, persistent leaderboard and coin storage, and the
-  post-entry reward emitter remain explicit follow-up work.
+  scene teardown. A stable runtime loads/saves `total_coins` and `classic_best_1/2/3`, keeps
+  Retry mutations memory-only, saves on app hide, and recovers corrupt target storage to exact
+  defaults with diagnostics while disabling writes for that process to protect stored data.
+  Full first-launch Settings initialization, Main Menu replacement/
+  exit-save, and native same-parent Retry remain explicit follow-up work.
 - The latest Preview pass opened at `720x1280` after clearing Creator's stale generated-code
   cache and demonstrated the recovered `GOOD / LUCK!` intro, exact ordinary-fruit spawning,
   score/best HUD, green-to-red fail-marker transitions, and 60 FPS with zero Creator Console
-  errors. It then reached the exact 11-child result shell with the manual physics system absent;
-  an actual pointer click on Retry created a fresh running `classic` scene, re-registered manual
-  physics, and left the error overlay empty. The portrait mask prevented presentation leakage
-  into the browser pillarbox.
+  errors. A final cache-clean Preview and actual Retry pointer click then observed all result
+  stages: the initial emitter between total panel/label, exactly 100 particle children before
+  reward creation, effect/coin roots with badge/label children while those particles remained,
+  and emitter removal after cleanup. Automatic Physics2D was restored, the manual system stayed
+  absent throughout result, effect rotation remained normalized, and the error overlay stayed
+  empty. Retry created a fresh running `classic` scene and re-registered manual physics. The
+  portrait mask prevented presentation leakage into the browser pillarbox.
 - The current playable slice is not presentation-complete; the exact staging gate is complete
   for the recovered APK corpus, but 100% consumer coverage and canonical sample-project
   completeness remain open. Release rights are a separate review.
-- The deterministic vertical-slice suite passes `184/184`, and Creator's bundled strict
+- The deterministic vertical-slice suite passes `220/220`, and Creator's bundled strict
   TypeScript compiler passes.
 
 ## Current Blockers
@@ -172,9 +184,9 @@ Current Editor integration:
 - Exact ordinary-bomb explosion point generation/rasterization plus safe registry/controller
   lifecycle integration, including the unresolved native lower-bound side effect; no sprite
   substitute, Fruit-miss substitution, or invented triangle pattern is accepted.
-- The `classic_best_1` persistence adapter remains deferred/unimplemented.
-- Result leaderboard/coin persistence, exact post-entry reward visuals, and MainMenu replacement;
-  retry still uses scene reload rather than native same-parent reconstruction.
+- Full Settings coverage beyond `total_coins` and `classic_best_1/2/3`, including the recovered
+  first-launch initialization and Main Menu exit-save checkpoint.
+- MainMenu replacement; Retry still uses scene reload rather than native same-parent reconstruction.
 - Electric-field compatibility decisions.
 - Android build validation and real APK/AAB post-build audit.
 - Rights review for original assets and product identity.

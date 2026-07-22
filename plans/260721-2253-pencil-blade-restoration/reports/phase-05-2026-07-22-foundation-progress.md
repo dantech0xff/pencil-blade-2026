@@ -1,5 +1,10 @@
 # Phase 05 Foundation Progress - 2026-07-22
 
+> Historical checkpoint: this report records the earlier foundation state. The current Phase 05
+> status is tracked in the [phase specification](../phase-05-build-cocos-creator-architecture-and-vertical-slice.md);
+> result reward presentation and the recovered four-key Classic Settings runtime were implemented
+> after this snapshot.
+
 ## Result
 
 Phase 05 moved from a pre-scaffold plan through the foundation into a bounded playable state.

@@ -67,7 +67,10 @@ export interface LoadedClassicPresentationResources {
 
 export interface LoadedClassicResultResources {
   readonly background: LoadedClassicRasterResource;
+  readonly bonusCoinsBadge: LoadedClassicRasterResource;
+  readonly bonusCoinsEffect: LoadedClassicRasterResource;
   readonly bonusParticle: LoadedClassicRasterResource;
+  readonly coin: LoadedClassicRasterResource;
   readonly header: LoadedClassicRasterResource;
   readonly medalNone: LoadedClassicRasterResource;
   readonly menuNormal: LoadedClassicRasterResource;
@@ -195,7 +198,10 @@ function createSpriteLoadDescriptors(assetTree: ClassicAssetTree): readonly Spri
     descriptor('presentation.terminalGame', presentation.terminalGame),
     descriptor('presentation.terminalOver', presentation.terminalOver),
     descriptor('result.background', result.background),
+    descriptor('result.bonusCoinsBadge', result.bonusCoinsBadge),
+    descriptor('result.bonusCoinsEffect', result.bonusCoinsEffect),
     descriptor('result.bonusParticle', result.bonusParticle),
+    descriptor('result.coin', result.coin),
     descriptor('result.header', result.header),
     descriptor('result.medalNone', result.medalNone),
     descriptor('result.menuNormal', result.menuNormal),
@@ -351,11 +357,22 @@ function requireLoadedResult(
   const contract = getClassicResultResources(assetTree);
   return Object.freeze({
     background: requireLoaded('result.background', contract.background, loadedByKey),
+    bonusCoinsBadge: requireLoaded(
+      'result.bonusCoinsBadge',
+      contract.bonusCoinsBadge,
+      loadedByKey,
+    ),
+    bonusCoinsEffect: requireLoaded(
+      'result.bonusCoinsEffect',
+      contract.bonusCoinsEffect,
+      loadedByKey,
+    ),
     bonusParticle: requireLoaded(
       'result.bonusParticle',
       contract.bonusParticle,
       loadedByKey,
     ),
+    coin: requireLoaded('result.coin', contract.coin, loadedByKey),
     header: requireLoaded('result.header', contract.header, loadedByKey),
     medalNone: requireLoaded('result.medalNone', contract.medalNone, loadedByKey),
     menuNormal: requireLoaded('result.menuNormal', contract.menuNormal, loadedByKey),

@@ -57,7 +57,10 @@ export interface ClassicPresentationRasterSet {
 
 export interface ClassicResultRasterSet {
   readonly background: ClassicRasterResource;
+  readonly bonusCoinsBadge: ClassicRasterResource;
+  readonly bonusCoinsEffect: ClassicRasterResource;
   readonly bonusParticle: ClassicRasterResource;
+  readonly coin: ClassicRasterResource;
   readonly header: ClassicRasterResource;
   readonly medalNone: ClassicRasterResource;
   readonly menuNormal: ClassicRasterResource;
@@ -185,10 +188,19 @@ export const CLASSIC_RESULT_RESOURCES: Readonly<Record<ClassicAssetTree, Classic
         '480x800/Interfaces/object-display-score-background.png',
         [442, 407],
       ),
+      bonusCoinsBadge: createRaster(
+        '480x800/Interfaces/object-bonus-coins.png',
+        [130, 129],
+      ),
+      bonusCoinsEffect: createRaster(
+        '480x800/Interfaces/object-bonus-coins-effect.png',
+        [229, 229],
+      ),
       bonusParticle: createRaster(
         '480x800/Interfaces/object-bonus-particle.png',
         [48, 46],
       ),
+      coin: createRaster('480x800/Interfaces/object-coin.png', [34, 34]),
       header: createRaster('480x800/Interfaces/object-mode-results.png', [552, 118]),
       medalNone: createRaster('480x800/Interfaces/object-medal-none.png', [104, 209]),
       menuNormal: createRaster(
@@ -208,10 +220,19 @@ export const CLASSIC_RESULT_RESOURCES: Readonly<Record<ClassicAssetTree, Classic
         '720x1280/Interfaces/object-display-score-background.png',
         [662, 610],
       ),
+      bonusCoinsBadge: createRaster(
+        '720x1280/Interfaces/object-bonus-coins.png',
+        [159, 157],
+      ),
+      bonusCoinsEffect: createRaster(
+        '720x1280/Interfaces/object-bonus-coins-effect.png',
+        [342, 342],
+      ),
       bonusParticle: createRaster(
         '720x1280/Interfaces/object-bonus-particle.png',
         [71, 68],
       ),
+      coin: createRaster('720x1280/Interfaces/object-coin.png', [50, 49]),
       header: createRaster('720x1280/Interfaces/object-mode-results.png', [792, 159]),
       medalNone: createRaster('720x1280/Interfaces/object-medal-none.png', [154, 314]),
       menuNormal: createRaster(

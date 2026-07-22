@@ -1,6 +1,7 @@
 import {
   _decorator,
   Component,
+  Game,
   Node,
   Sprite,
   Tween,
@@ -8,6 +9,7 @@ import {
   UITransform,
   Vec3,
   director,
+  game,
   isValid,
   tween,
 } from 'cc';
@@ -48,12 +50,7 @@ import { ModuloGameplayRandom, SeededTargetRawSource } from '../domain/gameplay-
 import type { ScoreCommand } from '../domain/score-service';
 import { ScoreService } from '../domain/score-service';
 import {
-  CLASSIC_INITIAL_LEADERBOARD,
-  CLASSIC_INITIAL_TOTAL_COINS,
-  calculateClassicResultCoinBonus,
   classicLeaderboardPanelValues,
-  insertClassicResultScore,
-  type ClassicLeaderboard,
 } from '../domain/classic-result-ranking';
 import { TossTimer } from '../domain/toss-timer';
 import {
@@ -66,6 +63,10 @@ import { ClassicEntityRegistry } from './classic-entity-registry';
 import { ClassicFailPresenter } from './classic-fail-presenter';
 import { ClassicResultPresenter } from './classic-result-presenter';
 import { ClassicScoreHudPresenter } from './classic-score-hud-presenter';
+import {
+  getClassicSettingsRuntime,
+  type ClassicSettingsRuntime,
+} from './classic-settings-runtime';
 import type {
   ClassicGeneratedFruitCutEvent,
   ClassicGeneratedFruitMissEvent,
@@ -91,6 +92,8 @@ export const CLASSIC_RESOURCE_LOAD_FAILED_EVENT = 'classic-resource-load-failed'
 export const CLASSIC_RESULT_MENU_REQUESTED_EVENT = 'classic-result-menu-requested';
 export const CLASSIC_RESULT_REWARD_READY_EVENT = 'classic-result-reward-ready';
 export const CLASSIC_RESULT_RETRY_FAILED_EVENT = 'classic-result-retry-failed';
+export const CLASSIC_SETTINGS_LOAD_RECOVERED_EVENT = 'classic-settings-load-recovered';
+export const CLASSIC_SETTINGS_SAVE_FAILED_EVENT = 'classic-settings-save-failed';
 
 const TARGET_REPLAY_SEED = 0x5042_4c44;
 const NORMAL_FREE_CONTROLLER: ClassicTossControllerId = 'normal-free';
@@ -145,7 +148,7 @@ export class ClassicGameplayController extends Component {
   private readonly swishAudio = new ClassicSwishAudioGate(this.random);
   private readonly combo = new ComboService(this.random);
   private readonly fail = new FailService();
-  private readonly score = new ScoreService();
+  private score = new ScoreService();
   private readonly deferredControllers = new Set<ClassicTossControllerId>();
   private readonly cutHalfPresenters = new Set<ClassicCutHalfPresenter>();
   private readonly criticalCutHalfPresenters = new Set<ClassicCutHalfPresenter>();
@@ -168,11 +171,10 @@ export class ClassicGameplayController extends Component {
   private introLuckNode: Node | null = null;
   private terminalGameNode: Node | null = null;
   private terminalOverNode: Node | null = null;
-  private classicLeaderboard: ClassicLeaderboard = CLASSIC_INITIAL_LEADERBOARD;
+  private settingsRuntime: ClassicSettingsRuntime | null = null;
   private resultConstructionRequested = false;
   private resultMode: 0 | null = null;
   private resultScore: number | null = null;
-  private totalCoins = CLASSIC_INITIAL_TOTAL_COINS;
   private gameOver = false;
   private shuttingDown = false;
 
@@ -182,6 +184,19 @@ export class ClassicGameplayController extends Component {
       throw new Error('ClassicGameplayController requires ClassicSceneController');
     }
     this.sceneController = sceneController;
+    this.settingsRuntime = getClassicSettingsRuntime();
+    if (this.settingsRuntime.loadFailure !== null) {
+      this.node.emit(
+        CLASSIC_SETTINGS_LOAD_RECOVERED_EVENT,
+        this.settingsRuntime.loadFailure,
+      );
+      console.warn(this.settingsRuntime.loadFailure);
+    }
+    this.score = new ScoreService(
+      0,
+      0,
+      this.settingsRuntime.state.snapshot.leaderboard.first,
+    );
     const viewport = this.requireViewport();
     void this.initializeRecoveredResources(viewport).catch(
       this.onRecoveredResourceInitializationFailed,
@@ -269,6 +284,7 @@ export class ClassicGameplayController extends Component {
   };
 
   onEnable(): void {
+    game.on(Game.EVENT_HIDE, this.onGameHidden, this);
     this.node.on(CLASSIC_BLADE_MOVED_EVENT, this.onBladeMoved, this);
     this.node.on(CLASSIC_PHYSICS_STEPPED_EVENT, this.onPhysicsStepped, this);
     this.node.on(CLASSIC_SESSION_COMMAND_EVENT, this.onSessionCommand, this);
@@ -302,6 +318,7 @@ export class ClassicGameplayController extends Component {
   }
 
   onDisable(): void {
+    game.off(Game.EVENT_HIDE, this.onGameHidden, this);
     this.node.off(CLASSIC_BLADE_MOVED_EVENT, this.onBladeMoved, this);
     this.node.off(CLASSIC_PHYSICS_STEPPED_EVENT, this.onPhysicsStepped, this);
     this.node.off(CLASSIC_SESSION_COMMAND_EVENT, this.onSessionCommand, this);
@@ -421,6 +438,16 @@ export class ClassicGameplayController extends Component {
       } else {
         this.scheduleOnce(this.onSwishCooldownComplete, instruction.delaySeconds);
       }
+    }
+  };
+
+  private readonly onGameHidden = (): void => {
+    try {
+      this.settingsRuntime?.save();
+    } catch (error) {
+      const failure = error instanceof Error ? error : new Error(String(error));
+      this.node.emit(CLASSIC_SETTINGS_SAVE_FAILED_EVENT, failure);
+      console.error(failure);
     }
   };
 
@@ -897,16 +924,15 @@ export class ClassicGameplayController extends Component {
       throw new Error('Classic result must attach once at recovered z-order 1');
     }
 
-    const ranking = insertClassicResultScore(
-      configured.score,
-      this.classicLeaderboard,
-    );
+    const settings = this.requireSettingsRuntime();
+    const ranking = settings.state.recordClassicResultScore(configured.score);
     const presenter = ClassicResultPresenter.create({
       completedRunScore: configured.score,
       fonts: resources.resultFonts,
       panelValues: classicLeaderboardPanelValues(ranking.leaderboard),
+      random: this.random,
       resources: resources.result,
-      totalCoins: this.totalCoins,
+      totalCoins: settings.state.snapshot.totalCoins,
       viewport: this.requireViewport(),
     }, {
       onMenu: this.onResultMenu,
@@ -929,7 +955,6 @@ export class ClassicGameplayController extends Component {
       root.destroy();
       throw error;
     }
-    this.classicLeaderboard = ranking.leaderboard;
     this.resultPresentationRoot = root;
     this.resultPresenter = presenter;
   }
@@ -975,22 +1000,27 @@ export class ClassicGameplayController extends Component {
     this.node.emit(CLASSIC_RESULT_MENU_REQUESTED_EVENT, payload);
   };
 
-  private readonly onResultTotalCoinsEntranceComplete = (): void => {
+  private readonly onResultTotalCoinsEntranceComplete = (): number => {
     const { score } = this.requireConfiguredResultTransition();
-    const bonusCoins = calculateClassicResultCoinBonus(score);
-    const totalCoins = this.totalCoins + bonusCoins;
-    if (!Number.isSafeInteger(totalCoins)) {
-      throw new RangeError('Classic total coins must remain a safe integer');
-    }
-    this.totalCoins = totalCoins;
+    const { bonusCoins, totalCoins } = this.requireSettingsRuntime()
+      .state.awardClassicResultCoins(score);
     const payload: ClassicResultRewardReadyEvent = Object.freeze({
       bonusCoins,
       completedRunScore: score,
       totalCoins,
     });
-    // Exact reward rasters/actions follow this callback and remain the next bounded slice.
+    // The presenter creates effect/coin/badge before this mutation and the bonus label after it.
     this.node.emit(CLASSIC_RESULT_REWARD_READY_EVENT, payload);
+    return bonusCoins;
   };
+
+  private requireSettingsRuntime(): ClassicSettingsRuntime {
+    const runtime = this.settingsRuntime;
+    if (runtime === null) {
+      throw new Error('Classic settings must load before result behavior');
+    }
+    return runtime;
+  }
 
   private updatePresentation(): void {
     this.scoreHudPresenter?.setDisplayedScore(this.score.displayedScore);

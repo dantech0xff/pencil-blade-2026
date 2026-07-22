@@ -366,6 +366,9 @@ test('misses use exact recovered marker resources and the 0.25-second callback b
 
 test('terminal completion replaces Classic with the recovered result shell and explicit deferred seams', () => {
   const gameplaySource = readText('game/assets/scripts/creator/classic-gameplay-controller.ts');
+  const resultPresenterSource = readText(
+    'game/assets/scripts/creator/classic-result-presenter.ts',
+  );
   const sceneSource = readText('game/assets/scripts/creator/classic-scene-controller.ts');
   const terminalStart = gameplaySource.indexOf('  private playRecoveredTerminalPresentation(): void {');
   const resultStart = gameplaySource.indexOf('  private beginResultConstruction(): void {');
@@ -391,8 +394,11 @@ test('terminal completion replaces Classic with the recovered result shell and e
   assert.match(gameplaySource, /ClassicResultPresenter\.create\(\{/);
   assert.match(gameplaySource, /fonts: resources\.resultFonts/);
   assert.match(gameplaySource, /resources: resources\.result/);
+  assert.match(gameplaySource, /random: this\.random/);
   assert.match(gameplaySource, /panelValues: classicLeaderboardPanelValues\(ranking\.leaderboard\)/);
-  assert.match(gameplaySource, /totalCoins: this\.totalCoins/);
+  assert.match(gameplaySource, /const settings = this\.requireSettingsRuntime\(\)/);
+  assert.match(gameplaySource, /settings\.state\.recordClassicResultScore\(configured\.score\)/);
+  assert.match(gameplaySource, /totalCoins: settings\.state\.snapshot\.totalCoins/);
   assert.match(gameplaySource, /presenter\.attach\(root\)/);
   assert.match(gameplaySource, /getClassicResultRankAudioPath\(ranking\.achievedRank\)/);
 
@@ -424,8 +430,33 @@ test('terminal completion replaces Classic with the recovered result shell and e
     /restart\(onLaunched\?: \(error: Error \| null\) => void\): boolean \{[\s\S]*?return director\.loadScene\('classic', onLaunched\)/,
   );
   assert.match(gameplaySource, /CLASSIC_RESULT_MENU_REQUESTED_EVENT/);
-  assert.match(gameplaySource, /calculateClassicResultCoinBonus\(score\)/);
+  assert.match(gameplaySource, /state\.awardClassicResultCoins\(score\)/);
   assert.match(gameplaySource, /CLASSIC_RESULT_REWARD_READY_EVENT/);
+  assert.match(gameplaySource, /return bonusCoins/);
+  assert.match(
+    resultPresenterSource,
+    /ClassicResultParticleExplosionPresenter\.create\(\{[\s\S]*?resource: input\.resources\.bonusParticle/,
+  );
+  assert.match(resultPresenterSource, /particleExplosionPresenter\.attachBetween\(/);
+  assert.match(
+    resultPresenterSource,
+    /ClassicResultRewardPresenter\.create\(\{[\s\S]*?effectResource: input\.resources\.bonusCoinsEffect/,
+  );
+  assert.match(resultPresenterSource, /rewardPresenter\.present\(parent\)/);
+  assert.match(
+    gameplaySource,
+    /new ScoreService\([\s\S]*?settingsRuntime\.state\.snapshot\.leaderboard\.first/,
+  );
+  assert.match(gameplaySource, /game\.on\(Game\.EVENT_HIDE, this\.onGameHidden, this\)/);
+  assert.match(gameplaySource, /onGameHidden[\s\S]*?settingsRuntime\?\.save\(\)/);
+  assert.match(
+    gameplaySource,
+    /settingsRuntime\.loadFailure !== null[\s\S]*?CLASSIC_SETTINGS_LOAD_RECOVERED_EVENT/,
+  );
+  assert.match(
+    gameplaySource,
+    /onGameHidden[\s\S]*?catch \(error\)[\s\S]*?CLASSIC_SETTINGS_SAVE_FAILED_EVENT/,
+  );
   assert.doesNotMatch(gameplaySource, /new MainMenuLayer|scorescreen\.wav/);
 });
 

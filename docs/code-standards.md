@@ -40,8 +40,10 @@ the restoration plan depends on.
   staging, and consumer coverage. Track release rights separately.
 - Keep the exact Classic score HUD in its dedicated presenter/domain pair, including the
   recovered score icon, best-score cup, double-score panel, Linds font, entry fade, icon
-  pulse, and overlap-safe double-score actions. Leave `classic_best_1` persistence deferred
-  until the save-layer adapter exists.
+  pulse, and overlap-safe double-score actions. Seed it from the process-owned Classic Settings
+  runtime; keep `total_coins` and `classic_best_1/2/3` mutations memory-only until an explicit
+  recovered save checkpoint. After any storage-load recovery, disable writes for that process
+  so transient read failures cannot overwrite progression.
 - Keep generated Creator cache files out of hand-authored logic.
 
 ## Testing Rules

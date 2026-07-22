@@ -5,8 +5,8 @@ Status: bounded recovery complete, static evidence only
 This contract defines the minimum Classic-mode presentation needed for a clean-room Cocos
 Creator 3.8 implementation. It covers resource selection, logical layout, anchors, z-order,
 start gating, active-gameplay HUD, failure feedback, bomb feedback, terminal presentation,
-result-screen handoff, and the directly recovered audio order. It does not authorize copying
-the original assets; asset rights remain unknown.
+result-screen handoff, result particles/reward, and the directly recovered audio order. It does
+not authorize copying the original assets; asset rights remain unknown.
 
 The APK and native library were never installed, loaded, linked, or executed. All claims are
 from static resource metadata and static ARM/Thumb analysis. Native addresses below are
@@ -31,6 +31,8 @@ normalized image virtual addresses.
 | `E-BOMB` | `E-NATIVE`, `0x00145538`-`0x001465DC`, `0x00148C20`, `0x00149484` | bomb creation/cut, procedural explosion, Classic hit/finish callbacks |
 | `E-GAME-OVER` | `E-NATIVE`, `0x00149204`, `0x001493F8` | terminal text timeline and score-screen replacement |
 | `E-RESULT` | `E-NATIVE`, `0x0014CD2C`, `0x0014D034`, `0x0014D0D0` | result layout, rank update, and rank audio |
+| `E-RESULT-REWARD` | `E-NATIVE`, `0x0014DADC` | `DisplayScoreLayer::TotalCoinsCallback` reward creation/accounting order |
+| `E-RESULT-PARTICLE` | `E-NATIVE`, `0x0015FD0C`, `0x0015FD28`, `0x0015FE34`, `0x0015FED8`, `0x0015FF30` | `ParticleExplosion` cleanup, burst, entry timeline, construction, and creation |
 
 The targeted presentation ranges were regenerated from `E-NATIVE` with GNU ARM binutils
 2.27 and LLVM 19.0.1 forced to Thumbv5TE. The tools agree on the representative instruction
@@ -124,6 +126,9 @@ set rather than once per resolution tree.
 | `Buttons/button-menu-score-selected.png` | `134x129` | `200x193` | menu selected state |
 | `Interfaces/total-coins.png` | `334x131` | `464x160` | total-coins panel |
 | `Interfaces/object-bonus-particle.png` | `48x46` | `71x68` | result particle texture |
+| `Interfaces/object-bonus-coins-effect.png` | `229x229` | `342x342` | rotating reward effect |
+| `Interfaces/object-coin.png` | `34x34` | `50x49` | reward coin/root sprite |
+| `Interfaces/object-bonus-coins.png` | `130x129` | `159x157` | reward badge child |
 
 The result labels use shared `Fonts/AgencyB.ttf` and `Fonts/SlabThing.ttf`.
 
@@ -320,21 +325,19 @@ The shared result layer constructs these recovered presentation nodes:
 | menu button | inferred center | `(R.x + 0.5w(button), 0.075H)` | concurrent fade/move `1.0` to `(R.x - 0.5w(button), 0.075H)` | menu z `1` |
 | `object-medal-none` | inferred center | `(0.8W, 0.75H)` | opacity `0`, scale `0.5`; concurrent `FadeIn(1.0)` and `ScaleTo(1.0, 1)` | `1` |
 | total-coins panel | inferred center | `(L.x - 0.5w(panel), B.y + 0.2H)` | concurrent fade/move `1.75` to `(L.x + 0.3W, B.y + 0.2H)`, then total-coins callback | `1` |
-| bonus particle emitter | n/a | `(0.75W, 0.2H)` | uses `object-bonus-particle` texture | `1` |
+| bonus-particle container | n/a | `(0.75W, 0.2H)` | wait `1.65`, synchronously create `100` moving sprites, wait `9.5`, remove container | `1` |
 
 The main score label uses `Fonts/AgencyB.ttf`, point size `62 * (W / 480)`, and color
 `rgb(102, 45, 145)`. Three white panel labels use the same font at
-`32 * (W / 480)` and are placed relative to the score-panel sprite at:
+`32 * (W / 480)`. Their recovered population/visual order is `Best_1`, `Best_2`, then
+`Best_3`; relative to the score-panel sprite they are:
 
-1. `(0.55 * panelWidth, 0.55 * panelHeight)`;
-2. `(0.225 * panelWidth, 0.3375 * panelHeight)`;
-3. `(0.875 * panelWidth, 0.1875 * panelHeight)`.
+1. `Best_1`: `(0.55 * panelWidth, 0.55 * panelHeight)`;
+2. `Best_2`: `(0.225 * panelWidth, 0.3375 * panelHeight)`;
+3. `Best_3`: `(0.875 * panelWidth, 0.1875 * panelHeight)`.
 
 The total-coins label uses `Fonts/SlabThing.ttf` at `34 * (W / 480)`, explicit anchor
-`(0, 0.45)`, and panel-local position `(0.375 * panelWidth, 0.5 * panelHeight)`. The three
-panel-label meanings depend on the selected mode's score globals; their fixed visual
-positions are recovered, but this contract does not rename those values without stronger
-semantic evidence.
+`(0, 0.45)`, and panel-local position `(0.375 * panelWidth, 0.5 * panelHeight)`.
 
 After the background, main score, header, medal placeholder, and retry/menu nodes are
 constructed, the rank/cup update can request exactly one of `Sounds/thirdplace.wav`,
@@ -344,10 +347,67 @@ are constructed. No direct `Sounds/scorescreen.wav` call was recovered from
 `DisplayScoreLayer::onEnter`; its literal/resource presence alone cannot assign it to this
 transition.
 
-The callback after the `1.75`-second total-coins entrance starts further coin-award effects.
-That reward-accounting sequence is shared across modes and is outside this minimum Classic
-presentation contract; the callback boundary and its ordering are retained here so a port
-does not start it before the panel arrives.
+#### Bonus-particle explosion
+
+From `E-RESULT-PARTICLE`, the result particle container is added at z-order `1` and positioned
+at `(0.75W, 0.2H)`.
+Its recovered action sequence is `Delay(1.65)` -> synchronous burst callback -> `Delay(9.5)`
+-> remove the container with cleanup, so removal occurs at nominal result time `11.15`
+seconds. The plan/construction before the burst consumes no random draw.
+
+At `1.65` seconds the callback creates exactly `100` `object-bonus-particle` sprites. Each
+particle consumes exactly five inclusive integer draws, in this order:
+
+1. duration hundredths in `[265, 475]`, converted to `2.65` through `4.75` seconds;
+2. horizontal sign in `[-1, 1]`;
+3. horizontal magnitude in `[trunc(0.25W), trunc(0.75W)]`;
+4. vertical sign in `[-1, 1]`;
+5. vertical magnitude in `[trunc(0.25W), trunc(0.75W)]`.
+
+The local move delta is `(horizontalSign * horizontalMagnitude, verticalSign *
+verticalMagnitude)`. A zero sign therefore produces no movement on that axis even though its
+magnitude draw is still consumed. The burst consumes `500` draws total. Completed particle
+sprites are not individually auto-deleted: they remain at their endpoints until the
+container cleanup at `11.15` seconds. No fade or direct audio request is present in this
+particle path. The two recovered constructor color flags are both `false`; their native
+semantic names remain unknown.
+
+The exact draw count, order, and inclusive ranges are recovered. Native PRNG algorithm,
+seeding, and stream state are not recovered by this presentation contract, so matching this
+draw protocol must not be described as native RNG sequence parity.
+
+Particle center anchor, white color, full opacity, and ordinary sprite blend are **inferred**
+legacy engine defaults because the recovered path contains no corresponding setters. Creator
+must set these explicitly for deterministic rendering without upgrading them to recovered
+calls.
+
+#### Total-coins reward callback
+
+From `E-RESULT-REWARD`, the total-coins entrance invokes its callback only after the recovered
+`1.75`-second fade/move completes. The callback then performs this synchronous order:
+
+1. create `object-bonus-coins-effect`, add it to the result layer at z-order `1` and
+   `(0.675W, 0.2H)`, then run `RepeatForever(RotateBy(2.5, +360))`;
+2. create `object-coin` and add it to the result layer after the effect, also at z-order `1`
+   and `(0.675W, 0.2H)`;
+3. create `object-bonus-coins` and add it to the coin at z-order `1`, at legacy lower-left
+   content position `(w(badge) / 1.25, h(badge) / 1.25)`;
+4. perform the Classic coin-accounting mutation; the bonus is signed truncation toward zero
+   of float32 `score * 0.6`, and its addition to total coins uses signed 32-bit wraparound;
+5. format that bonus with `%d`, create the `Fonts/SlabThing.ttf` label at
+   `34 * (W / 480)` points with anchor `(0.5, -0.1)`, and add it to the coin after the badge
+   at z-order `1` and legacy lower-left content position `(w(badge) / 1.25, 0)`.
+
+The equal-z insertion order is therefore effect -> coin at the result root and badge -> label
+inside the coin, with accounting specifically between badge and label creation. Creator-local
+child positions must convert the recovered lower-left content coordinates by subtracting
+`(0.5w(coin), 0.5h(coin))`. The two root positions are direct `W/H` products; no visible-rect
+origin is added.
+
+The effect rotation is perpetual until its owning result layer is cleaned up. The callback
+contains no direct audio, fade, move, expiry, or removal for the effect, coin, badge, or bonus
+label. Center anchors, opacity `255`, scale `1`, and initial rotation `0` for these three
+sprites are **inferred** legacy defaults, not recovered setters.
 
 ## Audio ordering ledger
 
@@ -362,6 +422,7 @@ does not start it before the panel arrives.
 | `GAME`/`OVER` | no direct request | recovered absence in this range |
 | result replacement | `stopAllEffects` before Classic removal/result insertion | recovered |
 | result rank update | effects-enabled conditional third/second/first-place sound after header/medal/menu creation and before remaining labels/coins | recovered |
+| result particle/reward callbacks | no direct request | recovered absence in these ranges |
 | generic result ambience | `scorescreen.wav` use/order not linked | unknown |
 
 An implementation must keep effects-disabled branches free of these audio requests. It must
@@ -382,7 +443,9 @@ not add a sound merely because a matching-looking WAV exists in the resource map
 | bomb physics gate | `PhysicsWorldGate` adapter | map `StopPhysicsWorld(true)` before `-10` to pause and `StopPhysicsWorld(false)` after the guarded game-over call to resume |
 | bomb flash | `BombExplosionPresenter` | deterministic delay -> full-visible-rect white quad -> white triangle phases; do not replace with an unproved smoke sprite |
 | terminal text | `ClassicGameOverPresenter` | one-shot guard, parallel `GAME`/`OVER` tracks, result event only from `GAME` completion |
-| results | `DisplayScore` scene/prefab in the same gameplay container | stop effects, replace Classic, create fixed layout, then allow rank audio/coin callback in recovered order |
+| results | `DisplayScore` scene/prefab in the same gameplay container | stop effects, replace Classic, create fixed layout, then allow rank audio and timed result callbacks in recovered order |
+| result particles | `ClassicResultParticleExplosionPresenter` | `1.65` delay, exact 100-sprite/five-draw burst protocol, retained children, and container cleanup at `11.15`; do not claim native RNG stream parity |
+| total-coins reward | `ClassicResultRewardPresenter` | invoke after `1.75`; preserve effect -> coin -> badge -> accounting -> label order and perpetual effect rotation |
 | audio | `EffectsAudioService` | effects gating, non-looping requests, retained bomb handles, and `stopAllEffects` boundary |
 
 Recommended Creator hierarchy, where names are new implementation names rather than recovered
@@ -405,6 +468,12 @@ GameplayScene
       StartGate
       TerminalOverlay
     DisplayScoreRoot             replaces ClassicModeRoot, runtime z 1
+      TotalCoinsPanel
+      ResultParticleExplosion
+      ResultRewardEffect
+      ResultRewardCoin
+        ResultRewardBadge
+        ResultRewardBonusLabel
 ```
 
 Creator's scene/UI sorting does not reproduce old equal-z sibling behavior automatically in
@@ -454,9 +523,17 @@ with the following static and Creator-side tests:
 10. Assert parallel `GAME`/`OVER` tracks and exact positions. Only `GAME` completion after
     nominal `2.5` seconds may emit `showResults`.
 11. Assert result transition order `stopAllEffects -> configure result -> remove Classic ->
-    add result(z=1)`, then validate fixed result layout, `1.75` total-coins callback boundary,
-    and conditional rank audio.
-12. Lint the asset/audio catalog so `bombsmoke.png`, `text-go.png`, medal rank sprites,
+    add result(z=1)`, then validate fixed result layout, panel values in `Best_1`, `Best_2`,
+    `Best_3` visual order, and conditional rank audio.
+12. With a scripted random adapter and fake clock, assert zero draws before `1.65`, then
+    exactly `500` draws for `100` particles in the recovered five-draw order/ranges. Assert
+    per-particle move durations/deltas, no fades, retained completed children, and one container
+    cleanup at `11.15`; this validates draw protocol, not native RNG sequence parity.
+13. Assert the total-coins entrance invokes its callback only after `1.75`, then effect ->
+    coin -> badge -> accounting -> label. Assert equal-z sibling order, coordinate conversion,
+    float32 Classic bonus math, signed 32-bit total update, perpetual `2.5`-second `+360`
+    rotation, and absence of callback-local audio, fade, move, expiry, or removal.
+14. Lint the asset/audio catalog so `bombsmoke.png`, `text-go.png`, medal rank sprites,
     `object-new-best.png`, `fruitfail.wav`, and `scorescreen.wav` cannot silently become
     required Classic dependencies without new evidence and a contract update.
 
@@ -476,6 +553,11 @@ These are contract fixtures, not pixel-golden claims from an original runtime.
 | center anchors where no setter exists | inferred | legacy `CCSprite`/label defaults; make explicit in Creator |
 | equal-z rendering among every base-gameplay child | partially recovered | known additions use z `1`; complete insertion order of all base children remains unknown |
 | `GOOD`/`LUCK` is Classic's only recovered countdown/start gate | recovered | high; direct Classic construction; no Classic `text-go` xref |
+| result panel visual values `Best_1`, `Best_2`, `Best_3` | recovered | high; direct label population order |
+| result particle timing, 100-sprite burst, draw protocol, and retained-child lifetime | recovered | high; direct constructor/callback/action order and constants |
+| total-coins effect -> coin -> badge -> accounting -> label callback order | recovered | high; direct call/insertion order and constants |
+| particle texture render defaults and reward sprite defaults without setters | inferred | legacy engine defaults; explicit Creator inputs, not recovered calls |
+| original PRNG algorithm, seed, stream state, and exact sequence parity | unknown/not required | recovered draw protocol does not establish generator parity |
 | `fruitfail.wav` and `scorescreen.wav` ownership/timing | unknown | resource/literal presence only |
 | `bombsmoke`, rank medal sprites, and `object-new-best` Classic use | unknown/not required | paired availability without direct covered-path reference |
 | bomb physics-world gate around terminal flow | recovered | `StopPhysicsWorld(true)` precedes `-10`; guarded game over precedes `StopPhysicsWorld(false)` |
@@ -487,4 +569,6 @@ These are contract fixtures, not pixel-golden claims from an original runtime.
 - Which subsystem, if any, owns `fruitfail.wav` and `scorescreen.wav` in the original runtime?
 - Are medal-rank and `object-new-best` sprites selected through a dynamically constructed path
   outside the recovered result range?
+- What original PRNG algorithm, seed, and shared stream state supplied the result-particle
+  draws?
 - What are the complete equal-z insertion relationships among every base-gameplay child?

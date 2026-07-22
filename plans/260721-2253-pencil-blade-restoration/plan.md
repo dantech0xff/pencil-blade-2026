@@ -45,8 +45,8 @@ Verified starting point:
   bodies, fixtures, velocities, collision filters, ray casts, and scoring reactions from
   the native binary/resources and express them as testable contracts.
 - Keep the exact Classic score HUD in the recovered slice, including the score icon,
-  best-score cup, double-score panel, and `Fonts/Linds.ttf`; `classic_best_1` persistence
-  remains deferred.
+  best-score cup, double-score panel, and `Fonts/Linds.ttf`; seed it from the recovered
+  `classic_best_1` Settings key.
 - Android is primary. Creator 3.8 requires API 21+, so original min SDK 9 is a documented platform-envelope change.
 - Keep archival/decompiled material separate from ship-ready content and rights status.
 - Presentation restoration is complete only after 100% inventory, staging, and consumer
@@ -91,11 +91,15 @@ Verified starting point:
   deferred. The static contracts and Creator boundary now also cover the exact mode-0 result
   entry: completed-run score, result rasters/fonts, three-rank insertion and cues, selected
   retry/menu frames, independent entrance actions, and the recovered coin-bonus callback.
-  A fresh Preview reached that 11-child shell, confirmed result removal restores the prior
-  Physics2D lifecycle, and reloaded a running Classic scene through an actual Retry click with
-  no error overlay. Retry remains mounted and rearms on immediate or asynchronous load failure.
-  Leaderboard/coin persistence, reward visuals, Main Menu replacement, and native same-parent
-  retry reconstruction remain open rather than being approximated.
+  The integrated continuation now adds the exact delayed 100-sprite result burst, rotating
+  effect/coin/badge/bonus-label tree, signed-int32 coin accounting, and process-owned storage
+  for `total_coins` plus `classic_best_1/2/3`. App-hide saves are active; Retry mutations remain
+  memory-only, and unreadable target storage recovers to exact defaults with diagnostics while
+  writes stay disabled for that process to prevent progression loss. Preview
+  confirms result removal restores the prior Physics2D lifecycle and a real Retry click reloads
+  a running Classic scene without an error overlay. Main Menu replacement/exit-save, full
+  first-launch Settings initialization, and native same-parent Retry remain open rather than
+  being approximated.
   The exact standard-bomb raster/audio/entity foundation and Concurrent batch partition are
   also contract-tested, while bomb controllers remain deferred pending non-invented procedural
   explosion geometry. Project completion still requires the remaining resource consumers and

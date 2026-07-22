@@ -49,7 +49,11 @@ export class UITransform {
 }
 
 export class Sprite {
-  constructor() { this.sizeMode = 0; this.spriteFrame = null; }
+  constructor() {
+    this.color = new Color(255, 255, 255, 255);
+    this.sizeMode = 0;
+    this.spriteFrame = null;
+  }
 }
 Sprite.SizeMode = Object.freeze({ CUSTOM: 2 });
 
@@ -73,6 +77,7 @@ export class Node {
     this.children = [];
     this.components = new Map();
     this.destroyed = false;
+    this.eulerAngles = { x: 0, y: 0, z: 0 };
     this.events = new Map();
     this.lastRequestedSiblingIndex = null;
     this.layer = 0;
@@ -102,13 +107,24 @@ export class Node {
     return component;
   }
   getComponent(Type) { return this.components.get(Type) ?? null; }
-  setParent(parent) {
+  setParent(parent, keepWorldTransform = false) {
+    const world = this.worldPosition;
     if (this.parent !== null) {
       const index = this.parent.children.indexOf(this);
       if (index >= 0) this.parent.children.splice(index, 1);
     }
     this.parent = parent;
     if (parent !== null) parent.children.push(this);
+    if (keepWorldTransform) {
+      const parentWorld = parent === null
+        ? { x: 0, y: 0, z: 0 }
+        : parent.worldPosition;
+      this.position = {
+        x: world.x - parentWorld.x,
+        y: world.y - parentWorld.y,
+        z: world.z - parentWorld.z,
+      };
+    }
   }
   setPosition(x, y, z) { this.position = { x, y, z }; }
   setWorldPosition(x, y, z) {
@@ -119,6 +135,7 @@ export class Node {
     this.position = { x: x - parent.x, y: y - parent.y, z: z - parent.z };
   }
   setScale(x, y, z) { this.scale = { x, y, z }; }
+  setRotationFromEuler(x, y, z) { this.eulerAngles = { x, y, z }; }
   setSiblingIndex(index) {
     this.lastRequestedSiblingIndex = index;
     if (this.parent === null) return;
@@ -145,6 +162,8 @@ export class Node {
   }
   listenerCount(type) { return (this.events.get(type) ?? []).length; }
   destroy() {
+    if (this.destroyed) return;
+    for (const child of [...this.children]) child.destroy();
     this.destroyed = true;
     this.active = false;
     this.events.clear();
@@ -225,6 +244,7 @@ interface StubNode {
   readonly activeInHierarchy: boolean;
   readonly children: StubNode[];
   destroyed: boolean;
+  readonly eulerAngles: Readonly<{ x: number; y: number; z: number }>;
   lastRequestedSiblingIndex: number | null;
   layer: number;
   readonly name: string;
@@ -235,6 +255,7 @@ interface StubNode {
   emit(type: string): void;
   getComponent<T>(Type: new () => T): T | null;
   listenerCount(type: string): number;
+  setParent(parent: StubNode | null, keepWorldTransform?: boolean): void;
   setPosition(x: number, y: number, z: number): void;
 }
 
@@ -259,7 +280,10 @@ interface Harness {
 
 interface LoadedResultResources {
   readonly background: LoadedRaster;
+  readonly bonusCoinsBadge: LoadedRaster;
+  readonly bonusCoinsEffect: LoadedRaster;
   readonly bonusParticle: LoadedRaster;
+  readonly coin: LoadedRaster;
   readonly header: LoadedRaster;
   readonly medalNone: LoadedRaster;
   readonly menuNormal: LoadedRaster;
@@ -276,6 +300,9 @@ interface ResultInput {
     readonly slabThing: Readonly<{ canonicalPath: string; font: StubFont }>;
   }>;
   readonly panelValues: readonly [number, number, number];
+  readonly random: Readonly<{
+    nextIntInclusive(minimumInclusive: number, maximumInclusive: number): number;
+  }>;
   readonly resources: LoadedResultResources;
   readonly totalCoins: number;
   readonly viewport: Readonly<{ height: number; width: number; x: number; y: number }>;
@@ -316,10 +343,11 @@ test('both asset trees construct exact native-order sibling visuals, resources, 
       'ClassicResultPanelLabel-2',
       'ClassicResultPanelLabel-3',
       'ClassicResultTotalCoinsPanel',
+      'ClassicResultParticleExplosion',
       'ClassicResultTotalCoinsLabel',
     ]);
-    assert.equal(owned.some(({ name }) => name.includes('Bonus')), false);
-    assert.equal(owned.length, 11);
+    assert.equal(owned.some(({ name }) => name.includes('Reward')), false);
+    assert.equal(owned.length, 12);
 
     for (const [visual, resource] of [
       [presenter.scorePanel, resources.background],
@@ -354,7 +382,7 @@ test('both asset trees construct exact native-order sibling visuals, resources, 
         presenter.panelLabels[index].label as unknown as StubLabel,
         harness.agencyFont,
         presenter.layout.panelLabels[index].fontSize,
-        String([11, 33, 22][index]),
+        String([33, 22, 11][index]),
         CLASSIC_RESULT_WHITE,
       );
       assert.deepEqual(
@@ -389,7 +417,7 @@ test('both asset trees construct exact native-order sibling visuals, resources, 
 
     assert.deepEqual(parent.children.map(({ name }) => name), owned.map(({ name }) => name));
     assert.deepEqual(owned.map(({ lastRequestedSiblingIndex }) => lastRequestedSiblingIndex), [
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11,
     ]);
     for (const node of owned) {
       assert.equal(node.layer, 27);
@@ -441,10 +469,13 @@ test('score, shell, and total-coins actions preserve exact independent durations
   const callbackStates: Array<Readonly<{ complete: boolean; x: number }>> = [];
   let presenter: InstanceType<typeof ClassicResultPresenter>;
   const harness = createHarness('480x800', {
-    onTotalCoinsEntranceComplete: () => callbackStates.push({
-      complete: presenter.state.totalCoinsEntranceComplete,
-      x: presenter.totalCoinsPanel.node.worldPosition.x,
-    }),
+    onTotalCoinsEntranceComplete: () => {
+      callbackStates.push({
+        complete: presenter.state.totalCoinsEntranceComplete,
+        x: presenter.totalCoinsPanel.node.worldPosition.x,
+      });
+      return 24;
+    },
   });
   presenter = harness.presenter;
   presenter.attach(new cc.Node('Parent') as never);
@@ -505,13 +536,36 @@ test('score, shell, and total-coins actions preserve exact independent durations
     complete: true,
     x: presenter.layout.totalCoinsPanel.final.worldPosition.x,
   }]);
+  assert.equal(presenter.rewardPresenter.state.bonusCoins, 24);
+  assert.equal(presenter.rewardPresenter.bonusLabel?.label.string, '24');
   presenter.updateAction(10);
   presenter.updateAction(0);
   assert.equal(callbackStates.length, 1);
 });
 
 test('one overshooting action tick lands every node exactly and completes total coins once', () => {
-  const harness = createHarness('720x1280');
+  let presenter: InstanceType<typeof ClassicResultPresenter>;
+  let rewardBoundary: Readonly<{
+    readonly awardAttempted: boolean;
+    readonly bonusLabelAbsent: boolean;
+    readonly particleCount: number;
+    readonly particleDisposed: boolean;
+    readonly presenting: boolean;
+  }> | null = null;
+  const harness = createHarness('720x1280', {
+    onTotalCoinsEntranceComplete: () => {
+      rewardBoundary = Object.freeze({
+        awardAttempted: presenter.rewardPresenter.state.awardAttempted,
+        bonusLabelAbsent: presenter.rewardPresenter.bonusLabel === null,
+        particleCount: presenter.particleExplosionPresenter.state.particleCount,
+        particleDisposed: presenter.particleExplosionPresenter.state.disposed,
+        presenting: presenter.rewardPresenter.state.presenting,
+      });
+      harness.events.push('total-coins-complete');
+      return 192;
+    },
+  });
+  presenter = harness.presenter;
   harness.presenter.attach(new cc.Node('Parent') as never);
   harness.presenter.updateAction(100);
 
@@ -519,12 +573,27 @@ test('one overshooting action tick lands every node exactly and completes total 
     attached: true,
     disposed: false,
     navigation: 'none',
+    particleBurstStarted: true,
+    rewardPresented: true,
     scorePanelElapsedActionSeconds: 0.75,
     shellElapsedActionSeconds: 1,
     totalCoinsElapsedActionSeconds: 1.75,
     totalCoinsEntranceComplete: true,
   });
   assert.deepEqual(harness.events, ['total-coins-complete']);
+  assert.deepEqual(rewardBoundary, {
+    awardAttempted: true,
+    bonusLabelAbsent: true,
+    particleCount: 100,
+    particleDisposed: false,
+    presenting: true,
+  });
+  assert.equal(harness.presenter.particleExplosionPresenter.state.disposed, true);
+  assert.equal(harness.presenter.rewardPresenter.state.bonusCoins, 192);
+  assert.equal(
+    harness.presenter.rewardPresenter.state.rotationDegrees,
+    ((100 - 1.75) % 2.5) / 2.5 * 360,
+  );
   for (const [presented, layout] of [
     [harness.presenter.scorePanel, harness.presenter.layout.scorePanel],
     [harness.presenter.resultHeader, harness.presenter.layout.resultHeader],
@@ -786,7 +855,7 @@ test('dispose is idempotent, removes touch handlers, destroys all visuals, and c
     assert.equal(harness.presenter.dispose(), false);
     assert.equal(harness.presenter.isDisposed, true);
     assert.equal(harness.presenter.isAttached, false);
-    assert.equal(owned.length, 11);
+    assert.equal(owned.length, 12);
     assert.equal(owned.every(({ destroyed }) => destroyed), true);
     assert.equal(owned.every(({ parent }) => parent === null), true);
     for (const type of Object.values(cc.Node.EventType)) {
@@ -846,7 +915,12 @@ function createHarness(
         font: slabFont,
       }),
     }),
-    panelValues: Object.freeze([11, 33, 22]) as readonly [number, number, number],
+    panelValues: Object.freeze([33, 22, 11]) as readonly [number, number, number],
+    random: Object.freeze({
+      nextIntInclusive(minimumInclusive: number, maximumInclusive: number): number {
+        return Math.trunc((minimumInclusive + maximumInclusive) / 2);
+      },
+    }),
     resources,
     totalCoins: 777,
     viewport: Object.freeze(viewport),
@@ -863,7 +937,10 @@ function lifecycleCallbacks(events: string[]) {
     onMenu: () => events.push('menu'),
     onRankPresentationBoundary() {},
     onRetry: () => events.push('retry'),
-    onTotalCoinsEntranceComplete: () => events.push('total-coins-complete'),
+    onTotalCoinsEntranceComplete: () => {
+      events.push('total-coins-complete');
+      return 192;
+    },
   };
 }
 
@@ -871,7 +948,10 @@ function loadedResources(assetTree: AssetTree): LoadedResultResources {
   const resources = getClassicResultResources(assetTree);
   return Object.freeze({
     background: loadedRaster(resources.background),
+    bonusCoinsBadge: loadedRaster(resources.bonusCoinsBadge),
+    bonusCoinsEffect: loadedRaster(resources.bonusCoinsEffect),
     bonusParticle: loadedRaster(resources.bonusParticle),
+    coin: loadedRaster(resources.coin),
     header: loadedRaster(resources.header),
     medalNone: loadedRaster(resources.medalNone),
     menuNormal: loadedRaster(resources.menuNormal),

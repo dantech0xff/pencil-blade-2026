@@ -5,6 +5,7 @@ import {
   CLASSIC_INITIAL_LEADERBOARD,
   CLASSIC_INITIAL_TOTAL_COINS,
   CLASSIC_RESULT_COIN_FACTOR,
+  awardClassicResultCoins,
   calculateClassicResultCoinBonus,
   classicLeaderboardPanelValues,
   insertClassicResultScore,
@@ -57,7 +58,7 @@ test('Classic rank comparisons use >= while scores below third place do not muta
   });
 });
 
-test('first-run zero defaults promote zero and panel values follow Best_1, Best_3, Best_2', () => {
+test('first-run zero defaults promote zero and panel values follow Best_1, Best_2, Best_3', () => {
   const result = insertClassicResultScore(0, CLASSIC_INITIAL_LEADERBOARD);
   assert.equal(result.achievedRank, 1);
   assert.deepEqual(result.leaderboard, { first: 0, second: 0, third: 0 });
@@ -65,7 +66,7 @@ test('first-run zero defaults promote zero and panel values follow Best_1, Best_
     first: 300,
     second: 200,
     third: 100,
-  }), [300, 100, 200]);
+  }), [300, 200, 100]);
 });
 
 test('Classic leaderboard rejects unsafe or unordered state', () => {
@@ -94,5 +95,13 @@ test('Classic result coin callback keeps the recovered default and float32 60% t
   assert.equal(calculateClassicResultCoinBonus(1), 0);
   assert.equal(calculateClassicResultCoinBonus(5), 3);
   assert.equal(calculateClassicResultCoinBonus(-5), -3);
+  assert.deepEqual(awardClassicResultCoins(2014, 5), {
+    bonusCoins: 3,
+    totalCoins: 2017,
+  });
+  assert.deepEqual(awardClassicResultCoins(0x7fff_ffff, 2), {
+    bonusCoins: 1,
+    totalCoins: -0x8000_0000,
+  });
   assert.throws(() => calculateClassicResultCoinBonus(0x8000_0000), RangeError);
 });

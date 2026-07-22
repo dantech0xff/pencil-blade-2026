@@ -22,6 +22,11 @@ export const CLASSIC_INITIAL_LEADERBOARD: ClassicLeaderboard = Object.freeze({
 export const CLASSIC_INITIAL_TOTAL_COINS = 2014;
 export const CLASSIC_RESULT_COIN_FACTOR = Math.fround(0.6);
 
+export interface ClassicResultCoinAward {
+  readonly bonusCoins: number;
+  readonly totalCoins: number;
+}
+
 /**
  * Inserts a completed Classic score using the native >= comparisons.
  * Equal scores therefore promote through the matching rank tier.
@@ -30,7 +35,7 @@ export function insertClassicResultScore(
   completedScore: number,
   current: ClassicLeaderboard,
 ): ClassicLeaderboardUpdate {
-  assertSafeInteger(completedScore, 'completedScore');
+  assertSignedInt32(completedScore, 'completedScore');
   assertLeaderboard(current);
 
   if (completedScore >= current.first) {
@@ -48,15 +53,15 @@ export function insertClassicResultScore(
   });
 }
 
-/** Native podium labels are created in Best_1, Best_3, Best_2 order. */
+/** Native podium labels are populated in Best_1, Best_2, Best_3 order. */
 export function classicLeaderboardPanelValues(
   leaderboard: ClassicLeaderboard,
 ): readonly [number, number, number] {
   assertLeaderboard(leaderboard);
   return Object.freeze([
     leaderboard.first,
-    leaderboard.third,
     leaderboard.second,
+    leaderboard.third,
   ]);
 }
 
@@ -66,6 +71,19 @@ export function calculateClassicResultCoinBonus(completedScore: number): number 
   return Math.trunc(Math.fround(
     Math.fround(completedScore) * CLASSIC_RESULT_COIN_FACTOR,
   ));
+}
+
+/** Applies the native signed 32-bit ARM addition used by TotalCoinsCallback. */
+export function awardClassicResultCoins(
+  currentTotalCoins: number,
+  completedScore: number,
+): ClassicResultCoinAward {
+  assertSignedInt32(currentTotalCoins, 'currentTotalCoins');
+  const bonusCoins = calculateClassicResultCoinBonus(completedScore);
+  return Object.freeze({
+    bonusCoins,
+    totalCoins: (currentTotalCoins + bonusCoins) | 0,
+  });
 }
 
 function update(
@@ -88,9 +106,9 @@ function assertLeaderboard(value: ClassicLeaderboard): void {
   if (value === null || typeof value !== 'object') {
     throw new TypeError('current leaderboard must be an object');
   }
-  assertSafeInteger(value.first, 'current.first');
-  assertSafeInteger(value.second, 'current.second');
-  assertSafeInteger(value.third, 'current.third');
+  assertSignedInt32(value.first, 'current.first');
+  assertSignedInt32(value.second, 'current.second');
+  assertSignedInt32(value.third, 'current.third');
   if (value.first < value.second || value.second < value.third) {
     throw new RangeError('current leaderboard must be ordered first >= second >= third');
   }

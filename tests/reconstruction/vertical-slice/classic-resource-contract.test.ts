@@ -308,9 +308,21 @@ test('Classic result rasters preserve exact canonical paths and paired dimension
         canonicalPath: '480x800/Interfaces/object-display-score-background.png',
         dimensions: { width: 442, height: 407 },
       },
+      bonusCoinsBadge: {
+        canonicalPath: '480x800/Interfaces/object-bonus-coins.png',
+        dimensions: { width: 130, height: 129 },
+      },
+      bonusCoinsEffect: {
+        canonicalPath: '480x800/Interfaces/object-bonus-coins-effect.png',
+        dimensions: { width: 229, height: 229 },
+      },
       bonusParticle: {
         canonicalPath: '480x800/Interfaces/object-bonus-particle.png',
         dimensions: { width: 48, height: 46 },
+      },
+      coin: {
+        canonicalPath: '480x800/Interfaces/object-coin.png',
+        dimensions: { width: 34, height: 34 },
       },
       header: {
         canonicalPath: '480x800/Interfaces/object-mode-results.png',
@@ -346,9 +358,21 @@ test('Classic result rasters preserve exact canonical paths and paired dimension
         canonicalPath: '720x1280/Interfaces/object-display-score-background.png',
         dimensions: { width: 662, height: 610 },
       },
+      bonusCoinsBadge: {
+        canonicalPath: '720x1280/Interfaces/object-bonus-coins.png',
+        dimensions: { width: 159, height: 157 },
+      },
+      bonusCoinsEffect: {
+        canonicalPath: '720x1280/Interfaces/object-bonus-coins-effect.png',
+        dimensions: { width: 342, height: 342 },
+      },
       bonusParticle: {
         canonicalPath: '720x1280/Interfaces/object-bonus-particle.png',
         dimensions: { width: 71, height: 68 },
+      },
+      coin: {
+        canonicalPath: '720x1280/Interfaces/object-coin.png',
+        dimensions: { width: 50, height: 49 },
       },
       header: {
         canonicalPath: '720x1280/Interfaces/object-mode-results.png',
@@ -421,7 +445,10 @@ test('Creator loader includes the exact result SpriteFrames and fail-closed resu
   const loaderSource = readText('game/assets/scripts/creator/classic-resource-loader.ts');
   const resultFields = [
     'background',
+    'bonusCoinsBadge',
+    'bonusCoinsEffect',
     'bonusParticle',
+    'coin',
     'header',
     'medalNone',
     'menuNormal',

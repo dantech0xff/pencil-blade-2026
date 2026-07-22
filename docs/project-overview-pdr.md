@@ -13,8 +13,9 @@ intro/terminal/fail-marker art, score icon, best-score cup, double-score panel, 
 ordinary intact/cut fruit, critical particles, and 23 reviewed core/ordinary-bomb audio clips.
 The exact standard-bomb raster, body, fixture, cut guard, and retained-audio seam are also
 implemented and tested, but bomb controllers remain deferred until the unresolved procedural
-explosion geometry can be restored without guessing. The `classic_best_1` persistence adapter
-is still deferred and unimplemented. This is a bounded Classic checkpoint, not presentation
+explosion geometry can be restored without guessing. The mode-0 result now includes its exact
+rank order, delayed particle burst, rotating reward tree, and the Classic-relevant
+`total_coins` plus `classic_best_1/2/3` persistence subset. This is a bounded Classic checkpoint, not presentation
 completion: most resource consumers and the full scene/prefab map remain open.
 
 ## Authority and evidence
@@ -49,7 +50,8 @@ replay, and device comparison are unavailable and are not project gates.
   subset that the playable slice consumes.
 - The Classic score HUD now uses the exact recovered score icon, best-score cup,
   double-score panel, and `Fonts/Linds.ttf`. Best-score display follows the authoritative
-  score service, while the `classic_best_1` persistence adapter remains deferred.
+  score service seeded from persisted `classic_best_1`; app hide saves all four restored
+  Classic Settings integers. Full first-launch/Main Menu Settings behavior remains open.
 - Presentation restoration is complete only when the canonical user-supplied sample project
   has 100% inventory, staging, and consumer coverage for every resource actually present.
 - No canonical graphics, animation frame, sound, music, font, shader/material, level/layout,
@@ -69,8 +71,8 @@ replay, and device comparison are unavailable and are not project gates.
 - Visual, layout, animation, shader/material, audio, level/progression, timing, input, physics,
   score, state, and save behavior maps from evidence to contracts, reconstruction fixtures,
   tests, and Creator implementation.
-- Best-score presentation in the Classic HUD is exact; the `classic_best_1` persistence adapter
-  remains a separate save-layer task.
+- Best-score presentation in the Classic HUD is exact and backed by `classic_best_1`; the
+  remaining Settings fields and first-launch/Main Menu save checkpoints remain separate tasks.
 - The Android build contains only the clean-room TypeScript/Creator implementation and assets
   whose use is permitted for the chosen release scope.
 - `99%` is the future acceptance target for a versioned static-contract/resource fidelity
