@@ -15,8 +15,8 @@ The workspace now contains the Creator foundation, Classic contract/test baselin
 exact recovered APK game assets in a Creator bundle, and a bounded normal-fruit loop using
 the recovered background, text, intact/cut fruit, critical-particle, and core-audio resources.
 The exact score HUD now adds the recovered score icon, best-score cup, double-score panel,
-and `Fonts/Linds.ttf` through a dedicated presenter, while `classic_best_1` persistence
-remains deferred.
+and `Fonts/Linds.ttf` through a dedicated presenter. Process-owned persistence now covers
+`total_coins`, `classic_best_1/2/3`, and `enable_effect` in recovered order.
 The remaining scene/prefab map, eight deferred toss controllers, most presentation consumers,
 and runtime physics-equivalence gate keep the architecture decision in progress.
 
@@ -172,6 +172,10 @@ Map the recovered SharedPreferences keys/defaults into a versioned TypeScript sa
 Legacy ads, review, social, and network bridges are excluded. Migration reads may recognize
 legacy keys, but no JNI/native compatibility layer is permitted.
 
+The current bounded runtime reads and writes `total_coins`, `classic_best_1/2/3`, then Boolean
+`enable_effect`, whose recovered default is `true`. Result mutations remain memory-only until
+the app-hide save checkpoint. Full first-launch Settings and Main Menu exit-save remain open.
+
 ## Verification Gates
 
 1. Pure domain tests for timers, RNG draw order, toss graph, combo/score/fail, and state.
@@ -180,7 +184,9 @@ legacy keys, but no JNI/native compatibility layer is permitted.
 3. Creator integration tests for the selected public manual variable-step policy, dynamic
    trajectories, post-step synchronization, deferred lifecycle behavior, and rendered rotation.
 4. Presentation/resource tests against registered hashes, geometry, and command order.
-5. Build-content audit rejecting APKs, `libgame.so`, extracted native/decompiler output,
+5. Executable controller tests for same-parent Retry success, pre-commit rollback, and
+   post-commit Result-cleanup isolation.
+6. Build-content audit rejecting APKs, `libgame.so`, extracted native/decompiler output,
    old Cocos2d-x code/runtime, secrets, and obsolete platform SDKs. The audit hashes every
    archive entry, parses exact ZIP records, recurses through bounded nested archives, and
    permits ELF only at the pinned Creator 3.8.8 `libcocos.so` boundary.
@@ -190,9 +196,10 @@ legacy keys, but no JNI/native compatibility layer is permitted.
 - The Classic Canvas map is authoritative for the three scene components, but the remaining
   scenes, prefabs, presentation consumers, and non-normal toss factories are not authored yet.
 - Creator Preview has exercised exact ordinary-fruit presentation, trajectories, cut halves,
-  core audio, cut/score, three-miss game over, and scene-reload retry. Exact contact, ray
-  traversal order, deferred destruction, and deterministic trajectory equivalence still need
-  an executable harness.
+  core audio, cut/score, three-miss game over, and two same-parent Result->Retry cycles without
+  a reload or game/Cocos console error. The executable Retry harness covers construction,
+  early/late physics, post-parent attachment, commit, and Result-cleanup failures. Exact contact,
+  ray traversal order, deferred destruction, and deterministic trajectory equivalence remain open.
 - The canonical sample-project resource manifest/root remains unresolved; presentation
   completion and the `99%` metric both stay blocked on that source.
 - BombElectric contact compatibility remains unresolved.

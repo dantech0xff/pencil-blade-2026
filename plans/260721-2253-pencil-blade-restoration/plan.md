@@ -87,19 +87,20 @@ Verified starting point:
   cut-half, critical-particle, score-HUD, and core-audio consumers in the bounded Classic loop.
   Exact recovered fail-marker resources and action timings are now integrated,
   contract-tested, and visually verified in a fresh `720x1280` Preview after invalidating
-  Creator's stale code cache. The score HUD is exact; `classic_best_1` persistence remains
-  deferred. The static contracts and Creator boundary now also cover the exact mode-0 result
+  Creator's stale code cache. The score HUD is exact and its `classic_best_1` baseline now
+  comes from the process-owned persistence runtime. The static contracts and Creator boundary
+  now also cover the exact mode-0 result
   entry: completed-run score, result rasters/fonts, three-rank insertion and cues, selected
   retry/menu frames, independent entrance actions, and the recovered coin-bonus callback.
   The integrated continuation now adds the exact delayed 100-sprite result burst, rotating
   effect/coin/badge/bonus-label tree, signed-int32 coin accounting, and process-owned storage
-  for `total_coins` plus `classic_best_1/2/3`. App-hide saves are active; Retry mutations remain
-  memory-only, and unreadable target storage recovers to exact defaults with diagnostics while
-  writes stay disabled for that process to prevent progression loss. Preview
-  confirms result removal restores the prior Physics2D lifecycle and a real Retry click reloads
-  a running Classic scene without an error overlay. Main Menu replacement/exit-save, full
-  first-launch Settings initialization, and native same-parent Retry remain open rather than
-  being approximated.
+  for `total_coins`, `classic_best_1/2/3`, and `enable_effect` in recovered order with default
+  effect `true`. App-hide saves are active; Retry mutations remain memory-only, and unreadable
+  target storage recovers to exact defaults with diagnostics while writes stay disabled for
+  that process to prevent progression loss. Preview confirms the result boundary and a same-
+  parent Result->Retry cycle at the captured parent without a reload or error overlay. Main
+  Menu replacement/exit-save and full first-launch Settings initialization remain open rather
+  than being approximated.
   The exact standard-bomb raster/audio/entity foundation and Concurrent batch partition are
   also contract-tested, while bomb controllers remain deferred pending non-invented procedural
   explosion geometry. Project completion still requires the remaining resource consumers and
@@ -145,6 +146,7 @@ Verified starting point:
 - [Phase 5 foundation progress](./reports/phase-05-2026-07-22-foundation-progress.md)
 - [Creator readiness audit](./reports/creator-readiness-2026-07-22.md)
 - [Android toolchain readiness audit](./reports/android-toolchain-readiness-2026-07-22.md)
+- [Retry and `enable_effect` checkpoint](./reports/pm-260722-2312-retry-checkpoint.md)
 
 The 2026-07-21 reviews are historical. Their reference-device and runtime-capture assumptions
 were superseded by the 2026-07-22 static-only decision.

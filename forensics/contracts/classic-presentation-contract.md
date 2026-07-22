@@ -31,6 +31,8 @@ normalized image virtual addresses.
 | `E-BOMB` | `E-NATIVE`, `0x00145538`-`0x001465DC`, `0x00148C20`, `0x00149484` | bomb creation/cut, procedural explosion, Classic hit/finish callbacks |
 | `E-GAME-OVER` | `E-NATIVE`, `0x00149204`, `0x001493F8` | terminal text timeline and score-screen replacement |
 | `E-RESULT` | `E-NATIVE`, `0x0014CD2C`, `0x0014D034`, `0x0014D0D0` | result layout, rank update, and rank audio |
+| `E-RESULT-NAV` | `E-NATIVE`, `0x0014CBB0`, `0x0014CC84` | `DisplayScoreLayer` Retry and Main Menu callbacks |
+| `E-SETTINGS` | `E-NATIVE`, `0x00163620`, `0x00163094` | Classic-relevant Settings load/save order |
 | `E-RESULT-REWARD` | `E-NATIVE`, `0x0014DADC` | `DisplayScoreLayer::TotalCoinsCallback` reward creation/accounting order |
 | `E-RESULT-PARTICLE` | `E-NATIVE`, `0x0015FD0C`, `0x0015FD28`, `0x0015FE34`, `0x0015FED8`, `0x0015FF30` | `ParticleExplosion` cleanup, burst, entry timeline, construction, and creation |
 
@@ -155,8 +157,8 @@ at z-order `1` inside the background layer. No explicit anchor setter is present
 center anchor is inferred from the legacy `CCSprite` default.
 
 When Classic is selected, the mode selector is removed from its current parent with cleanup
-enabled. A new Classic layer is added to that same parent at z-order `1`. This is a same-parent
-replacement; the current evidence does not justify inventing a separate native scene.
+enabled. A new Classic layer is added to that same parent at z-order `1`. This recovered
+same-parent replacement does not require inventing a separate native scene.
 
 Within Classic, all nine toss controllers, the fail manager, start sprites, dynamic tossed
 objects, bomb explosion node, terminal text, and the shared HUD presentation use z-order `1`
@@ -311,6 +313,36 @@ action sum is `2.5` seconds. `GameOver` itself makes no direct audio request.
 
 This is a layer replacement after terminal text exits, not a simultaneous overlay on live
 Classic gameplay.
+
+### Result navigation and Classic Settings subset
+
+`DisplayScoreLayer::RetryCallback` at `0x0014CBB0` performs this synchronous order:
+
+1. if `enable_effect` is true, request `Sounds/menubuttonclick.wav` once, non-looping;
+2. capture the Result layer's current parent;
+3. remove Result from that parent with cleanup enabled;
+4. construct a fresh Classic layer for mode `0`;
+5. add that Classic layer to the captured parent at z-order `1`.
+
+`DisplayScoreLayer::MenuCallback` at `0x0014CC84` shares steps 1 through 3, then constructs a
+fresh Main Menu layer and adds it to the captured parent at z-order `1`. Neither callback saves
+Settings, reloads or replaces a scene, stops the Director, delays navigation, stops all effects,
+or reseeds process-owned random state. Full Main Menu construction is not yet implemented in
+Creator; its recovered command plan remains a deferred boundary.
+
+Settings load at `0x00163620` and save at `0x00163094` access the implemented Classic subset in
+this exact relative order: `total_coins`, `classic_best_1`, `classic_best_2`, `classic_best_3`,
+then Boolean `enable_effect`. The recovered default for `enable_effect` is `true`.
+
+Creator makes one explicit safety adaptation at the cleanup boundary. Result is detached from
+its parent synchronously in the recovered order, but its presenter is retained for the rest of
+that same callback until fresh Classic construction, physics restart, attachment, and commit
+succeed. A pre-commit exception restores the identical Result and prior run/session/physics
+state without replaying leaderboard, coin, or random work. Once commit publishes the fresh
+state, engine cleanup is best-effort and any cleanup error is reported without rolling back the
+new Classic layer. No frame or input is processed while the detached presenter is retained.
+This delays disposal relative to native cleanup timing without changing the observable
+successful order.
 
 ### Result screen reached from Classic
 
@@ -503,7 +535,7 @@ with the following static and Creator-side tests:
    dimensions in position formulas.
 4. Assert background center/fade and root priorities `0,1,2,3`.
 5. With a fake clock, assert selection audio -> `0.75` delay -> same-parent Classic
-   replacement. Effects off must emit no selection-audio command.
+   replacement at the captured parent. Effects off must emit no selection-audio command.
 6. Assert `GOOD` and `LUCK` start concurrently with exact positions and three `0.5`-second
    segments. Assert cuts remain enabled throughout the intro; only `LUCK` completion at
    nominal `1.5` seconds reasserts `DisableCut(false)` and starts all nine controllers. Assert
@@ -525,15 +557,19 @@ with the following static and Creator-side tests:
 11. Assert result transition order `stopAllEffects -> configure result -> remove Classic ->
     add result(z=1)`, then validate fixed result layout, panel values in `Best_1`, `Best_2`,
     `Best_3` visual order, and conditional rank audio.
-12. With a scripted random adapter and fake clock, assert zero draws before `1.65`, then
+12. Execute the imported Creator Retry controllers against a targeted Creator lifecycle stub. Assert
+    click gating, synchronous Result detach, fresh mode-0 construction, same-parent z-order `1`
+    attach, exact state-identity rollback for construction/physics/attachment/commit failures,
+    and post-commit cleanup isolation. Assert no repeated Settings or random work.
+13. With a scripted random adapter and fake clock, assert zero draws before `1.65`, then
     exactly `500` draws for `100` particles in the recovered five-draw order/ranges. Assert
     per-particle move durations/deltas, no fades, retained completed children, and one container
     cleanup at `11.15`; this validates draw protocol, not native RNG sequence parity.
-13. Assert the total-coins entrance invokes its callback only after `1.75`, then effect ->
+14. Assert the total-coins entrance invokes its callback only after `1.75`, then effect ->
     coin -> badge -> accounting -> label. Assert equal-z sibling order, coordinate conversion,
     float32 Classic bonus math, signed 32-bit total update, perpetual `2.5`-second `+360`
     rotation, and absence of callback-local audio, fade, move, expiry, or removal.
-14. Lint the asset/audio catalog so `bombsmoke.png`, `text-go.png`, medal rank sprites,
+15. Lint the asset/audio catalog so `bombsmoke.png`, `text-go.png`, medal rank sprites,
     `object-new-best.png`, `fruitfail.wav`, and `scorescreen.wav` cannot silently become
     required Classic dependencies without new evidence and a contract update.
 

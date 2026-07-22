@@ -20,12 +20,13 @@ uses exact background, intro/terminal/fail-marker art, score icon, best-score cu
 double-score panel, Linds font, intact/cut fruit, critical-particle, core-audio, and the mode-0
 result-entry rasters/fonts/cues. The result boundary now implements the recovered completed-run
 score, leaderboard insertion, button states, entrance timings, delayed 100-sprite burst,
-reward tree, and coin-bonus callback. The four Classic-relevant Settings integers now persist
-through a process-owned Creator adapter at the recovered app-hide checkpoint.
+reward tree, and coin-bonus callback. The five Classic-relevant Settings values now persist
+through a process-owned Creator adapter at the recovered app-hide checkpoint, with
+`enable_effect` defaulting to `true`.
 The exact standard-bomb raster/audio/entity foundation is also implemented and tested, but is
 not scheduled into the playable loop until its unresolved procedural explosion geometry can be
-restored without guessing. Full first-launch Settings initialization, the Main Menu save/replace
-path, and native same-parent Retry reconstruction remain open. The
+restored without guessing. Full first-launch Settings initialization and the Main Menu
+save/replace path remain open. The
 remaining scene/prefab map, consumer coverage, and full Classic scope still need to be
 completed before this phase can close.
 
@@ -151,27 +152,28 @@ Current Editor integration:
   sprites; at `1.75` seconds it creates effect, coin, badge, performs signed-int32 accounting,
   then creates the bonus label. The effect repeats `+360` degrees every `2.5` seconds and the
   emitter removes its retained scale-zero particles at `11.15` seconds.
-  Retry uses a temporary scene-reload adapter, leaves the result mounted until the load is
-  accepted, rearms navigation after immediate or asynchronous failure, and tolerates parent-led
-  scene teardown. A stable runtime loads/saves `total_coins` and `classic_best_1/2/3`, keeps
-  Retry mutations memory-only, saves on app hide, and recovers corrupt target storage to exact
-  defaults with diagnostics while disabling writes for that process to protect stored data.
-  Full first-launch Settings initialization, Main Menu replacement/
-  exit-save, and native same-parent Retry remain explicit follow-up work.
+  Retry uses the recovered same-parent replacement flow: it synchronously detaches Result,
+  constructs a fresh mode-0 run, restarts session/physics, then attaches at the captured parent
+  with z-order `1`. Same-callback rollback restores and rearms the identical Result if a
+  pre-commit stage fails; post-commit cleanup errors are reported without tearing down the
+  fresh Classic state. A stable runtime loads/saves `total_coins`, `classic_best_1/2/3`,
+  and `enable_effect` in recovered order, keeps Retry mutations memory-only, saves on app hide,
+  and recovers corrupt target storage to exact defaults with diagnostics while disabling writes
+  for that process to protect stored data. Full first-launch Settings initialization and Main
+  Menu replacement/exit-save remain explicit follow-up work.
 - The latest Preview pass opened at `720x1280` after clearing Creator's stale generated-code
   cache and demonstrated the recovered `GOOD / LUCK!` intro, exact ordinary-fruit spawning,
   score/best HUD, green-to-red fail-marker transitions, and 60 FPS with zero Creator Console
-  errors. A final cache-clean Preview and actual Retry pointer click then observed all result
-  stages: the initial emitter between total panel/label, exactly 100 particle children before
-  reward creation, effect/coin roots with badge/label children while those particles remained,
-  and emitter removal after cleanup. Automatic Physics2D was restored, the manual system stayed
-  absent throughout result, effect rotation remained normalized, and the error overlay stayed
-  empty. Retry created a fresh running `classic` scene and re-registered manual physics. The
-  portrait mask prevented presentation leakage into the browser pillarbox.
+  errors. A follow-up Preview verified two Result->Retry cycles at the same localhost URL
+  without a reload or game/Cocos console error; both runs re-entered the fresh `GOOD / LUCK!`
+  intro. That Preview is success-path verification only; a separate executable controller
+  harness injects construction, early/late physics, post-parent attachment, commit, and
+  post-commit cleanup failures. It verifies rollback where still reversible, committed-state
+  isolation afterward, and no duplicate persistence or RNG work.
 - The current playable slice is not presentation-complete; the exact staging gate is complete
   for the recovered APK corpus, but 100% consumer coverage and canonical sample-project
   completeness remain open. Release rights are a separate review.
-- The deterministic vertical-slice suite passes `220/220`, and Creator's bundled strict
+- The deterministic vertical-slice suite passes `238/238`, and Creator's bundled strict
   TypeScript compiler passes.
 
 ## Current Blockers
@@ -184,9 +186,9 @@ Current Editor integration:
 - Exact ordinary-bomb explosion point generation/rasterization plus safe registry/controller
   lifecycle integration, including the unresolved native lower-bound side effect; no sprite
   substitute, Fruit-miss substitution, or invented triangle pattern is accepted.
-- Full Settings coverage beyond `total_coins` and `classic_best_1/2/3`, including the recovered
-  first-launch initialization and Main Menu exit-save checkpoint.
-- MainMenu replacement; Retry still uses scene reload rather than native same-parent reconstruction.
+- Full Settings coverage beyond `total_coins`, `classic_best_1/2/3`, and `enable_effect`,
+  including the recovered first-launch initialization and Main Menu exit-save checkpoint.
+- MainMenu replacement remains open; Retry now uses the recovered same-parent reconstruction.
 - Electric-field compatibility decisions.
 - Android build validation and real APK/AAB post-build audit.
 - Rights review for original assets and product identity.
