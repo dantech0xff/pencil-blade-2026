@@ -39,6 +39,8 @@ export type LoadedClassicCriticalParticleResources = readonly [
 
 export interface LoadedClassicPresentationResources {
   readonly background: LoadedClassicRasterResource;
+  readonly failFilled: LoadedClassicRasterResource;
+  readonly failNormal: LoadedClassicRasterResource;
   readonly introGood: LoadedClassicRasterResource;
   readonly introLuck: LoadedClassicRasterResource;
   readonly terminalGame: LoadedClassicRasterResource;
@@ -117,6 +119,8 @@ function createSpriteLoadDescriptors(assetTree: ClassicAssetTree): readonly Spri
   const presentation = getClassicPresentationResources(assetTree);
   const descriptors: SpriteLoadDescriptor[] = [
     descriptor('presentation.background', presentation.background),
+    descriptor('presentation.failFilled', presentation.failFilled),
+    descriptor('presentation.failNormal', presentation.failNormal),
     descriptor('presentation.introGood', presentation.introGood),
     descriptor('presentation.introLuck', presentation.introLuck),
     descriptor('presentation.terminalGame', presentation.terminalGame),
@@ -192,6 +196,8 @@ function requireLoadedPresentation(
   const contract = getClassicPresentationResources(assetTree);
   return Object.freeze({
     background: requireLoaded('presentation.background', contract.background, loadedByKey),
+    failFilled: requireLoaded('presentation.failFilled', contract.failFilled, loadedByKey),
+    failNormal: requireLoaded('presentation.failNormal', contract.failNormal, loadedByKey),
     introGood: requireLoaded('presentation.introGood', contract.introGood, loadedByKey),
     introLuck: requireLoaded('presentation.introLuck', contract.introLuck, loadedByKey),
     terminalGame: requireLoaded('presentation.terminalGame', contract.terminalGame, loadedByKey),

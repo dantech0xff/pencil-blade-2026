@@ -92,6 +92,8 @@ test('background and GOOD/LUCK intro resources are exact for both resolution tre
     const presentation = getClassicPresentationResources(tree);
     for (const resource of [
       presentation.background,
+      presentation.failFilled,
+      presentation.failNormal,
       presentation.introGood,
       presentation.introLuck,
       presentation.terminalGame,
@@ -110,6 +112,14 @@ test('background and GOOD/LUCK intro resources are exact for both resolution tre
   assert.deepEqual(getClassicPresentationResources('720x1280').introLuck.dimensions, {
     width: 168,
     height: 50,
+  });
+  assert.deepEqual(getClassicPresentationResources('480x800').failNormal.dimensions, {
+    width: 49,
+    height: 48,
+  });
+  assert.deepEqual(getClassicPresentationResources('720x1280').failFilled.dimensions, {
+    width: 73,
+    height: 73,
   });
 });
 

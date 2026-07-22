@@ -260,6 +260,31 @@ test('critical cut halves preserve per-half update RNG and exact particle consum
   assert.match(plannerSource, /CLASSIC_CRITICAL_PARTICLE_SCALE_OUT_ACTION_SECONDS = Math\.fround\(1\.5\)/);
 });
 
+test('misses use exact recovered marker resources and the 0.25-second callback boundary', () => {
+  const gameplaySource = readText('game/assets/scripts/creator/classic-gameplay-controller.ts');
+  const loaderSource = readText('game/assets/scripts/creator/classic-resource-loader.ts');
+  const presenterSource = readText('game/assets/scripts/creator/classic-fail-presenter.ts');
+  const planSource = readText('game/assets/scripts/domain/classic-fail-presentation.ts');
+
+  assert.match(loaderSource, /descriptor\('presentation\.failFilled', presentation\.failFilled\)/);
+  assert.match(loaderSource, /descriptor\('presentation\.failNormal', presentation\.failNormal\)/);
+  assert.match(gameplaySource, /ClassicFailPresenter\.create\(\{/);
+  assert.match(gameplaySource, /filledResource: resources\.presentation\.failFilled/);
+  assert.match(gameplaySource, /normalResource: resources\.presentation\.failNormal/);
+  assert.match(gameplaySource, /presenter\.presentMiss\(command\.strike, command\.missPosition\)/);
+  assert.match(gameplaySource, /this\.applyFailCommands\(this\.fail\.completeIndicator\(\)\)/);
+  assert.match(gameplaySource, /this\.failPresenter\?\.updateAction\(deltaSeconds\)/);
+  assert.doesNotMatch(gameplaySource, /ClassicGeneratedStrikes|GENERATED_FAIL_CALLBACK_DELAY_SECONDS/);
+
+  assert.match(planSource, /CLASSIC_FAIL_ACTIVATION_ACTION_SECONDS = Math\.fround\(0\.25\)/);
+  assert.match(planSource, /CLASSIC_FAIL_TRANSIENT_ACTION_SECONDS = Math\.fround\(1\)/);
+  assert.match(planSource, /Math\.fround\(viewport\.height \* TRANSIENT_Y_FACTOR\)/);
+  assert.match(presenterSource, /marker\.sprite\.spriteFrame = this\.filledResource\.spriteFrame/);
+  assert.match(presenterSource, /marker\.layout\.scale \* plan\.initialScaleMultiplier/);
+  assert.match(presenterSource, /this\.lifecycle\.onIndicatorComplete\(strike\)/);
+  assert.match(presenterSource, /destroyTransient\(transient\)/);
+});
+
 function readJson<T>(relativePath: string): T {
   return JSON.parse(readText(relativePath)) as T;
 }

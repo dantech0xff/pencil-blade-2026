@@ -7,8 +7,8 @@ The workspace now has the Cocos Creator 3.8.8 `game/` project, pure TypeScript d
 the Creator Physics2D adapter, vertical-slice contract tests, the build-audit script, and an
 Editor-authored `classic.scene` with normal-fruit gameplay. All 862 recovered APK game assets
 are staged byte-for-byte and imported into the Creator bundle. The loop now consumes exact
-background, intro/terminal text, nine intact/cut fruit sets, four critical particles, and 20
-core audio clips. This is still a bounded checkpoint, not the end state.
+background, intro/terminal/fail-marker art, nine intact/cut fruit sets, four critical particles,
+and 20 core audio clips. This is still a bounded checkpoint, not the end state.
 
 The phase is still in progress. Canvas now owns `BladeInputController`,
 `ClassicSceneController`, and `ClassicGameplayController`, but eight toss controllers,
@@ -55,9 +55,10 @@ The playable slice starts on the first swipe, runs only the recovered normal-fre
 and spawns exact intact fruit rasters with recovered fixtures and kinematics. Blade rays,
 duplicate cut scoring, score smoothing, combo wiring, ordinary cut-bottom/cut-top bodies,
 recovered impulses/fade, critical-particle planning/presentation, and exact toss/swish/cut/
-critical/combo audio are implemented. Bounds and misses reach game over at three misses, and
-tap-to-retry reloads the scene. The other eight Classic controllers are recorded as deferred
-instead of being silently simulated.
+critical/combo audio are implemented. Bounds and misses use the exact three persistent marker
+rasters, recovered entry and activation timing, one-second transient cleanup, and shared-count
+callback behavior before game over; tap-to-retry reloads the scene. The other eight Classic
+controllers are recorded as deferred instead of being silently simulated.
 
 The staging pipeline copies all 862 recovered APK game assets without recompression or byte
 changes. Creator imported the corpus and the validator checks its current 934 metadata
@@ -85,14 +86,15 @@ from the fidelity work.
 
 - `git diff --check`: clean
 - `node $HOME/.claude/scripts/validate-docs.cjs docs/`: clean
-- `node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/reconstruction/vertical-slice/*.test.ts`: `115/115` pass
+- `node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/reconstruction/vertical-slice/*.test.ts`: `124/124` pass
 - `node --test tests/stage-creator-assets-test.mjs tests/validate-creator-resource-meta-test.mjs`: `29/29` pass
 - `node scripts/audit-creator-build.mjs <build.apk|build.aab>`: documented as the build audit entry point
 - `node --test tests/audit-creator-build-test.mjs`: `8/8` synthetic checks pass
 - Creator 3.8.8 bundled TypeScript compiler: pass
 - reconstruction-policy positive and negative checks: pass
-- Creator Preview: opens at `720x1280`, loads the exact core resource subset, plays audio at
-  60 FPS, and shows no runtime error overlay; Editor Console error count remains zero
+- Last completed Creator Preview: opened at `720x1280`, loaded the exact core resource subset,
+  played audio at 60 FPS, and showed no runtime error overlay; a fresh fail-marker visual pass
+  is pending because the current macOS UI session is locked
 
 ## Unresolved Questions
 

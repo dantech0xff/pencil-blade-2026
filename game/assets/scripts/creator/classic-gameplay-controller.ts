@@ -56,6 +56,7 @@ import { ClassicAudioPresenter } from './classic-audio-presenter';
 import { ClassicCriticalParticlePresenter } from './classic-critical-particle-presenter';
 import { ClassicCutHalfPresenter } from './classic-cut-half-presenter';
 import { ClassicEntityRegistry } from './classic-entity-registry';
+import { ClassicFailPresenter } from './classic-fail-presenter';
 import type {
   ClassicGeneratedFruitCutEvent,
   ClassicGeneratedFruitMissEvent,
@@ -80,7 +81,6 @@ export const CLASSIC_DEFERRED_TOSS_CONTROLLER_EVENT = 'classic-deferred-toss-con
 export const CLASSIC_RESOURCE_LOAD_FAILED_EVENT = 'classic-resource-load-failed';
 
 const TARGET_REPLAY_SEED = 0x5042_4c44;
-const GENERATED_FAIL_CALLBACK_DELAY_SECONDS = 0;
 const NORMAL_FREE_CONTROLLER: ClassicTossControllerId = 'normal-free';
 
 export interface ClassicDeferredTossControllerEvent {
@@ -99,8 +99,8 @@ export interface ClassicGameplaySnapshot {
 }
 
 /**
- * Playable, rights-safe Classic slice: first touch starts the recovered normal-free timer,
- * generated fruit use Creator Physics2D, and post-step blade rays drive cut/score/combo.
+ * Playable Classic slice: first touch starts the recovered normal-free timer, exact recovered
+ * fruit use Creator Physics2D, and post-step blade rays drive cut/score/combo.
  * This and ClassicSceneController are scene-lifetime components; do not toggle either one
  * independently to model pause or resume.
  */
@@ -119,17 +119,16 @@ export class ClassicGameplayController extends Component {
   private readonly fail = new FailService();
   private readonly score = new ScoreService();
   private readonly deferredControllers = new Set<ClassicTossControllerId>();
-  private readonly pendingFailCallbacks = new Set<() => void>();
   private readonly cutHalfPresenters = new Set<ClassicCutHalfPresenter>();
   private readonly criticalCutHalfPresenters = new Set<ClassicCutHalfPresenter>();
   private readonly criticalParticlePresenters = new Set<ClassicCriticalParticlePresenter>();
   private sceneController: ClassicSceneController | null = null;
   private audioPresenter: ClassicAudioPresenter | null = null;
   private registry: ClassicEntityRegistry | null = null;
+  private failPresenter: ClassicFailPresenter | null = null;
   private resourceCatalog: ClassicSliceResourceCatalog | null = null;
   private normalFree: ClassicFreeTossStrategy | null = null;
   private scoreLabel: Label | null = null;
-  private strikeLabel: Label | null = null;
   private introGoodNode: Node | null = null;
   private introLuckNode: Node | null = null;
   private terminalGameNode: Node | null = null;
@@ -233,6 +232,7 @@ export class ClassicGameplayController extends Component {
     for (const presenter of this.criticalParticlePresenters) {
       presenter.updateAction(deltaSeconds);
     }
+    this.failPresenter?.updateAction(deltaSeconds);
     this.applyScoreCommands(this.score.updateDisplayedScore());
     this.updatePresentation();
   }
@@ -258,10 +258,6 @@ export class ClassicGameplayController extends Component {
     }
     this.normalFree?.stop();
     this.audioPresenter?.stop();
-    for (const callback of this.pendingFailCallbacks) {
-      this.unschedule(callback);
-    }
-    this.pendingFailCallbacks.clear();
     this.unschedule(this.onDisplayedScoreScaleUpComplete);
     this.unschedule(this.onDisplayedScoreScaleDownComplete);
     this.unschedule(this.onSwishCooldownComplete);
@@ -273,6 +269,8 @@ export class ClassicGameplayController extends Component {
       presenter.dispose();
     }
     this.criticalParticlePresenters.clear();
+    this.failPresenter?.dispose();
+    this.failPresenter = null;
     this.registry?.disposeAll();
   }
 
@@ -512,14 +510,11 @@ export class ClassicGameplayController extends Component {
   private applyFailCommands(commands: readonly FailCommand[]): void {
     for (const command of commands) {
       if (command.type === 'queue-fail-indicator') {
-        const callback = (): void => {
-          this.pendingFailCallbacks.delete(callback);
-          this.applyFailCommands(this.fail.completeIndicator());
-        };
-        this.pendingFailCallbacks.add(callback);
-        // The original presentation duration remains unknown. A next-tick generated presenter
-        // preserves the recovered callback/count boundary without claiming recovered timing.
-        this.scheduleOnce(callback, GENERATED_FAIL_CALLBACK_DELAY_SECONDS);
+        const presenter = this.failPresenter;
+        if (presenter === null) {
+          throw new Error('Recovered fail presentation requires loaded resources');
+        }
+        presenter.presentMiss(command.strike, command.missPosition);
       } else if (command.type === 'game-over-callback') {
         this.sceneController?.gameOverFromMiss();
       }
@@ -605,13 +600,16 @@ export class ClassicGameplayController extends Component {
       viewport.height / 2 - 70,
       34,
     );
-    this.strikeLabel = createLabel(
-      this.node,
-      'ClassicGeneratedStrikes',
-      viewport.width / 2 - 130,
-      viewport.height / 2 - 70,
-      28,
-    );
+    this.failPresenter = ClassicFailPresenter.create({
+      filledResource: resources.presentation.failFilled,
+      normalResource: resources.presentation.failNormal,
+      viewport,
+    }, {
+      onIndicatorComplete: () => {
+        this.applyFailCommands(this.fail.completeIndicator());
+      },
+    });
+    this.failPresenter.attach(this.node);
   }
 
   private playRecoveredIntro(
@@ -703,9 +701,6 @@ export class ClassicGameplayController extends Component {
   private updatePresentation(): void {
     if (this.scoreLabel !== null) {
       this.scoreLabel.string = `SCORE ${this.score.displayedScore}`;
-    }
-    if (this.strikeLabel !== null) {
-      this.strikeLabel.string = `MISS ${this.fail.count}/3`;
     }
   }
 

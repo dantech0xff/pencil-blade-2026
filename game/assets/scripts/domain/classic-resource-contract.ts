@@ -37,6 +37,8 @@ export interface ClassicNormalFruitResourceDefinition {
 
 export interface ClassicPresentationRasterSet {
   readonly background: ClassicRasterResource;
+  readonly failFilled: ClassicRasterResource;
+  readonly failNormal: ClassicRasterResource;
   readonly introGood: ClassicRasterResource;
   readonly introLuck: ClassicRasterResource;
   readonly terminalGame: ClassicRasterResource;
@@ -116,6 +118,8 @@ export const CLASSIC_PRESENTATION_RESOURCES: Readonly<Record<ClassicAssetTree, C
   = Object.freeze({
     '480x800': Object.freeze({
       background: createRaster('480x800/Backgrounds/paperbackground0.png', [480, 800]),
+      failFilled: createRaster('480x800/Interfaces/object-x-filled.png', [49, 48]),
+      failNormal: createRaster('480x800/Interfaces/object-x-normal.png', [49, 48]),
       introGood: createRaster('480x800/Text/text-good.png', [112, 25]),
       introLuck: createRaster('480x800/Text/text-luck.png', [112, 33]),
       terminalGame: createRaster('480x800/Text/text-game.png', [269, 51]),
@@ -123,6 +127,8 @@ export const CLASSIC_PRESENTATION_RESOURCES: Readonly<Record<ClassicAssetTree, C
     }),
     '720x1280': Object.freeze({
       background: createRaster('720x1280/Backgrounds/paperbackground0.png', [720, 1280]),
+      failFilled: createRaster('720x1280/Interfaces/object-x-filled.png', [73, 73]),
+      failNormal: createRaster('720x1280/Interfaces/object-x-normal.png', [72, 71]),
       introGood: createRaster('720x1280/Text/text-good.png', [168, 37]),
       introLuck: createRaster('720x1280/Text/text-luck.png', [168, 50]),
       terminalGame: createRaster('720x1280/Text/text-game.png', [404, 76]),

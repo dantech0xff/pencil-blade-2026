@@ -81,9 +81,10 @@ Verified starting point:
 - Phase 5 starts after the Classic presentation subset and gameplay/physics contracts are ready.
   That static subset is now registered. Creator has imported the exact recovered APK corpus,
   serialized the first `classic.scene`, and exercised exact background/text/ordinary-fruit,
-  cut-half, critical-particle, and core-audio consumers in the bounded Classic loop. Project
-  completion still requires the remaining resource consumers and scene/prefab map, a pinned
-  integration/toolchain policy, and build validation.
+  cut-half, critical-particle, and core-audio consumers in the bounded Classic loop. Exact
+  recovered fail-marker resources and action timings are now integrated and contract-tested.
+  Project completion still requires the remaining resource consumers and scene/prefab map,
+  a pinned integration/toolchain policy, and build validation.
 - Phase 6 expands only after the Cocos Creator vertical slice passes contract tests.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.

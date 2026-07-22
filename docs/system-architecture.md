@@ -6,9 +6,9 @@ Pencil Blade is being rebuilt as a static-evidence, clean-room Cocos Creator 3.8
 The workspace now contains a Creator foundation under `game/`, pure TypeScript domain modules,
 Creator-facing adapters, deterministic contract tests, and an Editor-authored `classic.scene`.
 All 862 recovered APK game assets are staged byte-for-byte in the Creator `game` bundle.
-The Canvas now runs a bounded Classic loop using exact recovered background, text, ordinary
-fruit/cut-half, critical-particle, and core-audio resources. The full gameplay/presentation
-layer remains incomplete.
+The Canvas now runs a bounded Classic loop using exact recovered background, text, fail-marker,
+ordinary fruit/cut-half, critical-particle, and core-audio resources. The full gameplay and
+presentation layer remains incomplete.
 
 ## Dependency Direction
 
@@ -45,7 +45,7 @@ component enable/disable is not the pause boundary.
 |---|---|
 | Physics2D | Recovered gravity, body and fixture values, ray-order behavior, and variable `frameDt * worldSpeed` stepping are encoded in pure modules. Automatic simulation stays off; a project-owned `System.postUpdate` performs one synchronized manual step and flushes project lifecycle mutations only after Box2D unlocks. |
 | Spawn and toss | Spawn ordering, intervals, fruit selection, and controller sequencing live in pure modules. |
-| Score, combo, fail | Score, combo window, double-score behavior, and three-indicator fail flow are modeled independently of Creator presentation. |
+| Score, combo, fail | Score, combo window, double-score behavior, and the three-miss state are pure. A dedicated Creator presenter owns the exact normal/filled marker rasters, recovered entry/activation/transient action timings, and completion callbacks. |
 | Cut handling | Blade tracking and bidirectional ray planning are pure; the Creator gameplay bridge executes two ordered post-step raycasts and preserves repeated fixture dispatch until batch disposal. |
 | Cut presentation | Ordinary cuts instantiate exact bottom/top rasters, recovered body/fixture/impulse values, action-clock fade, and deferred disposal. Critical halves may emit exact recovered particle rasters with shared RNG ordering. |
 | Audio | A Creator adapter preloads 20 core recovered clips and interprets toss, swish, cut, critical, and combo commands without moving draw/order rules out of the domain. |

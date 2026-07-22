@@ -16,9 +16,9 @@ Classic loop implemented independently in TypeScript with Creator Physics2D. The
 foundation now exists under `game/`. Creator has reopened that exact root and serialized the
 first `classic.scene` with resolution/session, four-slot input, and a bounded generated
 normal-fruit loop. All 862 recovered APK game assets are staged and imported; the current loop
-uses exact background, intro/terminal text, intact/cut fruit, critical-particle, and core-audio
-resources. The remaining scene/prefab map, consumer coverage, and full Classic scope still need
-to be completed before this phase can close.
+uses exact background, intro/terminal/fail-marker art, intact/cut fruit, critical-particle, and
+core-audio resources. The remaining scene/prefab map, consumer coverage, and full Classic scope
+still need to be completed before this phase can close.
 
 ## Context Links
 
@@ -122,13 +122,15 @@ Current Editor integration:
 - All 862 recovered APK game assets (784 PNG, 59 WAV, 3 MP3, and 16 fonts) are staged
   byte-for-byte under the Creator bundle. The current import validator covers 934 generated
   metadata sidecars; the manifest's per-asset consumer and UUID fields still require backfill.
-- Preview opens at `720x1280` and demonstrates first-swipe start, exact ordinary-fruit
-  spawning/trajectory, cut halves, core audio, cut/score, misses, game over, and retry.
+- The last completed Preview pass opened at `720x1280` and demonstrated first-swipe start,
+  exact ordinary-fruit spawning/trajectory, cut halves, core audio, cut/score, misses, game
+  over, and retry. Exact recovered fail-marker presentation has since replaced the generated
+  miss label and passes deterministic presenter/integration tests; a fresh visual pass is pending.
 - The current playable slice is not presentation-complete; the exact staging gate is complete
   for the recovered APK corpus, but 100% consumer coverage and canonical sample-project
   completeness remain open. Release rights are a separate review.
-- Current Creator Console error counters remain zero, Creator's bundled strict TypeScript
-  compiler passes, and the deterministic vertical-slice suite passes `115/115`.
+- The last inspected Creator Console error counters were zero, Creator's bundled strict
+  TypeScript compiler passes, and the deterministic vertical-slice suite passes `124/124`.
 
 ## Current Blockers
 
