@@ -42,8 +42,11 @@ export const BIRD_PARTICLE_RESOURCE_COUNT = 4 as const;
 export const BIRD_SHARED_RASTER_RESOURCE_COUNT = 5 as const;
 export const BIRD_TYPE_SPECIFIC_RASTER_RESOURCE_COUNT = 12 as const;
 export const BIRD_RASTER_RESOURCE_COUNT = 17 as const;
-/** Unique union of both 17-raster profiles: five shared plus twelve per type. */
-export const BIRD_COMBINED_RASTER_RESOURCE_COUNT = 29 as const;
+/** Unique union of all three profiles: five shared plus twelve per type. */
+export const BIRD_ALL_TYPE_RASTER_RESOURCE_COUNT = 41 as const;
+/** Backward-compatible combined-count name, now covering every Bird type. */
+export const BIRD_COMBINED_RASTER_RESOURCE_COUNT =
+  BIRD_ALL_TYPE_RASTER_RESOURCE_COUNT;
 
 const BIRD_ANIMATION_FRAME_DIMENSIONS = {
   '480x800': [
@@ -84,6 +87,10 @@ const BIRD_DIRECTION_DIMENSIONS = {
       left: [110, 101],
       right: [111, 101],
     },
+    3: {
+      left: [110, 101],
+      right: [110, 101],
+    },
   },
   '720x1280': {
     1: {
@@ -91,6 +98,10 @@ const BIRD_DIRECTION_DIMENSIONS = {
       right: [129, 116],
     },
     2: {
+      left: [129, 115],
+      right: [129, 115],
+    },
+    3: {
       left: [129, 115],
       right: [129, 115],
     },
@@ -216,6 +227,7 @@ function createBirdResourceProfiles(
   return Object.freeze({
     1: createBirdResourceProfile(assetTree, 1, shared),
     2: createBirdResourceProfile(assetTree, 2, shared),
+    3: createBirdResourceProfile(assetTree, 3, shared),
   });
 }
 
@@ -282,8 +294,8 @@ function resolveBirdBladeType(birdType: BirdBladeType): BirdBladeType {
   if (!Number.isSafeInteger(birdType)) {
     throw new TypeError('birdType must be a safe integer');
   }
-  if (birdType !== 1 && birdType !== 2) {
-    throw new RangeError('birdType must be 1 or 2');
+  if (birdType !== 1 && birdType !== 2 && birdType !== 3) {
+    throw new RangeError('birdType must be 1, 2, or 3');
   }
   return birdType;
 }

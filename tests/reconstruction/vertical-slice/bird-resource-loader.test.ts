@@ -133,45 +133,56 @@ test('Bird loader requests all 17 exact extensionless SpriteFrame paths in order
   }
 });
 
-test('Bird loader selects the exact type-2 profile only when explicitly requested', async () => {
+test('Bird loader selects each exact non-default profile only when requested', async () => {
   for (const assetTree of ['480x800', '720x1280'] as const) {
-    const contracts = listBirdRasterResources(assetTree, 2);
-    const requested: string[] = [];
-    cc.assetManager.reset();
-    cc.assetManager.setBundle({
-      load(
-        pathOrPaths: string[],
-        _Type: unknown,
-        callback: (error: Error | null, value: object[]) => void,
-      ) {
-        assert.ok(Array.isArray(pathOrPaths));
-        requested.push(...pathOrPaths);
-        callback(
-          null,
-          pathOrPaths.map((_, index) => exactFrame(contracts, index)),
-        );
-      },
-    });
+    for (const birdType of [2, 3] as const) {
+      const contracts = listBirdRasterResources(assetTree, birdType);
+      const requested: string[] = [];
+      cc.assetManager.reset();
+      cc.assetManager.setBundle({
+        load(
+          pathOrPaths: string[],
+          _Type: unknown,
+          callback: (error: Error | null, value: object[]) => void,
+        ) {
+          assert.ok(Array.isArray(pathOrPaths));
+          requested.push(...pathOrPaths);
+          callback(
+            null,
+            pathOrPaths.map((_, index) => exactFrame(contracts, index)),
+          );
+        },
+      });
 
-    const loaded = await loadBirdResources(assetTree, 2);
-    assert.equal(loaded.assetTree, assetTree);
-    assert.equal(loaded.birdType, 2);
-    assert.equal(loaded.profile, getBirdResourceProfile(assetTree, 2));
-    assert.equal(loaded.profile.birdType, 2);
-    assert.equal(loaded.rasterCount, BIRD_RASTER_RESOURCE_COUNT);
-    assert.deepEqual(
-      requested,
-      contracts.map(({ canonicalPath }) => (
-        canonicalRasterToSpriteFrameBundlePath(canonicalPath)
-      )),
-    );
-    assert.deepEqual(
-      loaded.orderedRasters.map(({ canonicalPath }) => canonicalPath),
-      contracts.map(({ canonicalPath }) => canonicalPath),
-    );
-    assert.match(loaded.animationFrames[0].canonicalPath, /bird-anim-2-0\.png$/);
-    assert.match(loaded.leftDirection.canonicalPath, /bird-left-2\.png$/);
-    assert.match(loaded.rightDirection.canonicalPath, /bird-right-2\.png$/);
+      const loaded = await loadBirdResources(assetTree, birdType);
+      assert.equal(loaded.assetTree, assetTree);
+      assert.equal(loaded.birdType, birdType);
+      assert.equal(loaded.profile, getBirdResourceProfile(assetTree, birdType));
+      assert.equal(loaded.profile.birdType, birdType);
+      assert.equal(loaded.rasterCount, BIRD_RASTER_RESOURCE_COUNT);
+      assert.deepEqual(
+        requested,
+        contracts.map(({ canonicalPath }) => (
+          canonicalRasterToSpriteFrameBundlePath(canonicalPath)
+        )),
+      );
+      assert.deepEqual(
+        loaded.orderedRasters.map(({ canonicalPath }) => canonicalPath),
+        contracts.map(({ canonicalPath }) => canonicalPath),
+      );
+      assert.match(
+        loaded.animationFrames[0].canonicalPath,
+        new RegExp(`bird-anim-${birdType}-0\\.png$`),
+      );
+      assert.match(
+        loaded.leftDirection.canonicalPath,
+        new RegExp(`bird-left-${birdType}\\.png$`),
+      );
+      assert.match(
+        loaded.rightDirection.canonicalPath,
+        new RegExp(`bird-right-${birdType}\\.png$`),
+      );
+    }
   }
 });
 
@@ -203,6 +214,23 @@ test('Bird loader fails closed on omitted and geometry-changed SpriteFrames', as
   await assert.rejects(
     () => loadBirdResources('720x1280'),
     /Creator SpriteFrame geometry mismatch for 720x1280\/Birds\/bird-right-1\.png/,
+  );
+
+  const typeThreeContracts = listBirdRasterResources('480x800', 3);
+  cc.assetManager.setBundle(bundleFor({
+    contracts: typeThreeContracts,
+    rasterFrames: (paths) => paths.map((_, index) => {
+      const contract = typeThreeContracts[index];
+      assert.ok(contract);
+      return new cc.SpriteFrame(
+        contract.dimensions.width + (index === 11 ? 1 : 0),
+        contract.dimensions.height,
+      );
+    }),
+  }));
+  await assert.rejects(
+    () => loadBirdResources('480x800', 3),
+    /Creator SpriteFrame geometry mismatch for 480x800\/Birds\/bird-left-3\.png/,
   );
 });
 
@@ -272,8 +300,8 @@ test('Bird catalog rejects unknown and changed resource lookups', async () => {
     /assetTree must be 480x800 or 720x1280/,
   );
   await assert.rejects(
-    () => loadBirdResources('480x800', 3 as never),
-    /birdType must be 1 or 2/,
+    () => loadBirdResources('480x800', 4 as never),
+    /birdType must be 1, 2, or 3/,
   );
   await assert.rejects(
     () => loadBirdResources('480x800', 1.5 as never),

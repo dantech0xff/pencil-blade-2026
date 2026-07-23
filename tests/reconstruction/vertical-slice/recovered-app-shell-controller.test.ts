@@ -24,8 +24,12 @@ test('app shell boots the shared scene into Main Menu before any Classic activat
     '.prepareClassicBirdRuntime()',
     'const crazyBirdPreparation = classicBirdPreparation',
     '.prepareCrazyBirdRuntime()',
+    'const comboBirdPreparation = crazyBirdPreparation',
+    'this.requireComboBirdGameplayController()',
+    '.prepareComboBirdRuntime()',
     'await Promise.all([',
     'crazyBirdPreparation,',
+    'comboBirdPreparation,',
     'SharedLeafPresenter.create({',
     'SharedGameScenePresenter.create({',
     'nonClassicPhysics.activateCollisionFilter()',
@@ -97,17 +101,22 @@ test('destroyed shell never starts delayed Classic Bird preparation', async () =
   assert.equal(classicBirdPreparationCount, 0);
 });
 
-test('serialized shell binds every Crazy and Classic Bird navigation event and owner', () => {
+test('serialized shell binds every Crazy and Bird navigation event and owner', () => {
   const onLoad = extractMethod(SOURCE, 'onLoad');
   const onEnable = extractMethod(SOURCE, 'onEnable');
   const onDisable = extractMethod(SOURCE, 'onDisable');
 
   assert.match(SOURCE, /@requireComponent\(CrazyGameplayController\)/);
   assert.match(SOURCE, /@requireComponent\(ClassicBirdGameplayController\)/);
+  assert.match(SOURCE, /@requireComponent\(ComboBirdGameplayController\)/);
   assert.match(onLoad, /CrazyGameplayController,[\s\S]*?'CrazyGameplayController'/);
   assert.match(
     onLoad,
     /ClassicBirdGameplayController,[\s\S]*?'ClassicBirdGameplayController'/,
+  );
+  assert.match(
+    onLoad,
+    /ComboBirdGameplayController,[\s\S]*?'ComboBirdGameplayController'/,
   );
   for (const event of [
     'CRAZY_RESULT_MENU_REQUESTED_EVENT',
@@ -116,6 +125,8 @@ test('serialized shell binds every Crazy and Classic Bird navigation event and o
     'CRAZY_BIRD_PAUSE_QUIT_REQUESTED_EVENT',
     'CLASSIC_BIRD_RESULT_MENU_REQUESTED_EVENT',
     'CLASSIC_BIRD_PAUSE_QUIT_REQUESTED_EVENT',
+    'COMBO_BIRD_RESULT_MENU_REQUESTED_EVENT',
+    'COMBO_BIRD_PAUSE_QUIT_REQUESTED_EVENT',
   ]) {
     assert.match(onEnable, new RegExp(`this\\.node\\.on\\([\\s\\S]*?${event}`));
     assert.match(onDisable, new RegExp(`this\\.node\\.off\\([\\s\\S]*?${event}`));
@@ -316,6 +327,56 @@ test('Mode Select enters prepared Crazy Bird through the profiled timed-mode own
   ]);
 });
 
+test('Mode Select enters prepared Combo Bird through its isolated mode-5 owner', () => {
+  const createModeSelect = extractMethod(SOURCE, 'createModeSelectPresenter');
+  const transition = extractMethod(SOURCE, 'transitionModeSelectToComboBird');
+
+  assert.match(
+    createModeSelect,
+    /onComboBirdRequested: \(transaction\) => \([\s\S]*?this\.transitionModeSelectToComboBird\(transaction\)/,
+  );
+  assertOrderedSubstrings(transition, [
+    "transaction.destination !== 'ComboBirdLayer'",
+    '!comboBird.prepared',
+    "this.runTransition('mode-select', 'combo-bird'",
+    'sharedScene.detachCurrentScreen(oldPresenter.root)',
+    'oldPresenter.suspendForTransition()',
+    'nonClassicPhysics.restorePreviousCollisionFilter()',
+    'comboBird.activateComboBirdFromAppShell(sharedScene)',
+    "this.stateValue = 'combo-bird'",
+    "disposeCommittedPresenter(oldPresenter, 'Mode Select')",
+  ]);
+  const rollbackStart = transition.indexOf('} catch (error) {');
+  assert.ok(rollbackStart > -1);
+  assertOrderedSubstrings(transition.slice(rollbackStart), [
+    'const rollbackFailures: unknown[] = []',
+    'this.restoreModeSelectAfterFailedComboBirdActivation(oldPresenter.root)',
+    'nonClassicPhysics.activateCollisionFilter()',
+    'oldPresenter.rearmNavigationAfterFailure()',
+    'if (rollbackFailures.length > 0)',
+    'new ModeSelectFatalNavigationError(',
+    'aggregateWithPrimaryError(',
+    "'Mode Select to Combo Bird rollback failed'",
+    'error instanceof ComboBirdLifecycleRollbackError',
+    "'Mode Select to Combo Bird retained poisoned runtime ownership'",
+  ]);
+
+  const rollback = extractMethod(
+    SOURCE,
+    'restoreModeSelectAfterFailedComboBirdActivation',
+  );
+  assertOrderedSubstrings(rollback, [
+    'const current = sharedScene.currentScreen',
+    'if (current === previous)',
+    'if (!isValid(previous, true) || previous.parent !== null)',
+    'if (current === null)',
+    'sharedScene.attachCurrentScreen(previous)',
+    'sharedScene.replaceCurrentScreen(previous)',
+    'sharedScene.currentScreen !== previous',
+  ]);
+  assert.doesNotMatch(rollback, /previous\.setParent\(|previous\.parent\s*=/);
+});
+
 test('Classic Result to Main Menu commits only after attach and activation, with rollback first', () => {
   const transition = extractMemberBlock(
     SOURCE,
@@ -490,6 +551,52 @@ test('Classic Bird Result and Pause Quit share one commit-after-activation trans
   assert.ok(rollbackIndex > filterIndex);
 });
 
+test('Combo Bird Result and Pause Quit share one commit-after-activation transaction', () => {
+  const result = extractMemberBlock(
+    SOURCE,
+    '  private readonly onComboBirdResultMenuRequested = (',
+  );
+  const quit = extractMemberBlock(
+    SOURCE,
+    '  private readonly onComboBirdPauseQuitRequested = (',
+  );
+  const transition = extractMethod(SOURCE, 'transitionComboBirdToMainMenu');
+
+  assertOrderedSubstrings(result, [
+    'captureComboBirdResultMenuNavigationRequest(request)',
+    'if (captured.request === null)',
+    'this.rejectComboBirdNavigationRequest(',
+    "'Combo Bird Result'",
+    'this.transitionComboBirdToMainMenu(captured.request',
+  ]);
+  assertOrderedSubstrings(quit, [
+    'captureComboBirdPauseQuitNavigationRequest(request)',
+    'if (captured.request === null)',
+    'this.rejectComboBirdNavigationRequest(',
+    "'Combo Bird Pause Quit'",
+    'this.transitionComboBirdToMainMenu(captured.request',
+  ]);
+  assertOrderedSubstrings(transition, [
+    "this.stateValue !== 'combo-bird'",
+    'this.requireNonClassicPhysics()',
+    '.activateCollisionFilter()',
+    'sharedScene.replaceCurrentScreen(nextPresenter.root)',
+    'nextPresenter.activate()',
+    'commitClassicBirdMainMenuNavigationRequest(request, previous, source)',
+    'this.activeMainMenu = nextPresenter',
+    "this.stateValue = 'main-menu'",
+  ]);
+  const catchIndex = transition.indexOf('} catch (error) {');
+  assertOrderedSubstrings(transition.slice(catchIndex), [
+    'this.restoreComboBirdNavigationRootBeforeRollback(request.root)',
+    'nextPresenter?.dispose()',
+    'this.requireNonClassicPhysics().restorePreviousCollisionFilter()',
+    'request.rollback()',
+    'this.assertComboBirdNavigationRollbackRestored(request.root)',
+    'this.retainComboBirdShellFailure(',
+  ]);
+});
+
 test('Crazy shell payload guards reject malformed events before dereferencing navigation fields', () => {
   const resultGuard = extractMemberBlock(
     SOURCE,
@@ -567,6 +674,50 @@ test('Classic Bird payload captures reject malformed events without repeat deref
     'runBestEffortCleanup(',
     '[rollback]',
   ]);
+});
+
+test('Combo Bird payload captures use the exact result and pause roots once', () => {
+  const resultCapture = extractMemberBlock(
+    SOURCE,
+    'function captureComboBirdResultMenuNavigationRequest(',
+  );
+  const quitCapture = extractMemberBlock(
+    SOURCE,
+    'function captureComboBirdPauseQuitNavigationRequest(',
+  );
+
+  assertOrderedSubstrings(resultCapture, [
+    "request === null || typeof request !== 'object'",
+    'const rollback = candidate.rollback',
+    'capturedRollback = () => rollback.call(request)',
+    'const resultRoot = candidate.resultRoot',
+    'const completedRunScore = candidate.completedRunScore',
+    'const commit = candidate.commit',
+    'resultRoot instanceof Node',
+    'isValid(resultRoot, true)',
+    'isSignedInt32(completedRunScore)',
+    'completedRunScore < 0',
+    "typeof commit !== 'function'",
+    'root: resultRoot',
+  ]);
+  assertOrderedSubstrings(quitCapture, [
+    "request === null || typeof request !== 'object'",
+    'const rollback = candidate.rollback',
+    'capturedRollback = () => rollback.call(request)',
+    'const comboBirdRoot = candidate.comboBirdRoot',
+    'const commit = candidate.commit',
+    'comboBirdRoot instanceof Node',
+    'isValid(comboBirdRoot, true)',
+    "typeof commit !== 'function'",
+    'root: comboBirdRoot',
+  ]);
+  assert.equal((quitCapture.match(/candidate\.comboBirdRoot/g) ?? []).length, 1);
+  assert.equal((quitCapture.match(/candidate\.commit/g) ?? []).length, 1);
+  assert.equal((quitCapture.match(/candidate\.rollback/g) ?? []).length, 1);
+  assert.equal((resultCapture.match(/candidate\.resultRoot/g) ?? []).length, 1);
+  assert.equal((resultCapture.match(/candidate\.completedRunScore/g) ?? []).length, 1);
+  assert.equal((resultCapture.match(/candidate\.commit/g) ?? []).length, 1);
+  assert.equal((resultCapture.match(/candidate\.rollback/g) ?? []).length, 1);
 });
 
 test('Crazy Bird payload captures every effectful navigation field once', () => {

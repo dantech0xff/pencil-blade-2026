@@ -28,6 +28,13 @@ export class Font {
   constructor() { this.destroyed = false; }
 }
 
+export class AssetManager {}
+
+export const assetManager = {
+  getBundle() { return null; },
+  loadBundle(_name, callback) { callback(new Error('unused assetManager stub')); },
+};
+
 export class Size {
   constructor(width = 0, height = 0) { this.width = width; this.height = height; }
 }
@@ -210,6 +217,12 @@ const {
   '../../../game/assets/scripts/domain/crazy-resource-contract.ts'
 );
 const {
+  COMBO_BIRD_SUPPLEMENTAL_RASTER_COUNT,
+  getComboBirdSupplementalRasterSet,
+} = await import(
+  '../../../game/assets/scripts/domain/combo-bird-resource-contract.ts'
+);
+const {
   TIME_MANAGER_FREEZE_AUDIO_PATH,
   TIME_MANAGER_NORMAL_COLOR,
   TIME_MANAGER_TICK_AUDIO_PATH,
@@ -226,6 +239,16 @@ const {
   TimeManagerTimeUpDispatchError,
 } = await import(
   '../../../game/assets/scripts/creator/time-manager-presenter.ts'
+);
+const {
+  createCrazyTimeManagerResourcePort,
+} = await import(
+  '../../../game/assets/scripts/creator/crazy-resource-loader.ts'
+);
+const {
+  createComboBirdTimeManagerResourcePort,
+} = await import(
+  '../../../game/assets/scripts/creator/combo-bird-resource-loader.ts'
 );
 
 interface CocosStub {
@@ -293,12 +316,14 @@ const VIEWPORTS = Object.freeze({
   }),
 });
 
-test('entry constructs exact detached Crazy resources and activates without starting', () => {
+test('entry constructs exact detached resources and activates without starting', () => {
   for (const assetTree of ['480x800', '720x1280'] as const) {
     cc.resetCreatedNodes();
     cc.resetEvents();
     const requestedPaths: string[] = [];
-    const resources = loadedCrazyResources(assetTree, requestedPaths);
+    const resources = createCrazyTimeManagerResourcePort(
+      loadedCrazyResources(assetTree, requestedPaths),
+    );
     const harness = createHarness({ assetTree, resources, totalSeconds: 60 });
     const { presenter } = harness;
     const supplement = getCrazySupplementalRasterSet(assetTree);
@@ -374,6 +399,44 @@ test('entry constructs exact detached Crazy resources and activates without star
     assert.equal(presenter.timerLabel.opacity.opacity, 255);
     assert.equal(presenter.state.entryElapsedActionSeconds, 1);
   }
+});
+
+test('Crazy and Combo Bird adapters both satisfy the exact TimeManager port', () => {
+  for (const assetTree of ['480x800', '720x1280'] as const) {
+    const adaptedResources = [
+      createCrazyTimeManagerResourcePort(loadedCrazyResources(assetTree)),
+      createComboBirdTimeManagerResourcePort(loadedComboBirdResources(assetTree)),
+    ];
+    for (const resources of adaptedResources) {
+      cc.resetCreatedNodes();
+      const { presenter } = createHarness({
+        assetTree,
+        resources,
+        totalSeconds: 90,
+      });
+      assert.equal(presenter.timerLabel.label.font, resources.timeManagerFont);
+      assert.equal(
+        presenter.freezeClock.sprite.spriteFrame,
+        resources.freezeClock.spriteFrame,
+      );
+      assert.equal(presenter.dispose(), true);
+    }
+  }
+
+  const crazyPort = createCrazyTimeManagerResourcePort(
+    loadedCrazyResources('480x800'),
+  );
+  const resourcesWithIrrelevantCrazyCatalogMembers = {
+    ...crazyPort,
+    rasterCount: 0,
+    raster() {
+      throw new Error('TimeManager must not consult a mode catalog lookup');
+    },
+  };
+  assert.doesNotThrow(() => {
+    createHarness({ resources: resourcesWithIrrelevantCrazyCatalogMembers })
+      .presenter.dispose();
+  });
 });
 
 test('scheduler ticks delegate audio then apply warning color and countdown text', () => {
@@ -747,16 +810,14 @@ test('disposal and malformed Time Up resources stay safe', () => {
   assert.equal(pending.state.activeTimeUpPresentationCount, 0);
 
   cc.resetCreatedNodes();
-  const invalidResources = loadedCrazyResources('480x800');
-  const supplement = getCrazySupplementalRasterSet('480x800');
-  const originalRaster = invalidResources.raster;
+  const invalidResources = createCrazyTimeManagerResourcePort(
+    loadedCrazyResources('480x800'),
+  );
   const malformedResources = {
     ...invalidResources,
-    raster(resource: Parameters<typeof originalRaster>[0]) {
-      const loaded = originalRaster(resource);
-      return resource.canonicalPath === supplement.timeUp.canonicalPath
-        ? { ...loaded, spriteFrame: new cc.SpriteFrame(1, 1) }
-        : loaded;
+    timeUp: {
+      ...invalidResources.timeUp,
+      spriteFrame: new cc.SpriteFrame(1, 1),
     },
   };
   assert.throws(
@@ -764,6 +825,71 @@ test('disposal and malformed Time Up resources stay safe', () => {
     /untrimmed raster geometry/,
   );
   assert.equal(cc.createdNodes.length, 0);
+});
+
+test('mismatched direct resources and an invalid font fail closed before allocation', () => {
+  const low = createCrazyTimeManagerResourcePort(
+    loadedCrazyResources('480x800'),
+  );
+  const high = createComboBirdTimeManagerResourcePort(
+    loadedComboBirdResources('720x1280'),
+  );
+  const changedDimensions = {
+    height: low.timeUp.dimensions.height,
+    width: low.timeUp.dimensions.width + 1,
+  };
+  const invalidFont = new cc.Font();
+  invalidFont.destroyed = true;
+
+  const cases = [
+    {
+      expected: /exact TimeManager raster contract/,
+      resources: {
+        ...low,
+        freezeClock: {
+          ...low.freezeClock,
+          canonicalPath: '480x800/Interfaces/not-the-freeze-clock.png',
+        },
+      },
+    },
+    {
+      expected: /dimensions must match the exact TimeManager raster/,
+      resources: {
+        ...low,
+        timeUp: {
+          ...low.timeUp,
+          dimensions: changedDimensions,
+          spriteFrame: new cc.SpriteFrame(
+            changedDimensions.width,
+            changedDimensions.height,
+          ),
+        },
+      },
+    },
+    {
+      expected: /exact TimeManager raster contract/,
+      resources: {
+        ...low,
+        timeUp: high.timeUp,
+      },
+    },
+    {
+      expected: /valid loaded Creator Font/,
+      resources: {
+        ...low,
+        timeManagerFont: invalidFont,
+      },
+    },
+  ];
+
+  for (const { expected, resources } of cases) {
+    cc.resetCreatedNodes();
+    assert.throws(
+      () => createHarness({ assetTree: '480x800', resources }).presenter,
+      expected,
+    );
+    assert.equal(cc.createdNodes.length, 0);
+  }
 });
 
 function createHarness(options: {
@@ -775,18 +901,20 @@ function createHarness(options: {
     readonly onTimeUp: () => void;
     readonly onTimeUpFinish: () => void;
   }>;
-  readonly resources?: ReturnType<typeof loadedCrazyResources>;
+  readonly resources?: ReturnType<typeof createCrazyTimeManagerResourcePort>;
   readonly totalSeconds?: number;
 } = {}) {
-  const assetTree = options.assetTree ?? '480x800';
-  const resources = options.resources ?? loadedCrazyResources(assetTree);
+  const assetTree = options.assetTree ?? options.resources?.assetTree ?? '480x800';
+  const resources = options.resources ?? createCrazyTimeManagerResourcePort(
+    loadedCrazyResources(assetTree),
+  );
   const viewport = VIEWPORTS[assetTree];
   const overrides = options.portOverrides ?? {};
   const presenter = TimeManagerPresenter.create({
     effectsEnabled: () => true,
     logicalHeight: viewport.height,
     logicalWidth: viewport.width,
-    resources: resources as never,
+    resources,
     totalSeconds: options.totalSeconds ?? 60,
     visibleRect: viewport,
   }, {
@@ -846,6 +974,40 @@ function loadedCrazyResources(
       }
       return loaded;
     },
+  };
+}
+
+function loadedComboBirdResources(assetTree: AssetTree) {
+  const supplement = getComboBirdSupplementalRasterSet(assetTree);
+  const loadedByPath = new Map([
+    supplement.freezeClock,
+    supplement.timeUp,
+  ].map((resource) => [
+    resource.canonicalPath,
+    {
+      ...resource,
+      spriteFrame: new cc.SpriteFrame(
+        resource.dimensions.width,
+        resource.dimensions.height,
+      ),
+    },
+  ]));
+  const raster = (
+    resource: typeof supplement.freezeClock | typeof supplement.timeUp,
+  ) => {
+    const loaded = loadedByPath.get(resource.canonicalPath);
+    if (loaded === undefined) {
+      throw new Error(`unexpected Combo Bird raster ${resource.canonicalPath}`);
+    }
+    return loaded;
+  };
+  return {
+    assetTree,
+    freezeClock: raster(supplement.freezeClock),
+    rasterCount: COMBO_BIRD_SUPPLEMENTAL_RASTER_COUNT,
+    timeManagerFont: new cc.Font(),
+    timeUp: raster(supplement.timeUp),
+    raster,
   };
 }
 

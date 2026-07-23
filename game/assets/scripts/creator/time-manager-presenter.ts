@@ -8,6 +8,14 @@ import {
   isValid,
 } from 'cc';
 
+import type { Font } from 'cc';
+
+import {
+  assertGameAssetTree,
+  createGameRaster,
+  type GameAssetTree,
+  type GameRasterResource,
+} from '../domain/game-resource-contract';
 import {
   TimeManagerService,
   createTimeManagerEntryPlan,
@@ -19,14 +27,33 @@ import {
   type TimeManagerTimeUpPresentationPlan,
   type TimeManagerVisibleRect,
 } from '../domain/time-manager-service';
-import {
-  CRAZY_SUPPLEMENTAL_RASTER_COUNT,
-  getCrazySupplementalRasterSet,
-} from '../domain/crazy-resource-contract';
 import type { LoadedGameRasterResource } from './game-resource-loader';
-import type { LoadedCrazyResources } from './crazy-resource-loader';
 
 const MAX_OPACITY = 255;
+
+interface TimeManagerRasterContract {
+  readonly freezeClock: GameRasterResource;
+  readonly timeUp: GameRasterResource;
+}
+
+const TIME_MANAGER_RASTER_CONTRACTS: Readonly<
+  Record<GameAssetTree, TimeManagerRasterContract>
+> = Object.freeze({
+  '480x800': Object.freeze({
+    freezeClock: createGameRaster(
+      '480x800/Interfaces/object-time-freeze.png',
+      [148, 85],
+    ),
+    timeUp: createGameRaster('480x800/Text/text-time-up.png', [345, 135]),
+  }),
+  '720x1280': Object.freeze({
+    freezeClock: createGameRaster(
+      '720x1280/Interfaces/object-time-freeze.png',
+      [222, 127],
+    ),
+    timeUp: createGameRaster('720x1280/Text/text-time-up.png', [481, 165]),
+  }),
+});
 
 type TimeManagerAudioCommand = Extract<
   TimeManagerCommand,
@@ -39,11 +66,18 @@ export interface TimeManagerAudioPort {
   playOneShot(canonicalPath: TimeManagerAudioPath): void;
 }
 
+export interface TimeManagerResourcePort {
+  readonly assetTree: GameAssetTree;
+  readonly freezeClock: LoadedGameRasterResource;
+  readonly timeManagerFont: Font;
+  readonly timeUp: LoadedGameRasterResource;
+}
+
 export interface TimeManagerPresenterInput {
   readonly effectsEnabled: () => boolean;
   readonly logicalHeight: number;
   readonly logicalWidth: number;
-  readonly resources: LoadedCrazyResources;
+  readonly resources: TimeManagerResourcePort;
   readonly totalSeconds: number;
   readonly visibleRect: TimeManagerVisibleRect;
 }
@@ -573,23 +607,16 @@ function prepareInput(
     || typeof input.resources !== 'object'
     || Array.isArray(input.resources)
   ) {
-    throw new TypeError('resources must be loaded Crazy resources');
-  }
-  if (input.resources.rasterCount !== CRAZY_SUPPLEMENTAL_RASTER_COUNT) {
-    throw new RangeError(
-      `Crazy resources must contain ${String(CRAZY_SUPPLEMENTAL_RASTER_COUNT)} rasters`,
-    );
-  }
-  if (typeof input.resources.raster !== 'function') {
-    throw new TypeError('resources.raster must be a function');
+    throw new TypeError('resources must implement the TimeManager resource port');
   }
   if (!isValid(input.resources.timeManagerFont, true)) {
-    throw new Error('Crazy TimeManager font must be a valid loaded Creator Font');
+    throw new Error('TimeManager font must be a valid loaded Creator Font');
   }
 
-  const contracts = getCrazySupplementalRasterSet(input.resources.assetTree);
-  const freezeClockResource = input.resources.raster(contracts.freezeClock);
-  const timeUpResource = input.resources.raster(contracts.timeUp);
+  assertGameAssetTree(input.resources.assetTree);
+  const contracts = TIME_MANAGER_RASTER_CONTRACTS[input.resources.assetTree];
+  const freezeClockResource = input.resources.freezeClock;
+  const timeUpResource = input.resources.timeUp;
   assertLoadedRaster(
     freezeClockResource,
     contracts.freezeClock,
@@ -619,7 +646,7 @@ function prepareInput(
 }
 
 function createTimerLabel(
-  resources: LoadedCrazyResources,
+  resources: TimeManagerResourcePort,
   plan: TimeManagerEntryPlan,
 ): PresentedTimeManagerLabel {
   const node = new Node('TimeManagerCountdownLabel');
@@ -749,13 +776,13 @@ function assertLoadedRaster(
     throw new TypeError(`${label} must be a loaded raster`);
   }
   if (loaded.canonicalPath !== expected.canonicalPath) {
-    throw new RangeError(`${label} must match the exact Crazy raster contract`);
+    throw new RangeError(`${label} must match the exact TimeManager raster contract`);
   }
   if (
     loaded.dimensions.width !== expected.dimensions.width
     || loaded.dimensions.height !== expected.dimensions.height
   ) {
-    throw new RangeError(`${label} dimensions must match the exact Crazy raster`);
+    throw new RangeError(`${label} dimensions must match the exact TimeManager raster`);
   }
   if (!isValid(loaded.spriteFrame, true)) {
     throw new Error(`${label}.spriteFrame must be a valid loaded Creator SpriteFrame`);

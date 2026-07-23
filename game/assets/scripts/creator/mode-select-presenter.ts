@@ -115,6 +115,7 @@ export type ModeSelectUnsupportedDestination = Exclude<
   | 'CrazyModeLayer'
   | 'ClassicBirdLayer'
   | 'CrazyBirdLayer'
+  | 'ComboBirdLayer'
 >;
 
 export interface ModeSelectNavigationTransaction {
@@ -135,6 +136,9 @@ export interface ModeSelectPresenterLifecycle {
     transaction: ModeSelectNavigationTransaction,
   ) => boolean | void;
   readonly onCrazyBirdRequested: (
+    transaction: ModeSelectNavigationTransaction,
+  ) => boolean | void;
+  readonly onComboBirdRequested: (
     transaction: ModeSelectNavigationTransaction,
   ) => boolean | void;
   readonly onMainMenuRequested: (
@@ -1633,6 +1637,7 @@ function assertInput(input: ModeSelectPresenterInput): void {
     'onCrazyRequested',
     'onClassicBirdRequested',
     'onCrazyBirdRequested',
+    'onComboBirdRequested',
     'onMainMenuRequested',
     'onUnsupportedDestinationRequested',
   ], 'lifecycle');
@@ -1659,6 +1664,9 @@ function dispatchModeNavigation(
   }
   if (destination === 'CrazyBirdLayer') {
     return lifecycle.onCrazyBirdRequested(transaction);
+  }
+  if (destination === 'ComboBirdLayer') {
+    return lifecycle.onComboBirdRequested(transaction);
   }
   return lifecycle.onUnsupportedDestinationRequested(destination, transaction);
 }

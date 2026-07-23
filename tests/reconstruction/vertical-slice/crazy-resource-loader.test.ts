@@ -45,9 +45,11 @@ const {
 } = await import('../../../game/assets/scripts/domain/game-resource-contract.ts');
 const {
   CRAZY_SUPPLEMENTAL_RASTER_COUNT,
+  getCrazySupplementalRasterSet,
   getCrazySupplementalRasterResources,
 } = await import('../../../game/assets/scripts/domain/crazy-resource-contract.ts');
 const {
+  createCrazyTimeManagerResourcePort,
   loadCrazyResources,
 } = await import('../../../game/assets/scripts/creator/crazy-resource-loader.ts');
 
@@ -81,9 +83,28 @@ test('Crazy loader resolves all 37 exact rasters and the TimeManager font', asyn
   });
 
   const loaded = await loadCrazyResources(assetTree);
+  const timeManagerResources = createCrazyTimeManagerResourcePort(loaded);
+  const supplement = getCrazySupplementalRasterSet(assetTree);
   assert.equal(contracts.length, CRAZY_SUPPLEMENTAL_RASTER_COUNT);
   assert.equal(loaded.rasterCount, 37);
   assert.equal(loaded.timeManagerFont, font);
+  assert.deepEqual(Object.keys(timeManagerResources), [
+    'assetTree',
+    'freezeClock',
+    'timeManagerFont',
+    'timeUp',
+  ]);
+  assert.equal(timeManagerResources.assetTree, assetTree);
+  assert.equal(
+    timeManagerResources.freezeClock.canonicalPath,
+    supplement.freezeClock.canonicalPath,
+  );
+  assert.equal(timeManagerResources.timeManagerFont, font);
+  assert.equal(
+    timeManagerResources.timeUp.canonicalPath,
+    supplement.timeUp.canonicalPath,
+  );
+  assert.equal(Object.isFrozen(timeManagerResources), true);
   assert.equal(requested.length, 38);
   for (const contract of contracts) {
     const raster = loaded.raster(contract);

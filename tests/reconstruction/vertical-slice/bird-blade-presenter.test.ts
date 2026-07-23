@@ -444,40 +444,73 @@ test('presenter starts centered with ten exact 0.1-second looping main frames', 
   );
 });
 
-test('presenter derives type 2 from loaded resources and rejects a mismatched profile', () => {
-  const resources = loadedBirdResources('480x800', 2);
-  const presenter = BirdBladePresenter.create({
+test('presenter preserves types 2 and 3 and rejects mismatched profile identity', () => {
+  const typeTwoResources = loadedBirdResources('480x800', 2);
+  const typeTwoPresenter = BirdBladePresenter.create({
     random: new BoundsAwareRandom(),
-    resources: resources as never,
+    resources: typeTwoResources as never,
     viewport: { width: 480, height: 800 },
   });
 
-  assert.equal(presenter.state.snapshot().type, 2);
+  assert.equal(typeTwoPresenter.state.snapshot().type, 2);
   assert.equal(
-    (presenter.main.sprite.spriteFrame as unknown as StubSpriteFrame).label,
+    (typeTwoPresenter.main.sprite.spriteFrame as unknown as StubSpriteFrame).label,
     '480x800/Birds/bird-anim-2-0.png',
   );
   assert.equal(
-    (presenter.leftDirection.sprite.spriteFrame as unknown as StubSpriteFrame).label,
+    (typeTwoPresenter.leftDirection.sprite.spriteFrame as unknown as StubSpriteFrame)
+      .label,
     '480x800/Birds/bird-left-2.png',
   );
   assert.equal(
-    (presenter.rightDirection.sprite.spriteFrame as unknown as StubSpriteFrame).label,
+    (typeTwoPresenter.rightDirection.sprite.spriteFrame as unknown as StubSpriteFrame)
+      .label,
     '480x800/Birds/bird-right-2.png',
   );
   assert.deepEqual(
-    presenter.leftDirection.transform.contentSize,
+    typeTwoPresenter.leftDirection.transform.contentSize,
     { width: 110, height: 101 },
   );
   assert.deepEqual(
-    presenter.rightDirection.transform.contentSize,
+    typeTwoPresenter.rightDirection.transform.contentSize,
     { width: 111, height: 101 },
+  );
+
+  const typeThreeResources = loadedBirdResources('480x800', 3);
+  const typeThreePresenter = BirdBladePresenter.create({
+    random: new BoundsAwareRandom(),
+    resources: typeThreeResources as never,
+    viewport: { width: 480, height: 800 },
+  });
+  assert.equal(typeThreePresenter.state.snapshot().type, 3);
+  assert.equal(
+    (typeThreePresenter.main.sprite.spriteFrame as unknown as StubSpriteFrame)
+      .label,
+    '480x800/Birds/bird-anim-3-0.png',
+  );
+  assert.equal(
+    (typeThreePresenter.leftDirection.sprite.spriteFrame as unknown as StubSpriteFrame)
+      .label,
+    '480x800/Birds/bird-left-3.png',
+  );
+  assert.equal(
+    (typeThreePresenter.rightDirection.sprite.spriteFrame as unknown as StubSpriteFrame)
+      .label,
+    '480x800/Birds/bird-right-3.png',
+  );
+  assert.deepEqual(
+    typeThreePresenter.leftDirection.transform.contentSize,
+    { width: 110, height: 101 },
+  );
+  assert.deepEqual(
+    typeThreePresenter.rightDirection.transform.contentSize,
+    { width: 110, height: 101 },
   );
 
   assert.throws(
     () => BirdBladePresenter.create({
       random: new BoundsAwareRandom(),
-      resources: { ...resources, birdType: 1 } as never,
+      resources: { ...typeTwoResources, birdType: 1 } as never,
       viewport: { width: 480, height: 800 },
     }),
     /resources profile must match Bird type 1/,
@@ -486,12 +519,39 @@ test('presenter derives type 2 from loaded resources and rejects a mismatched pr
     () => BirdBladePresenter.create({
       random: new BoundsAwareRandom(),
       resources: {
-        ...resources,
+        ...typeTwoResources,
         profile: getBirdResourceProfile('480x800'),
       } as never,
       viewport: { width: 480, height: 800 },
     }),
     /resources profile must match Bird type 2/,
+  );
+  assert.throws(
+    () => BirdBladePresenter.create({
+      random: new BoundsAwareRandom(),
+      resources: {
+        ...typeThreeResources,
+        profile: getBirdResourceProfile('480x800', 2),
+      } as never,
+      viewport: { width: 480, height: 800 },
+    }),
+    /resources profile must match Bird type 3/,
+  );
+  assert.throws(
+    () => BirdBladePresenter.create({
+      random: new BoundsAwareRandom(),
+      resources: { ...typeThreeResources, birdType: 4 } as never,
+      viewport: { width: 480, height: 800 },
+    }),
+    /birdType must be 1, 2, or 3/,
+  );
+  assert.throws(
+    () => BirdBladePresenter.create({
+      random: new BoundsAwareRandom(),
+      resources: { ...typeThreeResources, rasterCount: 16 } as never,
+      viewport: { width: 480, height: 800 },
+    }),
+    /resources rasterCount must be 17/,
   );
 });
 
@@ -780,7 +840,7 @@ test('invalid viewport, random, parent, and changed raster geometry reject', () 
 
 function loadedBirdResources(
   assetTree: '480x800' | '720x1280',
-  birdType: 1 | 2 = 1,
+  birdType: 1 | 2 | 3 = 1,
 ) {
   const profile = getBirdResourceProfile(assetTree, birdType);
   const contracts = listBirdRasterResources(assetTree, birdType);

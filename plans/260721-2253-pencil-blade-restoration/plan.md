@@ -115,10 +115,9 @@ Verified starting point:
   rail, and RopeButton/FruitButton physics presenters are now implemented. Their lifecycle
   transactions, input/physics leases, rollback paths, exact resources, and fail-closed unrecovered
   destinations currently hold the checkpoint. Fresh Creator-served Browser Preview runs reach
-  the Crazy Bird checkpoint, including Main Menu -> Mode Select -> Crazy Bird -> live
-  Bird/type-2 presentation -> Pause/Resume/Replay -> Pause Quit -> Main Menu. The final
-  post-gesture DevTools check reports `0` messages. No placeholder destination screen is
-  authorized.
+  the Combo Bird checkpoint, including Main Menu -> Mode Select -> Combo Bird -> live
+  Bird/type-3 ordinary-only gameplay -> Pause/Resume/Replay -> Pause Quit -> Main Menu. The
+  final Cocos console counters are `0/0/0/0`. No placeholder destination screen is authorized.
   The exact standard-bomb raster/audio/entity foundation and Concurrent batch partition are
   contract-tested. Crazy mode now owns its recovered 60-second session, controller graph,
   standard-bomb explosion/fuse-smoke path, special/electric/magnet/Dragon entities, audio,
@@ -129,17 +128,24 @@ Verified starting point:
   closure, distinct objective events, `bird_crazy_best_1..3`, a float32 `0.8` reward, and
   fresh mode-4 replay/retry/menu ownership. The exact native `ActionGoCallback` operand/order
   remains a disclosed static inference gap.
-  The current checkpoint reaches `952/952` vertical-slice tests, `38/38`
-  resource/build/catalog tests, `14/14` source/staging/archive inventory cases in `217s`,
-  strict Creator TypeScript, reconstruction-policy positive plus `4/4` negative fixtures,
-  native static analysis `7/7`, and an approved independent runtime review with no P0/P1/P2
-  finding.
+  Combo Bird mode `5` is a separate production owner rather than a Crazy profile. It composes
+  BirdBlade type `3`, the exact type-3 and instruction/TimeManager resources, a recovered
+  `90`-second timer, three ordinary-fruit toss controllers, objectives, pause, result ranking
+  and reward, and transactional replay/retry/menu lifecycles. Its leaderboard keys are
+  `bird_combo_best_1..3` and its recovered reward factor is float32 `0.8`. Missing or corrupt
+  storage still falls back to `999999` coins while a valid persisted balance wins.
+  The current checkpoint reaches `70/70` focused Combo Bird tests, `1030/1030` full
+  vertical-slice tests, and `38/38` resource/build/catalog tests. The unchanged
+  source/staging/archive inventory remains `14/14` in `217s`; strict Creator TypeScript,
+  reconstruction-policy positive plus `4/4` negative fixtures, native static analysis `7/7`,
+  and diff hygiene are clean.
   Project completion still requires the remaining resource consumers and scene/prefab map,
   a pinned integration/toolchain policy, and build validation.
-- Phase 6 continues because the Cocos Creator vertical slice and production Crazy Bird
-  checkpoint reached their contract gates and a fresh Creator-served Browser Preview. Four of
-  six production routes are complete. Combo Bird is next, then GN Style, so the remaining work
-  preserves the dedicated particle choreography and mode-specific contracts.
+- Phase 6 continues because the Cocos Creator vertical slice and production Combo Bird
+  checkpoint reached their contract gates and a fresh Creator-served Browser Preview. Five of
+  six production routes are complete. GN Style mode `2` is the only remaining fail-closed
+  destination, so the next work preserves its dedicated particle choreography and
+  mode-specific contracts.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
 
@@ -190,6 +196,9 @@ Verified starting point:
 - [Crazy Bird production checkpoint](./reports/implementer-2026-07-24-crazy-bird-runtime.md)
 - [Crazy Bird final verification](./reports/tester-2026-07-24-crazy-bird-final-checkpoint.md)
 - [Crazy Bird runtime review](./reports/reviewer-2026-07-24-crazy-bird-gameplay-shell.md)
+- [Combo Bird architecture map](./reports/explorer-2026-07-24-combo-bird-architecture-map.md)
+- [Combo Bird production checkpoint](./reports/implementer-2026-07-24-combo-bird-runtime.md)
+- [Combo Bird final verification](./reports/tester-2026-07-24-combo-bird-final-checkpoint.md)
 - [Remaining mode implementation order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 - [Creator readiness audit](./reports/creator-readiness-2026-07-22.md)
 - [Android toolchain readiness audit](./reports/android-toolchain-readiness-2026-07-22.md)

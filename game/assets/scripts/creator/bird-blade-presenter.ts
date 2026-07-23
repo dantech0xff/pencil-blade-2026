@@ -36,6 +36,7 @@ import {
 } from '../domain/bird-blade-state';
 import {
   BIRD_ANIMATION_FRAME_COUNT,
+  BIRD_RASTER_RESOURCE_COUNT,
   getBirdResourceProfile,
 } from '../domain/bird-resource-contract';
 import type {
@@ -842,11 +843,19 @@ function assertResources(resources: LoadedBirdResources): void {
     profile.rightDirection,
     ...profile.particles,
   ];
+  if (resources.rasterCount !== BIRD_RASTER_RESOURCE_COUNT) {
+    throw new RangeError(
+      `resources rasterCount must be ${BIRD_RASTER_RESOURCE_COUNT}`,
+    );
+  }
   if (
     !Array.isArray(resources.orderedRasters)
-    || resources.orderedRasters.length !== expected.length
+    || expected.length !== BIRD_RASTER_RESOURCE_COUNT
+    || resources.orderedRasters.length !== BIRD_RASTER_RESOURCE_COUNT
   ) {
-    throw new RangeError('resources must contain all 17 Bird rasters');
+    throw new RangeError(
+      `resources must contain all ${BIRD_RASTER_RESOURCE_COUNT} Bird rasters`,
+    );
   }
   expected.forEach((contract, index) => {
     const loaded = resources.orderedRasters[index];

@@ -105,6 +105,12 @@
         "__id__": 25
       },
       {
+        "__id__": 26
+      },
+      {
+        "__id__": 27
+      },
+      {
         "__id__": 20
       }
     ],
@@ -580,5 +586,29 @@
     "_enabled": true,
     "__prefab": null,
     "_id": "V96kZxIljWKq4XVV6qzbSg"
+  },
+  {
+    "__type__": "663d3B/+/BERYDnLojJMA0g",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 2
+    },
+    "_enabled": true,
+    "__prefab": null,
+    "_id": "cBScene6m5JQx4tN8zR2p"
+  },
+  {
+    "__type__": "cb050HbGT5HybWddzJ929pX",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 2
+    },
+    "_enabled": true,
+    "__prefab": null,
+    "_id": "cBGamep9k7VWx3sL6uA1q"
   }
 ]

@@ -11,7 +11,7 @@ export const BIRD_BLADE_MOVING_STATE = 1 as const;
 export const BIRD_BLADE_SETTLE_STATE = 2 as const;
 export const BIRD_BLADE_RAY_GATE_MAXIMUM = 3 as const;
 
-export type BirdBladeType = 1 | 2;
+export type BirdBladeType = 1 | 2 | 3;
 export type BirdBladeMotionState =
   | typeof BIRD_BLADE_IDLE_STATE
   | typeof BIRD_BLADE_MOVING_STATE
@@ -452,8 +452,8 @@ function resolveBirdBladeType(type: BirdBladeType | undefined): BirdBladeType {
   if (!Number.isSafeInteger(type)) {
     throw new TypeError('type must be a safe integer');
   }
-  if (type !== 1 && type !== 2) {
-    throw new RangeError('type must be 1 or 2');
+  if (type !== 1 && type !== 2 && type !== 3) {
+    throw new RangeError('type must be 1, 2, or 3');
   }
   return type;
 }

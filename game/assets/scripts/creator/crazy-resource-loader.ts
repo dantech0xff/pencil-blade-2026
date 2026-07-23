@@ -5,6 +5,7 @@ import type { AssetManager, Font } from 'cc';
 import {
   CRAZY_SUPPLEMENTAL_RASTER_COUNT,
   CRAZY_TIME_MANAGER_FONT_RESOURCE,
+  getCrazySupplementalRasterSet,
   getCrazySupplementalRasterResources,
 } from '../domain/crazy-resource-contract';
 import {
@@ -17,12 +18,25 @@ import {
   loadGameResourceBundle,
   type LoadedGameRasterResource,
 } from './game-resource-loader';
+import type { TimeManagerResourcePort } from './time-manager-presenter';
 
 export interface LoadedCrazyResources {
   readonly assetTree: GameAssetTree;
   readonly rasterCount: typeof CRAZY_SUPPLEMENTAL_RASTER_COUNT;
   readonly timeManagerFont: Font;
   raster(resource: GameRasterResource): LoadedGameRasterResource;
+}
+
+export function createCrazyTimeManagerResourcePort(
+  resources: LoadedCrazyResources,
+): TimeManagerResourcePort {
+  const supplement = getCrazySupplementalRasterSet(resources.assetTree);
+  return Object.freeze({
+    assetTree: resources.assetTree,
+    freezeClock: resources.raster(supplement.freezeClock),
+    timeManagerFont: resources.timeManagerFont,
+    timeUp: resources.raster(supplement.timeUp),
+  });
 }
 
 /**

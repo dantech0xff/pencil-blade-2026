@@ -14,14 +14,16 @@ effort: "2-4 months"
 Expand the proven slice to all statically identified modes, cosmetics, objectives,
 progression, settings, audio, and lifecycle behavior without weakening contract tests.
 
-Classic, Crazy, Classic Bird, and Crazy Bird now have production Creator routes. Classic Bird
-adds the shared BaseBird/BirdBlade substrate and the mode-3 checkpoint on top of the recovered
-Classic lifecycle. Crazy includes its recovered timed controller graph, standard and electric
-bombs, specials, magnet, Dragon, objectives, pause, result, audio, and transactional
-Replay/Quit/Time-Up/Retry lifecycle. Crazy Bird mode `4` profiles that shared graph with
-BirdBlade type `2`, the exact 17-raster type-2 closure, distinct mode-4 objectives,
-`bird_crazy_best_1..3`, and the float32 `0.8` result reward. The next slice is Combo Bird mode
-`5`, then GN Style mode `2`.
+Classic, Crazy, Classic Bird, Crazy Bird, and Combo Bird now have production Creator routes.
+Classic Bird adds the shared BaseBird/BirdBlade substrate and the mode-3 checkpoint on top of
+the recovered Classic lifecycle. Crazy includes its recovered timed controller graph, standard
+and electric bombs, specials, magnet, Dragon, objectives, pause, result, audio, and
+transactional Replay/Quit/Time-Up/Retry lifecycle. Crazy Bird mode `4` profiles that shared
+graph with BirdBlade type `2`. Combo Bird mode `5` remains independent from Crazy and composes
+BirdBlade type `3`, exact type-3 resources, a recovered `90`-second timer, an ordinary-only toss
+graph, objectives, pause, result ranking/reward, and transactional replay/retry/menu ownership.
+Its keys are `bird_combo_best_1..3` and its reward factor is float32 `0.8`. GN Style mode `2`
+is the only remaining route.
 
 ## Context Links
 
@@ -32,6 +34,9 @@ BirdBlade type `2`, the exact 17-raster type-2 closure, distinct mode-4 objectiv
 - [Crazy Bird production checkpoint](./reports/implementer-2026-07-24-crazy-bird-runtime.md)
 - [Crazy Bird final verification](./reports/tester-2026-07-24-crazy-bird-final-checkpoint.md)
 - [Crazy Bird runtime review](./reports/reviewer-2026-07-24-crazy-bird-gameplay-shell.md)
+- [Combo Bird architecture map](./reports/explorer-2026-07-24-combo-bird-architecture-map.md)
+- [Combo Bird production checkpoint](./reports/implementer-2026-07-24-combo-bird-runtime.md)
+- [Combo Bird final verification](./reports/tester-2026-07-24-combo-bird-final-checkpoint.md)
 - [Remaining mode order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 
 ## Requirements
@@ -79,33 +84,35 @@ save schema and include reproducible fixtures for progression states.
 - **Complete:** shared BaseBird/BirdBlade substrate and Classic Bird mode `3`.
 - **Complete:** Crazy Bird mode `4` through the shared Crazy graph, BirdBlade type `2`, exact
   type-2 resources, mode-4 objective/ranking/reward profiles, and transactional replay/result/menu.
-- **Next:** Combo Bird mode `5`, then GN Style mode `2`.
-- Combo Bird follows the shared bird/timed-result seams and must preserve the
+- **Complete:** independent Combo Bird mode `5` with BirdBlade type `3`, the exact type-3 and
+  instruction/TimeManager resources, a `90`-second timer, ordinary-only toss graph,
+  objectives, pause, result/ranking/reward, `bird_combo_best_1..3`, float32 `0.8` reward,
+  and transactional Replay/Retry/Main Menu ownership. Its resource contract preserves the
   resolution-specific `text-juscombo.png` / `text-justcombo.png` mismatch explicitly.
-  GN Style remains last because its recovered `150`-second shell,
+- **Next:** GN Style mode `2`, whose recovered `150`-second shell,
   `GangnamStyle.mp3`, and direct 439-call particle choreography must be materialized from
   evidence instead of approximated.
-- Four of six production routes are complete; modes `2` and `5` remain fail closed.
+- Five of six production routes are complete; only mode `2` remains fail closed.
 
 Current certification checkpoint:
 
-- Full deterministic vertical slice: `952/952` final clean checkpoint
+- Focused Combo Bird suite: `70/70`
+- Full deterministic vertical slice: `1030/1030` final clean checkpoint
 - Resource/build/catalog tests: `38/38`
 - Static inventory/source/staging/archive workflow: `14/14` in `217s`
 - Reconstruction policy: positive checkpoint and `4/4` negative fixtures
 - Native static analysis: `7/7`
 - Cocos Creator 3.8.8 strict TypeScript: observed
-- Fresh Creator-served Browser Preview reaches Crazy Bird, live type-2 gameplay,
-  Pause/Resume/Replay, and Pause Quit to Main Menu; final post-gesture DevTools reports
-  `0` messages
-- Independent runtime review: approved with no P0/P1/P2 finding
-- Result-entry rollback reacquisition P1 resolved before final certification
+- Fresh Creator-served Browser Preview reaches Main Menu -> Mode Select -> Combo Bird ->
+  live type-3 gameplay, Pause/Resume/Replay, and Pause Quit -> Main Menu; final Cocos
+  console counters are `0/0/0/0`
+- Missing or corrupt save still falls back to `999999` coins; a valid persisted balance wins
 
 ## Todo List
 
 - [x] Shared Classic/Crazy systems required by the first two production modes
 - [x] Shared BaseBird/BirdBlade systems
-- [ ] Six modes (`4/6` production routes complete)
+- [ ] Six modes (`5/6` production routes complete)
 - [ ] Full content/cosmetics
 - [ ] Progression and saves
 - [ ] Menus/settings/results/objectives
@@ -136,6 +143,5 @@ leaderboards, if retained, require new approved implementations.
 
 ## Next Steps
 
-Implement Combo Bird mode `5`, then GN Style mode `2`. Freeze content and enter Phase 7 only
-when all identified states/contracts are reconciled and remaining unknowns are disclosed with
-impact.
+Implement GN Style mode `2`. Freeze content and enter Phase 7 only when all identified
+states/contracts are reconciled and remaining unknowns are disclosed with impact.

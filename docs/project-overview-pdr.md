@@ -13,14 +13,16 @@ intro/terminal/fail-marker art, score icon, best-score cup, double-score panel, 
 ordinary intact/cut fruit, critical particles, and 23 reviewed core/ordinary-bomb audio clips.
 The exact standard-bomb raster, body, fixture, cut guard, and retained-audio seam are also
 implemented and tested, and the shared BaseBird/BirdBlade substrate now powers production
-Classic Bird mode `3` and Crazy Bird mode `4`. Crazy Bird profiles the shared 60-second Crazy
-controllers with BirdBlade type `2`, the exact 17-raster type-2 closure, distinct mode-4
-objectives, `bird_crazy_best_1..3`, and the float32 `0.8` result reward. The mode-0 result
-includes its exact rank order, delayed particle burst, rotating reward tree, and the
+Classic Bird mode `3`, Crazy Bird mode `4`, and Combo Bird mode `5`. Combo Bird is an
+independent runtime rather than a Crazy profile: it owns BirdBlade type `3`, exact type-3 and
+instruction/TimeManager resources, a `90`-second timer, an ordinary-only toss graph,
+objectives, pause, result ranking/reward, `bird_combo_best_1..3`, and transactional
+Replay/Retry/Main Menu ownership. Its recovered reward factor is float32 `0.8`. The mode-0
+result includes its exact rank order, delayed particle burst, rotating reward tree, and the
 Classic-relevant `total_coins` plus `classic_best_1/2/3` persistence subset. Missing or corrupt
 save restores `999999` coins while a valid persisted balance wins. This is a bounded production
 checkpoint, not presentation completion: most resource consumers and the full scene/prefab map
-remain open, and modes `2` and `5` still fail closed.
+remain open, and only GN Style mode `2` still fails closed.
 
 ## Authority and evidence
 
@@ -54,18 +56,20 @@ replay, and device comparison are unavailable and are not project gates.
   subset that the playable slice consumes.
 - The Classic score HUD now uses the exact recovered score icon, best-score cup,
   double-score panel, and `Fonts/Linds.ttf`. Best-score display follows the authoritative
-  score service seeded from persisted `classic_best_1`; app hide saves all four restored
-  Classic Settings integers. Missing or corrupt save falls back to `999999` coins while a
-  valid persisted balance wins. Full first-launch/Main Menu Settings behavior remains open.
-- The current implementation checkpoint covers production routes `0`, `1`, `3`, and `4`;
-  modes `2` and `5` remain fail closed.
-- The Crazy Bird checkpoint passes `952/952` deterministic vertical-slice tests, `38/38`
-  resource/build/catalog tests, `14/14` inventory/evidence cases in `217s`, reconstruction
-  policy positive plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator
-  TypeScript, and independent runtime review.
-- Fresh Creator Preview reaches Main Menu → Mode Select → Crazy Bird → live Bird/type-2
-  gameplay → Pause/Resume/Replay → Pause Quit → Main Menu with an empty Cocos console and
-  `0` post-gesture DevTools messages.
+  score service seeded from persisted `classic_best_1`; app hide saves the expanded
+  implemented Settings subset, including all five route leaderboards and objective state.
+  Missing or corrupt save falls back to `999999` coins while a valid persisted balance wins.
+  Full first-launch/Main Menu Settings behavior remains open.
+- The current implementation checkpoint covers five of six production routes: `0`, `1`, `3`,
+  `4`, and `5`. GN Style mode `2` is the next and only fail-closed route.
+- The Combo Bird checkpoint passes `70/70` focused tests, `1030/1030` deterministic
+  vertical-slice tests, and `38/38` resource/build/catalog tests. The unchanged
+  inventory/evidence workflow remains `14/14` in `217s`; reconstruction policy positive plus
+  `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and diff
+  hygiene are clean.
+- Fresh Creator Preview reaches Main Menu → Mode Select → Combo Bird → live Bird/type-3
+  gameplay → Pause/Resume/Replay → Pause Quit → Main Menu with final Cocos console counters
+  `0/0/0/0`.
 - Presentation restoration is complete only when the canonical user-supplied sample project
   has 100% inventory, staging, and consumer coverage for every resource actually present.
 - No canonical graphics, animation frame, sound, music, font, shader/material, level/layout,
@@ -133,6 +137,12 @@ replay, and device comparison are unavailable and are not project gates.
   inference gap and is not counted as recovered behavior.
 - Git is initialized on `main` with a committed foundation. The curated/ignored boundary remains
   mandatory for staging and commits.
+
+## Checkpoint evidence
+
+- [Combo Bird architecture map](../plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-combo-bird-architecture-map.md)
+- [Combo Bird production checkpoint](../plans/260721-2253-pencil-blade-restoration/reports/implementer-2026-07-24-combo-bird-runtime.md)
+- [Combo Bird final verification](../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-combo-bird-final-checkpoint.md)
 
 ## Phase 1 acceptance
 

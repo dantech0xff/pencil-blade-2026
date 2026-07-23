@@ -505,11 +505,12 @@ test('partial RopeButton activation rolls back the input lease and permits retry
   presenter.dispose();
 });
 
-test('rejected Crazy, both Bird routes, and unsupported routes restore every cut card', () => {
+test('rejected Crazy, all Bird routes, and unsupported routes restore every cut card', () => {
   ropeStub.resetRopes();
   let crazyCalls = 0;
   let classicBirdCalls = 0;
   let crazyBirdCalls = 0;
+  let comboBirdCalls = 0;
   let unsupportedCalls = 0;
   const lifecycle = defaultLifecycle();
   lifecycle.onCrazyRequested = () => {
@@ -522,6 +523,10 @@ test('rejected Crazy, both Bird routes, and unsupported routes restore every cut
   };
   lifecycle.onCrazyBirdRequested = () => {
     crazyBirdCalls += 1;
+    return false;
+  };
+  lifecycle.onComboBirdRequested = () => {
+    comboBirdCalls += 1;
     return false;
   };
   lifecycle.onUnsupportedDestinationRequested = () => {
@@ -538,10 +543,12 @@ test('rejected Crazy, both Bird routes, and unsupported routes restore every cut
   const gnStyle = ropeStub.createdRopes[2];
   const classicBird = ropeStub.createdRopes[3];
   const crazyBird = ropeStub.createdRopes[4];
+  const comboBird = ropeStub.createdRopes[5];
   assert.ok(crazy);
   assert.ok(gnStyle);
   assert.ok(classicBird);
   assert.ok(crazyBird);
+  assert.ok(comboBird);
   assert.equal(crazy.cut(segment, true), true);
   assert.equal(presenter.state.navigationPendingCount, 1);
   presenter.update(0.75);
@@ -568,6 +575,15 @@ test('rejected Crazy, both Bird routes, and unsupported routes restore every cut
   assert.equal(presenter.state.navigationPendingCount, 0);
   assert.equal(crazyBird.restoreCount, 1);
   assert.equal(crazyBird.cutAccepted, false);
+
+  assert.equal(comboBird.cut(segment, true), true);
+  assert.equal(presenter.state.navigationPendingCount, 1);
+  presenter.update(0.75);
+  assert.equal(comboBirdCalls, 1);
+  assert.equal(unsupportedCalls, 0);
+  assert.equal(presenter.state.navigationPendingCount, 0);
+  assert.equal(comboBird.restoreCount, 1);
+  assert.equal(comboBird.cutAccepted, false);
 
   assert.equal(gnStyle.cut(segment, true), true);
   assert.equal(presenter.state.navigationPendingCount, 1);
@@ -939,6 +955,7 @@ test('source keeps exact detached/lifecycle boundaries and no destination placeh
   assert.match(source, /onCrazyRequested/);
   assert.match(source, /onClassicBirdRequested/);
   assert.match(source, /onCrazyBirdRequested/);
+  assert.match(source, /onComboBirdRequested/);
   assert.match(source, /onMainMenuRequested/);
   assert.match(source, /onUnsupportedDestinationRequested/);
   assert.match(source, /restoreAfterFailedNavigation/);
@@ -1554,6 +1571,7 @@ function defaultLifecycle() {
     onCrazyRequested(_transaction?: unknown) { return true; },
     onClassicBirdRequested(_transaction?: unknown) { return true; },
     onCrazyBirdRequested(_transaction?: unknown) { return true; },
+    onComboBirdRequested(_transaction?: unknown) { return true; },
     onMainMenuRequested(_transaction?: unknown) { return true; },
     onUnsupportedDestinationRequested(
       _destination?: unknown,

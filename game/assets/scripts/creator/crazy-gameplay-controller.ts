@@ -182,10 +182,8 @@ import {
   type CrazyPhysicsSteppedEvent,
   type CrazyTimeUpFinishParticipant,
 } from './crazy-scene-controller';
-import {
-  loadCrazyResources,
-  type LoadedCrazyResources,
-} from './crazy-resource-loader';
+import * as CrazyResourceLoader from './crazy-resource-loader';
+import type { LoadedCrazyResources } from './crazy-resource-loader';
 import { createDetachedScreenRoot } from './detached-screen-root';
 import { ObjectiveAchievementPresenter } from './objective-achievement-presenter';
 import { StandardBombExplosionPresenter } from './standard-bomb-explosion-presenter';
@@ -811,7 +809,7 @@ export class CrazyGameplayController extends Component {
     // Neither raster/font loader attaches a node. Load both before the audio owner so any
     // earlier rejection has no Creator attachment to unwind.
     const [resources, dragonFont, baseGameplayResources] = await Promise.all([
-      loadCrazyResources(classicCatalog.assetTree),
+      CrazyResourceLoader.loadCrazyResources(classicCatalog.assetTree),
       loadCrazyDragonFont(),
       loadBaseGameplayResources(classicCatalog.assetTree),
     ]);
@@ -1360,7 +1358,7 @@ export class CrazyGameplayController extends Component {
       effectsEnabled: this.effectsEnabled,
       logicalHeight: this.requireResolution().profile.designHeight,
       logicalWidth: this.requireResolution().profile.designWidth,
-      resources,
+      resources: CrazyResourceLoader.createCrazyTimeManagerResourcePort(resources),
       totalSeconds: 60,
       visibleRect,
     }, {
