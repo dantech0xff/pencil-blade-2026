@@ -19,6 +19,17 @@ import {
   type ClassicResultCoinAward,
 } from './classic-result-ranking';
 import {
+  CRAZY_BIRD_BEST_1_STORAGE_KEY,
+  CRAZY_BIRD_BEST_2_STORAGE_KEY,
+  CRAZY_BIRD_BEST_3_STORAGE_KEY,
+  CRAZY_BIRD_INITIAL_LEADERBOARD,
+  awardCrazyBirdResultCoins,
+  insertCrazyBirdResultScore,
+  type CrazyBirdLeaderboard,
+  type CrazyBirdLeaderboardUpdate,
+  type CrazyBirdResultCoinAward,
+} from './crazy-bird-result-ranking';
+import {
   CRAZY_BEST_1_STORAGE_KEY,
   CRAZY_BEST_2_STORAGE_KEY,
   CRAZY_BEST_3_STORAGE_KEY,
@@ -40,6 +51,11 @@ export {
   CLASSIC_BIRD_BEST_2_STORAGE_KEY,
   CLASSIC_BIRD_BEST_3_STORAGE_KEY,
 } from './classic-bird-result-ranking';
+export {
+  CRAZY_BIRD_BEST_1_STORAGE_KEY,
+  CRAZY_BIRD_BEST_2_STORAGE_KEY,
+  CRAZY_BIRD_BEST_3_STORAGE_KEY,
+} from './crazy-bird-result-ranking';
 export {
   CRAZY_BEST_1_STORAGE_KEY,
   CRAZY_BEST_2_STORAGE_KEY,
@@ -107,6 +123,7 @@ export interface ClassicTotalCoinsAdjustment {
  */
 export class ClassicSettingsState {
   private birdClassicLeaderboardValue: ClassicBirdLeaderboard;
+  private birdCrazyLeaderboardValue: CrazyBirdLeaderboard;
   private crazyLeaderboardValue: CrazyLeaderboard;
   private currentObjectiveValue: number;
   private effectsEnabledValue: boolean;
@@ -123,10 +140,13 @@ export class ClassicSettingsState {
   private constructor(
     snapshot: ClassicSettingsSnapshot,
     birdClassicLeaderboard: ClassicBirdLeaderboard,
+    birdCrazyLeaderboard: CrazyBirdLeaderboard,
   ) {
     assertSnapshot(snapshot);
     assertOrderedLeaderboard(birdClassicLeaderboard, 'birdClassicLeaderboard');
+    assertOrderedLeaderboard(birdCrazyLeaderboard, 'birdCrazyLeaderboard');
     this.birdClassicLeaderboardValue = freezeLeaderboard(birdClassicLeaderboard);
+    this.birdCrazyLeaderboardValue = freezeLeaderboard(birdCrazyLeaderboard);
     this.crazyLeaderboardValue = freezeLeaderboard(snapshot.crazyLeaderboard);
     this.currentObjectiveValue = snapshot.currentObjective;
     this.effectsEnabledValue = snapshot.effectsEnabled;
@@ -158,6 +178,7 @@ export class ClassicSettingsState {
         totalCoins: CLASSIC_INITIAL_TOTAL_COINS,
       }),
       CLASSIC_BIRD_INITIAL_LEADERBOARD,
+      CRAZY_BIRD_INITIAL_LEADERBOARD,
     );
   }
 
@@ -189,6 +210,9 @@ export class ClassicSettingsState {
     const birdClassicFirst = port.readInt32(CLASSIC_BIRD_BEST_1_STORAGE_KEY, 0);
     const birdClassicSecond = port.readInt32(CLASSIC_BIRD_BEST_2_STORAGE_KEY, 0);
     const birdClassicThird = port.readInt32(CLASSIC_BIRD_BEST_3_STORAGE_KEY, 0);
+    const birdCrazyFirst = port.readInt32(CRAZY_BIRD_BEST_1_STORAGE_KEY, 0);
+    const birdCrazySecond = port.readInt32(CRAZY_BIRD_BEST_2_STORAGE_KEY, 0);
+    const birdCrazyThird = port.readInt32(CRAZY_BIRD_BEST_3_STORAGE_KEY, 0);
     const currentObjective = port.readInt32(OBJECTIVES_CURRENT_STORAGE_KEY, 0);
     const fruitsCut = port.readInt32(OBJECTIVES_FRUITS_CUT_STORAGE_KEY, 0);
     const musicEnabled = port.readBoolean(CLASSIC_MUSIC_ENABLED_STORAGE_KEY, true);
@@ -219,11 +243,20 @@ export class ClassicSettingsState {
         second: birdClassicSecond,
         third: birdClassicThird,
       }),
+      Object.freeze({
+        first: birdCrazyFirst,
+        second: birdCrazySecond,
+        third: birdCrazyThird,
+      }),
     );
   }
 
   get birdClassicLeaderboard(): ClassicBirdLeaderboard {
     return freezeLeaderboard(this.birdClassicLeaderboardValue);
+  }
+
+  get birdCrazyLeaderboard(): CrazyBirdLeaderboard {
+    return freezeLeaderboard(this.birdCrazyLeaderboardValue);
   }
 
   get snapshot(): ClassicSettingsSnapshot {
@@ -339,6 +372,17 @@ export class ClassicSettingsState {
     return update;
   }
 
+  recordCrazyBirdResultScore(
+    completedScore: number,
+  ): CrazyBirdLeaderboardUpdate {
+    const update = insertCrazyBirdResultScore(
+      completedScore,
+      this.birdCrazyLeaderboardValue,
+    );
+    this.birdCrazyLeaderboardValue = update.leaderboard;
+    return update;
+  }
+
   awardClassicResultCoins(completedScore: number): ClassicResultCoinAward {
     const award = awardClassicResultCoins(this.totalCoinsValue, completedScore);
     this.totalCoinsValue = award.totalCoins;
@@ -355,6 +399,14 @@ export class ClassicSettingsState {
     completedScore: number,
   ): ClassicBirdResultCoinAward {
     const award = awardClassicBirdResultCoins(this.totalCoinsValue, completedScore);
+    this.totalCoinsValue = award.totalCoins;
+    return award;
+  }
+
+  awardCrazyBirdResultCoins(
+    completedScore: number,
+  ): CrazyBirdResultCoinAward {
+    const award = awardCrazyBirdResultCoins(this.totalCoinsValue, completedScore);
     this.totalCoinsValue = award.totalCoins;
     return award;
   }
@@ -383,6 +435,18 @@ export class ClassicSettingsState {
     port.writeInt32(
       CLASSIC_BIRD_BEST_3_STORAGE_KEY,
       this.birdClassicLeaderboardValue.third,
+    );
+    port.writeInt32(
+      CRAZY_BIRD_BEST_1_STORAGE_KEY,
+      this.birdCrazyLeaderboardValue.first,
+    );
+    port.writeInt32(
+      CRAZY_BIRD_BEST_2_STORAGE_KEY,
+      this.birdCrazyLeaderboardValue.second,
+    );
+    port.writeInt32(
+      CRAZY_BIRD_BEST_3_STORAGE_KEY,
+      this.birdCrazyLeaderboardValue.third,
     );
     port.writeInt32(OBJECTIVES_CURRENT_STORAGE_KEY, this.currentObjectiveValue);
     port.writeInt32(OBJECTIVES_FRUITS_CUT_STORAGE_KEY, this.fruitsCutValue);

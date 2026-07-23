@@ -113,7 +113,7 @@ interface BirdBladeMeshOwner {
 }
 
 /**
- * Creator presentation for the recovered single type-1 BirdBlade.
+ * Creator presentation for the recovered BirdBlade visual types.
  *
  * The state machine owns movement/RNG/ray semantics. This class owns only one textured
  * testblade7 trail, three Bird sprites, and native ParticleObject-style actions.
@@ -137,6 +137,7 @@ export class BirdBladePresenter {
     this.resources = input.resources;
     this.state = new BirdBladeStateMachine({
       random: input.random,
+      type: input.resources.birdType,
       viewport: input.viewport,
     });
 
@@ -825,7 +826,15 @@ function assertResources(resources: LoadedBirdResources): void {
   if (resources === null || typeof resources !== 'object') {
     throw new TypeError('resources must be an object');
   }
-  const profile = getBirdResourceProfile(resources.assetTree);
+  const profile = getBirdResourceProfile(
+    resources.assetTree,
+    resources.birdType,
+  );
+  if (resources.profile !== profile) {
+    throw new RangeError(
+      `resources profile must match Bird type ${profile.birdType}`,
+    );
+  }
   const expected = [
     profile.blade,
     ...profile.animationFrames,

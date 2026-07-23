@@ -6,6 +6,7 @@ export const CRAZY_FROZEN_WORLD_SPEED = Math.fround(0.5);
 export interface CrazyPhysicsAdapterState {
   readonly active: boolean;
   readonly frozen: boolean;
+  readonly restorePending: boolean;
   readonly worldSpeed: number;
 }
 
@@ -49,6 +50,7 @@ export class CrazyPhysicsAdapter {
   private activeValue = false;
   private readonly delegate: CrazyPhysicsDelegate;
   private frozenValue = false;
+  private restorePendingValue = false;
   private worldSpeedValue = CRAZY_NORMAL_WORLD_SPEED;
 
   constructor(delegate: CrazyPhysicsDelegate = new ClassicPhysicsAdapter()) {
@@ -60,6 +62,7 @@ export class CrazyPhysicsAdapter {
     return Object.freeze({
       active: this.activeValue,
       frozen: this.frozenValue,
+      restorePending: this.restorePendingValue,
       worldSpeed: this.worldSpeedValue,
     });
   }
@@ -70,6 +73,9 @@ export class CrazyPhysicsAdapter {
     }
     if (this.activeValue) {
       throw new Error('Crazy physics is already active');
+    }
+    if (this.restorePendingValue) {
+      throw new Error('Crazy physics cleanup must complete before activation');
     }
 
     this.frozenValue = false;
@@ -85,6 +91,7 @@ export class CrazyPhysicsAdapter {
       try {
         this.delegate.restorePreviousWorldProperties();
       } catch (cleanupError: unknown) {
+        this.restorePendingValue = true;
         throw new CrazyPhysicsActivationError(error, cleanupError);
       }
       throw error;
@@ -92,12 +99,13 @@ export class CrazyPhysicsAdapter {
   }
 
   deactivate(): boolean {
-    if (!this.activeValue) {
+    if (!this.activeValue && !this.restorePendingValue) {
       return false;
     }
     this.delegate.restorePreviousWorldProperties();
     this.activeValue = false;
     this.frozenValue = false;
+    this.restorePendingValue = false;
     this.worldSpeedValue = CRAZY_NORMAL_WORLD_SPEED;
     return true;
   }

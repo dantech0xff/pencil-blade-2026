@@ -97,6 +97,9 @@ test('Bird loader requests all 17 exact extensionless SpriteFrame paths in order
 
     const loaded = await loadBirdResources(assetTree);
     assert.equal(loaded.assetTree, assetTree);
+    assert.equal(loaded.birdType, 1);
+    assert.equal(loaded.profile, getBirdResourceProfile(assetTree));
+    assert.equal(Object.isFrozen(loaded.profile), true);
     assert.equal(loaded.rasterCount, BIRD_RASTER_RESOURCE_COUNT);
     assert.deepEqual(
       requested,
@@ -127,6 +130,48 @@ test('Bird loader requests all 17 exact extensionless SpriteFrame paths in order
       );
       assert.deepEqual(raster.dimensions, contract.dimensions);
     }
+  }
+});
+
+test('Bird loader selects the exact type-2 profile only when explicitly requested', async () => {
+  for (const assetTree of ['480x800', '720x1280'] as const) {
+    const contracts = listBirdRasterResources(assetTree, 2);
+    const requested: string[] = [];
+    cc.assetManager.reset();
+    cc.assetManager.setBundle({
+      load(
+        pathOrPaths: string[],
+        _Type: unknown,
+        callback: (error: Error | null, value: object[]) => void,
+      ) {
+        assert.ok(Array.isArray(pathOrPaths));
+        requested.push(...pathOrPaths);
+        callback(
+          null,
+          pathOrPaths.map((_, index) => exactFrame(contracts, index)),
+        );
+      },
+    });
+
+    const loaded = await loadBirdResources(assetTree, 2);
+    assert.equal(loaded.assetTree, assetTree);
+    assert.equal(loaded.birdType, 2);
+    assert.equal(loaded.profile, getBirdResourceProfile(assetTree, 2));
+    assert.equal(loaded.profile.birdType, 2);
+    assert.equal(loaded.rasterCount, BIRD_RASTER_RESOURCE_COUNT);
+    assert.deepEqual(
+      requested,
+      contracts.map(({ canonicalPath }) => (
+        canonicalRasterToSpriteFrameBundlePath(canonicalPath)
+      )),
+    );
+    assert.deepEqual(
+      loaded.orderedRasters.map(({ canonicalPath }) => canonicalPath),
+      contracts.map(({ canonicalPath }) => canonicalPath),
+    );
+    assert.match(loaded.animationFrames[0].canonicalPath, /bird-anim-2-0\.png$/);
+    assert.match(loaded.leftDirection.canonicalPath, /bird-left-2\.png$/);
+    assert.match(loaded.rightDirection.canonicalPath, /bird-right-2\.png$/);
   }
 });
 
@@ -225,6 +270,14 @@ test('Bird catalog rejects unknown and changed resource lookups', async () => {
   await assert.rejects(
     () => loadBirdResources('phone' as never),
     /assetTree must be 480x800 or 720x1280/,
+  );
+  await assert.rejects(
+    () => loadBirdResources('480x800', 3 as never),
+    /birdType must be 1 or 2/,
+  );
+  await assert.rejects(
+    () => loadBirdResources('480x800', 1.5 as never),
+    /birdType must be a safe integer/,
   );
 });
 

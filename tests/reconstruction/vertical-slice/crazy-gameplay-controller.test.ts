@@ -9,6 +9,14 @@ const SOURCE = readFileSync(
   `${REPOSITORY_ROOT}/game/assets/scripts/creator/crazy-gameplay-controller.ts`,
   'utf8',
 );
+const TEST_CRAZY_PROFILE = Object.freeze({
+  kind: 'crazy',
+  mode: 1,
+});
+const TEST_CRAZY_BIRD_PROFILE = Object.freeze({
+  kind: 'crazy-bird',
+  mode: 4,
+});
 
 test('Crazy gameplay is a passive serialized owner of the existing Crazy scene', () => {
   assert.match(SOURCE, /@ccclass\('CrazyGameplayController'\)/);
@@ -31,7 +39,8 @@ test('Crazy gameplay is a passive serialized owner of the existing Crazy scene',
   assertOrderedSubstrings(update, [
     'this.resultPresenter?.updateAction(deltaSeconds)',
     'if (!this.isCrazyGameplayAttached())',
-    'this.bladePresenter?.updateFrame()',
+    "cutDriver?.kind === 'standard'",
+    'cutDriver.presenter.updateFrame()',
   ]);
 });
 
@@ -76,15 +85,21 @@ test('preparation reuses Classic process services and leaves failed attempts ret
 });
 
 test('activation constructs detached state and commits only through an empty screen host', () => {
-  const activation = extractMethod(SOURCE, 'activateCrazyFromAppShell');
+  const defaultEntry = extractMethod(SOURCE, 'activateCrazyFromAppShell');
+  assert.match(
+    defaultEntry,
+    /this\.activateTimedModeFromAppShell\(screenPlacement, CRAZY_TIMED_PROFILE\)/,
+  );
+  const activation = extractMethod(SOURCE, 'activateTimedModeFromAppShell');
   assertOrderedSubstrings(activation, [
-    "this.readinessStatus !== 'ready'",
+    'const readiness = profile === CRAZY_BIRD_TIMED_PROFILE',
+    "if (readiness !== 'ready')",
     'this.drainRetiredCrazyRunOwnership()',
     'screenPlacement.currentScreen !== null',
     'this.screenPlacement = screenPlacement',
-    'this.constructCrazyMode()',
+    'this.constructCrazyMode(profile)',
     'this.captureCrazyActivationObjectiveRollback()',
-    'this.attachCrazyModeAndActivateScene(screenPlacement)',
+    'this.attachCrazyModeAndActivateScene(screenPlacement, profile)',
     'this.updateScorePresentation()',
   ]);
   assert.match(
@@ -94,7 +109,9 @@ test('activation constructs detached state and commits only through an empty scr
 
   const construct = extractMethod(SOURCE, 'constructCrazyMode');
   assertOrderedSubstrings(construct, [
-    "createDetachedScreenRoot('CrazyModeRoot', this.node)",
+    'const root = createDetachedScreenRoot(',
+    "profile === CRAZY_BIRD_TIMED_PROFILE ? 'CrazyBirdModeRoot' : 'CrazyModeRoot'",
+    'this.runProfile = profile',
     'this.registry = new CrazyEntityRegistry({',
     'this.coordinator = new CrazyTossCoordinator({',
     'this.createCorePresentation(',
@@ -107,7 +124,10 @@ test('activation constructs detached state and commits only through an empty scr
   assertOrderedSubstrings(attach, [
     'screenPlacement.attachCurrentScreen(root)',
     'screenPlacement.currentScreen !== root',
-    'this.requireCrazySceneController().activateCrazyLayer(best)',
+    'const scene = this.requireCrazySceneController()',
+    'scene.activateCrazyLayer(best)',
+    'scene.sessionSnapshot().mode !== profile.mode',
+    'scene.timedModeProfile !== profile',
   ]);
 });
 
@@ -381,8 +401,9 @@ test('Time Up constructs mode-1 Result with ranking, reward, Retry rollback, and
   const result = extractMethod(SOURCE, 'attachCrazyResult');
   assertOrderedSubstrings(result, [
     'insertCrazyResultScore(',
-    'ClassicResultPresenter.create({',
     'crazyLeaderboardPanelValues(ranking.leaderboard)',
+    'ClassicResultPresenter.create({',
+    '      panelValues,',
     "createDetachedScreenRoot('CrazyResultPresentationRoot', this.node)",
     'this.resultPresentationRoot = root',
     'this.resultPresenter = presenter',
@@ -449,9 +470,9 @@ test('Time Up constructs mode-1 Result with ranking, reward, Retry rollback, and
     "case 'capture-result-parent':",
     "case 'remove-result':",
     "case 'construct-crazy':",
-    'this.constructCrazyMode()',
+    'this.constructCrazyMode(configured.profile)',
     "case 'attach-crazy-to-captured-parent':",
-    'this.attachCrazyModeAndActivateScene(placement)',
+    'this.attachCrazyModeAndActivateScene(placement, configured.profile)',
   ]);
   assert.match(
     retry,
@@ -464,14 +485,21 @@ test('Time Up constructs mode-1 Result with ranking, reward, Retry rollback, and
 
   const menu = extractMemberBlock(SOURCE, '  private readonly onResultMenu = ()');
   assertOrderedSubstrings(menu, [
+    'const presenter = this.requireResultPresenter()',
+    'let transaction: CrazyResultMenuTransaction | null = null',
+    "route: 'main-menu'",
+    'transaction = activeTransaction',
+    "command.type === 'request-menu-button-audio'",
     'CRAZY_RESULT_MENU_REQUESTED_EVENT',
+    '} catch (error) {',
+    "presenter.rearmNavigationAfterFailure('menu')",
     "transaction.status === 'pending'",
   ]);
   assert.match(menu, /commit: \(previousRoot: Node\)/);
   assert.match(menu, /rollback: \(\)/);
   assert.match(
     menu,
-    /try \{[\s\S]*?this\.node\.emit\(CRAZY_RESULT_MENU_REQUESTED_EVENT, payload\)[\s\S]*?finally \{[\s\S]*?if \(transaction\.status === 'pending'\)[\s\S]*?this\.rollbackResultMenu\(transaction\)/,
+    /catch \(rollbackError\)[\s\S]*?new CrazyLifecycleRollbackError\([\s\S]*?this\.retainFatalLifecycleBoundary\(failure\)/,
   );
 });
 
@@ -491,8 +519,9 @@ test('committed Result retires failed Crazy cleanup without blocking a later dra
   const scene = {};
   const remainingRoot = { name: 'retired-crazy', parent: null };
   const transaction = {
-    configuration: { mode: 1, score: 321 },
+    configuration: { mode: 1, profile: TEST_CRAZY_PROFILE, score: 321 },
     crazyRoot,
+    profile: TEST_CRAZY_PROFILE,
     presenter: resultPresenter,
     root: resultRoot,
     status: 'prepared',
@@ -504,7 +533,11 @@ test('committed Result retires failed Crazy cleanup without blocking a later dra
     crazyModeRoot: crazyRoot,
     crazySceneController: scene,
     pendingCapturedCrazyRoot: crazyRoot,
-    pendingResultConfiguration: { mode: 1, score: 321 },
+    pendingResultConfiguration: {
+      mode: 1,
+      profile: TEST_CRAZY_PROFILE,
+      score: 321,
+    },
     pendingResultEntryTransaction: transaction,
     resultPresentationRoot: resultRoot,
     resultPresenter,
@@ -525,7 +558,7 @@ test('committed Result retires failed Crazy cleanup without blocking a later dra
       };
     },
     configuredResult() {
-      return { mode: 1, score: 321 };
+      return { mode: 1, profile: TEST_CRAZY_PROFILE, score: 321 };
     },
     createEmptyCrazyRunOwnership() {
       return {
@@ -563,7 +596,11 @@ test('committed Result retires failed Crazy cleanup without blocking a later dra
   assert.equal(transaction.status, 'committed');
   assert.equal(controller.pendingResultEntryTransaction, null);
   assert.equal(controller.crazyModeRoot, null);
-  assert.deepEqual(controller.pendingResultConfiguration, { mode: 1, score: 321 });
+  assert.deepEqual(controller.pendingResultConfiguration, {
+    mode: 1,
+    profile: TEST_CRAZY_PROFILE,
+    score: 321,
+  });
   assert.equal(controller.resultPresentationRoot, resultRoot);
   assert.equal(controller.resultPresenter, resultPresenter);
   assert.equal(controller.retiredCrazyRuns.length, 1);
@@ -582,7 +619,11 @@ test('committed Result retires failed Crazy cleanup without blocking a later dra
   assert.equal(cleanupAttempts, 2);
   assert.equal(controller.retiredCrazyRuns.length, 0);
   assert.equal(controller.crazyModeRoot, null);
-  assert.deepEqual(controller.pendingResultConfiguration, { mode: 1, score: 321 });
+  assert.deepEqual(controller.pendingResultConfiguration, {
+    mode: 1,
+    profile: TEST_CRAZY_PROFILE,
+    score: 321,
+  });
   assert.equal(controller.resultPresentationRoot, resultRoot);
 });
 
@@ -630,7 +671,7 @@ test('shared pause and objective owners preserve Crazy callback and navigation o
     'oldScene.suspendCrazyLayerForNavigation()',
     'this.acquireStandbyCrazySceneController(oldScene)',
     'this.installCrazyRunOwnership(this.createEmptyCrazyRunOwnership())',
-    'this.constructCrazyMode()',
+    'this.constructCrazyMode(profile)',
     '.sharedAudioPresenter.stopBackgroundMusic()',
     'this.requireCrazyAudioPresenter().stopBackgroundMusic()',
     '.sharedAudioPresenter.stopAllEffects()',
@@ -640,6 +681,7 @@ test('shared pause and objective owners preserve Crazy callback and navigation o
     'placement.replaceCurrentScreen(freshRoot)',
     'this.captureCrazyActivationObjectiveRollback()',
     'freshScene.activateCrazyLayer(best)',
+    'freshScene.sessionSnapshot().mode !== profile.mode',
     'this.updateScorePresentation()',
     'oldScene.finalizeSuspendedCrazyLayerRelease()',
   ]);
@@ -677,7 +719,7 @@ test('shared pause and objective owners preserve Crazy callback and navigation o
   );
   assert.match(
     quit,
-    /try \{[\s\S]*?this\.node\.emit\(CRAZY_PAUSE_QUIT_REQUESTED_EVENT, payload\)[\s\S]*?finally \{[\s\S]*?if \(transaction\.status === 'pending'\)[\s\S]*?this\.rollbackPauseQuit\(transaction\)/,
+    /try \{[\s\S]*?this\.node\.emit\([\s\S]*?CRAZY_PAUSE_QUIT_REQUESTED_EVENT[\s\S]*?payload,[\s\S]*?finally \{[\s\S]*?if \(transaction\.status === 'pending'\)[\s\S]*?this\.rollbackPauseQuit\(transaction\)/,
   );
   const quitCommit = extractMethod(SOURCE, 'commitPauseQuit');
   assertOrderedSubstrings(quitCommit, [
@@ -710,8 +752,10 @@ test('shared pause and objective owners preserve Crazy callback and navigation o
 });
 
 test('initial activation and Result Retry restore objectives 46/50 after partial entry failure', () => {
-  const activate = compileSourceMethod<(this: Record<string, any>, placement: any) => void>(
-    'activateCrazyFromAppShell',
+  const activate = compileSourceMethod<
+    (this: Record<string, any>, placement: any, profile: object) => void
+  >(
+    'activateTimedModeFromAppShell',
     transactionDependencies(),
   );
   const retry = compileSourceMethod<(this: Record<string, any>) => void>(
@@ -722,9 +766,12 @@ test('initial activation and Result Retry restore objectives 46/50 after partial
         return [
           { type: 'capture-result-parent' },
           { cleanup: true, type: 'remove-result' },
-          { fresh: true, type: 'construct-crazy' },
+          { fresh: true, mode: 1, type: 'construct-crazy' },
           { type: 'attach-crazy-to-captured-parent' },
         ];
+      },
+      createCrazyBirdResultNavigationCommands() {
+        throw new Error('mode-1 retry must not request Crazy Bird navigation');
       },
       isValid(value: unknown) {
         return (
@@ -743,7 +790,11 @@ test('initial activation and Result Retry restore objectives 46/50 after partial
   for (const objectiveId of [46, 50] as const) {
     const initial = createInitialActivationObjectiveHarness(objectiveId);
     assert.throws(
-      () => activate.call(initial.controller, initial.placement),
+      () => activate.call(
+        initial.controller,
+        initial.placement,
+        TEST_CRAZY_PROFILE,
+      ),
       /injected initial partial-command failure/,
     );
     assert.equal(initial.objectiveValue(), 7);
@@ -901,8 +952,10 @@ test('committed Pause Quit retains failed cleanup and drains it before Crazy re-
       }
     },
   });
-  const activate = compileSourceMethod<(this: Record<string, any>, placement: any) => void>(
-    'activateCrazyFromAppShell',
+  const activate = compileSourceMethod<
+    (this: Record<string, any>, placement: any, profile: object) => void
+  >(
+    'activateTimedModeFromAppShell',
     transactionDependencies(),
   );
   const drain = compileSourceMethod<(this: Record<string, any>) => void>(
@@ -933,7 +986,11 @@ test('committed Pause Quit retains failed cleanup and drains it before Crazy re-
     drain.call(harness.controller)
   );
   assert.doesNotThrow(() => (
-    activate.call(harness.controller, harness.placement)
+    activate.call(
+      harness.controller,
+      harness.placement,
+      TEST_CRAZY_PROFILE,
+    )
   ));
   assert.equal(harness.controller.retiredCrazyRuns.length, 0);
   assert.equal(harness.cleanupAttempts(), 2);
@@ -1108,7 +1165,7 @@ test('teardown aggregates all run, Result, and preparation cleanup boundaries', 
   assert.match(run, /timeManagerPresenter\.dispose\(\)/);
   assert.match(run, /bombElectricPresenter\.dispose\(\)/);
   assert.match(run, /electricContactAdapter\.dispose\(\)/);
-  assert.match(run, /bladePresenter\.dispose\(\)/);
+  assert.match(run, /cutDriver\.presenter\.dispose\(\)/);
   assert.match(run, /scoreHudPresenter\.dispose\(\)/);
   assert.match(run, /pausePresenter\.dispose\(\)/);
   assert.match(
@@ -1214,6 +1271,9 @@ function compileSourceArrowMember<T extends (...args: any[]) => unknown>(
 
 function transactionDependencies() {
   return {
+    CRAZY_BIRD_RESULT_MODE_ID: 4,
+    CRAZY_BIRD_TIMED_PROFILE: TEST_CRAZY_BIRD_PROFILE,
+    CRAZY_RESULT_MODE_ID: 1,
     aggregateWithPrimary(
       label: string,
       primary: unknown,
@@ -1231,12 +1291,16 @@ function transactionDependencies() {
         failures.push(error);
       }
     },
+    timedModeLabel(profile: object) {
+      return profile === TEST_CRAZY_BIRD_PROFILE ? 'Crazy Bird' : 'Crazy';
+    },
   };
 }
 
 function replayDependencies(cleanupReports: unknown[][] = []) {
   return {
     CLASSIC_MENU_BUTTON_AUDIO_PATH: 'Sounds/menu-click.wav',
+    CRAZY_BIRD_TIMED_PROFILE: TEST_CRAZY_BIRD_PROFILE,
     aggregateWithPrimary(
       label: string,
       primary: unknown,
@@ -1267,6 +1331,10 @@ function replayDependencies(cleanupReports: unknown[][] = []) {
       if (failures.length > 0) {
         cleanupReports.push([...failures]);
       }
+    },
+    timedModeLeaderboardFirst(_settings: unknown, profile: object) {
+      assert.equal(profile, TEST_CRAZY_PROFILE);
+      return 99;
     },
   };
 }
@@ -1373,7 +1441,7 @@ function createResultRetryObjectiveHarness(objectiveId: 46 | 50) {
       return { objectiveId, value: objectiveValue };
     },
     configuredResult() {
-      return { mode: 1, score: 123 };
+      return { mode: 1, profile: TEST_CRAZY_PROFILE, score: 123 };
     },
     constructCrazyMode() {
       this.crazyModeRoot = freshRoot;
@@ -1599,6 +1667,7 @@ function createReplayHarness(
   const freshScene = {
     active: false,
     suspended: false,
+    timedModeProfile: TEST_CRAZY_PROFILE,
     activateCrazyLayer() {
       events.push('fresh:activate');
       objectiveProgress = 0;
@@ -1606,6 +1675,9 @@ function createReplayHarness(
         throw new Error('injected activate failure');
       }
       this.active = true;
+    },
+    sessionSnapshot() {
+      return { mode: 1 };
     },
     releaseCrazyLayerForReplacement() {
       assert.equal(this.active, true);
@@ -1739,6 +1811,9 @@ function createReplayHarness(
     },
     requirePausePresenter() {
       return pause;
+    },
+    requireRunProfile() {
+      return TEST_CRAZY_PROFILE;
     },
     requireScreenPlacement() {
       return placement;

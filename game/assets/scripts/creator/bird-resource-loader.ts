@@ -4,7 +4,9 @@ import {
   listBirdRasterResources,
   type BirdAnimationFrameResources,
   type BirdParticleResources,
+  type BirdResourceProfile,
 } from '../domain/bird-resource-contract';
+import type { BirdBladeType } from '../domain/bird-blade-state';
 import type {
   GameAssetTree,
   GameRasterResource,
@@ -33,9 +35,11 @@ export interface LoadedBirdResources {
   readonly animationFrames: LoadedBirdAnimationFrameResources;
   readonly assetTree: GameAssetTree;
   readonly blade: LoadedGameRasterResource;
+  readonly birdType: BirdBladeType;
   readonly leftDirection: LoadedGameRasterResource;
   readonly orderedRasters: readonly LoadedGameRasterResource[];
   readonly particles: LoadedBirdParticleResources;
+  readonly profile: BirdResourceProfile;
   readonly rasterCount: typeof BIRD_RASTER_RESOURCE_COUNT;
   readonly rightDirection: LoadedGameRasterResource;
   raster(resource: GameRasterResource): LoadedGameRasterResource;
@@ -48,9 +52,10 @@ export interface LoadedBirdResources {
  */
 export async function loadBirdResources(
   assetTree: GameAssetTree,
+  birdType: BirdBladeType = 1,
 ): Promise<LoadedBirdResources> {
-  const profile = getBirdResourceProfile(assetTree);
-  const rasterContracts = listBirdRasterResources(assetTree);
+  const profile = getBirdResourceProfile(assetTree, birdType);
+  const rasterContracts = listBirdRasterResources(assetTree, profile.birdType);
   if (rasterContracts.length !== BIRD_RASTER_RESOURCE_COUNT) {
     throw new Error(
       `Bird must load exactly ${BIRD_RASTER_RESOURCE_COUNT} dedicated rasters`,
@@ -84,9 +89,11 @@ export async function loadBirdResources(
     animationFrames,
     assetTree,
     blade: requireLoadedBirdRaster(profile.blade, loadedByPath),
+    birdType: profile.birdType,
     leftDirection: requireLoadedBirdRaster(profile.leftDirection, loadedByPath),
     orderedRasters,
     particles,
+    profile,
     rasterCount: BIRD_RASTER_RESOURCE_COUNT,
     rightDirection: requireLoadedBirdRaster(profile.rightDirection, loadedByPath),
     raster(resource: GameRasterResource): LoadedGameRasterResource {

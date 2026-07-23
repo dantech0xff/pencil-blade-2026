@@ -26,6 +26,9 @@ const {
   CLASSIC_BIRD_BEST_1_STORAGE_KEY,
   CLASSIC_BIRD_BEST_2_STORAGE_KEY,
   CLASSIC_BIRD_BEST_3_STORAGE_KEY,
+  CRAZY_BIRD_BEST_1_STORAGE_KEY,
+  CRAZY_BIRD_BEST_2_STORAGE_KEY,
+  CRAZY_BIRD_BEST_3_STORAGE_KEY,
   CLASSIC_EFFECTS_ENABLED_STORAGE_KEY,
   CLASSIC_MODE_UNLOCK_INDICES,
   CLASSIC_MUSIC_ENABLED_STORAGE_KEY,
@@ -88,6 +91,9 @@ const RESTORATION_READS = [
   [CLASSIC_BIRD_BEST_1_STORAGE_KEY, 0],
   [CLASSIC_BIRD_BEST_2_STORAGE_KEY, 0],
   [CLASSIC_BIRD_BEST_3_STORAGE_KEY, 0],
+  [CRAZY_BIRD_BEST_1_STORAGE_KEY, 0],
+  [CRAZY_BIRD_BEST_2_STORAGE_KEY, 0],
+  [CRAZY_BIRD_BEST_3_STORAGE_KEY, 0],
   [OBJECTIVES_CURRENT_STORAGE_KEY, 0],
   [OBJECTIVES_FRUITS_CUT_STORAGE_KEY, 0],
   [CLASSIC_MUSIC_ENABLED_STORAGE_KEY, true],
@@ -113,6 +119,9 @@ test('Classic settings load exact keys and restoration defaults in recovered rel
   assert.equal(CLASSIC_BIRD_BEST_1_STORAGE_KEY, 'bird_classic_best_1');
   assert.equal(CLASSIC_BIRD_BEST_2_STORAGE_KEY, 'bird_classic_best_2');
   assert.equal(CLASSIC_BIRD_BEST_3_STORAGE_KEY, 'bird_classic_best_3');
+  assert.equal(CRAZY_BIRD_BEST_1_STORAGE_KEY, 'bird_crazy_best_1');
+  assert.equal(CRAZY_BIRD_BEST_2_STORAGE_KEY, 'bird_crazy_best_2');
+  assert.equal(CRAZY_BIRD_BEST_3_STORAGE_KEY, 'bird_crazy_best_3');
   assert.deepEqual(port.reads, RESTORATION_READS);
   assert.deepEqual(state.snapshot, {
     crazyLeaderboard: { first: 0, second: 0, third: 0 },
@@ -137,6 +146,12 @@ test('Classic settings load exact keys and restoration defaults in recovered rel
     third: 0,
   });
   assert.equal(Object.isFrozen(state.birdClassicLeaderboard), true);
+  assert.deepEqual(state.birdCrazyLeaderboard, {
+    first: 0,
+    second: 0,
+    third: 0,
+  });
+  assert.equal(Object.isFrozen(state.birdCrazyLeaderboard), true);
 });
 
 test('persisted total coins and rankings override the restoration defaults', () => {
@@ -151,6 +166,9 @@ test('persisted total coins and rankings override the restoration defaults', () 
     [CLASSIC_BIRD_BEST_1_STORAGE_KEY]: 30_000,
     [CLASSIC_BIRD_BEST_2_STORAGE_KEY]: 20_000,
     [CLASSIC_BIRD_BEST_3_STORAGE_KEY]: 10_000,
+    [CRAZY_BIRD_BEST_1_STORAGE_KEY]: 300_000,
+    [CRAZY_BIRD_BEST_2_STORAGE_KEY]: 200_000,
+    [CRAZY_BIRD_BEST_3_STORAGE_KEY]: 100_000,
     [OBJECTIVES_CURRENT_STORAGE_KEY]: 13,
     [OBJECTIVES_FRUITS_CUT_STORAGE_KEY]: 2468,
     [CLASSIC_EFFECTS_ENABLED_STORAGE_KEY]: false,
@@ -188,6 +206,10 @@ test('persisted total coins and rankings override the restoration defaults', () 
     achievedRank: 2,
     leaderboard: { first: 30_000, second: 25_000, third: 20_000 },
   });
+  assert.deepEqual(state.recordCrazyBirdResultScore(250_000), {
+    achievedRank: 2,
+    leaderboard: { first: 300_000, second: 250_000, third: 200_000 },
+  });
 });
 
 test('result mutations remain memory-only until explicit save checkpoint', () => {
@@ -216,6 +238,9 @@ test('result mutations remain memory-only until explicit save checkpoint', () =>
     [CLASSIC_BIRD_BEST_1_STORAGE_KEY, 0],
     [CLASSIC_BIRD_BEST_2_STORAGE_KEY, 0],
     [CLASSIC_BIRD_BEST_3_STORAGE_KEY, 0],
+    [CRAZY_BIRD_BEST_1_STORAGE_KEY, 0],
+    [CRAZY_BIRD_BEST_2_STORAGE_KEY, 0],
+    [CRAZY_BIRD_BEST_3_STORAGE_KEY, 0],
     [OBJECTIVES_CURRENT_STORAGE_KEY, 0],
     [OBJECTIVES_FRUITS_CUT_STORAGE_KEY, 0],
     [CLASSIC_MUSIC_ENABLED_STORAGE_KEY, true],
@@ -364,6 +389,35 @@ test('Classic Bird result uses its own ranking and float32 0.8 coin balance', ()
   ]);
 });
 
+test('Crazy Bird result uses its own ranking and float32 0.8 coin balance', () => {
+  const port = new RecordingPort({
+    [CRAZY_BIRD_BEST_1_STORAGE_KEY]: 300,
+    [CRAZY_BIRD_BEST_2_STORAGE_KEY]: 200,
+    [CRAZY_BIRD_BEST_3_STORAGE_KEY]: 100,
+  });
+  const state = ClassicSettingsState.load(port);
+
+  assert.deepEqual(state.recordCrazyBirdResultScore(250), {
+    achievedRank: 2,
+    leaderboard: { first: 300, second: 250, third: 200 },
+  });
+  assert.deepEqual(state.birdCrazyLeaderboard, {
+    first: 300,
+    second: 250,
+    third: 200,
+  });
+  assert.deepEqual(state.awardCrazyBirdResultCoins(25), {
+    bonusCoins: 20,
+    totalCoins: 1_000_019,
+  });
+  state.save(port);
+  assert.deepEqual(port.writes.slice(13, 16), [
+    [CRAZY_BIRD_BEST_1_STORAGE_KEY, 300],
+    [CRAZY_BIRD_BEST_2_STORAGE_KEY, 250],
+    [CRAZY_BIRD_BEST_3_STORAGE_KEY, 200],
+  ]);
+});
+
 test('settings reject invalid ports, values, and unordered persisted rankings', () => {
   assert.throws(
     () => ClassicSettingsState.load(null as never),
@@ -398,6 +452,14 @@ test('settings reject invalid ports, values, and unordered persisted rankings', 
       [CLASSIC_BIRD_BEST_3_STORAGE_KEY]: 2,
     })),
     /birdClassicLeaderboard must remain ordered/,
+  );
+  assert.throws(
+    () => ClassicSettingsState.load(new RecordingPort({
+      [CRAZY_BIRD_BEST_1_STORAGE_KEY]: 1,
+      [CRAZY_BIRD_BEST_2_STORAGE_KEY]: 3,
+      [CRAZY_BIRD_BEST_3_STORAGE_KEY]: 2,
+    })),
+    /birdCrazyLeaderboard must remain ordered/,
   );
   assert.throws(
     () => ClassicSettingsState.load(new RecordingPort({

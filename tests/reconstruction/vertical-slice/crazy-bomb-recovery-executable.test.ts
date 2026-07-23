@@ -25,6 +25,19 @@ export class Component {
   unschedule() {}
 }
 
+export class EventTouch {
+  getUILocation() { return { x: 0, y: 0 }; }
+}
+
+export const Input = Object.freeze({
+  EventType: Object.freeze({ TOUCH_START: 'touch-start' }),
+});
+
+export const input = Object.freeze({
+  on() {},
+  off() {},
+});
+
 export class Node {
   constructor(name = '') {
     this.active = true;
@@ -74,11 +87,19 @@ export class BladeInputController {
 `);
 
 const PHYSICS_STUB_URL = dataModule(`
+export class CrazyPhysicsActivationError extends Error {}
+
 export class CrazyPhysicsAdapter {
   constructor() { this.active = false; }
-  get state() { return { active: this.active }; }
+  get state() {
+    return { active: this.active, frozen: false, restorePending: false, worldSpeed: 1 };
+  }
   activate() { this.active = true; }
-  deactivate() { this.active = false; }
+  deactivate() {
+    const changed = this.active;
+    this.active = false;
+    return changed;
+  }
   callAfterStep(mutation) { mutation(); }
   freezeWorld() {}
   raycastAll() { return []; }
@@ -96,15 +117,25 @@ export const CLASSIC_MENU_BUTTON_AUDIO_PATH = '';
 export const CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH = '';
 export const CLASSIC_SWISH_COOLDOWN_ACTION_SECONDS = 0;
 export const CRAZY_DOUBLE_SCORE_AUDIO_PATH = '';
+export const CRAZY_BIRD_RESULT_MENU_BUTTON_AUDIO_PATH = '';
+export const CRAZY_BIRD_RESULT_MODE_ID = 4;
 export const CRAZY_RESULT_MENU_BUTTON_AUDIO_PATH = '';
 export const CRAZY_RESULT_MODE_ID = 1;
 export const CRAZY_SPECIAL_FRUIT_BASE_CUT_AUDIO_PATH = '';
+export const CRAZY_TIMED_PROFILE = Object.freeze({ kind: 'crazy', mode: 1 });
+export const CRAZY_BIRD_TIMED_PROFILE = Object.freeze({
+  kind: 'crazy-bird',
+  mode: 4,
+});
 export const CLASSIC_BLADE_BEGAN_EVENT = 'blade-began';
 export const CLASSIC_BLADE_ENDED_EVENT = 'blade-ended';
 export const CLASSIC_BLADE_MOVED_EVENT = 'blade-moved';
+export const BIRD_BLADE_TOUCH_BEGAN_EVENT = 'bird-blade-touch-began';
 
 export {
   InertDependency as BaseGameplayPausePresenter,
+  InertDependency as BirdBladePresenter,
+  InertDependency as BirdBladeRayAdapter,
   InertDependency as BonusManagerState,
   InertDependency as ClassicBladePresenter,
   InertDependency as ClassicCriticalParticlePresenter,
@@ -131,10 +162,12 @@ export {
   unused as buildBidirectionalRayPlan,
   unused as createClassicCriticalParticleUpdateCommands,
   unused as createClassicCutHalfMotion,
+  unused as createCrazyBirdResultNavigationCommands,
   unused as createCrazyFruitCutCommands,
   unused as createCrazyResultNavigationCommands,
   unused as createCutDispatchCommands,
   unused as createDetachedScreenRoot,
+  unused as crazyBirdLeaderboardPanelValues,
   unused as crazyLeaderboardPanelValues,
   unused as executeCrazyBombElectricHitAudio,
   unused as getClassicComboAudioPath,
@@ -142,7 +175,9 @@ export {
   unused as getClassicOrdinaryBombAudioPath,
   unused as getClassicResultRankAudioPath,
   unused as insertCrazyResultScore,
+  unused as insertCrazyBirdResultScore,
   unused as loadBaseGameplayResources,
+  unused as loadBirdResources,
   unused as loadCrazyDragonFont,
   unused as loadCrazyResources,
   unused as partitionCrazyRuntimeCommands,
@@ -240,6 +275,9 @@ const {
   CRAZY_SESSION_COMMAND_EVENT,
   CrazySceneController,
 } = await import('../../../game/assets/scripts/creator/crazy-scene-controller.ts');
+const { BirdInputController } = await import(
+  '../../../game/assets/scripts/creator/bird-input-controller.ts'
+);
 const { CrazyGameplayController } = await import(
   '../../../game/assets/scripts/creator/crazy-gameplay-controller.ts'
 );
@@ -277,6 +315,7 @@ test('Crazy bomb-cut recovers committed cut state after a bombHit observer throw
   presenterProbes.length = 0;
   const node = new cc.Node('Canvas');
   const blade = node.addComponent(BladeInputController);
+  node.addComponent(BirdInputController);
   const scene = node.addComponent(CrazySceneController as never) as InstanceType<
     typeof CrazySceneController
   >;

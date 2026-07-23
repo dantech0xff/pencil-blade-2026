@@ -111,7 +111,10 @@ export interface ModeSelectClassicResources {
 
 export type ModeSelectUnsupportedDestination = Exclude<
   ModeSelectDestination,
-  'ClassicModeLayer' | 'CrazyModeLayer' | 'ClassicBirdLayer'
+  | 'ClassicModeLayer'
+  | 'CrazyModeLayer'
+  | 'ClassicBirdLayer'
+  | 'CrazyBirdLayer'
 >;
 
 export interface ModeSelectNavigationTransaction {
@@ -129,6 +132,9 @@ export interface ModeSelectPresenterLifecycle {
     transaction: ModeSelectNavigationTransaction,
   ) => boolean | void;
   readonly onClassicBirdRequested: (
+    transaction: ModeSelectNavigationTransaction,
+  ) => boolean | void;
+  readonly onCrazyBirdRequested: (
     transaction: ModeSelectNavigationTransaction,
   ) => boolean | void;
   readonly onMainMenuRequested: (
@@ -180,11 +186,17 @@ export class ModeSelectCleanupError extends Error {
  */
 export class ModeSelectFatalNavigationError extends Error {
   readonly cause: unknown;
+  readonly releaseScreenOwnership: () => void;
 
-  constructor(message: string, cause: unknown) {
+  constructor(
+    message: string,
+    cause: unknown,
+    releaseScreenOwnership: () => void = noOp,
+  ) {
     super(`${message}: ${errorMessage(cause)}`);
     this.name = 'ModeSelectFatalNavigationError';
     this.cause = cause;
+    this.releaseScreenOwnership = releaseScreenOwnership;
   }
 }
 
@@ -915,18 +927,29 @@ export class ModeSelectPresenter {
       }
       return true;
     } catch (error) {
-      restoreRootAfterRejectedTransaction(this.root, parent, transaction.zOrder);
       if (error instanceof ModeSelectFatalNavigationError) {
-        this.retainFatalNavigationBoundary();
+        this.retainFatalNavigationBoundary(error);
         throw error;
       }
+      restoreRootAfterRejectedTransaction(this.root, parent, transaction.zOrder);
       this.rearmNavigationAfterFailure();
       throw error;
     }
   }
 
-  private retainFatalNavigationBoundary(): void {
+  private retainFatalNavigationBoundary(error: ModeSelectFatalNavigationError): void {
     const cleanupFailures: unknown[] = [];
+    attemptCleanup(cleanupFailures, () => error.releaseScreenOwnership());
+    attemptCleanup(cleanupFailures, () => {
+      if (isValid(this.root, true)) {
+        this.root.active = false;
+      }
+    });
+    attemptCleanup(cleanupFailures, () => {
+      if (isValid(this.root, true) && this.root.parent !== null) {
+        this.root.setParent(null, true);
+      }
+    });
     this.navigationTimers = [];
     this.activeBladeSlots.clear();
     attemptCleanup(cleanupFailures, () => this.unregisterEvents());
@@ -1609,6 +1632,7 @@ function assertInput(input: ModeSelectPresenterInput): void {
     'onClassicRequested',
     'onCrazyRequested',
     'onClassicBirdRequested',
+    'onCrazyBirdRequested',
     'onMainMenuRequested',
     'onUnsupportedDestinationRequested',
   ], 'lifecycle');
@@ -1632,6 +1656,9 @@ function dispatchModeNavigation(
   }
   if (destination === 'ClassicBirdLayer') {
     return lifecycle.onClassicBirdRequested(transaction);
+  }
+  if (destination === 'CrazyBirdLayer') {
+    return lifecycle.onCrazyBirdRequested(transaction);
   }
   return lifecycle.onUnsupportedDestinationRequested(destination, transaction);
 }
@@ -1674,6 +1701,8 @@ function assertNever(value: never): never {
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
+
+function noOp(): void {}
 
 function attemptCleanup(failures: unknown[], cleanup: () => unknown): void {
   try {

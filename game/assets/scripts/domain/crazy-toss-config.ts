@@ -192,29 +192,29 @@ export const CRAZY_TOSS_ROWS: readonly CrazyTossRow[] = Object.freeze([
   }),
 ]);
 
-export const CRAZY_TOSS_CREATION_ORDER: readonly CrazyTossControllerId[] = Object.freeze([
+export const CRAZY_TOSS_CREATION_ORDER = Object.freeze([
   'ab', 'b0', 'b2', 'ac', 'b1', 'b3', 'b4', 'af', 'ae', 'ad', 'b5',
-]);
+] as const satisfies readonly CrazyTossControllerId[]);
 
-export const CRAZY_TOSS_START_ORDER: readonly CrazyTossControllerId[] = Object.freeze([
+export const CRAZY_TOSS_START_ORDER = Object.freeze([
   'ab', 'b0', 'b2', 'ac', 'b1', 'b3', 'ad', 'b5', 'ae', 'af',
-]);
+] as const satisfies readonly CrazyTossControllerId[]);
 
-export const CRAZY_TOSS_BOMB_HIT_STOP_ORDER: readonly CrazyTossControllerId[] = Object.freeze([
+export const CRAZY_TOSS_BOMB_HIT_STOP_ORDER = Object.freeze([
   'ae',
-]);
+] as const satisfies readonly CrazyTossControllerId[]);
 
-export const CRAZY_TOSS_TIME_UP_STOP_ORDER: readonly CrazyTossControllerId[] = Object.freeze([
+export const CRAZY_TOSS_TIME_UP_STOP_ORDER = Object.freeze([
   'ab', 'ad', 'ae', 'af', 'b0', 'b2', 'ac', 'b1', 'b3',
-]);
+] as const satisfies readonly CrazyTossControllerId[]);
 
-export const CRAZY_TOSS_STARTABLE_IDS: readonly CrazyTossControllerId[] = Object.freeze([
+export const CRAZY_TOSS_STARTABLE_IDS = Object.freeze([
   'ab', 'b0', 'b2', 'ac', 'b1', 'b3', 'af', 'ae', 'ad', 'b5',
-]);
+] as const satisfies readonly CrazyTossControllerId[]);
 
-export const CRAZY_TOSS_STOPPABLE_IDS: readonly CrazyTossControllerId[] = Object.freeze([
+export const CRAZY_TOSS_STOPPABLE_IDS = Object.freeze([
   'ab', 'b0', 'b2', 'ac', 'b1', 'b3', 'af', 'ae', 'ad',
-]);
+] as const satisfies readonly CrazyTossControllerId[]);
 
 export function isCrazyStartableControllerId(
   controllerId: CrazyTossControllerId,

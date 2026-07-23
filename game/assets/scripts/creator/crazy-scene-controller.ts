@@ -7,18 +7,35 @@ import {
   type CrazySessionCommand,
   type CrazySessionSnapshot,
 } from '../domain/crazy-session';
+import {
+  CRAZY_BIRD_TIMED_PROFILE,
+  CRAZY_TIMED_PROFILE,
+  type CrazyTimedModeProfile,
+} from '../domain/crazy-timed-mode-profile';
 import { BladeInputController } from './blade-input-controller';
-import { CrazyPhysicsAdapter } from './crazy-physics-adapter';
+import { BirdInputController } from './bird-input-controller';
+import {
+  CrazyPhysicsActivationError,
+  CrazyPhysicsAdapter,
+} from './crazy-physics-adapter';
 
 const { ccclass, requireComponent } = _decorator;
 
 export const CRAZY_PHYSICS_STEPPED_EVENT = 'crazy-physics-stepped';
 export const CRAZY_SESSION_COMMAND_EVENT = 'crazy-session-command';
 export const CRAZY_SESSION_SNAPSHOT_EVENT = 'crazy-session-snapshot';
+export const CRAZY_BIRD_PHYSICS_STEPPED_EVENT = 'crazy-bird-physics-stepped';
+export const CRAZY_BIRD_SESSION_COMMAND_EVENT = 'crazy-bird-session-command';
+export const CRAZY_BIRD_SESSION_SNAPSHOT_EVENT = 'crazy-bird-session-snapshot';
 
 export interface CrazyPhysicsSteppedEvent {
   readonly bladeSegments: readonly BladeSegment[];
   readonly deltaSeconds: number;
+}
+
+export interface CrazyBirdPhysicsSteppedEvent {
+  readonly deltaSeconds: number;
+  readonly mode: 4;
 }
 
 /**
@@ -59,19 +76,62 @@ export class CrazyTimeUpFinishRollbackError extends Error {
   }
 }
 
+export class CrazyLifecycleRollbackError extends Error {
+  readonly cause: unknown;
+  readonly rollbackErrors: readonly unknown[];
+
+  constructor(label: string, primary: unknown, rollbackFailures: readonly unknown[]) {
+    super(
+      `${label}: ${errorMessage(primary)}`
+      + (
+        rollbackFailures.length === 0
+          ? ''
+          : `; rollback: ${rollbackFailures.map(errorMessage).join('; ')}`
+      ),
+    );
+    this.name = 'CrazyLifecycleRollbackError';
+    this.cause = primary;
+    this.rollbackErrors = Object.freeze([...rollbackFailures]);
+  }
+}
+
+export class CrazyTimeUpFinishCommitError extends Error {
+  readonly cause: unknown;
+  readonly observerErrors: readonly unknown[];
+
+  constructor(primary: unknown, observerErrors: readonly unknown[]) {
+    super(
+      `Crazy Time-Up Finish commit failed: ${errorMessage(primary)}`
+      + (
+        observerErrors.length === 0
+          ? ''
+          : `; observers: ${observerErrors.map(errorMessage).join('; ')}`
+      ),
+    );
+    this.name = 'CrazyTimeUpFinishCommitError';
+    this.cause = primary;
+    this.observerErrors = Object.freeze([...observerErrors]);
+  }
+}
+
 /**
- * Passive serialized owner for Crazy session, blade lease, and variable Physics2D lease.
- * The app shell activates it only after the Crazy catalog and detached foreground are ready.
+ * Passive serialized owner for a Crazy-family timed session, its selected input lease, and
+ * variable Physics2D. The app shell activates it only after the matching catalog and detached
+ * foreground are ready.
  */
 @ccclass('CrazySceneController')
 @requireComponent(BladeInputController)
+@requireComponent(BirdInputController)
 export class CrazySceneController extends Component {
   private activeValue = false;
+  private birdInput: BirdInputController | null = null;
   private bladeInput: BladeInputController | null = null;
   private destroyedValue = false;
+  private fatalLifecycleValue = false;
   private loadedValue = false;
   private pendingTimeUpFinishParticipant: CrazyTimeUpFinishParticipant | null = null;
   private readonly physics = new CrazyPhysicsAdapter();
+  private profileValue: CrazyTimedModeProfile = CRAZY_TIMED_PROFILE;
   private session = new CrazySession();
   private suspendedValue = false;
   private timeUpFinishDispatchingValue = false;
@@ -79,11 +139,17 @@ export class CrazySceneController extends Component {
 
   onLoad(): void {
     const bladeInput = this.getComponent(BladeInputController);
+    const birdInput = this.getComponent(BirdInputController);
     if (bladeInput === null) {
       throw new Error('CrazySceneController requires BladeInputController');
     }
+    if (birdInput === null) {
+      throw new Error('CrazySceneController requires BirdInputController');
+    }
     this.bladeInput = bladeInput;
+    this.birdInput = birdInput;
     bladeInput.deactivateForNonClassicScreen();
+    birdInput.deactivateForNonBirdScreen(this);
     this.loadedValue = true;
   }
 
@@ -102,13 +168,30 @@ export class CrazySceneController extends Component {
     this.activeValue = false;
     this.loadedValue = false;
     this.suspendedValue = false;
+    this.pendingTimeUpFinishParticipant = null;
+    this.timeUpFinishDispatchingValue = false;
+    const failures: unknown[] = [];
+    collectFailure(failures, () => this.deactivateModeInput(this.profileValue));
+    collectFailure(failures, () => this.physics.deactivate());
+    if (failures.length === 1) {
+      throw failures[0];
+    }
+    if (failures.length > 1) {
+      throw new CrazyLifecycleRollbackError(
+        'Crazy destruction cleanup failed',
+        failures[0],
+        failures.slice(1),
+      );
+    }
     this.worldFrozenValue = false;
-    this.bladeInput?.deactivateForNonClassicScreen();
-    this.physics.deactivate();
   }
 
   get active(): boolean {
     return this.activeValue;
+  }
+
+  get fatalLifecycle(): boolean {
+    return this.fatalLifecycleValue;
   }
 
   get suspended(): boolean {
@@ -116,7 +199,17 @@ export class CrazySceneController extends Component {
   }
 
   get readyForActivation(): boolean {
-    return this.loadedValue && !this.destroyedValue && this.bladeInput !== null;
+    return (
+      this.loadedValue
+      && !this.destroyedValue
+      && !this.fatalLifecycleValue
+      && this.bladeInput !== null
+      && this.birdInput !== null
+    );
+  }
+
+  get timedModeProfile(): CrazyTimedModeProfile {
+    return this.profileValue;
   }
 
   sessionSnapshot(): CrazySessionSnapshot {
@@ -128,8 +221,25 @@ export class CrazySceneController extends Component {
    * commands. Any presenter failure restores the exact inactive boundary.
    */
   activateCrazyLayer(initialBestScore: number): void {
+    this.activateTimedModeLayer(initialBestScore, CRAZY_TIMED_PROFILE);
+  }
+
+  /**
+   * Creates the mode-4 timed session while leasing the shared owner-bound Bird input.
+   */
+  activateCrazyBirdLayer(initialBestScore: number): void {
+    this.activateTimedModeLayer(initialBestScore, CRAZY_BIRD_TIMED_PROFILE);
+  }
+
+  private activateTimedModeLayer(
+    initialBestScore: number,
+    profile: CrazyTimedModeProfile,
+  ): void {
     if (this.destroyedValue) {
       throw new Error('Crazy layer cannot activate after scene destruction');
+    }
+    if (!this.loadedValue || this.fatalLifecycleValue) {
+      throw new Error('Crazy layer cannot activate before load or after a fatal lifecycle failure');
     }
     if (this.activeValue) {
       throw new Error('Crazy layer is already active');
@@ -138,27 +248,57 @@ export class CrazySceneController extends Component {
       throw new Error('Crazy layer cannot activate while a suspended run is retained');
     }
     if (
+      this.timeUpFinishDispatchingValue
+      || this.pendingTimeUpFinishParticipant !== null
+    ) {
+      throw new Error('Crazy layer cannot activate during a Result transaction');
+    }
+    if (
       this.session.snapshot().lifecycle !== 'intro'
       && this.session.snapshot().lifecycle !== 'result-removed'
     ) {
       throw new Error('Crazy layer cannot activate from the current lifecycle');
     }
-    const bladeInput = this.requireBladeInput();
     const previousSession = this.session;
-    const freshSession = new CrazySession(initialBestScore);
+    const previousProfile = this.profileValue;
+    const previousWorldFrozen = this.worldFrozenValue;
+    const freshSession = new CrazySession(initialBestScore, profile);
+    this.session = freshSession;
+    this.profileValue = profile;
+    this.worldFrozenValue = false;
     try {
+      this.deactivateAlternateInput(profile);
       this.physics.activate((deltaSeconds) => this.afterPhysicsStep(deltaSeconds));
-      bladeInput.activateForClassicLayer();
-      this.session = freshSession;
+      this.activateModeInput(profile);
       this.activeValue = true;
-      this.worldFrozenValue = false;
       this.dispatch(freshSession.enterScene());
     } catch (error) {
-      bladeInput.deactivateForNonClassicScreen();
-      this.physics.deactivate();
+      const rollbackFailures: unknown[] = [];
       this.session = previousSession;
+      this.profileValue = previousProfile;
       this.activeValue = false;
-      this.worldFrozenValue = false;
+      collectFailure(
+        rollbackFailures,
+        () => this.deactivateModeInput(profile),
+      );
+      collectFailure(rollbackFailures, () => this.physics.deactivate());
+      this.worldFrozenValue = previousWorldFrozen;
+      if (rollbackFailures.length > 0) {
+        this.enterFatalLifecycleBoundary();
+        throw new CrazyLifecycleRollbackError(
+          'Crazy activation rollback failed',
+          error,
+          rollbackFailures,
+        );
+      }
+      if (isPhysicsActivationCleanupFailure(error)) {
+        this.enterFatalLifecycleBoundary();
+        throw new CrazyLifecycleRollbackError(
+          'Crazy activation rollback failed',
+          error,
+          [],
+        );
+      }
       throw error;
     }
   }
@@ -169,26 +309,9 @@ export class CrazySceneController extends Component {
    */
   suspendCrazyLayerForNavigation(): void {
     this.assertActive();
-    const bladeInput = this.requireBladeInput();
-    const cutEnabled = this.session.snapshot().cutEnabled;
-    try {
-      bladeInput.deactivateForNonClassicScreen();
-      this.physics.deactivate();
-    } catch (error) {
-      try {
-        if (!this.physics.state.active) {
-          this.physics.activate((deltaSeconds) => this.afterPhysicsStep(deltaSeconds));
-          if (this.worldFrozenValue) {
-            this.physics.freezeWorld();
-          }
-        }
-        bladeInput.activateForClassicLayer();
-        bladeInput.setCutEnabled(cutEnabled);
-      } catch (rollbackError) {
-        console.error(rollbackError);
-      }
-      throw error;
-    }
+    this.releaseModeLeasesWithRollback(
+      'Crazy navigation suspension rollback failed',
+    );
     this.activeValue = false;
     this.suspendedValue = true;
   }
@@ -200,21 +323,47 @@ export class CrazySceneController extends Component {
     if (this.destroyedValue) {
       throw new Error('Crazy layer cannot resume after scene destruction');
     }
-    if (this.activeValue || !this.suspendedValue) {
+    if (
+      this.fatalLifecycleValue
+      || this.activeValue
+      || !this.suspendedValue
+      || this.timeUpFinishDispatchingValue
+    ) {
       throw new Error('Crazy layer can resume only from a suspended run');
     }
-    const bladeInput = this.requireBladeInput();
     const cutEnabled = this.session.snapshot().cutEnabled;
     try {
       this.physics.activate((deltaSeconds) => this.afterPhysicsStep(deltaSeconds));
       if (this.worldFrozenValue) {
         this.physics.freezeWorld();
       }
-      bladeInput.activateForClassicLayer();
-      bladeInput.setCutEnabled(cutEnabled);
+      this.activateModeInput(this.profileValue);
+      this.applyCutEnabledToInput(cutEnabled);
     } catch (error) {
-      bladeInput.deactivateForNonClassicScreen();
-      this.physics.deactivate();
+      const rollbackFailures: unknown[] = [];
+      collectFailure(
+        rollbackFailures,
+        () => this.deactivateModeInput(this.profileValue),
+      );
+      collectFailure(rollbackFailures, () => this.physics.deactivate());
+      if (
+        rollbackFailures.length > 0
+        || isPhysicsActivationCleanupFailure(error)
+      ) {
+        this.enterFatalLifecycleBoundary();
+        if (rollbackFailures.length > 0) {
+          throw new CrazyLifecycleRollbackError(
+            'Crazy navigation resume rollback failed',
+            error,
+            rollbackFailures,
+          );
+        }
+        throw new CrazyLifecycleRollbackError(
+          'Crazy navigation resume rollback failed',
+          error,
+          [],
+        );
+      }
       throw error;
     }
     this.activeValue = true;
@@ -228,26 +377,21 @@ export class CrazySceneController extends Component {
     if (this.activeValue || !this.suspendedValue) {
       throw new Error('Crazy layer can finalize only from a suspended run');
     }
-    this.session = new CrazySession();
-    this.suspendedValue = false;
-    this.worldFrozenValue = false;
+    this.resetReleasedRun();
   }
 
   /**
-   * Releases the active mode-1 input/physics lease when Pause Replay or Quit removes the
-   * gameplay layer. Result removal reaches the same inactive boundary through its session
-   * command; pause navigation has no native session command, so its owner calls this seam.
+   * Releases the active timed-mode input/physics lease when Pause Replay or Quit removes the
+   * gameplay layer. Result removal reaches the same inactive boundary through its profiled
+   * session command; pause navigation has no native session command, so its owner calls this seam.
    */
   releaseCrazyLayerForReplacement(): void {
     this.assertActive();
-    this.requireBladeInput().deactivateForNonClassicScreen();
-    this.physics.deactivate();
+    this.releaseModeLeasesWithRollback(
+      'Crazy replacement release rollback failed',
+    );
     this.activeValue = false;
-    this.suspendedValue = false;
-    this.worldFrozenValue = false;
-    // A later entry always constructs a fresh session, matching GetReplayInstance and
-    // re-entry from Mode Select. Keeping an intro sentinel also preserves activate's gate.
-    this.session = new CrazySession();
+    this.resetReleasedRun();
     this.emitSessionSnapshot();
   }
 
@@ -345,7 +489,7 @@ export class CrazySceneController extends Component {
     for (const command of this.session.timeUp()) {
       try {
         this.applyResolvedCommand(command);
-        this.node.emit(CRAZY_SESSION_COMMAND_EVENT, command);
+        this.node.emit(this.sessionCommandEvent(), command);
       } catch (error) {
         // The listener may have committed before throwing. Never replay it; continue the
         // recovered ordered suffix once, then surface every original failure together.
@@ -398,10 +542,17 @@ export class CrazySceneController extends Component {
     try {
       this.applyAndEmit(commands);
       participant = this.currentTimeUpFinishParticipant();
-      participant?.prepareCommit();
+      if (participant === null) {
+        throw new Error(
+          'Crazy Time-Up Finish requires an enlisted gameplay participant',
+        );
+      }
+      participant.prepareCommit();
       this.session.commitTimeUpFinish();
+      this.worldFrozenValue = false;
     } catch (error) {
       const rollbackFailures: unknown[] = [];
+      let restorationFailure: unknown = null;
       participant = this.currentTimeUpFinishParticipant();
       this.pendingTimeUpFinishParticipant = null;
       this.timeUpFinishDispatchingValue = false;
@@ -410,11 +561,22 @@ export class CrazySceneController extends Component {
         const rollbackParticipant = participant;
         collectFailure(rollbackFailures, () => rollbackParticipant.rollback());
       }
-      collectFailure(
-        rollbackFailures,
-        () => this.restoreAfterFailedResultTransition(),
-      );
+      if (!this.fatalLifecycleValue) {
+        try {
+          this.restoreAfterFailedResultTransition();
+        } catch (restoreError) {
+          restorationFailure = restoreError;
+          rollbackFailures.push(restoreError);
+        }
+      }
       collectFailure(rollbackFailures, () => this.emitSessionSnapshot());
+      if (restorationFailure instanceof CrazyLifecycleRollbackError) {
+        throw new CrazyLifecycleRollbackError(
+          'Crazy Result rollback failed',
+          error,
+          rollbackFailures,
+        );
+      }
       if (rollbackFailures.length > 0) {
         throw new CrazyTimeUpFinishRollbackError(error, rollbackFailures);
       }
@@ -422,13 +584,25 @@ export class CrazySceneController extends Component {
     }
     this.pendingTimeUpFinishParticipant = null;
     this.timeUpFinishDispatchingValue = false;
-    participant?.commit();
+    let commitError: unknown = null;
+    try {
+      participant.commit();
+    } catch (error) {
+      commitError = error;
+    }
+    const observerErrors: unknown[] = [];
     try {
       this.emitSessionSnapshot();
     } catch (error) {
+      observerErrors.push(error);
+    }
+    if (commitError !== null) {
+      throw new CrazyTimeUpFinishCommitError(commitError, observerErrors);
+    }
+    if (observerErrors.length > 0) {
       // The Result and domain lifecycle are already committed and the old TimeManager owner may
       // be disposed. Report post-commit observer failure without falsely rearming that callback.
-      console.error(error);
+      console.error(observerErrors[0]);
     }
   }
 
@@ -440,14 +614,14 @@ export class CrazySceneController extends Component {
   private applyAndEmit(commands: readonly CrazySessionCommand[]): void {
     for (const command of commands) {
       this.applyResolvedCommand(command);
-      this.node.emit(CRAZY_SESSION_COMMAND_EVENT, command);
+      this.node.emit(this.sessionCommandEvent(), command);
     }
   }
 
   private applyResolvedCommand(command: CrazySessionCommand): void {
     switch (command.type) {
       case 'set-cut-enabled':
-        this.bladeInput?.setCutEnabled(command.enabled);
+        this.applyCutEnabledToInput(command.enabled);
         break;
       case 'freeze-world':
         this.physics.freezeWorld();
@@ -458,11 +632,12 @@ export class CrazySceneController extends Component {
         this.worldFrozenValue = false;
         break;
       case 'remove-crazy':
-        this.requireBladeInput().deactivateForNonClassicScreen();
-        this.physics.deactivate();
+      case 'remove-crazy-bird':
+        this.releaseModeLeasesWithRollback(
+          'Crazy Result removal rollback failed',
+        );
         this.activeValue = false;
         this.suspendedValue = false;
-        this.worldFrozenValue = false;
         break;
       default:
         break;
@@ -470,6 +645,14 @@ export class CrazySceneController extends Component {
   }
 
   private afterPhysicsStep(deltaSeconds: number): void {
+    if (this.profileValue.kind === 'crazy-bird') {
+      const payload: CrazyBirdPhysicsSteppedEvent = Object.freeze({
+        deltaSeconds,
+        mode: 4,
+      });
+      this.node.emit(CRAZY_BIRD_PHYSICS_STEPPED_EVENT, payload);
+      return;
+    }
     const payload: CrazyPhysicsSteppedEvent = Object.freeze({
       bladeSegments: Object.freeze([
         ...(this.bladeInput?.segmentsForPostPhysicsUpdate() ?? []),
@@ -480,25 +663,140 @@ export class CrazySceneController extends Component {
   }
 
   private restoreAfterFailedResultTransition(): void {
-    const bladeInput = this.requireBladeInput();
-    if (!this.physics.state.active) {
-      this.physics.activate((deltaSeconds) => this.afterPhysicsStep(deltaSeconds));
+    try {
+      if (!this.physics.state.active) {
+        this.physics.activate((deltaSeconds) => this.afterPhysicsStep(deltaSeconds));
+        if (this.worldFrozenValue) {
+          this.physics.freezeWorld();
+        }
+      }
+      this.activateModeInput(this.profileValue);
+      this.applyCutEnabledToInput(true);
+      this.activeValue = true;
+      this.suspendedValue = false;
+    } catch (error) {
+      const quiesceFailures: unknown[] = [];
+      this.enterFatalLifecycleBoundary();
+      collectFailure(
+        quiesceFailures,
+        () => this.deactivateModeInput(this.profileValue),
+      );
+      collectFailure(quiesceFailures, () => this.physics.deactivate());
+      throw new CrazyLifecycleRollbackError(
+        'Crazy Result restoration failed',
+        error,
+        quiesceFailures,
+      );
     }
-    bladeInput.activateForClassicLayer();
-    bladeInput.setCutEnabled(true);
-    this.activeValue = true;
+  }
+
+  private emitSessionSnapshot(): void {
+    this.node.emit(this.sessionSnapshotEvent(), this.session.snapshot());
+  }
+
+  private assertActive(): void {
+    if (!this.activeValue || this.destroyedValue || this.fatalLifecycleValue) {
+      throw new Error('Crazy layer must be active');
+    }
+  }
+
+  private activateModeInput(profile: CrazyTimedModeProfile): void {
+    if (profile.kind === 'crazy-bird') {
+      this.requireBirdInput().activateForBirdLayer(this);
+      return;
+    }
+    this.requireBladeInput().activateForClassicLayer();
+  }
+
+  private deactivateModeInput(profile: CrazyTimedModeProfile): void {
+    if (profile.kind === 'crazy-bird') {
+      this.requireBirdInput().deactivateForNonBirdScreen(this);
+      return;
+    }
+    this.requireBladeInput().deactivateForNonClassicScreen();
+  }
+
+  private deactivateAlternateInput(profile: CrazyTimedModeProfile): void {
+    if (profile.kind === 'crazy-bird') {
+      this.requireBladeInput().deactivateForNonClassicScreen();
+      return;
+    }
+    this.requireBirdInput().deactivateForNonBirdScreen(this);
+  }
+
+  private applyCutEnabledToInput(enabled: boolean): void {
+    if (this.profileValue.kind === 'crazy') {
+      this.requireBladeInput().setCutEnabled(enabled);
+    }
+  }
+
+  private releaseModeLeasesWithRollback(label: string): void {
+    const profile = this.profileValue;
+    const cutEnabled = this.session.snapshot().cutEnabled;
+    let physicsReleaseAttempted = false;
+    try {
+      this.deactivateModeInput(profile);
+      physicsReleaseAttempted = true;
+      this.physics.deactivate();
+    } catch (error) {
+      const rollbackFailures: unknown[] = [];
+      try {
+        if (physicsReleaseAttempted && this.physics.state.active) {
+          this.physics.deactivate();
+        }
+        if (!this.physics.state.active) {
+          this.physics.activate((deltaSeconds) => this.afterPhysicsStep(deltaSeconds));
+          if (this.worldFrozenValue) {
+            this.physics.freezeWorld();
+          }
+        }
+        this.activateModeInput(profile);
+        this.applyCutEnabledToInput(cutEnabled);
+      } catch (rollbackError) {
+        rollbackFailures.push(rollbackError);
+      }
+      if (rollbackFailures.length > 0) {
+        this.enterFatalLifecycleBoundary();
+        collectFailure(
+          rollbackFailures,
+          () => this.deactivateModeInput(profile),
+        );
+        collectFailure(rollbackFailures, () => this.physics.deactivate());
+        throw new CrazyLifecycleRollbackError(label, error, rollbackFailures);
+      }
+      throw error;
+    }
+  }
+
+  private resetReleasedRun(): void {
+    this.session = new CrazySession(0, this.profileValue);
     this.suspendedValue = false;
     this.worldFrozenValue = false;
   }
 
-  private emitSessionSnapshot(): void {
-    this.node.emit(CRAZY_SESSION_SNAPSHOT_EVENT, this.session.snapshot());
+  private enterFatalLifecycleBoundary(): void {
+    this.activeValue = false;
+    this.suspendedValue = false;
+    this.fatalLifecycleValue = true;
   }
 
-  private assertActive(): void {
-    if (!this.activeValue) {
-      throw new Error('Crazy layer must be active');
+  private sessionCommandEvent(): string {
+    return this.profileValue.kind === 'crazy-bird'
+      ? CRAZY_BIRD_SESSION_COMMAND_EVENT
+      : CRAZY_SESSION_COMMAND_EVENT;
+  }
+
+  private sessionSnapshotEvent(): string {
+    return this.profileValue.kind === 'crazy-bird'
+      ? CRAZY_BIRD_SESSION_SNAPSHOT_EVENT
+      : CRAZY_SESSION_SNAPSHOT_EVENT;
+  }
+
+  private requireBirdInput(): BirdInputController {
+    if (this.birdInput === null) {
+      throw new Error('Crazy Bird input is unavailable before onLoad');
     }
+    return this.birdInput;
   }
 
   private requireBladeInput(): BladeInputController {
@@ -529,6 +827,10 @@ function throwTimeUpDispatchFailures(failures: readonly unknown[]): void {
     throw failures[0];
   }
   throw new CrazyTimeUpDispatchError(failures);
+}
+
+function isPhysicsActivationCleanupFailure(error: unknown): boolean {
+  return error instanceof CrazyPhysicsActivationError;
 }
 
 function errorMessage(error: unknown): string {

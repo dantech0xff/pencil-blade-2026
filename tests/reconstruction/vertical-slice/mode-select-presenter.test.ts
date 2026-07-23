@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { extname } from 'node:path';
-import { registerHooks } from 'node:module';
+import { registerHooks, stripTypeScriptTypes } from 'node:module';
 import test from 'node:test';
+
+const APP_SHELL_SOURCE = readFileSync(
+  new URL(
+    '../../../game/assets/scripts/creator/recovered-app-shell-controller.ts',
+    import.meta.url,
+  ),
+  'utf8',
+);
 
 const CC_STUB_URL = moduleUrl(`
 export class Color {
@@ -496,10 +505,11 @@ test('partial RopeButton activation rolls back the input lease and permits retry
   presenter.dispose();
 });
 
-test('rejected Crazy, Classic Bird, and unsupported routes restore every cut card', () => {
+test('rejected Crazy, both Bird routes, and unsupported routes restore every cut card', () => {
   ropeStub.resetRopes();
   let crazyCalls = 0;
   let classicBirdCalls = 0;
+  let crazyBirdCalls = 0;
   let unsupportedCalls = 0;
   const lifecycle = defaultLifecycle();
   lifecycle.onCrazyRequested = () => {
@@ -508,6 +518,10 @@ test('rejected Crazy, Classic Bird, and unsupported routes restore every cut car
   };
   lifecycle.onClassicBirdRequested = () => {
     classicBirdCalls += 1;
+    return false;
+  };
+  lifecycle.onCrazyBirdRequested = () => {
+    crazyBirdCalls += 1;
     return false;
   };
   lifecycle.onUnsupportedDestinationRequested = () => {
@@ -521,9 +535,11 @@ test('rejected Crazy, Classic Bird, and unsupported routes restore every cut car
   presenter.activate();
   const segment = { end: { x: 2, y: 2 }, start: { x: 1, y: 1 } };
   const crazy = ropeStub.createdRopes[1];
+  const gnStyle = ropeStub.createdRopes[2];
   const classicBird = ropeStub.createdRopes[3];
   const crazyBird = ropeStub.createdRopes[4];
   assert.ok(crazy);
+  assert.ok(gnStyle);
   assert.ok(classicBird);
   assert.ok(crazyBird);
   assert.equal(crazy.cut(segment, true), true);
@@ -547,10 +563,19 @@ test('rejected Crazy, Classic Bird, and unsupported routes restore every cut car
   assert.equal(crazyBird.cut(segment, true), true);
   assert.equal(presenter.state.navigationPendingCount, 1);
   presenter.update(0.75);
-  assert.equal(unsupportedCalls, 1);
+  assert.equal(crazyBirdCalls, 1);
+  assert.equal(unsupportedCalls, 0);
   assert.equal(presenter.state.navigationPendingCount, 0);
   assert.equal(crazyBird.restoreCount, 1);
   assert.equal(crazyBird.cutAccepted, false);
+
+  assert.equal(gnStyle.cut(segment, true), true);
+  assert.equal(presenter.state.navigationPendingCount, 1);
+  presenter.update(0.75);
+  assert.equal(unsupportedCalls, 1);
+  assert.equal(presenter.state.navigationPendingCount, 0);
+  assert.equal(gnStyle.restoreCount, 1);
+  assert.equal(gnStyle.cutAccepted, false);
   assert.equal(crazy.cut(segment, true), true);
   presenter.dispose();
 });
@@ -561,6 +586,7 @@ test('fatal navigation rollback keeps Mode Select inert instead of reacquiring i
   const lifecycle = defaultLifecycle();
   let presenter: InstanceType<typeof ModeSelectPresenter>;
   lifecycle.onClassicBirdRequested = () => {
+    presenter.root.setParent(null);
     assert.equal(presenter.suspendForTransition(), true);
     throw new ModeSelectFatalNavigationError(
       'injected rollback-incomplete route',
@@ -588,6 +614,8 @@ test('fatal navigation rollback keeps Mode Select inert instead of reacquiring i
   );
   assert.equal(presenter.state.suspended, true);
   assert.equal(presenter.state.navigationPendingCount, 0);
+  assert.equal(presenter.root.parent, null);
+  assert.equal(presenter.root.active, false);
   assert.equal(classicBird.restoreCount, 0);
   assert.equal(classicBird.cutAccepted, true);
   assert.equal(
@@ -597,6 +625,108 @@ test('fatal navigation rollback keeps Mode Select inert instead of reacquiring i
   assert.equal(
     bladeInput.node.listenerCount(CLASSIC_BLADE_BEGAN_EVENT),
     0,
+  );
+  presenter.dispose();
+});
+
+for (const route of [
+  {
+    destination: 'CrazyModeLayer',
+    label: 'Crazy',
+    modeIndex: 1,
+    transitionMethod: 'transitionModeSelectToCrazy',
+  },
+  {
+    destination: 'CrazyBirdLayer',
+    label: 'Crazy Bird',
+    modeIndex: 4,
+    transitionMethod: 'transitionModeSelectToCrazyBird',
+  },
+] as const) {
+  test(`fatal ${route.label} presenter-to-shell handoff remains fully quiescent`, () => {
+    const outcome = executeFatalTimedModePresenterShell(route, 'direct-fatal');
+    assertFatalTimedModePresenterShellQuiescent(outcome);
+    outcome.presenter.dispose();
+  });
+
+  test(
+    `${route.label} rollback filter failure clears restored screen ownership`,
+    () => {
+      const outcome = executeFatalTimedModePresenterShell(
+        route,
+        'nonfatal-filter-fatal',
+      );
+      assertFatalTimedModePresenterShellQuiescent(outcome);
+      assert.equal(outcome.harness.filterReactivationCount, 1);
+      outcome.presenter.dispose();
+    },
+  );
+}
+
+for (const route of [
+  {
+    destination: 'ClassicModeLayer',
+    label: 'Classic',
+    modeIndex: 0,
+    transitionMethod: 'transitionModeSelectToClassic',
+  },
+  {
+    destination: 'ClassicBirdLayer',
+    label: 'Classic Bird',
+    modeIndex: 3,
+    transitionMethod: 'transitionModeSelectToClassicBird',
+  },
+] as const) {
+  test(
+    `${route.label} rollback filter failure clears restored screen ownership`,
+    () => {
+      const outcome = executeFatalTimedModePresenterShell(
+        route,
+        'nonfatal-filter-fatal',
+      );
+      assertFatalTimedModePresenterShellQuiescent(outcome);
+      assert.equal(outcome.harness.filterReactivationCount, 1);
+      outcome.presenter.dispose();
+    },
+  );
+}
+
+test('ordinary rejected navigation keeps attached Mode Select ownership usable', () => {
+  ropeStub.resetRopes();
+  const bladeInput = bladeInputHarness();
+  const lifecycle = defaultLifecycle();
+  lifecycle.onCrazyRequested = () => false;
+  const presenter = ModeSelectPresenter.create(
+    presenterInput(bladeInput, {
+      lifecycle,
+      unlocks: [1],
+    }).input as never,
+  );
+  const host = new cc.Node('SharedGameSceneRoot');
+  presenter.root.setParent(host);
+  presenter.activate();
+  const crazy = ropeStub.createdRopes[1];
+  assert.ok(crazy);
+  assert.equal(
+    crazy.cut(
+      { end: { x: 2, y: 2 }, start: { x: 1, y: 1 } },
+      true,
+    ),
+    true,
+  );
+
+  presenter.update(0.75);
+  assert.equal(presenter.root.parent, host);
+  assert.equal(presenter.root.active, true);
+  assert.equal(presenter.state.suspended, false);
+  assert.equal(crazy.restoreCount, 1);
+  assert.equal(
+    bladeInput.events.filter((event) => event === 'activate').length,
+    1,
+  );
+  assert.equal(
+    bladeInput.node.listenerCount(CLASSIC_BLADE_BEGAN_EVENT),
+    1,
   );
   presenter.dispose();
 });
@@ -808,12 +938,455 @@ test('source keeps exact detached/lifecycle boundaries and no destination placeh
   assert.match(source, /onClassicRequested/);
   assert.match(source, /onCrazyRequested/);
   assert.match(source, /onClassicBirdRequested/);
+  assert.match(source, /onCrazyBirdRequested/);
   assert.match(source, /onMainMenuRequested/);
   assert.match(source, /onUnsupportedDestinationRequested/);
   assert.match(source, /restoreAfterFailedNavigation/);
   assert.doesNotMatch(source, /new Node\(['"](?:Crazy|GNStyle|ClassicBird|CrazyBird|ComboBird)Layer/);
   assert.doesNotMatch(source, /total-coins-label/);
 });
+
+interface FatalTimedModeRoute {
+  readonly destination:
+    | 'ClassicModeLayer'
+    | 'CrazyModeLayer'
+    | 'ClassicBirdLayer'
+    | 'CrazyBirdLayer';
+  readonly label: 'Classic' | 'Crazy' | 'Classic Bird' | 'Crazy Bird';
+  readonly modeIndex: 0 | 1 | 3 | 4;
+  readonly transitionMethod:
+    | 'transitionModeSelectToClassic'
+    | 'transitionModeSelectToCrazy'
+    | 'transitionModeSelectToClassicBird'
+    | 'transitionModeSelectToCrazyBird';
+}
+
+type FatalTimedModeFailure = 'direct-fatal' | 'nonfatal-filter-fatal';
+
+class ExecutableCrazyLifecycleRollbackError extends Error {}
+class ExecutableClassicBirdLifecycleRollbackError extends Error {}
+
+class ExecutableModeSelectSharedScene {
+  currentScreen: StubNode | null = null;
+  disposed = false;
+  private host: StubNode | null = null;
+
+  attachExistingScreen(host: StubNode, screen: StubNode): void {
+    assert.equal(screen.parent, host);
+    this.host = host;
+    this.currentScreen = screen;
+  }
+
+  attachCurrentScreen(screen: StubNode): void {
+    if (
+      this.host === null
+      || this.currentScreen !== null
+      || screen.parent !== null
+      || screen.destroyed
+    ) {
+      throw new Error('Executable shared scene requires one valid detached screen');
+    }
+    screen.setParent(this.host);
+    this.currentScreen = screen;
+  }
+
+  detachCurrentScreen(expectedScreen?: StubNode): StubNode {
+    const current = this.currentScreen;
+    if (
+      current === null
+      || (expectedScreen !== undefined && expectedScreen !== current)
+    ) {
+      throw new Error('Executable shared scene current-screen identity changed before detach');
+    }
+    current.setParent(null);
+    this.currentScreen = null;
+    return current;
+  }
+}
+
+function executeFatalTimedModePresenterShell(
+  route: FatalTimedModeRoute,
+  failure: FatalTimedModeFailure,
+) {
+  ropeStub.resetRopes();
+  const bladeInput = bladeInputHarness();
+  const harness = createFatalTimedModeShellHarness(route, failure);
+  const lifecycle = defaultLifecycle();
+  let presenter: InstanceType<typeof ModeSelectPresenter>;
+  lifecycle.onClassicRequested = (transaction) => (
+    route.destination === 'ClassicModeLayer'
+      ? harness.transition(transaction)
+      : false
+  );
+  lifecycle.onCrazyRequested = (transaction) => (
+    route.destination === 'CrazyModeLayer'
+      ? harness.transition(transaction)
+      : false
+  );
+  lifecycle.onClassicBirdRequested = (transaction) => (
+    route.destination === 'ClassicBirdLayer'
+      ? harness.transition(transaction)
+      : false
+  );
+  lifecycle.onCrazyBirdRequested = (transaction) => (
+    route.destination === 'CrazyBirdLayer'
+      ? harness.transition(transaction)
+      : false
+  );
+  presenter = ModeSelectPresenter.create(
+    presenterInput(bladeInput, {
+      lifecycle,
+      unlocks: [1, 2, 4, 5],
+    }).input as never,
+  );
+  harness.attachPresenter(presenter);
+  presenter.activate();
+  const routeButton = ropeStub.createdRopes[route.modeIndex];
+  assert.ok(routeButton);
+  assert.equal(
+    routeButton.cut(
+      { end: { x: 2, y: 2 }, start: { x: 1, y: 1 } },
+      true,
+    ),
+    true,
+  );
+
+  assert.throws(
+    () => presenter.update(0.75),
+    failure === 'direct-fatal'
+      ? new RegExp(
+        `retained poisoned runtime ownership[\\s\\S]*injected ${route.label} fatal`,
+      )
+      : new RegExp(
+        `rollback is incomplete[\\s\\S]*injected ${route.label} filter reacquisition failure`,
+      ),
+  );
+  return { bladeInput, failure, harness, presenter, routeButton };
+}
+
+function assertFatalTimedModePresenterShellQuiescent(
+  outcome: ReturnType<typeof executeFatalTimedModePresenterShell>,
+): void {
+  assert.equal(outcome.harness.state, 'failed');
+  assert.equal(outcome.harness.currentScreen, null);
+  assert.equal(outcome.presenter.root.parent, null);
+  assert.equal(outcome.presenter.root.active, false);
+  assert.equal(outcome.harness.filterActive, false);
+  assert.equal(
+    outcome.harness.filterReactivationCount,
+    outcome.failure === 'direct-fatal' ? 0 : 1,
+  );
+  assert.equal(outcome.harness.inputRearmCount, 0);
+  assert.equal(outcome.harness.transitionFailureCount, 1);
+  assert.equal(outcome.presenter.state.suspended, true);
+  assert.equal(outcome.presenter.state.navigationPendingCount, 0);
+  assert.equal(outcome.routeButton.restoreCount, 0);
+  assert.equal(outcome.routeButton.cutAccepted, true);
+  assert.equal(
+    outcome.bladeInput.events.filter((event) => event === 'activate').length,
+    1,
+  );
+  assert.equal(
+    outcome.bladeInput.events.filter((event) => event === 'deactivate').length,
+    1,
+  );
+  assert.equal(
+    outcome.bladeInput.node.listenerCount(CLASSIC_BLADE_BEGAN_EVENT),
+    0,
+  );
+}
+
+function createFatalTimedModeShellHarness(
+  route: FatalTimedModeRoute,
+  failure: FatalTimedModeFailure,
+) {
+  const errorMessage = compileAppShellFunction<
+    (error: unknown) => string
+  >('errorMessage');
+  const aggregateWithPrimaryError = compileAppShellFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  const readErrorGraphValue = compileAppShellFunction<
+    (value: object, key: string) => unknown
+  >('readErrorGraphValue');
+  const enqueueErrorGraphValue = compileAppShellFunction<
+    (pending: unknown[], value: unknown) => void
+  >('enqueueErrorGraphValue');
+  const containsCrazyLifecycleRollbackError = compileAppShellFunction<
+    (error: unknown) => boolean
+  >('containsCrazyLifecycleRollbackError', {
+    CrazyLifecycleRollbackError: ExecutableCrazyLifecycleRollbackError,
+    enqueueErrorGraphValue,
+    readErrorGraphValue,
+  });
+  const compensateFailedTimedCrazyActivation = compileAppShellMethod<
+    (
+      this: Record<string, unknown>,
+      presenter: InstanceType<typeof ModeSelectPresenter>,
+      physics: Readonly<{
+        readonly collisionFilterActive: boolean;
+        activateCollisionFilter(): boolean;
+      }>,
+      error: unknown,
+      destination: 'Crazy' | 'Crazy Bird',
+    ) => never
+  >('compensateFailedTimedCrazyActivation', {
+    aggregateWithPrimaryError,
+    containsCrazyLifecycleRollbackError,
+    ModeSelectFatalNavigationError,
+  });
+  const captureModeSelectFatalScreenRelease = compileAppShellMethod<
+    (
+      this: Readonly<{
+        requireSharedScene(): ExecutableModeSelectSharedScene;
+      }>,
+      root: StubNode,
+    ) => () => void
+  >('captureModeSelectFatalScreenRelease');
+  const normalizeError = compileAppShellFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const runTransition = compileAppShellMethod<
+    (
+      this: Record<string, unknown>,
+      from: string,
+      to: string,
+      operation: () => boolean,
+    ) => boolean
+  >('runTransition', {
+    ModeSelectFatalNavigationError,
+    normalizeError,
+  });
+  const transition = compileAppShellMethod<
+    (
+      this: Record<string, unknown>,
+      transaction: Readonly<{
+        readonly destination: string;
+        readonly root: StubNode;
+      }>,
+    ) => boolean
+  >(route.transitionMethod, {
+    aggregateWithPrimaryError,
+    ClassicBirdLifecycleRollbackError:
+      ExecutableClassicBirdLifecycleRollbackError,
+    disposeCommittedPresenter: () => {},
+    ModeSelectFatalNavigationError,
+  });
+  const sharedScene = new ExecutableModeSelectSharedScene();
+  let filterActive = true;
+  let filterReactivationCount = 0;
+  let inputRearmCount = 0;
+  let transitionFailureCount = 0;
+  const nonClassicPhysics = {
+    activateCollisionFilter() {
+      filterReactivationCount += 1;
+      if (failure === 'nonfatal-filter-fatal') {
+        throw new Error(
+          `injected ${route.label} filter reacquisition failure`,
+        );
+      }
+      filterActive = true;
+      return true;
+    },
+    get collisionFilterActive() {
+      return filterActive;
+    },
+    restorePreviousCollisionFilter() {
+      filterActive = false;
+      return true;
+    },
+  };
+  const activationError = (): Error => (
+    failure === 'direct-fatal'
+      ? new ExecutableCrazyLifecycleRollbackError(
+        `injected ${route.label} fatal`,
+      )
+      : new Error(`injected nonfatal ${route.label} activation failure`)
+  );
+  const crazyGameplay = {
+    activateCrazyBirdFromAppShell() {
+      throw activationError();
+    },
+    activateCrazyFromAppShell() {
+      throw activationError();
+    },
+    crazyBirdPrepared: true,
+    prepared: true,
+  };
+  const classicGameplay = {
+    activateClassicFromAppShell() {
+      throw activationError();
+    },
+  };
+  const classicBirdGameplay = {
+    activateClassicBirdFromAppShell() {
+      throw activationError();
+    },
+    prepared: true,
+  };
+  const shell: Record<string, unknown> = {
+    activeModeSelect: null,
+    captureModeSelectFatalScreenRelease(root: StubNode) {
+      return captureModeSelectFatalScreenRelease.call(this as never, root);
+    },
+    compensateFailedTimedCrazyActivation(
+      presenter: InstanceType<typeof ModeSelectPresenter>,
+      physics: typeof nonClassicPhysics,
+      error: unknown,
+      destination: 'Crazy' | 'Crazy Bird',
+    ) {
+      return compensateFailedTimedCrazyActivation.call(
+        this,
+        presenter,
+        physics,
+        error,
+        destination,
+      );
+    },
+    destroyedValue: false,
+    emitTransitionFailure() {
+      transitionFailureCount += 1;
+    },
+    requireClassicBirdGameplayController: () => classicBirdGameplay,
+    requireCrazyGameplayController: () => crazyGameplay,
+    requireGameplayController: () => classicGameplay,
+    requireNonClassicPhysics: () => nonClassicPhysics,
+    requireSharedScene: () => sharedScene,
+    restoreModeSelectAfterFailedClassicActivation(root: StubNode) {
+      sharedScene.attachCurrentScreen(root);
+    },
+    restoreModeSelectAfterFailedClassicBirdActivation(root: StubNode) {
+      sharedScene.attachCurrentScreen(root);
+    },
+    restoreModeSelectAfterFailedCrazyActivation(root: StubNode) {
+      sharedScene.attachCurrentScreen(root);
+    },
+    restoreModeSelectAfterFailedCrazyBirdActivation(root: StubNode) {
+      sharedScene.attachCurrentScreen(root);
+    },
+    runTransition(from: string, to: string, operation: () => boolean) {
+      return runTransition.call(this, from, to, operation);
+    },
+    stateValue: 'mode-select',
+    transitioning: false,
+  };
+
+  return {
+    attachPresenter(presenter: InstanceType<typeof ModeSelectPresenter>) {
+      const host = new cc.Node('SharedGameSceneRoot');
+      presenter.root.setParent(host);
+      sharedScene.attachExistingScreen(host, presenter.root);
+      shell.activeModeSelect = presenter;
+      const rearm = presenter.rearmNavigationAfterFailure.bind(presenter);
+      Object.defineProperty(presenter, 'rearmNavigationAfterFailure', {
+        configurable: true,
+        value: () => {
+          inputRearmCount += 1;
+          return rearm();
+        },
+      });
+    },
+    get currentScreen() {
+      return sharedScene.currentScreen;
+    },
+    get filterActive() {
+      return filterActive;
+    },
+    get filterReactivationCount() {
+      return filterReactivationCount;
+    },
+    get inputRearmCount() {
+      return inputRearmCount;
+    },
+    get state() {
+      return shell.stateValue;
+    },
+    transition(transaction: unknown) {
+      return transition.call(shell, transaction as never);
+    },
+    get transitionFailureCount() {
+      return transitionFailureCount;
+    },
+  };
+}
+
+function compileAppShellFunction<T extends (...args: any[]) => unknown>(
+  functionName: string,
+  dependencies: Readonly<Record<string, unknown>> = {},
+): T {
+  const source = extractAppShellMember(`function ${functionName}(`);
+  return compileAppShellTypeScriptFunction<T>(
+    source,
+    functionName,
+    dependencies,
+  );
+}
+
+function compileAppShellMethod<T extends (...args: any[]) => unknown>(
+  methodName: string,
+  dependencies: Readonly<Record<string, unknown>> = {},
+): T {
+  const source = extractAppShellMethod(methodName).replace(
+    new RegExp(`^\\s*private\\s+${methodName}`),
+    `function ${methodName}`,
+  );
+  return compileAppShellTypeScriptFunction<T>(
+    source,
+    methodName,
+    dependencies,
+  );
+}
+
+function compileAppShellTypeScriptFunction<T extends (...args: any[]) => unknown>(
+  source: string,
+  functionName: string,
+  dependencies: Readonly<Record<string, unknown>>,
+): T {
+  const names = Object.keys(dependencies);
+  const values = names.map((name) => dependencies[name]);
+  const javascript = stripTypeScriptTypes(source, {
+    mode: 'transform',
+    sourceUrl: `mode-select-presenter.test.${functionName}.ts`,
+  });
+  return Function(
+    ...names,
+    `"use strict";\n${javascript}\nreturn ${functionName};`,
+  )(...values) as T;
+}
+
+function extractAppShellMethod(methodName: string): string {
+  const signature = new RegExp(
+    `^\\s*(?:private\\s+)?(?:async\\s+)?${methodName}\\b`,
+    'm',
+  );
+  const match = signature.exec(APP_SHELL_SOURCE);
+  assert.ok(match, `${methodName} method must exist`);
+  return extractAppShellBalancedBlock(match.index);
+}
+
+function extractAppShellMember(signature: string): string {
+  const start = APP_SHELL_SOURCE.indexOf(signature);
+  assert.notEqual(start, -1, `${signature} must exist`);
+  return extractAppShellBalancedBlock(start);
+}
+
+function extractAppShellBalancedBlock(start: number): string {
+  const openBrace = APP_SHELL_SOURCE.indexOf('{', start);
+  assert.notEqual(openBrace, -1, 'member body must start');
+  let depth = 0;
+  for (let index = openBrace; index < APP_SHELL_SOURCE.length; index += 1) {
+    const character = APP_SHELL_SOURCE[index];
+    if (character === '{') {
+      depth += 1;
+    } else if (character === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        return APP_SHELL_SOURCE.slice(start, index + 1);
+      }
+    }
+  }
+  throw new Error('member body is unterminated');
+}
 
 function centerCard(
   presenter: InstanceType<typeof ModeSelectPresenter>,
@@ -980,6 +1553,7 @@ function defaultLifecycle() {
     onClassicRequested(_transaction?: unknown) { return true; },
     onCrazyRequested(_transaction?: unknown) { return true; },
     onClassicBirdRequested(_transaction?: unknown) { return true; },
+    onCrazyBirdRequested(_transaction?: unknown) { return true; },
     onMainMenuRequested(_transaction?: unknown) { return true; },
     onUnsupportedDestinationRequested(
       _destination?: unknown,

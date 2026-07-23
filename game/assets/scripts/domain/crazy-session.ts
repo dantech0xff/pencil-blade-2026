@@ -3,22 +3,30 @@ import {
   ScoreService,
 } from './score-service';
 import {
-  CRAZY_MODE_ID,
   CRAZY_TOSS_BOMB_HIT_STOP_ORDER,
   CRAZY_TOSS_CREATION_ORDER,
   CRAZY_TOSS_START_ORDER,
-  CRAZY_TOSS_STARTABLE_IDS,
-  CRAZY_TOSS_STOPPABLE_IDS,
   CRAZY_TOSS_TIME_UP_STOP_ORDER,
   type CrazyTossControllerId,
   type CrazyTossRow,
   CRAZY_TOSS_ROWS,
 } from './crazy-toss-config';
+import {
+  CRAZY_BIRD_TIMED_PROFILE,
+  CRAZY_BIRD_CAPTURED_PARENT_BOUNDARY,
+  CRAZY_CAPTURED_PARENT_BOUNDARY as PROFILE_CRAZY_CAPTURED_PARENT_BOUNDARY,
+  CRAZY_TIMED_PROFILE,
+  type CrazyTimedModeBestScoreKey,
+  type CrazyTimedModeId,
+  type CrazyTimedModeProfile,
+  type CrazyTimedModeRemoveCommand,
+} from './crazy-timed-mode-profile';
 
-export const CRAZY_INITIAL_INTRO_SECONDS = 60;
-export const CRAZY_SETTINGS_BEST_SCORE_KEY = 'crazy_best_1';
+export const CRAZY_INITIAL_INTRO_SECONDS = 60 as const;
+export const CRAZY_SETTINGS_BEST_SCORE_KEY = CRAZY_TIMED_PROFILE.bestScoreKey;
 export const CRAZY_RESULT_NAVIGATION_Z_ORDER = 1;
-export const CRAZY_CAPTURED_PARENT_BOUNDARY = 'captured-crazy-parent';
+export const CRAZY_CAPTURED_PARENT_BOUNDARY
+  = PROFILE_CRAZY_CAPTURED_PARENT_BOUNDARY;
 
 export interface CrazyPoint {
   readonly x: number;
@@ -36,15 +44,21 @@ export interface CrazySessionSnapshot {
   readonly cutEnabled: boolean;
   readonly hasTimeManager: true;
   readonly lifecycle: CrazyLifecycle;
-  readonly mode: typeof CRAZY_MODE_ID;
+  readonly mode: CrazyTimedModeId;
   readonly score: ReturnType<ScoreService['snapshot']>;
 }
 
 export type CrazyObjectiveEventId = 4 | 5 | 8 | 9;
 export type CrazyObjectiveState = 0 | 1 | 2;
+export type CrazyStartableControllerId =
+  (typeof CRAZY_TOSS_START_ORDER)[number];
+export type CrazyStoppableControllerId =
+  | (typeof CRAZY_TOSS_BOMB_HIT_STOP_ORDER)[number]
+  | (typeof CRAZY_TOSS_TIME_UP_STOP_ORDER)[number];
 
 export type CrazySessionCommand =
   | Readonly<{ type: 'enter-base-gameplay-layer' }>
+  | Readonly<{ type: 'enter-base-bird-layer' }>
   | Readonly<{ type: 'reset-bonus-manager' }>
   | Readonly<{
       type: 'process-objective';
@@ -92,14 +106,20 @@ export type CrazySessionCommand =
   | Readonly<{ type: 'initialize-pause-ui' }>
   | Readonly<{
       type: 'initialize-best-score';
-      key: typeof CRAZY_SETTINGS_BEST_SCORE_KEY;
+      key: CrazyTimedModeBestScoreKey;
       score: number;
     }>
   | Readonly<{ type: 'set-cut-enabled'; enabled: boolean }>
   | Readonly<{ type: 'add-score'; value: number }>
   | Readonly<{ type: 'start-time-manager' }>
-  | Readonly<{ type: 'start-controller'; controller: typeof CRAZY_TOSS_STARTABLE_IDS[number] }>
-  | Readonly<{ type: 'stop-controller'; controller: typeof CRAZY_TOSS_STOPPABLE_IDS[number] }>
+  | Readonly<{
+      type: 'start-controller';
+      controller: CrazyStartableControllerId;
+    }>
+  | Readonly<{
+      type: 'stop-controller';
+      controller: CrazyStoppableControllerId;
+    }>
   | Readonly<{ type: 'stop-electric-bomb' }>
   | Readonly<{ type: 'freeze-world' }>
   | Readonly<{ type: 'unfreeze-world' }>
@@ -108,10 +128,14 @@ export type CrazySessionCommand =
       type: 'capture-crazy-parent';
       boundary: typeof CRAZY_CAPTURED_PARENT_BOUNDARY;
     }>
+  | Readonly<{
+      type: 'capture-crazy-bird-parent';
+      boundary: typeof CRAZY_BIRD_CAPTURED_PARENT_BOUNDARY;
+    }>
   | Readonly<{ type: 'construct-result' }>
-  | Readonly<{ type: 'set-result-mode'; mode: typeof CRAZY_MODE_ID }>
+  | Readonly<{ type: 'set-result-mode'; mode: CrazyTimedModeId }>
   | Readonly<{ type: 'set-result-score'; score: number }>
-  | Readonly<{ type: 'remove-crazy'; cleanup: true }>
+  | Readonly<{ type: CrazyTimedModeRemoveCommand; cleanup: true }>
   | Readonly<{ type: 'attach-result'; zOrder: typeof CRAZY_RESULT_NAVIGATION_Z_ORDER }>
   | ScoreCommand;
 
@@ -121,11 +145,16 @@ export class CrazySession {
   private cutEnabled = true;
   private sceneEntered = false;
   private readonly hasTimeManagerValue: true = true;
-  private readonly bestScoreKeyValue = CRAZY_SETTINGS_BEST_SCORE_KEY;
+  private readonly profileValue: CrazyTimedModeProfile;
 
-  constructor(initialBestScore = 0) {
+  constructor(
+    initialBestScore = 0,
+    profile: CrazyTimedModeProfile = CRAZY_TIMED_PROFILE,
+  ) {
     assertSafeInteger(initialBestScore, 'initialBestScore');
+    assertTimedModeProfile(profile);
     this.scoreService = new ScoreService(0, 0, initialBestScore);
+    this.profileValue = profile;
   }
 
   snapshot(): CrazySessionSnapshot {
@@ -133,13 +162,17 @@ export class CrazySession {
       cutEnabled: this.cutEnabled,
       hasTimeManager: this.hasTimeManagerValue,
       lifecycle: this.lifecycle,
-      mode: CRAZY_MODE_ID,
+      mode: this.profileValue.mode,
       score: this.scoreService.snapshot(),
     });
   }
 
-  get bestScoreKey(): typeof CRAZY_SETTINGS_BEST_SCORE_KEY {
-    return this.bestScoreKeyValue;
+  get bestScoreKey(): CrazyTimedModeBestScoreKey {
+    return this.profileValue.bestScoreKey;
+  }
+
+  get modeProfile(): CrazyTimedModeProfile {
+    return this.profileValue;
   }
 
   addScore(value: number): void {
@@ -177,10 +210,18 @@ export class CrazySession {
     this.sceneEntered = true;
 
     const commands: CrazySessionCommand[] = [
-      Object.freeze({ type: 'enter-base-gameplay-layer' }),
+      Object.freeze({ type: this.profileValue.baseEntryCommand }),
       Object.freeze({ type: 'reset-bonus-manager' }),
-      Object.freeze({ type: 'process-objective', eventId: 8, state: 0 }),
-      Object.freeze({ type: 'process-objective', eventId: 4, state: 0 }),
+      Object.freeze({
+        type: 'process-objective',
+        eventId: this.profileValue.noBombObjectiveEventId,
+        state: 0,
+      }),
+      Object.freeze({
+        type: 'process-objective',
+        eventId: this.profileValue.noDropObjectiveEventId,
+        state: 0,
+      }),
       Object.freeze({ type: 'read-logical-director-size' }),
     ];
 
@@ -211,7 +252,7 @@ export class CrazySession {
     commands.push(Object.freeze({ type: 'initialize-pause-ui' }));
     commands.push(Object.freeze({
       type: 'initialize-best-score',
-      key: this.bestScoreKeyValue,
+      key: this.profileValue.bestScoreKey,
       score: this.scoreService.bestScore,
     }));
 
@@ -239,14 +280,22 @@ export class CrazySession {
   fruitFail(position: CrazyPoint): readonly CrazySessionCommand[] {
     assertPoint(position);
     return Object.freeze([
-      Object.freeze({ type: 'process-objective', eventId: 4, state: 1 }),
+      Object.freeze({
+        type: 'process-objective',
+        eventId: this.profileValue.noDropObjectiveEventId,
+        state: 1,
+      }),
     ]);
   }
 
   bonusFruitFail(position: CrazyPoint): readonly CrazySessionCommand[] {
     assertPoint(position);
     return Object.freeze([
-      Object.freeze({ type: 'process-objective', eventId: 4, state: 1 }),
+      Object.freeze({
+        type: 'process-objective',
+        eventId: this.profileValue.noDropObjectiveEventId,
+        state: 1,
+      }),
     ]);
   }
 
@@ -268,7 +317,11 @@ export class CrazySession {
     for (const controller of CRAZY_TOSS_BOMB_HIT_STOP_ORDER) {
       commands.push(Object.freeze({ type: 'stop-controller', controller }));
     }
-    commands.push(Object.freeze({ type: 'process-objective', eventId: 8, state: 1 }));
+    commands.push(Object.freeze({
+      type: 'process-objective',
+      eventId: this.profileValue.noBombObjectiveEventId,
+      state: 1,
+    }));
     return Object.freeze(commands);
   }
 
@@ -302,8 +355,16 @@ export class CrazySession {
     }
     commands.push(Object.freeze({ type: 'stop-electric-bomb' }));
     commands.push(...this.finishDoubleScore());
-    commands.push(Object.freeze({ type: 'process-objective', eventId: 8, state: 2 }));
-    commands.push(Object.freeze({ type: 'process-objective', eventId: 4, state: 2 }));
+    commands.push(Object.freeze({
+      type: 'process-objective',
+      eventId: this.profileValue.noBombObjectiveEventId,
+      state: 2,
+    }));
+    commands.push(Object.freeze({
+      type: 'process-objective',
+      eventId: this.profileValue.noDropObjectiveEventId,
+      state: 2,
+    }));
     return Object.freeze(commands);
   }
 
@@ -312,20 +373,18 @@ export class CrazySession {
       throw new Error('Crazy result transition can begin only after time-up');
     }
     this.lifecycle = 'result-transition';
+    const captureCommand = createCaptureCommand(this.profileValue);
     return Object.freeze([
       Object.freeze({ type: 'set-cut-enabled', enabled: false }),
       Object.freeze({ type: 'stop-effects' }),
-      Object.freeze({
-        type: 'capture-crazy-parent',
-        boundary: CRAZY_CAPTURED_PARENT_BOUNDARY,
-      }),
+      captureCommand,
       Object.freeze({ type: 'construct-result' }),
-      Object.freeze({ type: 'set-result-mode', mode: CRAZY_MODE_ID }),
+      Object.freeze({ type: 'set-result-mode', mode: this.profileValue.mode }),
       Object.freeze({
         type: 'set-result-score',
         score: this.scoreService.authoritativeScore,
       }),
-      Object.freeze({ type: 'remove-crazy', cleanup: true }),
+      Object.freeze({ type: this.profileValue.removeCommand, cleanup: true }),
       Object.freeze({ type: 'attach-result', zOrder: CRAZY_RESULT_NAVIGATION_Z_ORDER }),
     ]);
   }
@@ -356,6 +415,26 @@ function getCrazyRow(controller: CrazyTossControllerId): CrazyTossRow {
   return row;
 }
 
+function createCaptureCommand(
+  profile: CrazyTimedModeProfile,
+): Extract<
+  CrazySessionCommand,
+  Readonly<{
+    type: 'capture-crazy-parent' | 'capture-crazy-bird-parent';
+  }>
+> {
+  if (profile.kind === 'crazy-bird') {
+    return Object.freeze({
+      type: 'capture-crazy-bird-parent',
+      boundary: CRAZY_BIRD_CAPTURED_PARENT_BOUNDARY,
+    });
+  }
+  return Object.freeze({
+    type: 'capture-crazy-parent',
+    boundary: CRAZY_CAPTURED_PARENT_BOUNDARY,
+  });
+}
+
 function assertPoint(point: CrazyPoint): void {
   if (point === null || typeof point !== 'object') {
     throw new TypeError('position must be an object');
@@ -367,6 +446,15 @@ function assertPoint(point: CrazyPoint): void {
 function assertCrazyScore(value: number, label: string): number {
   assertSafeInteger(value, label);
   return value;
+}
+
+function assertTimedModeProfile(profile: CrazyTimedModeProfile): void {
+  if (
+    profile !== CRAZY_TIMED_PROFILE
+    && profile !== CRAZY_BIRD_TIMED_PROFILE
+  ) {
+    throw new TypeError('profile must be a supported immutable Crazy timed-mode profile');
+  }
 }
 
 function assertSafeInteger(value: number, label: string): void {

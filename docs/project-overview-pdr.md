@@ -12,13 +12,15 @@ the Creator bundle. The current playable loop consumes the exact paper backgroun
 intro/terminal/fail-marker art, score icon, best-score cup, double-score panel, Linds font,
 ordinary intact/cut fruit, critical particles, and 23 reviewed core/ordinary-bomb audio clips.
 The exact standard-bomb raster, body, fixture, cut guard, and retained-audio seam are also
-implemented and tested, and the shared BaseBird/BirdBlade substrate now powers the production
-Classic Bird mode `3` route. The mode-0 result now includes its exact rank order, delayed
-particle burst, rotating reward tree, and the Classic-relevant `total_coins` plus
-`classic_best_1/2/3` persistence subset. Missing or corrupt save restores `999999` coins while
-a valid persisted balance wins. This is a bounded production checkpoint, not presentation
-completion: most resource consumers and the full scene/prefab map remain open, and modes `2`,
-`4`, and `5` still fail closed.
+implemented and tested, and the shared BaseBird/BirdBlade substrate now powers production
+Classic Bird mode `3` and Crazy Bird mode `4`. Crazy Bird profiles the shared 60-second Crazy
+controllers with BirdBlade type `2`, the exact 17-raster type-2 closure, distinct mode-4
+objectives, `bird_crazy_best_1..3`, and the float32 `0.8` result reward. The mode-0 result
+includes its exact rank order, delayed particle burst, rotating reward tree, and the
+Classic-relevant `total_coins` plus `classic_best_1/2/3` persistence subset. Missing or corrupt
+save restores `999999` coins while a valid persisted balance wins. This is a bounded production
+checkpoint, not presentation completion: most resource consumers and the full scene/prefab map
+remain open, and modes `2` and `5` still fail closed.
 
 ## Authority and evidence
 
@@ -55,8 +57,15 @@ replay, and device comparison are unavailable and are not project gates.
   score service seeded from persisted `classic_best_1`; app hide saves all four restored
   Classic Settings integers. Missing or corrupt save falls back to `999999` coins while a
   valid persisted balance wins. Full first-launch/Main Menu Settings behavior remains open.
-- The current implementation checkpoint covers production routes `0`, `1`, and `3`; modes `2`,
-  `4`, and `5` remain fail closed.
+- The current implementation checkpoint covers production routes `0`, `1`, `3`, and `4`;
+  modes `2` and `5` remain fail closed.
+- The Crazy Bird checkpoint passes `952/952` deterministic vertical-slice tests, `38/38`
+  resource/build/catalog tests, `14/14` inventory/evidence cases in `217s`, reconstruction
+  policy positive plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator
+  TypeScript, and independent runtime review.
+- Fresh Creator Preview reaches Main Menu → Mode Select → Crazy Bird → live Bird/type-2
+  gameplay → Pause/Resume/Replay → Pause Quit → Main Menu with an empty Cocos console and
+  `0` post-gesture DevTools messages.
 - Presentation restoration is complete only when the canonical user-supplied sample project
   has 100% inventory, staging, and consumer coverage for every resource actually present.
 - No canonical graphics, animation frame, sound, music, font, shader/material, level/layout,
@@ -120,6 +129,8 @@ replay, and device comparison are unavailable and are not project gates.
   name, artwork, fonts, music, trademarks, and other third-party material.
 - The canonical sample-project resource manifest/root remains unresolved; until it is resolved,
   the `99%` metric cannot be finalized and residual gaps cannot be enumerated completely.
+- Crazy Bird's exact native `ActionGoCallback` operand/order remains a disclosed static
+  inference gap and is not counted as recovered behavior.
 - Git is initialized on `main` with a committed foundation. The curated/ignored boundary remains
   mandatory for staging and commits.
 

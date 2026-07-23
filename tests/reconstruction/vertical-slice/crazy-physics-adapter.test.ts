@@ -38,6 +38,7 @@ test('Crazy physics preserves the recovered 1.0 normal and 0.5 freeze step scale
   assert.deepEqual(adapter.state, {
     active: true,
     frozen: false,
+    restorePending: false,
     worldSpeed: CRAZY_NORMAL_WORLD_SPEED,
   });
   assert.equal(delegate.resolveDelta?.(0.02), Math.fround(0.02));
@@ -60,6 +61,7 @@ test('freeze ownership restores exactly once without a global Crazy bomb hold', 
   assert.deepEqual(adapter.state, {
     active: true,
     frozen: true,
+    restorePending: false,
     worldSpeed: 0.5,
   });
   assert.equal(adapter.state.frozen, true);
@@ -71,6 +73,7 @@ test('freeze ownership restores exactly once without a global Crazy bomb hold', 
   assert.deepEqual(adapter.state, {
     active: false,
     frozen: false,
+    restorePending: false,
     worldSpeed: 1,
   });
 });
@@ -125,7 +128,7 @@ test('configuration failure enters activation cleanup and remains retryable', ()
   assert.equal(adapter.state.active, true);
 });
 
-test('activation reports both its primary failure and cleanup failure without losing retryability', () => {
+test('activation cleanup failure retains a retryable shared-world restore obligation', () => {
   const delegate = createDelegate();
   delegate.failConfigureCount = 1;
   delegate.failRestoreCount = 1;
@@ -147,9 +150,20 @@ test('activation reports both its primary failure and cleanup failure without lo
   );
   assert.deepEqual(delegate.lifecycle, ['configure', 'restore']);
   assert.equal(adapter.state.active, false);
+  assert.equal(adapter.state.restorePending, true);
+  assert.throws(
+    () => adapter.activate(() => {}),
+    /cleanup must complete before activation/,
+  );
 
+  assert.equal(adapter.deactivate(), true);
+  assert.equal(adapter.state.restorePending, false);
   adapter.activate(() => {});
   assert.equal(adapter.state.active, true);
+  assert.deepEqual(
+    delegate.lifecycle,
+    ['configure', 'restore', 'restore', 'configure', 'start'],
+  );
 });
 
 test('failed deactivation retains the active lease so restoration can be retried', () => {

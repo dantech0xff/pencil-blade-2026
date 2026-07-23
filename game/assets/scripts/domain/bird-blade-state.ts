@@ -4,12 +4,14 @@ import {
 } from './bird-blade-particle-plan';
 import type { GameplayRandom } from './gameplay-random';
 
+/** Default recovered BirdBlade visual type retained for Classic Bird callers. */
 export const BIRD_BLADE_TYPE = 1 as const;
 export const BIRD_BLADE_IDLE_STATE = 0 as const;
 export const BIRD_BLADE_MOVING_STATE = 1 as const;
 export const BIRD_BLADE_SETTLE_STATE = 2 as const;
 export const BIRD_BLADE_RAY_GATE_MAXIMUM = 3 as const;
 
+export type BirdBladeType = 1 | 2;
 export type BirdBladeMotionState =
   | typeof BIRD_BLADE_IDLE_STATE
   | typeof BIRD_BLADE_MOVING_STATE
@@ -30,6 +32,7 @@ export interface BirdBladeViewport {
 
 export interface BirdBladeStateOptions {
   readonly random: BirdBladeRandom;
+  readonly type?: BirdBladeType;
   readonly viewport: BirdBladeViewport;
 }
 
@@ -47,7 +50,7 @@ export interface BirdBladeStateSnapshot {
   readonly rotationDegrees: number;
   readonly state: BirdBladeMotionState;
   readonly targetPosition: BirdBladePoint;
-  readonly type: typeof BIRD_BLADE_TYPE;
+  readonly type: BirdBladeType;
 }
 
 export interface BirdBladeTouchResult {
@@ -88,7 +91,7 @@ const REJECTED_TOUCH: BirdBladeTouchResult = Object.freeze({
 });
 
 /**
- * Pure state and shared-RNG model for the recovered type-1 BirdBlade.
+ * Pure state and shared-RNG model for the recovered BirdBlade types.
  *
  * A parent adapter may inspect one cached ray, dispatch it, and then explicitly acknowledge
  * it. Cached rays are not a queue: movement extends the one current endpoint until the
@@ -107,11 +110,13 @@ export class BirdBladeStateMachine {
   private rotationDegreesValue = 0;
   private stateValue: BirdBladeMotionState = BIRD_BLADE_IDLE_STATE;
   private targetPositionValue: BirdBladePoint;
+  private readonly typeValue: BirdBladeType;
 
   constructor(options: BirdBladeStateOptions) {
     assertOptions(options);
     const viewport = copyViewport(options.viewport);
     this.random = options.random;
+    this.typeValue = resolveBirdBladeType(options.type);
     this.movementScalar = getBirdBladeMovementScalar(viewport.width);
 
     const center = frozenPoint(
@@ -308,7 +313,7 @@ export class BirdBladeStateMachine {
       rotationDegrees: this.rotationDegreesValue,
       state: this.stateValue,
       targetPosition: copyPoint(this.targetPositionValue),
-      type: BIRD_BLADE_TYPE,
+      type: this.typeValue,
     });
   }
 }
@@ -438,6 +443,19 @@ function assertOptions(options: BirdBladeStateOptions): void {
   ) {
     throw new TypeError('random must provide nextIntInclusive(minimum, maximum)');
   }
+}
+
+function resolveBirdBladeType(type: BirdBladeType | undefined): BirdBladeType {
+  if (type === undefined) {
+    return BIRD_BLADE_TYPE;
+  }
+  if (!Number.isSafeInteger(type)) {
+    throw new TypeError('type must be a safe integer');
+  }
+  if (type !== 1 && type !== 2) {
+    throw new RangeError('type must be 1 or 2');
+  }
+  return type;
 }
 
 function toNonNegativeFloat32(value: number, label: string): number {

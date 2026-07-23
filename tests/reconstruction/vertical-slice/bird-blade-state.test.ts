@@ -100,6 +100,37 @@ test('initial state is centered idle type 1 and scalar uses native float32 multi
   assert.deepEqual(random.calls, [PARTICLE_GATE_CALL]);
 });
 
+test('explicit type 2 changes only snapshot identity, not movement or shared-RNG mechanics', () => {
+  const typeOneRandom = new ScriptedRandom([1, 4]);
+  const typeTwoRandom = new ScriptedRandom([1, 4]);
+  const typeOne = createBlade(typeOneRandom);
+  const typeTwo = createBlade(typeTwoRandom, 2);
+
+  assert.equal(typeOne.snapshot().type, 1);
+  assert.equal(typeTwo.snapshot().type, 2);
+  assert.deepEqual(
+    typeTwo.touch({ x: 857, y: 400 }),
+    typeOne.touch({ x: 857, y: 400 }),
+  );
+
+  const typeOneUpdate = typeOne.update(0.5);
+  const typeTwoUpdate = typeTwo.update(0.5);
+  assert.deepEqual(
+    { ...typeTwoUpdate, snapshot: { ...typeTwoUpdate.snapshot, type: 1 } },
+    typeOneUpdate,
+  );
+  assert.deepEqual(typeTwoRandom.calls, typeOneRandom.calls);
+});
+
+test('BirdBlade state rejects unsupported visual types without falling back', () => {
+  for (const invalidType of [0, 3, 1.5, Number.NaN]) {
+    assert.throws(
+      () => createBlade(new ScriptedRandom([]), invalidType as never),
+      /type must (?:be a safe integer|be 1 or 2)/,
+    );
+  }
+});
+
 test('target x equality selects left and every later busy touch rejects without mutation', () => {
   const random = new ScriptedRandom([]);
   const blade = createBlade(random);
@@ -293,9 +324,10 @@ test('invalid ray draw leaves movement state unchanged and does not reach the pa
   }
 });
 
-function createBlade(random: ScriptedRandom) {
+function createBlade(random: ScriptedRandom, type?: 1 | 2) {
   return new BirdBladeStateMachine({
     random,
+    ...(type === undefined ? {} : { type }),
     viewport: { height: 800, width: 480 },
   });
 }

@@ -22,8 +22,10 @@ test('app shell boots the shared scene into Main Menu before any Classic activat
     'const classicBirdPreparation = crazyPreparation',
     'this.requireClassicBirdGameplayController()',
     '.prepareClassicBirdRuntime()',
+    'const crazyBirdPreparation = classicBirdPreparation',
+    '.prepareCrazyBirdRuntime()',
     'await Promise.all([',
-    'await Promise.all([crazyPreparation, classicBirdPreparation])',
+    'crazyBirdPreparation,',
     'SharedLeafPresenter.create({',
     'SharedGameScenePresenter.create({',
     'nonClassicPhysics.activateCollisionFilter()',
@@ -110,6 +112,8 @@ test('serialized shell binds every Crazy and Classic Bird navigation event and o
   for (const event of [
     'CRAZY_RESULT_MENU_REQUESTED_EVENT',
     'CRAZY_PAUSE_QUIT_REQUESTED_EVENT',
+    'CRAZY_BIRD_RESULT_MENU_REQUESTED_EVENT',
+    'CRAZY_BIRD_PAUSE_QUIT_REQUESTED_EVENT',
     'CLASSIC_BIRD_RESULT_MENU_REQUESTED_EVENT',
     'CLASSIC_BIRD_PAUSE_QUIT_REQUESTED_EVENT',
   ]) {
@@ -181,18 +185,9 @@ test('Mode Select enters prepared Crazy through the same empty transactional hos
   const rollbackStart = transition.indexOf('} catch (error) {');
   assert.ok(rollbackStart > -1);
   const rollbackBlock = transition.slice(rollbackStart);
-  assertOrderedSubstrings(rollbackBlock, [
-    'const rollbackFailures: unknown[] = []',
-    'this.restoreModeSelectAfterFailedCrazyActivation(oldPresenter.root)',
-    'nonClassicPhysics.activateCollisionFilter()',
-    'if (rollbackFailures.length > 0)',
-    'new ModeSelectFatalNavigationError(',
-    'aggregateWithPrimaryError(',
-    "'Mode Select to Crazy rollback failed'",
-  ]);
   assert.match(
     rollbackBlock,
-    /restoreModeSelectAfterFailedCrazyActivation[\s\S]*?catch \(rollbackError\) \{[\s\S]*?rollbackFailures\.push\(rollbackError\)[\s\S]*?activateCollisionFilter\(\)[\s\S]*?catch \(rollbackError\) \{[\s\S]*?rollbackFailures\.push\(rollbackError\)/,
+    /this\.compensateFailedTimedCrazyActivation\(\s*oldPresenter,\s*nonClassicPhysics,\s*error,\s*'Crazy',\s*\)/,
   );
 
   const rollback = extractMethod(SOURCE, 'restoreModeSelectAfterFailedCrazyActivation');
@@ -259,6 +254,68 @@ test('Mode Select enters prepared Classic Bird through its isolated transactiona
   assert.doesNotMatch(rollback, /previous\.setParent\(|previous\.parent\s*=/);
 });
 
+test('Mode Select enters prepared Crazy Bird through the profiled timed-mode owner', () => {
+  const createModeSelect = extractMethod(SOURCE, 'createModeSelectPresenter');
+  const transition = extractMethod(SOURCE, 'transitionModeSelectToCrazyBird');
+
+  assert.match(
+    createModeSelect,
+    /onCrazyBirdRequested: \(transaction\) => \([\s\S]*?this\.transitionModeSelectToCrazyBird\(transaction\)/,
+  );
+  assertOrderedSubstrings(transition, [
+    "transaction.destination !== 'CrazyBirdLayer'",
+    '!crazy.crazyBirdPrepared',
+    "this.runTransition('mode-select', 'crazy-bird'",
+    'sharedScene.detachCurrentScreen(oldPresenter.root)',
+    'oldPresenter.suspendForTransition()',
+    'nonClassicPhysics.restorePreviousCollisionFilter()',
+    'crazy.activateCrazyBirdFromAppShell(sharedScene)',
+    "this.stateValue = 'crazy-bird'",
+    "disposeCommittedPresenter(oldPresenter, 'Mode Select')",
+  ]);
+  const rollbackStart = transition.indexOf('} catch (error) {');
+  assert.ok(rollbackStart > -1);
+  const rollbackBlock = transition.slice(rollbackStart);
+  assert.match(
+    rollbackBlock,
+    /this\.compensateFailedTimedCrazyActivation\(\s*oldPresenter,\s*nonClassicPhysics,\s*error,\s*'Crazy Bird',\s*\)/,
+  );
+
+  const rollback = extractMethod(
+    SOURCE,
+    'restoreModeSelectAfterFailedCrazyBirdActivation',
+  );
+  assertOrderedSubstrings(rollback, [
+    'const current = sharedScene.currentScreen',
+    'if (current === previous)',
+    'if (!isValid(previous, true) || previous.parent !== null)',
+    'if (current === null)',
+    'sharedScene.attachCurrentScreen(previous)',
+    'sharedScene.replaceCurrentScreen(previous)',
+    'sharedScene.currentScreen !== previous',
+  ]);
+  assert.doesNotMatch(rollback, /previous\.setParent\(|previous\.parent\s*=/);
+
+  const compensation = extractMethod(
+    SOURCE,
+    'compensateFailedTimedCrazyActivation',
+  );
+  assertOrderedSubstrings(compensation, [
+    'containsCrazyLifecycleRollbackError(error)',
+    'new ModeSelectFatalNavigationError(',
+    'retained poisoned runtime ownership',
+    'const rollbackFailures: unknown[] = []',
+    "destination === 'Crazy Bird'",
+    'this.restoreModeSelectAfterFailedCrazyBirdActivation(oldPresenter.root)',
+    'this.restoreModeSelectAfterFailedCrazyActivation(oldPresenter.root)',
+    'nonClassicPhysics.activateCollisionFilter()',
+    '!nonClassicPhysics.collisionFilterActive',
+    'oldPresenter.rearmNavigationAfterFailure()',
+    'if (rollbackFailures.length > 0)',
+    'aggregateWithPrimaryError(',
+  ]);
+});
+
 test('Classic Result to Main Menu commits only after attach and activation, with rollback first', () => {
   const transition = extractMemberBlock(
     SOURCE,
@@ -290,6 +347,7 @@ test('Crazy Result and Pause Quit share one commit-after-activation Main Menu tr
     '  private readonly onCrazyPauseQuitRequested = (',
   );
   const transition = extractMethod(SOURCE, 'transitionCrazyToMainMenu');
+  const sharedTransition = extractMethod(SOURCE, 'transitionTimedCrazyToMainMenu');
 
   assertOrderedSubstrings(result, [
     'if (!isCrazyResultMenuRequestedEvent(request))',
@@ -305,8 +363,12 @@ test('Crazy Result and Pause Quit share one commit-after-activation Main Menu tr
   ]);
   assert.match(quit, /root: request\.crazyRoot/);
   assert.match(quit, /'Crazy Pause Quit'/);
-  assertOrderedSubstrings(transition, [
-    "this.stateValue !== 'crazy'",
+  assert.match(
+    transition,
+    /this\.transitionTimedCrazyToMainMenu\(request, 'crazy', source\)/,
+  );
+  assertOrderedSubstrings(sharedTransition, [
+    'this.stateValue !== expectedState',
     'this.requireNonClassicPhysics()',
     '.activateCollisionFilter()',
     'sharedScene.replaceCurrentScreen(nextPresenter.root)',
@@ -315,14 +377,14 @@ test('Crazy Result and Pause Quit share one commit-after-activation Main Menu tr
     'this.activeMainMenu = nextPresenter',
     "this.stateValue = 'main-menu'",
   ]);
-  const catchIndex = transition.indexOf('} catch (error) {');
-  const restoreIndex = transition.indexOf(
+  const catchIndex = sharedTransition.indexOf('} catch (error) {');
+  const restoreIndex = sharedTransition.indexOf(
     'this.restoreCrazyNavigationRootBeforeRollback(request.root)',
     catchIndex,
   );
-  const rollbackIndex = transition.indexOf('request.rollback()', catchIndex);
-  const disposeIndex = transition.indexOf('nextPresenter?.dispose()', catchIndex);
-  const filterIndex = transition.indexOf(
+  const rollbackIndex = sharedTransition.indexOf('request.rollback()', catchIndex);
+  const disposeIndex = sharedTransition.indexOf('nextPresenter?.dispose()', catchIndex);
+  const filterIndex = sharedTransition.indexOf(
     'this.requireNonClassicPhysics().restorePreviousCollisionFilter()',
     catchIndex,
   );
@@ -330,6 +392,50 @@ test('Crazy Result and Pause Quit share one commit-after-activation Main Menu tr
   assert.ok(disposeIndex > restoreIndex);
   assert.ok(filterIndex > disposeIndex);
   assert.ok(rollbackIndex > filterIndex);
+});
+
+test('Crazy Bird Result and Pause Quit use distinct events and fatal rollback handling', () => {
+  const result = extractMemberBlock(
+    SOURCE,
+    '  private readonly onCrazyBirdResultMenuRequested = (',
+  );
+  const quit = extractMemberBlock(
+    SOURCE,
+    '  private readonly onCrazyBirdPauseQuitRequested = (',
+  );
+  const transition = extractMethod(SOURCE, 'transitionCrazyBirdToMainMenu');
+  const sharedTransition = extractMethod(SOURCE, 'transitionTimedCrazyToMainMenu');
+
+  assertOrderedSubstrings(result, [
+    'captureCrazyResultMenuNavigationRequest(request)',
+    'if (captured.request === null)',
+    'this.rejectCrazyBirdNavigationRequest(',
+    "'Crazy Bird Result'",
+    'this.transitionCrazyBirdToMainMenu(',
+  ]);
+  assertOrderedSubstrings(quit, [
+    'captureCrazyPauseQuitNavigationRequest(request)',
+    'if (captured.request === null)',
+    'this.rejectCrazyBirdNavigationRequest(',
+    "'Crazy Bird Pause Quit'",
+    'this.transitionCrazyBirdToMainMenu(',
+  ]);
+  assert.match(
+    transition,
+    /this\.transitionTimedCrazyToMainMenu\(request, 'crazy-bird', source\)/,
+  );
+  assertOrderedSubstrings(sharedTransition, [
+    'this.stateValue !== expectedState',
+    'this.requireNonClassicPhysics()',
+    '.activateCollisionFilter()',
+    'sharedScene.replaceCurrentScreen(nextPresenter.root)',
+    'nextPresenter.activate()',
+    'commitCrazyMainMenuNavigationRequest(request, previous, source)',
+    "this.stateValue = 'main-menu'",
+    'this.assertCrazyNavigationRollbackRestored(request.root)',
+    "expectedState === 'crazy-bird' && rollbackFailures.length > 0",
+    'this.retainCrazyBirdShellFailure(',
+  ]);
 });
 
 test('Classic Bird Result and Pause Quit share one commit-after-activation transaction', () => {
@@ -410,8 +516,8 @@ test('Crazy shell payload guards reject malformed events before dereferencing na
     assert.match(guard, /typeof candidate\.rollback === 'function'/);
     assert.match(guard, /catch \{\s*return false;/);
   }
-  assert.match(resultGuard, /Number\.isFinite\(candidate\.completedRunScore\)/);
-  assert.match(resultGuard, /candidate\.completedRunScore >= 0/);
+  assert.match(resultGuard, /isSignedInt32\(candidate\.completedRunScore\)/);
+  assert.doesNotMatch(resultGuard, /candidate\.completedRunScore >= 0/);
   assertOrderedSubstrings(reject, [
     "request === null || typeof request !== 'object'",
     'return',
@@ -463,6 +569,39 @@ test('Classic Bird payload captures reject malformed events without repeat deref
   ]);
 });
 
+test('Crazy Bird payload captures every effectful navigation field once', () => {
+  const resultCapture = extractMemberBlock(
+    SOURCE,
+    'function captureCrazyResultMenuNavigationRequest(',
+  );
+  const quitCapture = extractMemberBlock(
+    SOURCE,
+    'function captureCrazyPauseQuitNavigationRequest(',
+  );
+
+  for (const capture of [resultCapture, quitCapture]) {
+    assertOrderedSubstrings(capture, [
+      "request === null || typeof request !== 'object'",
+      'request: null',
+      'try {',
+      'const rollback = candidate.rollback',
+      'capturedRollback = () => rollback.call(request)',
+    ]);
+    assert.match(capture, /instanceof Node/);
+    assert.match(capture, /typeof commit !== 'function'/);
+    assert.match(capture, /catch \{/);
+  }
+  assert.equal((resultCapture.match(/candidate\.resultRoot/g) ?? []).length, 1);
+  assert.equal((resultCapture.match(/candidate\.completedRunScore/g) ?? []).length, 1);
+  assert.equal((resultCapture.match(/candidate\.commit/g) ?? []).length, 1);
+  assert.equal((resultCapture.match(/candidate\.rollback/g) ?? []).length, 1);
+  assert.equal((quitCapture.match(/candidate\.crazyRoot/g) ?? []).length, 1);
+  assert.equal((quitCapture.match(/candidate\.commit/g) ?? []).length, 1);
+  assert.equal((quitCapture.match(/candidate\.rollback/g) ?? []).length, 1);
+  assert.match(resultCapture, /isSignedInt32\(completedRunScore\)/);
+  assert.doesNotMatch(resultCapture, /completedRunScore < 0/);
+});
+
 test('non-Classic producer commit errors use the idempotent commit contract', () => {
   for (const functionName of [
     'commitCrazyMainMenuNavigationRequest',
@@ -492,9 +631,12 @@ test('Crazy transaction helpers execute malformed, commit, and partial-root fail
   >('normalizeError');
   const errors: unknown[] = [];
   const testConsole = { error: (error: unknown) => errors.push(error) };
+  const isSignedInt32 = compileSourceFunction<
+    (value: unknown) => value is number
+  >('isSignedInt32');
   const resultGuard = compileSourceFunction<(request: unknown) => boolean>(
     'isCrazyResultMenuRequestedEvent',
-    { Node: ExecutableScreenNode, isValid },
+    { Node: ExecutableScreenNode, isSignedInt32, isValid },
   );
   const quitGuard = compileSourceFunction<(request: unknown) => boolean>(
     'isCrazyPauseQuitRequestedEvent',
@@ -606,10 +748,6 @@ test('Crazy transaction helpers execute malformed, commit, and partial-root fail
   assert.equal(crazyRollbackScene.currentScreen, crazyRoot);
   assert.equal(failedMenuRoot.parent, null);
 
-  const errorMessage = compileSourceFunction<(error: unknown) => string>('errorMessage');
-  const aggregateWithPrimaryError = compileSourceFunction<
-    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
-  >('aggregateWithPrimaryError', { errorMessage });
   class TestFatalNavigationError extends Error {
     constructor(message: string, cause: unknown) {
       super(`${message}: ${String(cause)}`);
@@ -621,9 +759,17 @@ test('Crazy transaction helpers execute malformed, commit, and partial-root fail
       root: ExecutableScreenNode;
     }>) => boolean
   >('transitionModeSelectToCrazy', {
-    aggregateWithPrimaryError,
     ModeSelectFatalNavigationError: TestFatalNavigationError,
   });
+  const compensateFailedTimedCrazyActivation = compileCrazyActivationCompensation(
+    TestFatalNavigationError,
+  );
+  const captureModeSelectFatalScreenRelease = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => () => void
+  >('captureModeSelectFatalScreenRelease');
 
   for (const attachPartialCrazy of [false, true]) {
     const modeSelectRoot = new ExecutableScreenNode();
@@ -652,6 +798,23 @@ test('Crazy transaction helpers execute malformed, commit, and partial-root fail
     };
     const shell = {
       activeModeSelect: oldPresenter,
+      captureModeSelectFatalScreenRelease(root: ExecutableScreenNode) {
+        return captureModeSelectFatalScreenRelease.call(this, root);
+      },
+      compensateFailedTimedCrazyActivation(
+        presenter: typeof oldPresenter,
+        physics: typeof nonClassicPhysics,
+        error: unknown,
+        destination: 'Crazy' | 'Crazy Bird',
+      ) {
+        return compensateFailedTimedCrazyActivation.call(
+          this,
+          presenter,
+          physics,
+          error,
+          destination,
+        );
+      },
       requireCrazyGameplayController: () => ({
         activateCrazyFromAppShell() {
           if (attachPartialCrazy) {
@@ -688,6 +851,109 @@ test('Crazy transaction helpers execute malformed, commit, and partial-root fail
     );
   }
 });
+
+test('Crazy Result Menu accepts a completed signed score of -10', () => {
+  const outcome = executeCrazyResultMenuRequest('crazy', -10);
+
+  assert.equal(outcome.commitCount, 1);
+  assert.equal(outcome.rollbackCount, 0);
+  assert.equal(outcome.state, 'main-menu');
+  assert.equal(outcome.currentScreen, outcome.mainMenuRoot);
+});
+
+test('Crazy Bird Result Menu accepts a completed signed score of -10', () => {
+  const outcome = executeCrazyResultMenuRequest('crazy-bird', -10);
+
+  assert.equal(outcome.commitCount, 1);
+  assert.equal(outcome.rollbackCount, 0);
+  assert.equal(outcome.state, 'main-menu');
+  assert.equal(outcome.currentScreen, outcome.mainMenuRoot);
+});
+
+test('both Crazy Result Menu paths enforce the complete signed-int32 score boundary', () => {
+  for (const mode of ['crazy', 'crazy-bird'] as const) {
+    for (const completedRunScore of [-0x8000_0000, 0x7fff_ffff]) {
+      const outcome = executeCrazyResultMenuRequest(mode, completedRunScore);
+      assert.equal(outcome.commitCount, 1);
+      assert.equal(outcome.rollbackCount, 0);
+      assert.equal(outcome.state, 'main-menu');
+    }
+    for (const completedRunScore of [-0x8000_0001, 0x8000_0000, 0.5]) {
+      const outcome = executeCrazyResultMenuRequest(mode, completedRunScore);
+      assert.equal(outcome.commitCount, 0);
+      assert.equal(outcome.rollbackCount, 1);
+      assert.equal(outcome.state, mode);
+    }
+  }
+});
+
+for (const route of ['crazy', 'crazy-bird'] as const) {
+  const label = route === 'crazy' ? 'Crazy' : 'Crazy Bird';
+
+  test(`direct fatal ${label} activation keeps every Mode Select lease quiescent`, () => {
+    const fatal = new ExecutableCrazyLifecycleRollbackError(
+      `injected direct fatal ${label} ownership`,
+    );
+    const outcome = executeCrazyActivationFailure(route, fatal);
+
+    assert.ok(outcome.thrown instanceof ExecutableModeSelectFatalNavigationError);
+    assert.equal(outcome.state, 'failed');
+    assert.equal(outcome.currentScreen, null);
+    assert.equal(outcome.modeSelectRoot.parent, null);
+    assert.equal(outcome.filterActive, false);
+    assert.equal(outcome.filterReactivationCount, 0);
+    assert.equal(outcome.inputLeaseHeld, false);
+    assert.equal(outcome.inputRearmCount, 0);
+    assert.equal(outcome.transitionFailureCount, 1);
+  });
+
+  test(`nested masked fatal ${label} activation keeps every Mode Select lease quiescent`, () => {
+    const fatal = new ExecutableCrazyLifecycleRollbackError(
+      `injected nested fatal ${label} ownership`,
+    );
+    const cleanupFailure = new Error(`injected ${label} cleanup failure`);
+    const masked = Object.assign(
+      new Error(`injected masked ${label} activation failure`),
+      {
+        cause: Object.assign(
+          new Error(`injected nested ${label} activation aggregate`),
+          {
+            errors: Object.freeze([fatal, cleanupFailure]),
+          },
+        ),
+      },
+    );
+    const outcome = executeCrazyActivationFailure(route, masked);
+
+    assert.ok(outcome.thrown instanceof ExecutableModeSelectFatalNavigationError);
+    assert.equal(outcome.state, 'failed');
+    assert.equal(outcome.currentScreen, null);
+    assert.equal(outcome.modeSelectRoot.parent, null);
+    assert.equal(outcome.filterActive, false);
+    assert.equal(outcome.filterReactivationCount, 0);
+    assert.equal(outcome.inputLeaseHeld, false);
+    assert.equal(outcome.inputRearmCount, 0);
+    assert.equal(outcome.transitionFailureCount, 1);
+  });
+
+  test(`nonfatal ${label} activation completely restores and rearms Mode Select`, () => {
+    const outcome = executeCrazyActivationFailure(
+      route,
+      new Error(`injected nonfatal ${label} activation failure`),
+    );
+
+    assert.equal(outcome.thrown, null);
+    assert.equal(outcome.result, false);
+    assert.equal(outcome.state, 'mode-select');
+    assert.equal(outcome.currentScreen, outcome.modeSelectRoot);
+    assert.notEqual(outcome.modeSelectRoot.parent, null);
+    assert.equal(outcome.filterActive, true);
+    assert.equal(outcome.filterReactivationCount, 1);
+    assert.equal(outcome.inputLeaseHeld, true);
+    assert.equal(outcome.inputRearmCount, 1);
+    assert.equal(outcome.transitionFailureCount, 1);
+  });
+}
 
 test('Classic Bird transaction helpers execute malformed and partial-root failure paths', () => {
   const isValid = (value: unknown): boolean => (
@@ -888,6 +1154,7 @@ test('incomplete Classic Bird activation rollback fails the shell and never retu
         return true;
       },
     },
+    captureModeSelectFatalScreenRelease: () => () => {},
     destroyedValue: false,
     emitTransitionFailure() {
       transitionFailureCount += 1;
@@ -999,6 +1266,7 @@ test('poisoned Classic Bird runtime ownership fails closed after shell rollback 
       rearmNavigationAfterFailure: () => true,
       suspendForTransition: () => true,
     },
+    captureModeSelectFatalScreenRelease: () => () => {},
     destroyedValue: false,
     emitTransitionFailure() {
       transitionFailureCount += 1;
@@ -1127,6 +1395,7 @@ test('failed nonfatal Classic Bird activation restores and rearms every Mode Sel
     };
     const shell: Record<string, unknown> = {
       activeModeSelect: oldPresenter,
+      captureModeSelectFatalScreenRelease: () => () => {},
       destroyedValue: false,
       emitTransitionFailure() {
         transitionFailureCount += 1;
@@ -1247,6 +1516,7 @@ test('incomplete Classic activation rollback fails the shell and never returns r
         return true;
       },
     },
+    captureModeSelectFatalScreenRelease: () => () => {},
     destroyedValue: false,
     emitTransitionFailure() {
       transitionFailureCount += 1;
@@ -1397,7 +1667,7 @@ test('post-mutation collision-filter release failure repairs the mask before rej
 
 test('failed Crazy Main Menu activation releases destination leases before producer rollback', () => {
   const runBestEffortCleanup = compileSourceFunction<
-    (label: string, operations: readonly (() => void)[]) => void
+    (label: string, operations: readonly (() => void)[]) => readonly Error[]
   >('runBestEffortCleanup');
   const transition = compileSourceMethod<
     (
@@ -1407,9 +1677,10 @@ test('failed Crazy Main Menu activation releases destination leases before produ
         commit(previousRoot: ExecutableScreenNode): void;
         rollback(): void;
       }>,
+      expectedState: 'crazy',
       source: 'Crazy Pause Quit',
     ) => void
-  >('transitionCrazyToMainMenu', { runBestEffortCleanup });
+  >('transitionTimedCrazyToMainMenu', { runBestEffortCleanup });
   const isValid = (value: unknown): boolean => (
     value instanceof ExecutableScreenNode && !value.destroyed
   );
@@ -1482,7 +1753,7 @@ test('failed Crazy Main Menu activation releases destination leases before produ
     transitioning: false,
   };
 
-  transition.call(shell, request, 'Crazy Pause Quit');
+  transition.call(shell, request, 'crazy', 'Crazy Pause Quit');
   assert.deepEqual(timeline, [
     'filter:activate',
     'menu:create',
@@ -1495,6 +1766,112 @@ test('failed Crazy Main Menu activation releases destination leases before produ
     'producer:rollback',
     'transition:failed',
   ]);
+});
+
+test('Crazy Bird Main Menu rollback failure retains a fatal shell state', () => {
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const errorMessage = compileSourceFunction<(error: unknown) => string>('errorMessage');
+  const aggregateWithPrimaryError = compileSourceFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  const runBestEffortCleanup = compileSourceFunction<
+    (label: string, operations: readonly (() => void)[]) => readonly Error[]
+  >('runBestEffortCleanup', {
+    console: { error() {} },
+    normalizeError,
+  });
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      request: Readonly<{
+        root: ExecutableScreenNode;
+        commit(previousRoot: ExecutableScreenNode): void;
+        rollback(): void;
+      }>,
+      expectedState: 'crazy-bird',
+      source: 'Crazy Bird Pause Quit',
+    ) => void
+  >('transitionTimedCrazyToMainMenu', {
+    aggregateWithPrimaryError,
+    runBestEffortCleanup,
+  });
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const restore = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >('restoreCrazyNavigationRootBeforeRollback', { isValid });
+
+  const birdRoot = new ExecutableScreenNode();
+  const menuRoot = new ExecutableScreenNode();
+  const sharedScene = new ExecutableSharedScene(birdRoot);
+  let collisionFilterActive = false;
+  const reported: Error[] = [];
+  const shell: Record<string, unknown> = {
+    activeMainMenu: null,
+    createMainMenuPresenter: () => ({
+      activate() {
+        throw new Error('injected Crazy Bird menu activation failure');
+      },
+      dispose() {},
+      root: menuRoot,
+    }),
+    destroyedValue: false,
+    emitTransitionFailure(_from: string, _to: string, error: unknown) {
+      reported.push(error instanceof Error ? error : new Error(String(error)));
+    },
+    requireGameplayController: () => ({
+      sharedAudioPresenter: {
+        stopBackgroundMusic() {},
+      },
+    }),
+    requireNonClassicPhysics: () => ({
+      activateCollisionFilter() {
+        collisionFilterActive = true;
+        return true;
+      },
+      get collisionFilterActive() {
+        return collisionFilterActive;
+      },
+      restorePreviousCollisionFilter() {
+        collisionFilterActive = false;
+      },
+    }),
+    requireSharedScene: () => sharedScene,
+    assertCrazyNavigationRollbackRestored(root: ExecutableScreenNode) {
+      assert.equal(sharedScene.currentScreen, root);
+      assert.equal(collisionFilterActive, false);
+    },
+    restoreCrazyNavigationRootBeforeRollback(root: ExecutableScreenNode) {
+      restore.call(this as never, root);
+    },
+    retainCrazyBirdShellFailure(from: string, error: unknown) {
+      this.stateValue = 'failed';
+      this.emitTransitionFailure(from, 'main-menu', error);
+    },
+    stateValue: 'crazy-bird',
+    transitioning: false,
+  };
+
+  transition.call(shell, {
+    commit() {},
+    rollback() {
+      throw new Error('injected Crazy Bird producer rollback failure');
+    },
+    root: birdRoot,
+  }, 'crazy-bird', 'Crazy Bird Pause Quit');
+
+  assert.equal(shell.stateValue, 'failed');
+  assert.equal(reported.length, 1);
+  assert.match(
+    reported[0]?.message ?? '',
+    /injected Crazy Bird menu activation failure[\s\S]*injected Crazy Bird producer rollback failure/,
+  );
 });
 
 test('failed Classic Bird Main Menu activation restores source before producer rollback', () => {
@@ -2048,6 +2425,380 @@ class ExecutableSharedScene {
 class ExecutableScreenNode {
   destroyed = false;
   parent: ExecutableScreenNode | null = null;
+}
+
+class ExecutableCrazyLifecycleRollbackError extends Error {}
+
+class ExecutableModeSelectFatalNavigationError extends Error {
+  readonly cause: unknown;
+
+  constructor(message: string, cause: unknown) {
+    super(`${message}: ${String(cause)}`);
+    this.cause = cause;
+  }
+}
+
+function executeCrazyResultMenuRequest(
+  mode: 'crazy' | 'crazy-bird',
+  completedRunScore: number,
+): Readonly<{
+  readonly commitCount: number;
+  readonly currentScreen: ExecutableScreenNode | null;
+  readonly mainMenuRoot: ExecutableScreenNode;
+  readonly rollbackCount: number;
+  readonly state: unknown;
+}> {
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const isSignedInt32 = (value: unknown): value is number => (
+    typeof value === 'number'
+    && Number.isSafeInteger(value)
+    && value >= -0x8000_0000
+    && value <= 0x7fff_ffff
+  );
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const commitCrazyMainMenuNavigationRequest = compileSourceFunction<
+    (
+      request: Readonly<{ commit(previousRoot: ExecutableScreenNode): void }>,
+      previousRoot: ExecutableScreenNode,
+      source: string,
+    ) => void
+  >('commitCrazyMainMenuNavigationRequest', {
+    console: { error() {} },
+    normalizeError,
+  });
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      request: Readonly<{
+        root: ExecutableScreenNode;
+        commit(previousRoot: ExecutableScreenNode): void;
+        rollback(): void;
+      }>,
+      expectedState: 'crazy' | 'crazy-bird',
+      source: string,
+    ) => void
+  >('transitionTimedCrazyToMainMenu', {
+    commitCrazyMainMenuNavigationRequest,
+  });
+  const resultRoot = new ExecutableScreenNode();
+  const mainMenuRoot = new ExecutableScreenNode();
+  const sharedScene = new ExecutableSharedScene(resultRoot);
+  let commitCount = 0;
+  let rollbackCount = 0;
+  const shell: Record<string, unknown> = {
+    activeMainMenu: null,
+    createMainMenuPresenter: () => ({
+      activate() {},
+      dispose() {},
+      root: mainMenuRoot,
+    }),
+    destroyedValue: false,
+    requireNonClassicPhysics: () => ({
+      activateCollisionFilter: () => true,
+    }),
+    requireSharedScene: () => sharedScene,
+    stateValue: mode,
+    transitioning: false,
+  };
+  const payload = {
+    commit(previousRoot: ExecutableScreenNode) {
+      assert.equal(previousRoot, resultRoot);
+      commitCount += 1;
+    },
+    completedRunScore,
+    resultRoot,
+    rollback() {
+      rollbackCount += 1;
+    },
+  };
+
+  if (mode === 'crazy') {
+    const isCrazyResultMenuRequestedEvent = compileSourceFunction<
+      (request: unknown) => boolean
+    >('isCrazyResultMenuRequestedEvent', {
+      Node: ExecutableScreenNode,
+      isSignedInt32,
+      isValid,
+    });
+    const rollbackRejectedCrazyNavigationRequest = compileSourceFunction<
+      (request: unknown, source: string) => void
+    >('rollbackRejectedCrazyNavigationRequest', {
+      console: { error() {} },
+      normalizeError,
+    });
+    const handler = compileSourceArrowMember<
+      (this: Record<string, unknown>, request: unknown) => void
+    >('onCrazyResultMenuRequested', {
+      isCrazyResultMenuRequestedEvent,
+      rollbackRejectedCrazyNavigationRequest,
+    });
+    shell.transitionCrazyToMainMenu = (
+      request: Readonly<{
+        root: ExecutableScreenNode;
+        commit(previousRoot: ExecutableScreenNode): void;
+        rollback(): void;
+      }>,
+    ) => transition.call(shell, request, 'crazy', 'Crazy Result');
+    handler.call(shell, payload);
+  } else {
+    const captureCrazyResultMenuNavigationRequest = compileSourceFunction<
+      (request: unknown) => Readonly<{
+        request: Readonly<{
+          root: ExecutableScreenNode;
+          commit(previousRoot: ExecutableScreenNode): void;
+          rollback(): void;
+        }> | null;
+        rollback: (() => void) | null;
+      }>
+    >('captureCrazyResultMenuNavigationRequest', {
+      Node: ExecutableScreenNode,
+      isSignedInt32,
+      isValid,
+    });
+    const handler = compileSourceArrowMember<
+      (this: Record<string, unknown>, request: unknown) => void
+    >('onCrazyBirdResultMenuRequested', {
+      captureCrazyResultMenuNavigationRequest,
+    });
+    shell.rejectCrazyBirdNavigationRequest = (
+      rollback: (() => void) | null,
+    ) => rollback?.();
+    shell.transitionCrazyBirdToMainMenu = (
+      request: Readonly<{
+        root: ExecutableScreenNode;
+        commit(previousRoot: ExecutableScreenNode): void;
+        rollback(): void;
+      }>,
+    ) => transition.call(shell, request, 'crazy-bird', 'Crazy Bird Result');
+    handler.call(shell, payload);
+  }
+
+  return Object.freeze({
+    commitCount,
+    currentScreen: sharedScene.currentScreen,
+    mainMenuRoot,
+    rollbackCount,
+    state: shell.stateValue,
+  });
+}
+
+function executeCrazyActivationFailure(
+  route: 'crazy' | 'crazy-bird',
+  activationError: unknown,
+): Readonly<{
+  readonly currentScreen: ExecutableScreenNode | null;
+  readonly filterActive: boolean;
+  readonly filterReactivationCount: number;
+  readonly inputLeaseHeld: boolean;
+  readonly inputRearmCount: number;
+  readonly modeSelectRoot: ExecutableScreenNode;
+  readonly result: boolean | null;
+  readonly state: unknown;
+  readonly thrown: unknown;
+  readonly transitionFailureCount: number;
+}> {
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const compensateFailedTimedCrazyActivation = compileCrazyActivationCompensation(
+    ExecutableModeSelectFatalNavigationError,
+  );
+  const captureModeSelectFatalScreenRelease = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => () => void
+  >('captureModeSelectFatalScreenRelease');
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      transaction: Readonly<{
+        destination: string;
+        root: ExecutableScreenNode;
+      }>,
+    ) => boolean
+  >(
+    route === 'crazy'
+      ? 'transitionModeSelectToCrazy'
+      : 'transitionModeSelectToCrazyBird',
+    {
+      ModeSelectFatalNavigationError: ExecutableModeSelectFatalNavigationError,
+    },
+  );
+  const runTransition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      from: string,
+      to: string,
+      operation: () => boolean,
+    ) => boolean
+  >('runTransition', {
+    ModeSelectFatalNavigationError: ExecutableModeSelectFatalNavigationError,
+  });
+  const restore = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >(
+    route === 'crazy'
+      ? 'restoreModeSelectAfterFailedCrazyActivation'
+      : 'restoreModeSelectAfterFailedCrazyBirdActivation',
+    { isValid },
+  );
+  const modeSelectRoot = new ExecutableScreenNode();
+  const sharedScene = new ExecutableSharedScene(modeSelectRoot);
+  let filterActive = true;
+  let filterReactivationCount = 0;
+  let inputLeaseHeld = true;
+  let inputRearmCount = 0;
+  let transitionFailureCount = 0;
+  const oldPresenter = {
+    dispose: () => true,
+    root: modeSelectRoot,
+    rearmNavigationAfterFailure() {
+      inputRearmCount += 1;
+      inputLeaseHeld = true;
+      return true;
+    },
+    suspendForTransition() {
+      inputLeaseHeld = false;
+      return true;
+    },
+  };
+  const shell: Record<string, unknown> = {
+    activeModeSelect: oldPresenter,
+    captureModeSelectFatalScreenRelease(root: ExecutableScreenNode) {
+      return captureModeSelectFatalScreenRelease.call(this as never, root);
+    },
+    compensateFailedTimedCrazyActivation(
+      presenter: typeof oldPresenter,
+      physics: Readonly<{
+        readonly collisionFilterActive: boolean;
+        activateCollisionFilter(): boolean;
+      }>,
+      error: unknown,
+      destination: 'Crazy' | 'Crazy Bird',
+    ) {
+      return compensateFailedTimedCrazyActivation.call(
+        this,
+        presenter,
+        physics,
+        error,
+        destination,
+      );
+    },
+    destroyedValue: false,
+    emitTransitionFailure() {
+      transitionFailureCount += 1;
+    },
+    requireCrazyGameplayController: () => ({
+      activateCrazyBirdFromAppShell() {
+        throw activationError;
+      },
+      activateCrazyFromAppShell() {
+        throw activationError;
+      },
+      crazyBirdPrepared: true,
+      prepared: true,
+    }),
+    requireNonClassicPhysics: () => ({
+      activateCollisionFilter() {
+        filterReactivationCount += 1;
+        filterActive = true;
+        return true;
+      },
+      get collisionFilterActive() {
+        return filterActive;
+      },
+      restorePreviousCollisionFilter() {
+        filterActive = false;
+        return true;
+      },
+    }),
+    requireSharedScene: () => sharedScene,
+    runTransition(from: string, to: string, operation: () => boolean) {
+      return runTransition.call(this, from, to, operation);
+    },
+    stateValue: 'mode-select',
+    transitioning: false,
+  };
+  const restoreMethodName = route === 'crazy'
+    ? 'restoreModeSelectAfterFailedCrazyActivation'
+    : 'restoreModeSelectAfterFailedCrazyBirdActivation';
+  shell[restoreMethodName] = function restoreModeSelect(root: ExecutableScreenNode) {
+    restore.call(this as never, root);
+  };
+
+  let result: boolean | null = null;
+  let thrown: unknown = null;
+  try {
+    result = transition.call(shell, {
+      destination: route === 'crazy' ? 'CrazyModeLayer' : 'CrazyBirdLayer',
+      root: modeSelectRoot,
+    });
+  } catch (error) {
+    thrown = error;
+  }
+
+  return Object.freeze({
+    currentScreen: sharedScene.currentScreen,
+    filterActive,
+    filterReactivationCount,
+    inputLeaseHeld,
+    inputRearmCount,
+    modeSelectRoot,
+    result,
+    state: shell.stateValue,
+    thrown,
+    transitionFailureCount,
+  });
+}
+
+function compileCrazyActivationCompensation(
+  fatalNavigationError: new (message: string, cause: unknown) => Error,
+): (
+  this: Record<string, unknown>,
+  oldPresenter: Readonly<{
+    readonly root: ExecutableScreenNode;
+    rearmNavigationAfterFailure(): boolean;
+  }>,
+  nonClassicPhysics: Readonly<{
+    readonly collisionFilterActive: boolean;
+    activateCollisionFilter(): boolean;
+  }>,
+  error: unknown,
+  destination: 'Crazy' | 'Crazy Bird',
+) => never {
+  const errorMessage = compileSourceFunction<(error: unknown) => string>('errorMessage');
+  const aggregateWithPrimaryError = compileSourceFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  const readErrorGraphValue = compileSourceFunction<
+    (value: object, key: string) => unknown
+  >('readErrorGraphValue');
+  const enqueueErrorGraphValue = compileSourceFunction<
+    (pending: unknown[], value: unknown) => void
+  >('enqueueErrorGraphValue');
+  const containsCrazyLifecycleRollbackError = compileSourceFunction<
+    (error: unknown) => boolean
+  >('containsCrazyLifecycleRollbackError', {
+    CrazyLifecycleRollbackError: ExecutableCrazyLifecycleRollbackError,
+    enqueueErrorGraphValue,
+    readErrorGraphValue,
+  });
+  return compileSourceMethod(
+    'compensateFailedTimedCrazyActivation',
+    {
+      aggregateWithPrimaryError,
+      containsCrazyLifecycleRollbackError,
+      ModeSelectFatalNavigationError: fatalNavigationError,
+    },
+  );
 }
 
 function compileSourceFunction<T extends (...args: any[]) => unknown>(

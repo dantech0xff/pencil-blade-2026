@@ -48,15 +48,23 @@ import {
   type CrazyFruitCutCommand,
 } from '../domain/crazy-fruit-cut';
 import {
-  CRAZY_RESULT_MENU_BUTTON_AUDIO_PATH,
   createCrazyResultNavigationCommands,
   type CrazyResultNavigationCommand,
 } from '../domain/crazy-result-navigation';
+import {
+  createCrazyBirdResultNavigationCommands,
+  type CrazyBirdResultNavigationCommand,
+} from '../domain/crazy-bird-result-navigation';
 import {
   CRAZY_RESULT_MODE_ID,
   crazyLeaderboardPanelValues,
   insertCrazyResultScore,
 } from '../domain/crazy-result-ranking';
+import {
+  CRAZY_BIRD_RESULT_MODE_ID,
+  crazyBirdLeaderboardPanelValues,
+  insertCrazyBirdResultScore,
+} from '../domain/crazy-bird-result-ranking';
 import {
   partitionCrazyRuntimeCommands,
   type CrazyRuntimeCommandBatch,
@@ -65,6 +73,12 @@ import type {
   CrazySessionCommand,
   CrazySessionSnapshot,
 } from '../domain/crazy-session';
+import {
+  CRAZY_BIRD_TIMED_PROFILE,
+  CRAZY_TIMED_PROFILE,
+  type CrazyTimedModeId,
+  type CrazyTimedModeProfile,
+} from '../domain/crazy-timed-mode-profile';
 import type { CrazyTossControllerId } from '../domain/crazy-toss-config';
 import {
   CrazyTossCoordinator,
@@ -90,6 +104,19 @@ import {
   type ClassicBladeBeganEvent,
   type ClassicBladeEndedEvent,
 } from './blade-input-controller';
+import {
+  BIRD_BLADE_TOUCH_BEGAN_EVENT,
+  type BirdBladeTouchBeganEvent,
+} from './bird-input-controller';
+import { BirdBladePresenter } from './bird-blade-presenter';
+import {
+  BirdBladeRayAdapter,
+  type BirdBladeRaycastBatch,
+} from './bird-blade-ray-adapter';
+import {
+  loadBirdResources,
+  type LoadedBirdResources,
+} from './bird-resource-loader';
 import { BaseGameplayPausePresenter } from './base-gameplay-pause-presenter';
 import {
   loadBaseGameplayResources,
@@ -145,9 +172,13 @@ import type {
 import { CrazyIntroPresenter } from './crazy-intro-presenter';
 import { CrazyMagnetPresenter } from './crazy-magnet-presenter';
 import {
+  CRAZY_BIRD_PHYSICS_STEPPED_EVENT,
+  CRAZY_BIRD_SESSION_COMMAND_EVENT,
   CRAZY_PHYSICS_STEPPED_EVENT,
   CRAZY_SESSION_COMMAND_EVENT,
+  CrazyLifecycleRollbackError,
   CrazySceneController,
+  type CrazyBirdPhysicsSteppedEvent,
   type CrazyPhysicsSteppedEvent,
   type CrazyTimeUpFinishParticipant,
 } from './crazy-scene-controller';
@@ -171,6 +202,18 @@ export const CRAZY_RESOURCE_LOAD_FAILED_EVENT = 'crazy-resource-load-failed';
 export const CRAZY_RESULT_MENU_REQUESTED_EVENT = 'crazy-result-menu-requested';
 export const CRAZY_RESULT_RETRY_FAILED_EVENT = 'crazy-result-retry-failed';
 export const CRAZY_RESULT_REWARD_READY_EVENT = 'crazy-result-reward-ready';
+export const CRAZY_BIRD_PAUSE_QUIT_REQUESTED_EVENT
+  = 'crazy-bird-pause-quit-requested';
+export const CRAZY_BIRD_PAUSE_REPLAY_FAILED_EVENT
+  = 'crazy-bird-pause-replay-failed';
+export const CRAZY_BIRD_RESOURCE_LOAD_FAILED_EVENT
+  = 'crazy-bird-resource-load-failed';
+export const CRAZY_BIRD_RESULT_MENU_REQUESTED_EVENT
+  = 'crazy-bird-result-menu-requested';
+export const CRAZY_BIRD_RESULT_RETRY_FAILED_EVENT
+  = 'crazy-bird-result-retry-failed';
+export const CRAZY_BIRD_RESULT_REWARD_READY_EVENT
+  = 'crazy-bird-result-reward-ready';
 
 export type CrazyGameplayReadinessStatus =
   | 'failed'
@@ -188,6 +231,7 @@ export interface CrazyGameplaySnapshot {
   readonly activeEntityCount: number;
   readonly displayedScore: number;
   readonly lifecycle: CrazySessionSnapshot['lifecycle'];
+  readonly mode: CrazyTimedModeId | null;
   readonly pendingStandardBombCount: number;
   readonly readiness: CrazyGameplayReadinessStatus;
   readonly resultActive: boolean;
@@ -223,6 +267,12 @@ export interface CrazyResultRewardReadyEvent {
   readonly totalCoins: number;
 }
 
+export type CrazyBirdPauseQuitRequestedEvent = CrazyPauseQuitRequestedEvent;
+export type CrazyBirdPauseReplayFailedEvent = CrazyPauseReplayFailedEvent;
+export type CrazyBirdResultMenuRequestedEvent = CrazyResultMenuRequestedEvent;
+export type CrazyBirdResultRetryFailedEvent = CrazyResultRetryFailedEvent;
+export type CrazyBirdResultRewardReadyEvent = CrazyResultRewardReadyEvent;
+
 export type CrazyScreenPlacementPort = ClassicScreenPlacementPort;
 
 interface CrazyViewport {
@@ -233,16 +283,19 @@ interface CrazyViewport {
 }
 
 interface CrazyResultConfiguration {
-  readonly mode: typeof CRAZY_RESULT_MODE_ID;
+  readonly mode: CrazyTimedModeId;
+  readonly profile: CrazyTimedModeProfile;
   readonly score: number;
 }
 
 interface CrazyPendingResultConfiguration {
-  mode?: typeof CRAZY_RESULT_MODE_ID;
+  mode?: CrazyTimedModeId;
+  profile?: CrazyTimedModeProfile;
   score?: number;
 }
 
 interface CrazyResultMenuTransaction {
+  readonly profile: CrazyTimedModeProfile;
   readonly presenter: ClassicResultPresenter;
   readonly root: Node;
   readonly screenPlacement: CrazyScreenPlacementPort;
@@ -252,12 +305,14 @@ interface CrazyResultMenuTransaction {
 interface CrazyResultEntryTransaction {
   configuration: CrazyResultConfiguration | null;
   readonly crazyRoot: Node;
+  readonly profile: CrazyTimedModeProfile;
   presenter: ClassicResultPresenter | null;
   root: Node | null;
   status: 'committed' | 'pending' | 'prepared' | 'rolled-back';
 }
 
 interface CrazyPauseQuitTransaction {
+  readonly profile: CrazyTimedModeProfile;
   readonly presenter: BaseGameplayPausePresenter;
   readonly root: Node;
   readonly screenPlacement: CrazyScreenPlacementPort;
@@ -286,19 +341,34 @@ interface CrazyPreparationProducts {
   readonly resources: LoadedCrazyResources;
 }
 
+type CrazyPhysicsRayHit = ReturnType<
+  CrazySceneController['raycastAll']
+>[number];
+
+type CrazyCutDriver =
+  | Readonly<{
+      readonly kind: 'standard';
+      readonly presenter: ClassicBladePresenter;
+    }>
+  | Readonly<{
+      readonly kind: 'bird';
+      readonly presenter: BirdBladePresenter;
+      readonly ray: BirdBladeRayAdapter<CrazyPhysicsRayHit>;
+    }>;
+
 interface StandardBombExplosionOwner {
   readonly completion: StandardBombExplosionCompletion;
   readonly presenter: StandardBombExplosionPresenter;
 }
 
 interface CrazyRunOwnership {
-  readonly bladePresenter: ClassicBladePresenter | null;
   readonly bonusManager: BonusManagerState;
   readonly bombElectricPresenter: CrazyBombElectricPresenter | null;
   readonly combo: ComboService | null;
   readonly comboItemPresenters: Set<ComboItemPresenter>;
   readonly coordinator: CrazyTossCoordinator | null;
   readonly crazyModeRoot: Node | null;
+  readonly cutDriver: CrazyCutDriver | null;
   readonly criticalCutHalfPresenters: Set<ClassicCutHalfPresenter>;
   readonly criticalParticlePresenters: Set<ClassicCriticalParticlePresenter>;
   readonly cutHalfPresenters: Set<ClassicCutHalfPresenter>;
@@ -309,6 +379,7 @@ interface CrazyRunOwnership {
   readonly pausePresenter: BaseGameplayPausePresenter | null;
   readonly pendingCapturedCrazyRoot: Node | null;
   readonly pendingResultConfiguration: CrazyPendingResultConfiguration | null;
+  readonly profile: CrazyTimedModeProfile | null;
   readonly registry: CrazyEntityRegistry | null;
   readonly scoreHudPresenter: ClassicScoreHudPresenter | null;
   readonly scoreHudRoot: Node | null;
@@ -321,7 +392,7 @@ interface CrazyRunOwnership {
 }
 
 interface CrazyActivationObjectiveRollback {
-  readonly objectiveId: 46 | 50;
+  readonly objectiveId: 46 | 47 | 50 | 51;
   readonly value: number;
 }
 
@@ -342,7 +413,10 @@ interface RetiredCrazyRunOwnership {
 export class CrazyGameplayController extends Component {
   private audioPresenter: CrazyAudioPresenter | null = null;
   private baseGameplayResources: LoadedBaseGameplayResources | null = null;
-  private bladePresenter: ClassicBladePresenter | null = null;
+  private crazyBirdPreparation: Promise<void> | null = null;
+  private crazyBirdPreparationError: Error | null = null;
+  private crazyBirdReadinessStatus: CrazyGameplayReadinessStatus = 'idle';
+  private crazyBirdResources: LoadedBirdResources | null = null;
   private bonusManager = new BonusManagerState();
   private bombElectricPresenter: CrazyBombElectricPresenter | null = null;
   private classicGameplayController: ClassicGameplayController | null = null;
@@ -353,6 +427,7 @@ export class CrazyGameplayController extends Component {
   private crazyModeRoot: Node | null = null;
   private crazyResources: LoadedCrazyResources | null = null;
   private crazySceneController: CrazySceneController | null = null;
+  private cutDriver: CrazyCutDriver | null = null;
   private criticalParticlePresenters = new Set<ClassicCriticalParticlePresenter>();
   private criticalCutHalfPresenters = new Set<ClassicCutHalfPresenter>();
   private cutHalfPresenters = new Set<ClassicCutHalfPresenter>();
@@ -360,6 +435,7 @@ export class CrazyGameplayController extends Component {
   private dragonFont: LoadedCrazyDragonFont | null = null;
   private electricContactAdapter: CrazyElectricContactAdapter | null = null;
   private introPresenter: CrazyIntroPresenter | null = null;
+  private lifecycleFatalError: CrazyLifecycleRollbackError | null = null;
   private magnetPresenters = new Set<CrazyMagnetPresenter>();
   private readonly objectiveAchievementPresenters = new Set<
     ObjectiveAchievementPresenter
@@ -374,6 +450,7 @@ export class CrazyGameplayController extends Component {
   private preparationError: Error | null = null;
   private readinessStatus: CrazyGameplayReadinessStatus = 'idle';
   private registry: CrazyEntityRegistry | null = null;
+  private runProfile: CrazyTimedModeProfile | null = null;
   private resultPresenter: ClassicResultPresenter | null = null;
   private resultPresentationRoot: Node | null = null;
   private readonly retiredCrazyRuns: RetiredCrazyRunOwnership[] = [];
@@ -424,8 +501,11 @@ export class CrazyGameplayController extends Component {
     this.node.on(CLASSIC_BLADE_BEGAN_EVENT, this.onBladeBegan, this);
     this.node.on(CLASSIC_BLADE_MOVED_EVENT, this.onBladeMoved, this);
     this.node.on(CLASSIC_BLADE_ENDED_EVENT, this.onBladeEnded, this);
+    this.node.on(BIRD_BLADE_TOUCH_BEGAN_EVENT, this.onBirdBladeTouchBegan, this);
     this.node.on(CRAZY_PHYSICS_STEPPED_EVENT, this.onPhysicsStepped, this);
+    this.node.on(CRAZY_BIRD_PHYSICS_STEPPED_EVENT, this.onPhysicsStepped, this);
     this.node.on(CRAZY_SESSION_COMMAND_EVENT, this.onSessionCommand, this);
+    this.node.on(CRAZY_BIRD_SESSION_COMMAND_EVENT, this.onSessionCommand, this);
   }
 
   start(): void {
@@ -446,7 +526,12 @@ export class CrazyGameplayController extends Component {
       return;
     }
 
-    this.bladePresenter?.updateFrame();
+    const cutDriver = this.cutDriver;
+    if (cutDriver?.kind === 'standard') {
+      cutDriver.presenter.updateFrame();
+    } else if (cutDriver?.kind === 'bird') {
+      cutDriver.presenter.update(deltaSeconds);
+    }
     for (const presenter of [...this.comboItemPresenters]) {
       presenter.updateAction(deltaSeconds);
     }
@@ -523,8 +608,11 @@ export class CrazyGameplayController extends Component {
     this.node.off(CLASSIC_BLADE_BEGAN_EVENT, this.onBladeBegan, this);
     this.node.off(CLASSIC_BLADE_MOVED_EVENT, this.onBladeMoved, this);
     this.node.off(CLASSIC_BLADE_ENDED_EVENT, this.onBladeEnded, this);
+    this.node.off(BIRD_BLADE_TOUCH_BEGAN_EVENT, this.onBirdBladeTouchBegan, this);
     this.node.off(CRAZY_PHYSICS_STEPPED_EVENT, this.onPhysicsStepped, this);
+    this.node.off(CRAZY_BIRD_PHYSICS_STEPPED_EVENT, this.onPhysicsStepped, this);
     this.node.off(CRAZY_SESSION_COMMAND_EVENT, this.onSessionCommand, this);
+    this.node.off(CRAZY_BIRD_SESSION_COMMAND_EVENT, this.onSessionCommand, this);
   }
 
   onDestroy(): void {
@@ -540,6 +628,7 @@ export class CrazyGameplayController extends Component {
     collectCleanupFailure(failures, () => this.disposeCrazyPreparation());
     this.screenPlacement = null;
     this.preparation = null;
+    this.crazyBirdPreparation = null;
     reportCleanupFailures('Crazy gameplay teardown', failures);
   }
 
@@ -552,6 +641,17 @@ export class CrazyGameplayController extends Component {
 
   get prepared(): boolean {
     return this.readinessStatus === 'ready';
+  }
+
+  get crazyBirdReadiness(): CrazyGameplayReadiness {
+    return Object.freeze({
+      error: this.crazyBirdPreparationError,
+      status: this.crazyBirdReadinessStatus,
+    });
+  }
+
+  get crazyBirdPrepared(): boolean {
+    return this.crazyBirdReadinessStatus === 'ready';
   }
 
   get sharedGameplayRandom(): GameplayRandom {
@@ -597,8 +697,11 @@ export class CrazyGameplayController extends Component {
       activeEntityCount: this.registry?.size ?? 0,
       displayedScore: session.score.displayedScore,
       lifecycle: session.lifecycle,
+      mode: this.runProfile?.mode ?? null,
       pendingStandardBombCount: this.standardBombExplosionOwners.size,
-      readiness: this.readinessStatus,
+      readiness: this.runProfile === CRAZY_BIRD_TIMED_PROFILE
+        ? this.crazyBirdReadinessStatus
+        : this.readinessStatus,
       resultActive: this.resultPresentationRoot !== null,
       score: session.score.authoritativeScore,
     });
@@ -641,6 +744,57 @@ export class CrazyGameplayController extends Component {
   /** Compatibility name for shell preparation owners that use the Classic lifecycle shape. */
   prepareRecoveredRuntime(): Promise<void> {
     return this.prepareCrazyRuntime();
+  }
+
+  /**
+   * Loads only the type-2 Bird supplement after the shared Crazy runtime is ready.
+   * A rejected type-2 attempt is retryable and never changes mode-1 readiness.
+   */
+  prepareCrazyBirdRuntime(): Promise<void> {
+    if (this.shuttingDown || !isValid(this.node, true)) {
+      throw new Error('Crazy Bird runtime cannot be prepared after destruction');
+    }
+    if (this.crazyBirdReadinessStatus === 'ready') {
+      return this.crazyBirdPreparation ?? Promise.resolve();
+    }
+    if (this.crazyBirdPreparation !== null) {
+      return this.crazyBirdPreparation;
+    }
+
+    this.crazyBirdReadinessStatus = 'pending';
+    this.crazyBirdPreparationError = null;
+    const attempt = this.initializeCrazyBirdPreparation();
+    this.crazyBirdPreparation = attempt;
+    void attempt.catch((error: unknown) => {
+      if (this.crazyBirdPreparation === attempt) {
+        this.crazyBirdPreparation = null;
+      }
+      const failure = normalizeError(error, 'Crazy Bird runtime preparation failed');
+      this.crazyBirdPreparationError = failure;
+      this.crazyBirdReadinessStatus = 'failed';
+      if (!this.shuttingDown && isValid(this.node, true)) {
+        this.node.emit(CRAZY_BIRD_RESOURCE_LOAD_FAILED_EVENT, failure);
+        console.error(failure);
+      }
+    });
+    return attempt;
+  }
+
+  private async initializeCrazyBirdPreparation(): Promise<void> {
+    await this.prepareCrazyRuntime();
+    this.assertPreparationStillUsable();
+    const assetTree = this.requireCrazyResources().assetTree;
+    const resources = await loadBirdResources(assetTree, 2);
+    this.assertPreparationStillUsable();
+    if (resources.assetTree !== assetTree || resources.birdType !== 2) {
+      throw new Error('Crazy Bird preparation requires the exact type-2 asset profile');
+    }
+    if (this.crazyBirdResources !== null) {
+      throw new Error('Crazy Bird preparation products can commit only once');
+    }
+    this.crazyBirdResources = resources;
+    this.crazyBirdReadinessStatus = 'ready';
+    this.crazyBirdPreparationError = null;
   }
 
   private async initializeCrazyPreparation(): Promise<void> {
@@ -727,12 +881,29 @@ export class CrazyGameplayController extends Component {
 
   /** App-shell entry. The current-screen host must already be transactionally empty. */
   activateCrazyFromAppShell(screenPlacement: CrazyScreenPlacementPort): void {
+    this.activateTimedModeFromAppShell(screenPlacement, CRAZY_TIMED_PROFILE);
+  }
+
+  /** Explicit mode-4 app-shell entry over the same Crazy timed owner. */
+  activateCrazyBirdFromAppShell(screenPlacement: CrazyScreenPlacementPort): void {
+    this.activateTimedModeFromAppShell(screenPlacement, CRAZY_BIRD_TIMED_PROFILE);
+  }
+
+  private activateTimedModeFromAppShell(
+    screenPlacement: CrazyScreenPlacementPort,
+    profile: CrazyTimedModeProfile,
+  ): void {
     assertScreenPlacementPort(screenPlacement);
     if (this.shuttingDown) {
-      throw new Error('Crazy runtime cannot activate after destruction');
+      throw new Error(`${timedModeLabel(profile)} runtime cannot activate after destruction`);
     }
-    if (this.readinessStatus !== 'ready') {
-      throw new Error('Crazy runtime must be fully prepared before activation');
+    const readiness = profile === CRAZY_BIRD_TIMED_PROFILE
+      ? this.crazyBirdReadinessStatus
+      : this.readinessStatus;
+    if (readiness !== 'ready') {
+      throw new Error(
+        `${timedModeLabel(profile)} runtime must be fully prepared before activation`,
+      );
     }
     const retainedPlacement = this.screenPlacement;
     if (retainedPlacement !== null && retainedPlacement !== screenPlacement) {
@@ -755,9 +926,9 @@ export class CrazyGameplayController extends Component {
     this.screenPlacement = screenPlacement;
     let objectiveRollback: CrazyActivationObjectiveRollback | null = null;
     try {
-      this.constructCrazyMode();
+      this.constructCrazyMode(profile);
       objectiveRollback = this.captureCrazyActivationObjectiveRollback();
-      this.attachCrazyModeAndActivateScene(screenPlacement);
+      this.attachCrazyModeAndActivateScene(screenPlacement, profile);
       this.updateScorePresentation();
       this.emitSnapshot();
     } catch (error) {
@@ -776,15 +947,37 @@ export class CrazyGameplayController extends Component {
         this.screenPlacement = retainedPlacement;
       }
       if (failures.length > 0) {
+        if (
+          containsCrazyLifecycleRollbackError(error)
+          || failures.some(containsCrazyLifecycleRollbackError)
+        ) {
+          throw new CrazyLifecycleRollbackError(
+            'Crazy activation rollback failed',
+            error,
+            failures,
+          );
+        }
         throw aggregateWithPrimary('Crazy activation rollback failed', error, failures);
       }
       throw error;
     }
   }
 
-  private constructCrazyMode(): void {
+  private constructCrazyMode(
+    profile: CrazyTimedModeProfile = CRAZY_TIMED_PROFILE,
+  ): void {
     if (this.crazyModeRoot !== null) {
       throw new Error('Crazy mode can be constructed only from an empty run owner');
+    }
+    assertCrazyTimedModeProfile(profile);
+    if (this.runProfile !== null || this.cutDriver !== null) {
+      throw new Error('Crazy mode requires empty profile and cut-driver ownership');
+    }
+    if (
+      profile === CRAZY_BIRD_TIMED_PROFILE
+      && this.crazyBirdReadinessStatus !== 'ready'
+    ) {
+      throw new Error('Crazy Bird resources are unavailable before preparation');
     }
     const resources = this.requireCrazyResources();
     const classic = this.requireClassicGameplayController();
@@ -793,8 +986,12 @@ export class CrazyGameplayController extends Component {
     const random = classic.sharedGameplayRandom;
     const settings = classic.sharedSettingsRuntime;
     const classicCatalog = classic.sharedResourceCatalog;
-    const root = createDetachedScreenRoot('CrazyModeRoot', this.node);
+    const root = createDetachedScreenRoot(
+      profile === CRAZY_BIRD_TIMED_PROFILE ? 'CrazyBirdModeRoot' : 'CrazyModeRoot',
+      this.node,
+    );
     this.crazyModeRoot = root;
+    this.runProfile = profile;
     this.worldPresentationRoot = createPresenterRoot(root, 'CrazyWorldPresentationRoot');
     this.scoreHudRoot = createPresenterRoot(root, 'CrazyScoreHudRoot');
     this.bonusManager.reset();
@@ -853,6 +1050,7 @@ export class CrazyGameplayController extends Component {
         settings,
         classicCatalog,
         random,
+        profile,
       );
     } catch (error) {
       const failures: unknown[] = [];
@@ -866,13 +1064,13 @@ export class CrazyGameplayController extends Component {
 
   private captureCrazyRunOwnership(): CrazyRunOwnership {
     return {
-      bladePresenter: this.bladePresenter,
       bonusManager: this.bonusManager,
       bombElectricPresenter: this.bombElectricPresenter,
       combo: this.combo,
       comboItemPresenters: this.comboItemPresenters,
       coordinator: this.coordinator,
       crazyModeRoot: this.crazyModeRoot,
+      cutDriver: this.cutDriver,
       criticalCutHalfPresenters: this.criticalCutHalfPresenters,
       criticalParticlePresenters: this.criticalParticlePresenters,
       cutHalfPresenters: this.cutHalfPresenters,
@@ -883,6 +1081,7 @@ export class CrazyGameplayController extends Component {
       pausePresenter: this.pausePresenter,
       pendingCapturedCrazyRoot: this.pendingCapturedCrazyRoot,
       pendingResultConfiguration: this.pendingResultConfiguration,
+      profile: this.runProfile,
       registry: this.registry,
       scoreHudPresenter: this.scoreHudPresenter,
       scoreHudRoot: this.scoreHudRoot,
@@ -897,13 +1096,13 @@ export class CrazyGameplayController extends Component {
 
   private createEmptyCrazyRunOwnership(): CrazyRunOwnership {
     return {
-      bladePresenter: null,
       bonusManager: new BonusManagerState(),
       bombElectricPresenter: null,
       combo: null,
       comboItemPresenters: new Set<ComboItemPresenter>(),
       coordinator: null,
       crazyModeRoot: null,
+      cutDriver: null,
       criticalCutHalfPresenters: new Set<ClassicCutHalfPresenter>(),
       criticalParticlePresenters: new Set<ClassicCriticalParticlePresenter>(),
       cutHalfPresenters: new Set<ClassicCutHalfPresenter>(),
@@ -914,6 +1113,7 @@ export class CrazyGameplayController extends Component {
       pausePresenter: null,
       pendingCapturedCrazyRoot: null,
       pendingResultConfiguration: null,
+      profile: null,
       registry: null,
       scoreHudPresenter: null,
       scoreHudRoot: null,
@@ -928,13 +1128,13 @@ export class CrazyGameplayController extends Component {
   }
 
   private installCrazyRunOwnership(ownership: CrazyRunOwnership): void {
-    this.bladePresenter = ownership.bladePresenter;
     this.bonusManager = ownership.bonusManager;
     this.bombElectricPresenter = ownership.bombElectricPresenter;
     this.combo = ownership.combo;
     this.comboItemPresenters = ownership.comboItemPresenters;
     this.coordinator = ownership.coordinator;
     this.crazyModeRoot = ownership.crazyModeRoot;
+    this.cutDriver = ownership.cutDriver;
     this.criticalCutHalfPresenters = ownership.criticalCutHalfPresenters;
     this.criticalParticlePresenters = ownership.criticalParticlePresenters;
     this.cutHalfPresenters = ownership.cutHalfPresenters;
@@ -945,6 +1145,7 @@ export class CrazyGameplayController extends Component {
     this.pausePresenter = ownership.pausePresenter;
     this.pendingCapturedCrazyRoot = ownership.pendingCapturedCrazyRoot;
     this.pendingResultConfiguration = ownership.pendingResultConfiguration;
+    this.runProfile = ownership.profile;
     this.registry = ownership.registry;
     this.scoreHudPresenter = ownership.scoreHudPresenter;
     this.scoreHudRoot = ownership.scoreHudRoot;
@@ -1028,7 +1229,12 @@ export class CrazyGameplayController extends Component {
     CrazyActivationObjectiveRollback | null {
     const manager = this.requireObjectivesManager();
     const active = manager.activeObjective();
-    if (active?.id !== 46 && active?.id !== 50) {
+    if (
+      active?.id !== 46
+      && active?.id !== 47
+      && active?.id !== 50
+      && active?.id !== 51
+    ) {
       return null;
     }
     return Object.freeze({
@@ -1090,13 +1296,15 @@ export class CrazyGameplayController extends Component {
     settings: ClassicSettingsRuntime,
     classicCatalog: ClassicSliceResourceCatalog,
     random: GameplayRandom,
+    profile: CrazyTimedModeProfile,
   ): void {
     const visibleRect = createVisibleRect(viewport);
+    const initialBestScore = timedModeLeaderboardFirst(settings, profile);
     this.scoreHudPresenter = ClassicScoreHudPresenter.create({
       bestScoreCupResource: classicCatalog.presentation.bestScoreCup,
       doubleScorePanelResource: classicCatalog.presentation.doubleScorePanel,
       fontResource: classicCatalog.scoreFont,
-      initialBestScore: settings.state.snapshot.crazyLeaderboard.first,
+      initialBestScore,
       scoreIconResource: classicCatalog.presentation.scoreIcon,
       viewport,
     }, {
@@ -1106,13 +1314,39 @@ export class CrazyGameplayController extends Component {
     });
     this.scoreHudPresenter.attach(scoreRoot);
 
-    this.bladePresenter = ClassicBladePresenter.create({
-      assetTree: classicCatalog.assetTree,
-      resource: classicCatalog.defaultBlade,
-      selectedBladeId: 0,
-      viewportWidth: viewport.width,
-    });
-    this.bladePresenter.attach(worldRoot);
+    if (profile.kind === 'crazy') {
+      const presenter = ClassicBladePresenter.create({
+        assetTree: classicCatalog.assetTree,
+        resource: classicCatalog.defaultBlade,
+        selectedBladeId: 0,
+        viewportWidth: viewport.width,
+      });
+      presenter.attach(worldRoot);
+      this.cutDriver = Object.freeze({
+        kind: 'standard',
+        presenter,
+      });
+    } else {
+      const presenter = BirdBladePresenter.create({
+        random,
+        resources: this.requireCrazyBirdResources(),
+        viewport,
+      });
+      presenter.attach(worldRoot);
+      const ray = BirdBladeRayAdapter.create<CrazyPhysicsRayHit>({
+        raySource: presenter,
+        raycast: {
+          raycastAll: (start, end) => this.requireCrazySceneController()
+            .raycastAll(start, end),
+        },
+        viewportWidth: viewport.width,
+      });
+      this.cutDriver = Object.freeze({
+        kind: 'bird',
+        presenter,
+        ray,
+      });
+    }
 
     this.introPresenter = CrazyIntroPresenter.create({
       resources,
@@ -1280,6 +1514,7 @@ export class CrazyGameplayController extends Component {
   };
 
   private readonly onPauseReplayRequested = (): void => {
+    const profile = this.requireRunProfile();
     try {
       this.restartCrazyFromPause();
     } catch (error) {
@@ -1288,7 +1523,12 @@ export class CrazyGameplayController extends Component {
         message: failure.message,
         reason: 'restart-error',
       });
-      this.node.emit(CRAZY_PAUSE_REPLAY_FAILED_EVENT, payload);
+      this.node.emit(
+        profile === CRAZY_BIRD_TIMED_PROFILE
+          ? CRAZY_BIRD_PAUSE_REPLAY_FAILED_EVENT
+          : CRAZY_PAUSE_REPLAY_FAILED_EVENT,
+        payload,
+      );
       console.error(failure);
     }
   };
@@ -1300,6 +1540,7 @@ export class CrazyGameplayController extends Component {
     const oldRoot = this.requireCrazyModeRoot();
     const pause = this.requirePausePresenter();
     const oldScene = this.requireCrazySceneController();
+    const profile = this.requireRunProfile();
     if (placement.currentScreen !== oldRoot || !oldScene.active) {
       throw new Error('Crazy Pause Replay requires the attached active gameplay run');
     }
@@ -1320,7 +1561,7 @@ export class CrazyGameplayController extends Component {
       this.installCrazyRunOwnership(this.createEmptyCrazyRunOwnership());
       this.crazySceneController = freshScene;
       freshInstalled = true;
-      this.constructCrazyMode();
+      this.constructCrazyMode(profile);
       freshRoot = this.requireDetachedCrazyModeRoot();
 
       const audioFailures: unknown[] = [];
@@ -1364,9 +1605,19 @@ export class CrazyGameplayController extends Component {
         throw new Error('Crazy Pause Replay replaced an unexpected gameplay screen');
       }
 
-      const best = this.sharedSettingsRuntime.state.snapshot.crazyLeaderboard.first;
+      const best = timedModeLeaderboardFirst(this.sharedSettingsRuntime, profile);
       objectiveRollback = this.captureCrazyActivationObjectiveRollback();
-      freshScene.activateCrazyLayer(best);
+      if (profile === CRAZY_BIRD_TIMED_PROFILE) {
+        freshScene.activateCrazyBirdLayer(best);
+      } else {
+        freshScene.activateCrazyLayer(best);
+      }
+      if (
+        freshScene.sessionSnapshot().mode !== profile.mode
+        || freshScene.timedModeProfile !== profile
+      ) {
+        throw new Error('Crazy Pause Replay activated a different timed-mode profile');
+      }
       this.updateScorePresentation();
       oldScene.finalizeSuspendedCrazyLayerRelease();
     } catch (error) {
@@ -1523,6 +1774,7 @@ export class CrazyGameplayController extends Component {
       throw error;
     }
     const transaction: CrazyPauseQuitTransaction = {
+      profile: this.requireRunProfile(),
       presenter: pause,
       root,
       screenPlacement: this.requireScreenPlacement(),
@@ -1536,7 +1788,12 @@ export class CrazyGameplayController extends Component {
       rollback: () => this.rollbackPauseQuit(transaction),
     });
     try {
-      this.node.emit(CRAZY_PAUSE_QUIT_REQUESTED_EVENT, payload);
+      this.node.emit(
+        transaction.profile === CRAZY_BIRD_TIMED_PROFILE
+          ? CRAZY_BIRD_PAUSE_QUIT_REQUESTED_EVENT
+          : CRAZY_PAUSE_QUIT_REQUESTED_EVENT,
+        payload,
+      );
     } finally {
       // Node events are synchronous. A missing/rejecting/throwing shell must not leave
       // gameplay resumed behind an options menu whose actions were cancelled.
@@ -1666,14 +1923,29 @@ export class CrazyGameplayController extends Component {
 
   private attachCrazyModeAndActivateScene(
     screenPlacement: CrazyScreenPlacementPort,
+    profile: CrazyTimedModeProfile = this.requireRunProfile(),
   ): void {
+    if (profile !== this.requireRunProfile()) {
+      throw new Error('Crazy scene activation lost its immutable run profile');
+    }
     const root = this.requireDetachedCrazyModeRoot();
     screenPlacement.attachCurrentScreen(root);
     if (screenPlacement.currentScreen !== root) {
       throw new Error('Crazy current-screen placement lost the attached mode root');
     }
-    const best = this.sharedSettingsRuntime.state.snapshot.crazyLeaderboard.first;
-    this.requireCrazySceneController().activateCrazyLayer(best);
+    const best = timedModeLeaderboardFirst(this.sharedSettingsRuntime, profile);
+    const scene = this.requireCrazySceneController();
+    if (profile === CRAZY_BIRD_TIMED_PROFILE) {
+      scene.activateCrazyBirdLayer(best);
+    } else {
+      scene.activateCrazyLayer(best);
+    }
+    if (
+      scene.sessionSnapshot().mode !== profile.mode
+      || scene.timedModeProfile !== profile
+    ) {
+      throw new Error('Crazy scene activation committed a different timed-mode profile');
+    }
   }
 
   private readonly onCoordinatorCommands = (
@@ -1745,6 +2017,19 @@ export class CrazyGameplayController extends Component {
   private readonly onSessionCommand = (command: CrazySessionCommand): void => {
     this.emitCommand(command);
     switch (command.type) {
+      case 'enter-base-gameplay-layer':
+        if (this.requireRunProfile() !== CRAZY_TIMED_PROFILE) {
+          throw new Error('Standard Crazy base entry requires the mode-1 profile');
+        }
+        break;
+      case 'enter-base-bird-layer':
+        if (
+          this.requireRunProfile() !== CRAZY_BIRD_TIMED_PROFILE
+          || this.requireCutDriver().kind !== 'bird'
+        ) {
+          throw new Error('Crazy Bird base entry requires the mode-4 Bird driver');
+        }
+        break;
       case 'reset-bonus-manager':
         this.bonusManager.reset();
         break;
@@ -1772,7 +2057,13 @@ export class CrazyGameplayController extends Component {
         this.initializePausePresentation();
         break;
       case 'initialize-best-score':
-        if (command.score !== this.sharedSettingsRuntime.state.snapshot.crazyLeaderboard.first) {
+        if (
+          command.key !== this.requireRunProfile().bestScoreKey
+          || command.score !== timedModeLeaderboardFirst(
+            this.sharedSettingsRuntime,
+            this.requireRunProfile(),
+          )
+        ) {
           throw new Error('Crazy best-score initialization lost the shared settings value');
         }
         break;
@@ -1799,6 +2090,7 @@ export class CrazyGameplayController extends Component {
         this.stopAllCrazyRunEffects();
         break;
       case 'capture-crazy-parent':
+      case 'capture-crazy-bird-parent':
         this.captureCrazyForResult();
         break;
       case 'construct-result':
@@ -1811,6 +2103,7 @@ export class CrazyGameplayController extends Component {
         this.setPendingResultScore(command.score);
         break;
       case 'remove-crazy':
+      case 'remove-crazy-bird':
         this.detachCrazyForResult(command.cleanup);
         break;
       case 'attach-result':
@@ -1827,9 +2120,12 @@ export class CrazyGameplayController extends Component {
     if (!this.isCrazyGameplayAttached()) {
       return;
     }
-    const presenter = this.bladePresenter;
-    if (presenter !== null && !presenter.isClaimed(event.slot)) {
-      presenter.begin(event.slot);
+    const driver = this.cutDriver;
+    if (
+      driver?.kind === 'standard'
+      && !driver.presenter.isClaimed(event.slot)
+    ) {
+      driver.presenter.begin(event.slot);
     }
   };
 
@@ -1837,12 +2133,14 @@ export class CrazyGameplayController extends Component {
     if (!this.isCrazyGameplayAttached()) {
       return;
     }
-    const presenter = this.bladePresenter;
-    if (presenter !== null) {
-      if (!presenter.isClaimed(event.segment.slot)) {
-        presenter.begin(event.segment.slot);
+    const driver = this.cutDriver;
+    if (driver?.kind === 'standard') {
+      if (!driver.presenter.isClaimed(event.segment.slot)) {
+        driver.presenter.begin(event.segment.slot);
       }
-      presenter.move(event.segment.slot, event.segment.current);
+      driver.presenter.move(event.segment.slot, event.segment.current);
+    } else {
+      return;
     }
     const swish = this.swishAudio;
     if (swish === null) {
@@ -1865,24 +2163,61 @@ export class CrazyGameplayController extends Component {
     if (!this.isCrazyGameplayAttached()) {
       return;
     }
-    const presenter = this.bladePresenter;
-    if (presenter !== null && presenter.isClaimed(event.slot)) {
-      presenter.end(event.slot);
+    const driver = this.cutDriver;
+    if (
+      driver?.kind === 'standard'
+      && driver.presenter.isClaimed(event.slot)
+    ) {
+      driver.presenter.end(event.slot);
     }
+  };
+
+  private readonly onBirdBladeTouchBegan = (
+    event: BirdBladeTouchBeganEvent,
+  ): void => {
+    if (!this.isCrazyGameplayAttached()) {
+      return;
+    }
+    const driver = this.cutDriver;
+    if (driver?.kind !== 'bird') {
+      return;
+    }
+
+    // BaseBird requests swish before the BirdBlade performs its busy/idle acceptance test.
+    const swish = this.requireSwishAudio();
+    for (const instruction of swish.request(true, this.effectsEnabled())) {
+      if (instruction.type === 'play-swish-audio') {
+        this.requireClassicGameplayController()
+          .sharedAudioPresenter.playOneShot(instruction.canonicalPath);
+      } else {
+        this.scheduleOnce(
+          this.onSwishCooldownComplete,
+          instruction.delaySeconds,
+        );
+      }
+    }
+    driver.presenter.touch(event.point);
   };
 
   private readonly onSwishCooldownComplete = (): void => {
     this.swishAudio?.unlock();
   };
 
-  private readonly onPhysicsStepped = (event: CrazyPhysicsSteppedEvent): void => {
+  private readonly onPhysicsStepped = (
+    event: CrazyPhysicsSteppedEvent | CrazyBirdPhysicsSteppedEvent,
+  ): void => {
     const registry = this.registry;
-    if (registry === null || !this.isCrazyGameplayAttached()) {
+    const driver = this.cutDriver;
+    if (
+      registry === null
+      || driver === null
+      || !this.isCrazyGameplayAttached()
+    ) {
       return;
     }
     const viewport = this.requireViewport();
     const existingCutHalves = [...this.cutHalfPresenters];
-    if (registry.size > 0) {
+    if (driver.kind === 'standard' && 'bladeSegments' in event && registry.size > 0) {
       registry.runRayQueryCutBatch(() => {
         for (const bladeSegment of event.bladeSegments) {
           const plan = buildBidirectionalRayPlan({
@@ -1917,6 +2252,26 @@ export class CrazyGameplayController extends Component {
           }
         }
       });
+    } else if (
+      driver.kind === 'bird'
+      && !('bladeSegments' in event)
+    ) {
+      const cutEnabled = this.requireCrazySceneController()
+        .sessionSnapshot().cutEnabled;
+      // BaseBird observes at most one cached ray after each variable world step. An empty
+      // registry or disabled cut gate still acknowledges a stale one-ray cache.
+      if (registry.size > 0 && cutEnabled) {
+        driver.ray.processOneCachedRay((batch) => (
+          this.applyBirdRaycastBatch(batch, registry)
+        ));
+      } else {
+        driver.presenter.acknowledgeCachedRay();
+      }
+    } else {
+      // A retired scene's differently-profiled event cannot advance the current run.
+      return;
+    }
+    if (registry.size > 0) {
       registry.evaluateBounds(viewport);
     }
     registry.updateDragonEffectsPhysics(viewport);
@@ -1927,6 +2282,40 @@ export class CrazyGameplayController extends Component {
     this.updateScorePresentation();
     this.emitSnapshot();
   };
+
+  private applyBirdRaycastBatch(
+    batch: BirdBladeRaycastBatch<CrazyPhysicsRayHit>,
+    registry: CrazyEntityRegistry,
+  ): boolean {
+    if (batch.plan === null) {
+      return true;
+    }
+    registry.runRayQueryCutBatch(() => {
+      const forwardHits: CutQueryHit[] = batch.forwardHits.map(
+        ({ collider }) => ({
+          target: registry.cuttableSnapshotForCollider(collider),
+        }),
+      );
+      const reverseHits: CutQueryHit[] = batch.reverseHits.map(
+        ({ collider }) => ({
+          target: registry.cuttableSnapshotForCollider(collider),
+        }),
+      );
+      for (const command of createCutDispatchCommands(
+        batch.plan as NonNullable<typeof batch.plan>,
+        forwardHits,
+        reverseHits,
+      )) {
+        this.emitCommand(command);
+        if (command.type === 'combo-check') {
+          this.requireCombo().checkCombo(command.position);
+        } else {
+          registry.cut(command.targetId, command.segment);
+        }
+      }
+    });
+    return true;
+  }
 
   private readonly onOrdinaryFruitCut = (
     event: ClassicGeneratedFruitCutEvent,
@@ -2550,14 +2939,18 @@ export class CrazyGameplayController extends Component {
     if (score === undefined) {
       return;
     }
+    const profile = this.runProfile;
+    if (profile === null) {
+      return;
+    }
+    const bestScore = timedModeLeaderboardFirst(
+      this.sharedSettingsRuntime,
+      profile,
+    );
     this.scoreHudPresenter?.setDisplayedScore(score.displayedScore);
     this.scoreHudPresenter?.setBestScore(
-      Math.max(
-        this.sharedSettingsRuntime.state.snapshot.crazyLeaderboard.first,
-        score.authoritativeScore,
-      ),
-      score.authoritativeScore
-        > this.sharedSettingsRuntime.state.snapshot.crazyLeaderboard.first,
+      Math.max(bestScore, score.authoritativeScore),
+      score.authoritativeScore > bestScore,
     );
     this.scoreHudPresenter?.setPendingDoubleScore(score.pendingDoubleScore);
   }
@@ -2587,6 +2980,7 @@ export class CrazyGameplayController extends Component {
     const transaction: CrazyResultEntryTransaction = {
       configuration: null,
       crazyRoot: root,
+      profile: this.requireRunProfile(),
       presenter: null,
       root: null,
       status: 'pending',
@@ -2611,16 +3005,19 @@ export class CrazyGameplayController extends Component {
     if (this.pendingResultConfiguration !== null) {
       throw new Error('Crazy Result construction can begin only once');
     }
-    this.pendingResultConfiguration = {};
+    this.pendingResultConfiguration = {
+      profile: this.requireRunProfile(),
+    };
   }
 
-  private setPendingResultMode(mode: typeof CRAZY_RESULT_MODE_ID): void {
+  private setPendingResultMode(mode: CrazyTimedModeId): void {
+    const profile = this.requirePendingResultProfile();
     if (
       this.pendingResultConfiguration === null
       || this.pendingResultConfiguration.mode !== undefined
-      || mode !== CRAZY_RESULT_MODE_ID
+      || mode !== profile.mode
     ) {
-      throw new Error('Crazy Result mode requires one mode-1 construction');
+      throw new Error('Crazy Result mode must match the immutable run profile');
     }
     this.pendingResultConfiguration = {
       ...this.pendingResultConfiguration,
@@ -2646,12 +3043,17 @@ export class CrazyGameplayController extends Component {
     const pending = this.pendingResultConfiguration;
     if (
       pending === null
-      || pending.mode !== CRAZY_RESULT_MODE_ID
+      || pending.profile === undefined
+      || pending.mode !== pending.profile.mode
       || pending.score === undefined
     ) {
       throw new Error('Crazy Result must be constructed, mode-set, and score-set first');
     }
-    return Object.freeze({ mode: pending.mode, score: pending.score });
+    return Object.freeze({
+      mode: pending.mode,
+      profile: pending.profile,
+      score: pending.score,
+    });
   }
 
   private detachCrazyForResult(cleanup: true): void {
@@ -2678,22 +3080,31 @@ export class CrazyGameplayController extends Component {
       || this.resultPresentationRoot !== null
       || this.requireScreenPlacement().currentScreen !== null
       || transaction.crazyRoot !== this.pendingCapturedCrazyRoot
+      || transaction.profile !== configured.profile
       || transaction.status !== 'pending'
     ) {
       throw new Error('Crazy Result must attach once to an empty host at z-order 1');
     }
     transaction.configuration = configured;
     const settings = this.sharedSettingsRuntime;
-    const ranking = insertCrazyResultScore(
-      configured.score,
-      settings.state.snapshot.crazyLeaderboard,
-    );
+    const ranking = configured.profile === CRAZY_BIRD_TIMED_PROFILE
+      ? insertCrazyBirdResultScore(
+        configured.score,
+        settings.state.birdCrazyLeaderboard,
+      )
+      : insertCrazyResultScore(
+        configured.score,
+        settings.state.snapshot.crazyLeaderboard,
+      );
+    const panelValues = configured.profile === CRAZY_BIRD_TIMED_PROFILE
+      ? crazyBirdLeaderboardPanelValues(ranking.leaderboard)
+      : crazyLeaderboardPanelValues(ranking.leaderboard);
     const classic = this.requireClassicGameplayController();
     const catalog = classic.sharedResourceCatalog;
     const presenter = ClassicResultPresenter.create({
       completedRunScore: configured.score,
       fonts: catalog.resultFonts,
-      panelValues: crazyLeaderboardPanelValues(ranking.leaderboard),
+      panelValues,
       random: classic.sharedGameplayRandom,
       resources: catalog.result,
       totalCoins: settings.state.snapshot.totalCoins,
@@ -2731,6 +3142,7 @@ export class CrazyGameplayController extends Component {
       || this.resultPresentationRoot !== resultRoot
       || this.resultPresenter !== resultPresenter
       || transaction.configuration?.mode !== configured.mode
+      || transaction.profile !== configured.profile
       || transaction.configuration.score !== configured.score
       || transaction.crazyRoot.parent !== null
       || this.requireScreenPlacement().currentScreen !== resultRoot
@@ -2752,12 +3164,17 @@ export class CrazyGameplayController extends Component {
     // Result construction already consumed the pure ranking preview. Commit the process-owned
     // leaderboard exactly once only after CrazySession has crossed result-removed, then release
     // the old run owner. Result reward accounting remains presentation-callback owned.
-    this.sharedSettingsRuntime.state.recordCrazyResultScore(configured.score);
+    if (configured.profile === CRAZY_BIRD_TIMED_PROFILE) {
+      this.sharedSettingsRuntime.state.recordCrazyBirdResultScore(configured.score);
+    } else {
+      this.sharedSettingsRuntime.state.recordCrazyResultScore(configured.score);
+    }
     transaction.status = 'committed';
     this.pendingResultEntryTransaction = null;
 
     const retainedResultConfiguration: CrazyPendingResultConfiguration = {
       mode: configured.mode,
+      profile: configured.profile,
       score: configured.score,
     };
     const releasedScene = this.requireCrazySceneController();
@@ -2842,6 +3259,10 @@ export class CrazyGameplayController extends Component {
   }
 
   private readonly onResultRetry = (): void => {
+    if (this.lifecycleFatalError !== null) {
+      return;
+    }
+    const profile = this.configuredResult().profile;
     try {
       this.restartCrazyFromResult();
     } catch (error) {
@@ -2853,7 +3274,12 @@ export class CrazyGameplayController extends Component {
         message: failure.message,
         reason: 'restart-error',
       });
-      this.node.emit(CRAZY_RESULT_RETRY_FAILED_EVENT, payload);
+      this.node.emit(
+        profile === CRAZY_BIRD_TIMED_PROFILE
+          ? CRAZY_BIRD_RESULT_RETRY_FAILED_EVENT
+          : CRAZY_RESULT_RETRY_FAILED_EVENT,
+        payload,
+      );
       console.error(failure);
     }
   };
@@ -2863,16 +3289,25 @@ export class CrazyGameplayController extends Component {
     const configured = this.configuredResult();
     const retainedResultConfiguration: CrazyPendingResultConfiguration = {
       mode: configured.mode,
+      profile: configured.profile,
       score: configured.score,
     };
     const resultRoot = this.requireAttachedResultRoot();
     const resultPresenter = this.requireResultPresenter();
     const placement = this.requireScreenPlacement();
-    const commands = createCrazyResultNavigationCommands({
-      effectsEnabled: this.effectsEnabled(),
-      mode: configured.mode,
-      route: 'retry',
-    });
+    const commands: readonly (
+      CrazyResultNavigationCommand | CrazyBirdResultNavigationCommand
+    )[] = configured.profile === CRAZY_BIRD_TIMED_PROFILE
+      ? createCrazyBirdResultNavigationCommands({
+        effectsEnabled: this.effectsEnabled(),
+        mode: CRAZY_BIRD_RESULT_MODE_ID,
+        route: 'retry',
+      })
+      : createCrazyResultNavigationCommands({
+        effectsEnabled: this.effectsEnabled(),
+        mode: CRAZY_RESULT_MODE_ID,
+        route: 'retry',
+      });
     let captured = false;
     let detached = false;
     let objectiveRollback: CrazyActivationObjectiveRollback | null = null;
@@ -2900,14 +3335,19 @@ export class CrazyGameplayController extends Component {
             detached = true;
             break;
           case 'construct-crazy':
+          case 'construct-crazy-bird':
             if (!detached || !command.fresh) {
               throw new Error('Crazy Retry must remove Result before fresh construction');
             }
-            this.constructCrazyMode();
+            if (command.mode !== configured.profile.mode) {
+              throw new Error('Crazy Retry command lost its timed-mode identity');
+            }
+            this.constructCrazyMode(configured.profile);
             break;
           case 'attach-crazy-to-captured-parent':
+          case 'attach-crazy-bird-to-captured-parent':
             objectiveRollback = this.captureCrazyActivationObjectiveRollback();
-            this.attachCrazyModeAndActivateScene(placement);
+            this.attachCrazyModeAndActivateScene(placement, configured.profile);
             break;
           default:
             throwUnexpectedRetryCommand(command);
@@ -2953,33 +3393,116 @@ export class CrazyGameplayController extends Component {
   }
 
   private readonly onResultMenu = (): void => {
-    if (this.effectsEnabled()) {
-      this.requireClassicGameplayController().sharedAudioPresenter.playOneShot(
-        CRAZY_RESULT_MENU_BUTTON_AUDIO_PATH,
-      );
+    if (this.lifecycleFatalError !== null) {
+      return;
     }
-    const configured = this.configuredResult();
-    const root = this.requireAttachedResultRoot();
     const presenter = this.requireResultPresenter();
-    const transaction: CrazyResultMenuTransaction = {
-      presenter,
-      root,
-      screenPlacement: this.requireScreenPlacement(),
-      status: 'pending',
-    };
-    const payload: CrazyResultMenuRequestedEvent = Object.freeze({
-      completedRunScore: configured.score,
-      resultRoot: root,
-      commit: (previousRoot: Node) => this.commitResultMenu(transaction, previousRoot),
-      rollback: () => this.rollbackResultMenu(transaction),
-    });
+    let transaction: CrazyResultMenuTransaction | null = null;
     try {
-      this.node.emit(CRAZY_RESULT_MENU_REQUESTED_EVENT, payload);
-    } finally {
-      // Node events are synchronous. If no shell accepts the request, restore the attached
-      // Result and rearm its Menu action instead of leaving navigation permanently latched.
-      if (transaction.status === 'pending') {
+      const configured = this.configuredResult();
+      const root = this.requireAttachedResultRoot();
+      const commands: readonly (
+        CrazyResultNavigationCommand | CrazyBirdResultNavigationCommand
+      )[] = configured.profile === CRAZY_BIRD_TIMED_PROFILE
+        ? createCrazyBirdResultNavigationCommands({
+          effectsEnabled: this.effectsEnabled(),
+          mode: CRAZY_BIRD_RESULT_MODE_ID,
+          route: 'main-menu',
+        })
+        : createCrazyResultNavigationCommands({
+          effectsEnabled: this.effectsEnabled(),
+          mode: CRAZY_RESULT_MODE_ID,
+          route: 'main-menu',
+        });
+      const activeTransaction: CrazyResultMenuTransaction = {
+        profile: configured.profile,
+        presenter,
+        root,
+        screenPlacement: this.requireScreenPlacement(),
+        status: 'pending',
+      };
+      transaction = activeTransaction;
+      for (const command of commands) {
+        this.emitCommand(command);
+        if (command.type === 'request-menu-button-audio') {
+          this.requireClassicGameplayController()
+            .sharedAudioPresenter.playOneShot(command.canonicalPath);
+        }
+      }
+      const payload: CrazyResultMenuRequestedEvent = Object.freeze({
+        completedRunScore: configured.score,
+        resultRoot: root,
+        commit: (previousRoot: Node) => (
+          this.commitResultMenu(activeTransaction, previousRoot)
+        ),
+        rollback: () => this.rollbackResultMenu(activeTransaction),
+      });
+      this.node.emit(
+        activeTransaction.profile === CRAZY_BIRD_TIMED_PROFILE
+          ? CRAZY_BIRD_RESULT_MENU_REQUESTED_EVENT
+          : CRAZY_RESULT_MENU_REQUESTED_EVENT,
+        payload,
+      );
+    } catch (error) {
+      if (transaction === null) {
+        const rearmFailures: unknown[] = [];
+        let rearmed = false;
+        collectCleanupFailure(rearmFailures, () => {
+          const navigationIsIdle = (): boolean => (
+            presenter.state.navigation === 'none'
+          );
+          rearmed = (
+            this.resultPresenter === presenter
+            && (
+              navigationIsIdle()
+              || (
+                presenter.rearmNavigationAfterFailure('menu')
+                && navigationIsIdle()
+              )
+            )
+          );
+          if (!rearmed) {
+            throw new Error('Crazy Result menu could not rearm Result');
+          }
+        });
+        if (!rearmed) {
+          const failure = new CrazyLifecycleRollbackError(
+            'Crazy Result menu preflight rollback failed',
+            error,
+            rearmFailures,
+          );
+          this.retainFatalLifecycleBoundary(failure);
+          throw failure;
+        }
+      } else if (transaction.status === 'pending') {
+        try {
+          this.rollbackResultMenu(transaction);
+        } catch (rollbackError) {
+          const failure = new CrazyLifecycleRollbackError(
+            'Crazy Result menu rollback failed',
+            error,
+            [rollbackError],
+          );
+          this.retainFatalLifecycleBoundary(failure);
+          throw failure;
+        }
+      }
+      if (error instanceof CrazyLifecycleRollbackError) {
+        this.retainFatalLifecycleBoundary(error);
+      }
+      throw error;
+    }
+    if (transaction.status === 'pending') {
+      try {
         this.rollbackResultMenu(transaction);
+      } catch (error) {
+        const failure = new CrazyLifecycleRollbackError(
+          'Crazy Result menu rollback failed',
+          new Error('Crazy Result menu request returned without settlement'),
+          [error],
+        );
+        this.retainFatalLifecycleBoundary(failure);
+        throw failure;
       }
     }
   };
@@ -2988,11 +3511,11 @@ export class CrazyGameplayController extends Component {
     transaction: CrazyResultMenuTransaction,
     previousRoot: Node,
   ): void {
-    if (previousRoot !== transaction.root) {
-      throw new Error('Crazy Result menu commit received an unexpected previous screen');
-    }
     if (transaction.status === 'committed') {
       return;
+    }
+    if (previousRoot !== transaction.root) {
+      throw new Error('Crazy Result menu commit received an unexpected previous screen');
     }
     if (transaction.status === 'rolled-back') {
       throw new Error('Rolled-back Crazy Result menu transaction cannot commit');
@@ -3047,6 +3570,7 @@ export class CrazyGameplayController extends Component {
     if (
       transaction.screenPlacement.currentScreen !== transaction.root
       || !transaction.presenter.rearmNavigationAfterFailure('menu')
+      || transaction.presenter.state.navigation !== 'none'
     ) {
       throw new Error('Crazy Result menu rollback could not restore and rearm Result');
     }
@@ -3059,16 +3583,29 @@ export class CrazyGameplayController extends Component {
       throw new Error('Crazy Result reward cannot commit before Time-Up Finish');
     }
     const configured = this.configuredResult();
-    const award = this.sharedSettingsRuntime.state
-      .awardCrazyResultCoins(configured.score);
+    const award = configured.profile === CRAZY_BIRD_TIMED_PROFILE
+      ? this.sharedSettingsRuntime.state.awardCrazyBirdResultCoins(configured.score)
+      : this.sharedSettingsRuntime.state.awardCrazyResultCoins(configured.score);
     const payload: CrazyResultRewardReadyEvent = Object.freeze({
       bonusCoins: award.bonusCoins,
       completedRunScore: configured.score,
       totalCoins: award.totalCoins,
     });
-    this.node.emit(CRAZY_RESULT_REWARD_READY_EVENT, payload);
+    this.node.emit(
+      configured.profile === CRAZY_BIRD_TIMED_PROFILE
+        ? CRAZY_BIRD_RESULT_REWARD_READY_EVENT
+        : CRAZY_RESULT_REWARD_READY_EVENT,
+      payload,
+    );
     return award.bonusCoins;
   };
+
+  private retainFatalLifecycleBoundary(
+    error: CrazyLifecycleRollbackError,
+  ): void {
+    this.lifecycleFatalError ??= error;
+    this.unschedule(this.onSwishCooldownComplete);
+  }
 
   private disposeCrazyModePresentation(): void {
     const failures: unknown[] = [];
@@ -3205,12 +3742,12 @@ export class CrazyGameplayController extends Component {
         failures.push(error);
       }
     }
-    const bladePresenter = this.bladePresenter;
-    if (bladePresenter !== null) {
+    const cutDriver = this.cutDriver;
+    if (cutDriver !== null) {
       try {
-        bladePresenter.dispose();
-        if (this.bladePresenter === bladePresenter) {
-          this.bladePresenter = null;
+        cutDriver.presenter.dispose();
+        if (this.cutDriver === cutDriver) {
+          this.cutDriver = null;
         }
       } catch (error) {
         failures.push(error);
@@ -3278,7 +3815,7 @@ export class CrazyGameplayController extends Component {
       && this.timeManagerPresenter === null
       && this.bombElectricPresenter === null
       && this.electricContactAdapter === null
-      && this.bladePresenter === null
+      && this.cutDriver === null
       && this.scoreHudPresenter === null
       && this.pausePresenter === null
     );
@@ -3298,6 +3835,7 @@ export class CrazyGameplayController extends Component {
       }
       if (root === null || !isValid(root, true)) {
         this.crazyModeRoot = null;
+        this.runProfile = null;
         if (this.pendingCapturedCrazyRoot === root) {
           this.pendingCapturedCrazyRoot = null;
         }
@@ -3382,10 +3920,14 @@ export class CrazyGameplayController extends Component {
     );
     if (preparationOwnersDrained) {
       this.baseGameplayResources = null;
+      this.crazyBirdResources = null;
       this.crazyResources = null;
       this.dragonFont = null;
       this.objectivesManager = null;
       this.readinessStatus = this.shuttingDown ? 'idle' : this.readinessStatus;
+      this.crazyBirdReadinessStatus = this.shuttingDown
+        ? 'idle'
+        : this.crazyBirdReadinessStatus;
     }
     if (failures.length > 0) {
       throw cleanupError('Crazy preparation', failures);
@@ -3438,6 +3980,38 @@ export class CrazyGameplayController extends Component {
       throw new Error('Crazy resources are unavailable before preparation');
     }
     return this.crazyResources;
+  }
+
+  private requireCrazyBirdResources(): LoadedBirdResources {
+    const resources = this.crazyBirdResources;
+    if (resources === null || resources.birdType !== 2) {
+      throw new Error('Crazy Bird type-2 resources are unavailable before preparation');
+    }
+    return resources;
+  }
+
+  private requireRunProfile(): CrazyTimedModeProfile {
+    const profile = this.runProfile;
+    if (profile === null) {
+      throw new Error('Crazy timed-mode run profile is unavailable');
+    }
+    return profile;
+  }
+
+  private requireCutDriver(): CrazyCutDriver {
+    const driver = this.cutDriver;
+    if (driver === null) {
+      throw new Error('Crazy timed-mode cut driver is unavailable');
+    }
+    return driver;
+  }
+
+  private requirePendingResultProfile(): CrazyTimedModeProfile {
+    const profile = this.pendingResultConfiguration?.profile;
+    if (profile === undefined) {
+      throw new Error('Crazy Result profile is unavailable before construction');
+    }
+    return profile;
   }
 
   private requireBaseGameplayResources(): LoadedBaseGameplayResources {
@@ -3541,6 +4115,13 @@ export class CrazyGameplayController extends Component {
       throw new Error('Crazy combo service is unavailable');
     }
     return this.combo;
+  }
+
+  private requireSwishAudio(): ClassicSwishAudioGate {
+    if (this.swishAudio === null) {
+      throw new Error('Crazy swish audio gate is unavailable');
+    }
+    return this.swishAudio;
   }
 
   private requireIntroPresenter(): CrazyIntroPresenter {
@@ -3682,6 +4263,88 @@ function assertScreenPlacementPort(
   }
 }
 
+function assertCrazyTimedModeProfile(profile: CrazyTimedModeProfile): void {
+  if (
+    profile !== CRAZY_TIMED_PROFILE
+    && profile !== CRAZY_BIRD_TIMED_PROFILE
+  ) {
+    throw new TypeError('profile must be a supported immutable Crazy timed-mode profile');
+  }
+}
+
+function containsCrazyLifecycleRollbackError(error: unknown): boolean {
+  const pending: unknown[] = [error];
+  const visited = new Set<object>();
+  while (pending.length > 0) {
+    const candidate = pending.pop();
+    if (candidate instanceof CrazyLifecycleRollbackError) {
+      return true;
+    }
+    if (
+      candidate === null
+      || (typeof candidate !== 'object' && typeof candidate !== 'function')
+    ) {
+      continue;
+    }
+    const identity = candidate as object;
+    if (visited.has(identity)) {
+      continue;
+    }
+    visited.add(identity);
+    enqueueCrazyLifecycleErrorGraphValue(
+      pending,
+      readCrazyLifecycleErrorGraphValue(identity, 'cause'),
+    );
+    enqueueCrazyLifecycleErrorGraphValue(
+      pending,
+      readCrazyLifecycleErrorGraphValue(identity, 'errors'),
+    );
+    enqueueCrazyLifecycleErrorGraphValue(
+      pending,
+      readCrazyLifecycleErrorGraphValue(identity, 'causes'),
+    );
+    enqueueCrazyLifecycleErrorGraphValue(
+      pending,
+      readCrazyLifecycleErrorGraphValue(identity, 'rollbackErrors'),
+    );
+  }
+  return false;
+}
+
+function enqueueCrazyLifecycleErrorGraphValue(
+  pending: unknown[],
+  value: unknown,
+): void {
+  if (Array.isArray(value)) {
+    pending.push(...value);
+  } else if (value !== undefined) {
+    pending.push(value);
+  }
+}
+
+function readCrazyLifecycleErrorGraphValue(value: object, key: string): unknown {
+  try {
+    return Reflect.get(value, key);
+  } catch {
+    return undefined;
+  }
+}
+
+function timedModeLabel(profile: CrazyTimedModeProfile): 'Crazy' | 'Crazy Bird' {
+  assertCrazyTimedModeProfile(profile);
+  return profile === CRAZY_BIRD_TIMED_PROFILE ? 'Crazy Bird' : 'Crazy';
+}
+
+function timedModeLeaderboardFirst(
+  settings: ClassicSettingsRuntime,
+  profile: CrazyTimedModeProfile,
+): number {
+  assertCrazyTimedModeProfile(profile);
+  return profile === CRAZY_BIRD_TIMED_PROFILE
+    ? settings.state.birdCrazyLeaderboard.first
+    : settings.state.snapshot.crazyLeaderboard.first;
+}
+
 function assertNonNegativeFinite(value: number, label: string): void {
   if (!Number.isFinite(value) || value < 0) {
     throw new RangeError(`${label} must be finite and non-negative`);
@@ -3714,10 +4377,16 @@ function aggregateWithPrimary(
   primary: unknown,
   cleanupFailures: readonly unknown[],
 ): Error {
-  return new Error(
+  const aggregate = new Error(
     `${label}: ${errorMessage(primary)}; cleanup: `
       + cleanupFailures.map(errorMessage).join('; '),
-  );
+  ) as Error & {
+    cause: unknown;
+    errors: readonly unknown[];
+  };
+  aggregate.cause = primary;
+  aggregate.errors = Object.freeze([primary, ...cleanupFailures]);
+  return aggregate;
 }
 
 function reportCleanupFailures(label: string, failures: readonly unknown[]): void {
@@ -3753,6 +4422,8 @@ function throwUnexpectedScoreCommand(command: never): never {
   throw new Error(`Unsupported Crazy score command ${String(command)}`);
 }
 
-function throwUnexpectedRetryCommand(command: CrazyResultNavigationCommand): never {
+function throwUnexpectedRetryCommand(
+  command: CrazyResultNavigationCommand | CrazyBirdResultNavigationCommand,
+): never {
   throw new Error(`Crazy Retry received unsupported command ${command.type}`);
 }

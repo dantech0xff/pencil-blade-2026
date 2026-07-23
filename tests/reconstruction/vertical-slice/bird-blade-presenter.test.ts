@@ -398,6 +398,7 @@ test('presenter starts centered with ten exact 0.1-second looping main frames', 
 
   assert.equal(BIRD_BLADE_ANIMATION_FRAME_DELAY_SECONDS, Math.fround(0.1));
   assert.deepEqual(presenter.state.snapshot().currentPosition, { x: 240, y: 400 });
+  assert.equal(presenter.state.snapshot().type, 1);
   assert.deepEqual(presenter.main.node.position, { x: 240, y: 400, z: 0 });
   assert.equal(presenter.main.node.active, true);
   assert.equal(presenter.leftDirection.node.active, false);
@@ -440,6 +441,57 @@ test('presenter starts centered with ten exact 0.1-second looping main frames', 
       minimumInclusive: 0,
       maximumInclusive: 4,
     })),
+  );
+});
+
+test('presenter derives type 2 from loaded resources and rejects a mismatched profile', () => {
+  const resources = loadedBirdResources('480x800', 2);
+  const presenter = BirdBladePresenter.create({
+    random: new BoundsAwareRandom(),
+    resources: resources as never,
+    viewport: { width: 480, height: 800 },
+  });
+
+  assert.equal(presenter.state.snapshot().type, 2);
+  assert.equal(
+    (presenter.main.sprite.spriteFrame as unknown as StubSpriteFrame).label,
+    '480x800/Birds/bird-anim-2-0.png',
+  );
+  assert.equal(
+    (presenter.leftDirection.sprite.spriteFrame as unknown as StubSpriteFrame).label,
+    '480x800/Birds/bird-left-2.png',
+  );
+  assert.equal(
+    (presenter.rightDirection.sprite.spriteFrame as unknown as StubSpriteFrame).label,
+    '480x800/Birds/bird-right-2.png',
+  );
+  assert.deepEqual(
+    presenter.leftDirection.transform.contentSize,
+    { width: 110, height: 101 },
+  );
+  assert.deepEqual(
+    presenter.rightDirection.transform.contentSize,
+    { width: 111, height: 101 },
+  );
+
+  assert.throws(
+    () => BirdBladePresenter.create({
+      random: new BoundsAwareRandom(),
+      resources: { ...resources, birdType: 1 } as never,
+      viewport: { width: 480, height: 800 },
+    }),
+    /resources profile must match Bird type 1/,
+  );
+  assert.throws(
+    () => BirdBladePresenter.create({
+      random: new BoundsAwareRandom(),
+      resources: {
+        ...resources,
+        profile: getBirdResourceProfile('480x800'),
+      } as never,
+      viewport: { width: 480, height: 800 },
+    }),
+    /resources profile must match Bird type 2/,
   );
 });
 
@@ -726,9 +778,12 @@ test('invalid viewport, random, parent, and changed raster geometry reject', () 
   assert.throws(() => presenter.update(0), /must be attached/);
 });
 
-function loadedBirdResources(assetTree: '480x800' | '720x1280') {
-  const profile = getBirdResourceProfile(assetTree);
-  const contracts = listBirdRasterResources(assetTree);
+function loadedBirdResources(
+  assetTree: '480x800' | '720x1280',
+  birdType: 1 | 2 = 1,
+) {
+  const profile = getBirdResourceProfile(assetTree, birdType);
+  const contracts = listBirdRasterResources(assetTree, birdType);
   const loadedByPath = new Map(
     contracts.map((contract) => [
       contract.canonicalPath,
@@ -745,9 +800,11 @@ function loadedBirdResources(assetTree: '480x800' | '720x1280') {
     animationFrames: Object.freeze(profile.animationFrames.map(requireRaster)),
     assetTree,
     blade: requireRaster(profile.blade),
+    birdType,
     leftDirection: requireRaster(profile.leftDirection),
     orderedRasters,
     particles: Object.freeze(profile.particles.map(requireRaster)),
+    profile,
     rasterCount: 17,
     rightDirection: requireRaster(profile.rightDirection),
     raster: requireRaster,

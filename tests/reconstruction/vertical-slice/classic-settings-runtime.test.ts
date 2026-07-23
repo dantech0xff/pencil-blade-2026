@@ -80,6 +80,9 @@ test('runtime keeps mutations in memory and writes only on save', () => {
   storage.values.set('bird_classic_best_1', '3000');
   storage.values.set('bird_classic_best_2', '2000');
   storage.values.set('bird_classic_best_3', '1000');
+  storage.values.set('bird_crazy_best_1', '30000');
+  storage.values.set('bird_crazy_best_2', '20000');
+  storage.values.set('bird_crazy_best_3', '10000');
   storage.values.set('current_objective', '13');
   storage.values.set('fruits_cut', '2468');
   storage.values.set('enable_music', 'true');
@@ -98,6 +101,7 @@ test('runtime keeps mutations in memory and writes only on save', () => {
   runtime.state.recordClassicResultScore(40);
   runtime.state.recordCrazyResultScore(250);
   runtime.state.recordClassicBirdResultScore(2500);
+  runtime.state.recordCrazyBirdResultScore(25_000);
   runtime.state.awardClassicResultCoins(10);
   assert.equal(storage.values.get('total_coins'), '3000');
   assert.equal(storage.values.get('classic_best_1'), '30');
@@ -113,6 +117,9 @@ test('runtime keeps mutations in memory and writes only on save', () => {
   assert.equal(storage.values.get('bird_classic_best_1'), '3000');
   assert.equal(storage.values.get('bird_classic_best_2'), '2500');
   assert.equal(storage.values.get('bird_classic_best_3'), '2000');
+  assert.equal(storage.values.get('bird_crazy_best_1'), '30000');
+  assert.equal(storage.values.get('bird_crazy_best_2'), '25000');
+  assert.equal(storage.values.get('bird_crazy_best_3'), '20000');
   assert.equal(storage.values.get('current_objective'), '13');
   assert.equal(storage.values.get('fruits_cut'), '2468');
   assert.equal(storage.values.get('selected_theme'), '9');
