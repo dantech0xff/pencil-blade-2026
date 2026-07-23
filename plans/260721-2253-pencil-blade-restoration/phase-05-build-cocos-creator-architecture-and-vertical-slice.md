@@ -20,7 +20,7 @@ uses exact background, intro/terminal/fail-marker art, score icon, best-score cu
 double-score panel, Linds font, intact/cut fruit, critical-particle, core-audio, and the mode-0
 result-entry rasters/fonts/cues. The result boundary now implements the recovered completed-run
 score, leaderboard insertion, button states, entrance timings, delayed 100-sprite burst,
-reward tree, and coin-bonus callback. The five Classic-relevant Settings values now persist
+reward tree, and coin-bonus callback. The eleven implemented Settings values now persist
 through a process-owned Creator adapter at the recovered app-hide checkpoint, with
 `enable_effect` defaulting to `true`.
 The active Phase 5A checkpoint now closes visible fidelity gaps in evidence order. The default
@@ -29,12 +29,17 @@ GREEN, and the separate shared Background/Leaf/Theme contract makes their clean/
 composites GREEN across contracts. Mode Select rail/navigation/lock and its exact 45-particle
 unlock burst are now review-passed pure domain code. Shared Leaf placement, world-step, ordered
 respawn, and display synchronization are likewise review-passed behind an injected physics port.
-Runtime app-shell/presenter integration remains pending.
+The serialized persistent app shell now constructs shared Background/Leaf/Theme roots, boots into
+Main Menu, replaces it transactionally with Mode Select, enters Classic only for recovered mode
+`0`, and routes Result back to Main Menu or Retry. Main Menu, Mode Select, shared presenters,
+RopeButton/FruitButton physics, input leases, rollback paths, and fail-closed destinations pass
+the deterministic suite and independent review. Fresh Browser Preview validation of that complete
+route remains pending.
 Checkpoint report: [Blade and navigation foundations](reports/journal-2026-07-23-blade-navigation-foundations.md).
 The exact standard-bomb raster/audio/entity foundation is also implemented and tested, but is
 not scheduled into the playable loop until its unresolved procedural explosion geometry can be
 restored without guessing. Full first-launch Settings initialization and the Main Menu
-save/replace path remain open. The
+exit-save path remain open. The
 remaining scene/prefab map, consumer coverage, and full Classic scope still need to be
 completed before this phase can close.
 
@@ -111,19 +116,21 @@ Status: in progress. Continue this phase rather than creating a second restorati
    the 2D `UIMeshRenderer` adapter requires `MeshRenderer`; this is renderer availability, not 3D gameplay.
 4. **Complete:** integrate began/moved/ended events and per-frame disposal without changing cut, swish,
    physics, score, result, or retry ownership.
-5. **Contract complete; implementation pending:** implement the exact Main Menu visible shell,
-   actions, toggles, FruitButtons, and audio/navigation gates.
-6. **Pure domain complete; presenter pending:** Mode Select rail, navigation, locks, persistence
-   asymmetry, and the exact 45-particle/225-draw burst are review-passed. Implement its exact
-   presenter and RopeButton/FruitButton physics without destination placeholders.
-7. **Leaf domain complete; shared presenters pending:** the exact resource/body/RNG/display model,
-   `Step(dt,5,5)` port, and ordered same-frame respawn operations are review-passed. Build the
-   Background/Leaf/Theme Creator owners while preserving equal-z append order and inert fades.
-8. Refactor scene boot behind one persistent app-shell host so Classic controllers are passive
-   until the recovered Mode Select handoff; preserve existing Result/Retry transactions.
-9. **Complete for this source checkpoint:** focused tests, `283/283` vertical-slice tests,
-   strict Creator TypeScript, `38/38` source/staging tests, reconstruction policy, and
-   prohibited-runtime/source-boundary checks pass. A real built artifact remains a later gate.
+5. **Complete:** implement the exact Main Menu visible shell, actions, toggles, FruitButtons,
+   audio/navigation gates, and transactional input lifecycle.
+6. **Complete:** implement the Mode Select rail, navigation, locks, persistence asymmetry,
+   exact 45-particle/225-draw burst, RopeButton/FruitButton physics, and fail-closed destination
+   handling without placeholder mode screens.
+7. **Complete:** implement the exact shared resource/body/RNG/display model, independent
+   `Step(dt,5,5)` leaf world, ordered same-frame respawn operations, and Background/Leaf/Theme
+   Creator owners while preserving equal-z append order and inert fades.
+8. **Complete:** refactor scene boot behind one persistent app-shell host so Classic controllers
+   stay passive until the recovered Mode Select handoff; preserve and extend Result/Retry/Menu
+   transactions with rollback and committed-state isolation.
+9. **Automated gate complete; live Preview pending:** focused tests, `410/410` vertical-slice
+   tests, `38/38` source/staging/archive tests, strict Creator TypeScript, reconstruction policy,
+   and prohibited-runtime/source-boundary checks pass. A fresh Browser Preview and real built
+   artifact remain separate gates.
 10. **Complete:** independent reviews found and closed the Mode Select per-particle burst and
     Shared Leaf physics-respawn gaps; contracts, evidence, plan, and architecture docs now state
     only the completed model/presenter boundaries.
@@ -235,7 +242,8 @@ Current Editor integration:
 - Project default design resolution is `720x1280`; runtime resolution selection preserves the
   recovered physical-width `720` branch and the `480x800` fallback through `SHOW_ALL`.
 - `assets/scenes/classic.scene` is Editor-serialized and attaches `BladeInputController`,
-  `ClassicSceneController`, and `ClassicGameplayController` to Canvas.
+  `ClassicSceneController`, `ClassicGameplayController`, and `RecoveredAppShellController` to
+  Canvas. The two Classic controllers remain passive until the app shell commits mode `0` entry.
 - Resolved gravity/sleep/solver properties are configured. Automatic Physics2D simulation stays
   off; a custom post-update system performs the recovered one-per-frame variable step with
   explicit synchronization and a project-owned deferred-mutation boundary. Removing Classic
@@ -266,11 +274,12 @@ Current Editor integration:
   constructs a fresh mode-0 run, restarts session/physics, then attaches at the captured parent
   with z-order `1`. Same-callback rollback restores and rearms the identical Result if a
   pre-commit stage fails; post-commit cleanup errors are reported without tearing down the
-  fresh Classic state. A stable runtime loads/saves `total_coins`, `classic_best_1/2/3`,
-  and `enable_effect` in recovered order, keeps Retry mutations memory-only, saves on app hide,
+  fresh Classic state. A stable runtime loads/saves the eleven implemented values spanning
+  selections, leaderboard, audio flags, coins, network sentinel, and rated state in recovered
+  relative order, keeps Retry mutations memory-only, saves on app hide,
   and recovers corrupt target storage to exact defaults with diagnostics while disabling writes
   for that process to protect stored data. Full first-launch Settings initialization and Main
-  Menu replacement/exit-save remain explicit follow-up work.
+  Menu exit-save remain explicit follow-up work; Result-to-Main replacement is integrated.
 - The latest Preview pass opened at `720x1280` after clearing Creator's stale generated-code
   cache and demonstrated the recovered `GOOD / LUCK!` intro, exact ordinary-fruit spawning,
   score/best HUD, green-to-red fail-marker transitions, and 60 FPS with zero Creator Console
@@ -283,8 +292,9 @@ Current Editor integration:
 - The current playable slice is not presentation-complete; the exact staging gate is complete
   for the recovered APK corpus, but 100% consumer coverage and canonical sample-project
   completeness remain open. Release rights are a separate review.
-- The deterministic vertical-slice suite passes `282/282`, and Creator's bundled strict
-  TypeScript compiler passes.
+- The deterministic vertical-slice suite passes `410/410`, source/staging/archive tests pass
+  `38/38`, Creator 3.8.8's bundled strict TypeScript compiler passes, and independent transaction
+  review has no remaining finding.
 
 ## Current Blockers
 
@@ -296,9 +306,10 @@ Current Editor integration:
 - Exact ordinary-bomb explosion point generation/rasterization plus safe registry/controller
   lifecycle integration, including the unresolved native lower-bound side effect; no sprite
   substitute, Fruit-miss substitution, or invented triangle pattern is accepted.
-- Full Settings coverage beyond `total_coins`, `classic_best_1/2/3`, and `enable_effect`,
-  including the recovered first-launch initialization and Main Menu exit-save checkpoint.
-- MainMenu replacement remains open; Retry now uses the recovered same-parent reconstruction.
+- Full Settings coverage beyond the eleven implemented fields, including the recovered
+  first-launch initialization and Main Menu exit-save checkpoint.
+- Fresh Browser Preview validation of Boot -> Main Menu -> Mode Select -> Classic and
+  Result -> Main Menu/Retry remains open; source-level transactions and rollback tests pass.
 - Electric-field compatibility decisions.
 - Android build validation and real APK/AAB post-build audit.
 - Rights review for original assets and product identity.

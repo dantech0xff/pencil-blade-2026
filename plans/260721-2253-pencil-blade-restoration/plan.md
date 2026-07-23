@@ -98,9 +98,9 @@ Verified starting point:
   effect `true`. App-hide saves are active; Retry mutations remain memory-only, and unreadable
   target storage recovers to exact defaults with diagnostics while writes stay disabled for
   that process to prevent progression loss. Preview confirms the result boundary and a same-
-  parent Result->Retry cycle at the captured parent without a reload or error overlay. Main
-  Menu replacement/exit-save and full first-launch Settings initialization remain open rather
-  than being approximated.
+  parent Result->Retry cycle at the captured parent without a reload or error overlay. Result-to-
+  Main Menu replacement is now implemented transactionally. Main Menu exit-save and full first-
+  launch Settings initialization remain open rather than being approximated.
   Phase 5A now prioritizes fidelity gaps visible in the playable slice. The default selected
   BasicBlade has a statically recovered four-slot lifecycle, exact `blade0.png` resource,
   ten-point limit, frame-based disposal, and textured triangle-strip geometry; its exact default
@@ -111,8 +111,12 @@ Verified starting point:
   across contracts. The Mode Select rail/navigation/lock state and exact 45-particle/225-draw
   unlock burst are now pure-model review-passed. The shared seven-leaf model is also review-passed,
   with `Step(dt,5,5)` isolated behind a real physics adapter boundary and ordered same-frame
-  respawn commands. Runtime app-shell integration, Main Menu/shared/Mode Select presenters, and
-  RopeButton/FruitButton physics remain open; no placeholder destination screen is authorized.
+  respawn commands. The persistent app shell, Main Menu, shared Background/Leaf/Theme, Mode Select
+  rail, and RopeButton/FruitButton physics presenters are now implemented. Their lifecycle
+  transactions, input/physics leases, rollback paths, exact resources, and fail-closed unrecovered
+  destinations pass the full deterministic suite and independent review. A fresh Creator Browser
+  Preview of Main Menu -> Mode Select -> Classic remains the runtime gate; no placeholder
+  destination screen is authorized.
   The exact standard-bomb raster/audio/entity foundation and Concurrent batch partition are
   also contract-tested, while bomb controllers remain deferred pending non-invented procedural
   explosion geometry. Project completion still requires the remaining resource consumers and
@@ -156,6 +160,10 @@ Verified starting point:
 - [Phase 3 Classic presentation progress](./reports/phase-03-2026-07-22-classic-presentation-progress.md)
 - [Phase 4 Classic contract progress](./reports/phase-04-2026-07-22-classic-contract-progress.md)
 - [Phase 5 foundation progress](./reports/phase-05-2026-07-22-foundation-progress.md)
+- [Main Menu Creator runtime](./reports/implementer-2026-07-23-main-menu-creator-runtime.md)
+- [Mode Select Creator runtime](./reports/implementer-2026-07-23-mode-select-creator-runtime.md)
+- [Menu/Mode checkpoint verification](./reports/tester-2026-07-23-menu-mode-checkpoint.md)
+- [Menu/Mode runtime simplification review](./reports/simplifier-2026-07-23-menu-mode-runtime.md)
 - [Creator readiness audit](./reports/creator-readiness-2026-07-22.md)
 - [Android toolchain readiness audit](./reports/android-toolchain-readiness-2026-07-22.md)
 - [Retry and `enable_effect` checkpoint](./reports/pm-260722-2312-retry-checkpoint.md)
