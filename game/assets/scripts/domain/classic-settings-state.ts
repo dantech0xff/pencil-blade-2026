@@ -7,6 +7,32 @@ import {
   type ClassicLeaderboardUpdate,
   type ClassicResultCoinAward,
 } from './classic-result-ranking';
+import {
+  CRAZY_BEST_1_STORAGE_KEY,
+  CRAZY_BEST_2_STORAGE_KEY,
+  CRAZY_BEST_3_STORAGE_KEY,
+  CRAZY_INITIAL_LEADERBOARD,
+  awardCrazyResultCoins,
+  insertCrazyResultScore,
+  type CrazyLeaderboard,
+  type CrazyLeaderboardUpdate,
+  type CrazyResultCoinAward,
+} from './crazy-result-ranking';
+import {
+  OBJECTIVES_COUNT,
+  OBJECTIVES_CURRENT_STORAGE_KEY,
+  OBJECTIVES_FRUITS_CUT_STORAGE_KEY,
+} from './objectives-manager-state';
+
+export {
+  CRAZY_BEST_1_STORAGE_KEY,
+  CRAZY_BEST_2_STORAGE_KEY,
+  CRAZY_BEST_3_STORAGE_KEY,
+} from './crazy-result-ranking';
+export {
+  OBJECTIVES_CURRENT_STORAGE_KEY,
+  OBJECTIVES_FRUITS_CUT_STORAGE_KEY,
+} from './objectives-manager-state';
 
 export const CLASSIC_TOTAL_COINS_STORAGE_KEY = 'total_coins';
 export const CLASSIC_SELECTED_THEME_STORAGE_KEY = 'selected_theme';
@@ -38,7 +64,11 @@ export interface ClassicInt32PreferencePort {
 }
 
 export interface ClassicSettingsSnapshot {
+  readonly crazyLeaderboard: CrazyLeaderboard;
+  readonly currentObjective: number;
   readonly effectsEnabled: boolean;
+  readonly fruitsCut: number;
+  /** Compatibility alias for the mode-0 leaderboard. */
   readonly leaderboard: ClassicLeaderboard;
   readonly musicEnabled: boolean;
   readonly networkAvailable: boolean;
@@ -56,11 +86,14 @@ export interface ClassicTotalCoinsAdjustment {
 }
 
 /**
- * Process-lifetime implemented subset of native Settings shared by the shell, menus, and Classic.
+ * Process-lifetime implemented subset of native Settings shared by shell, menus, and gameplay.
  * This is intentionally not the complete recovered 50-integer Settings schema.
  */
 export class ClassicSettingsState {
+  private crazyLeaderboardValue: CrazyLeaderboard;
+  private currentObjectiveValue: number;
   private effectsEnabledValue: boolean;
+  private fruitsCutValue: number;
   private leaderboardValue: ClassicLeaderboard;
   private musicEnabledValue: boolean;
   private readonly networkAvailableValue: boolean;
@@ -72,7 +105,10 @@ export class ClassicSettingsState {
 
   private constructor(snapshot: ClassicSettingsSnapshot) {
     assertSnapshot(snapshot);
+    this.crazyLeaderboardValue = freezeLeaderboard(snapshot.crazyLeaderboard);
+    this.currentObjectiveValue = snapshot.currentObjective;
     this.effectsEnabledValue = snapshot.effectsEnabled;
+    this.fruitsCutValue = snapshot.fruitsCut;
     this.leaderboardValue = freezeLeaderboard(snapshot.leaderboard);
     this.musicEnabledValue = snapshot.musicEnabled;
     this.networkAvailableValue = snapshot.networkAvailable;
@@ -85,7 +121,10 @@ export class ClassicSettingsState {
 
   static defaults(): ClassicSettingsState {
     return new ClassicSettingsState(Object.freeze({
+      crazyLeaderboard: CRAZY_INITIAL_LEADERBOARD,
+      currentObjective: 0,
       effectsEnabled: true,
+      fruitsCut: 0,
       leaderboard: CLASSIC_INITIAL_LEADERBOARD,
       musicEnabled: true,
       networkAvailable: false,
@@ -119,12 +158,24 @@ export class ClassicSettingsState {
     const first = port.readInt32(CLASSIC_BEST_1_STORAGE_KEY, 0);
     const second = port.readInt32(CLASSIC_BEST_2_STORAGE_KEY, 0);
     const third = port.readInt32(CLASSIC_BEST_3_STORAGE_KEY, 0);
+    const crazyFirst = port.readInt32(CRAZY_BEST_1_STORAGE_KEY, 0);
+    const crazySecond = port.readInt32(CRAZY_BEST_2_STORAGE_KEY, 0);
+    const crazyThird = port.readInt32(CRAZY_BEST_3_STORAGE_KEY, 0);
+    const currentObjective = port.readInt32(OBJECTIVES_CURRENT_STORAGE_KEY, 0);
+    const fruitsCut = port.readInt32(OBJECTIVES_FRUITS_CUT_STORAGE_KEY, 0);
     const musicEnabled = port.readBoolean(CLASSIC_MUSIC_ENABLED_STORAGE_KEY, true);
     const effectsEnabled = port.readBoolean(CLASSIC_EFFECTS_ENABLED_STORAGE_KEY, true);
     const networkAvailable = port.readBoolean(CLASSIC_NETWORK_AVAILABLE_STORAGE_KEY, false);
     const rated = port.readBoolean(CLASSIC_RATED_STORAGE_KEY, false);
     return new ClassicSettingsState(Object.freeze({
+      crazyLeaderboard: Object.freeze({
+        first: crazyFirst,
+        second: crazySecond,
+        third: crazyThird,
+      }),
+      currentObjective,
       effectsEnabled,
+      fruitsCut,
       leaderboard: Object.freeze({ first, second, third }),
       musicEnabled,
       networkAvailable,
@@ -138,7 +189,10 @@ export class ClassicSettingsState {
 
   get snapshot(): ClassicSettingsSnapshot {
     return Object.freeze({
+      crazyLeaderboard: freezeLeaderboard(this.crazyLeaderboardValue),
+      currentObjective: this.currentObjectiveValue,
       effectsEnabled: this.effectsEnabledValue,
+      fruitsCut: this.fruitsCutValue,
       leaderboard: freezeLeaderboard(this.leaderboardValue),
       musicEnabled: this.musicEnabledValue,
       networkAvailable: this.networkAvailableValue,
@@ -199,14 +253,50 @@ export class ClassicSettingsState {
     return adjustment;
   }
 
+  /** Applies the native signed-int32 reward addition used by ObjectivesManager. */
+  addObjectiveRewardCoins(rewardCoins: number): ClassicTotalCoinsAdjustment {
+    assertSignedInt32(rewardCoins, 'objective reward coins');
+    const previousTotalCoins = this.totalCoinsValue;
+    const nextTotalCoins = (previousTotalCoins + rewardCoins) | 0;
+    const adjustment = Object.freeze({
+      delta: rewardCoins,
+      nextTotalCoins,
+      previousTotalCoins,
+    });
+    this.totalCoinsValue = nextTotalCoins;
+    return adjustment;
+  }
+
+  setCurrentObjective(currentObjective: number): void {
+    assertCurrentObjective(currentObjective, true);
+    this.currentObjectiveValue = currentObjective;
+  }
+
+  setFruitsCut(fruitsCut: number): void {
+    assertSignedInt32(fruitsCut, 'fruitsCut');
+    this.fruitsCutValue = fruitsCut;
+  }
+
   recordClassicResultScore(completedScore: number): ClassicLeaderboardUpdate {
     const update = insertClassicResultScore(completedScore, this.leaderboardValue);
     this.leaderboardValue = update.leaderboard;
     return update;
   }
 
+  recordCrazyResultScore(completedScore: number): CrazyLeaderboardUpdate {
+    const update = insertCrazyResultScore(completedScore, this.crazyLeaderboardValue);
+    this.crazyLeaderboardValue = update.leaderboard;
+    return update;
+  }
+
   awardClassicResultCoins(completedScore: number): ClassicResultCoinAward {
     const award = awardClassicResultCoins(this.totalCoinsValue, completedScore);
+    this.totalCoinsValue = award.totalCoins;
+    return award;
+  }
+
+  awardCrazyResultCoins(completedScore: number): CrazyResultCoinAward {
+    const award = awardCrazyResultCoins(this.totalCoinsValue, completedScore);
     this.totalCoinsValue = award.totalCoins;
     return award;
   }
@@ -221,6 +311,11 @@ export class ClassicSettingsState {
     port.writeInt32(CLASSIC_BEST_1_STORAGE_KEY, this.leaderboardValue.first);
     port.writeInt32(CLASSIC_BEST_2_STORAGE_KEY, this.leaderboardValue.second);
     port.writeInt32(CLASSIC_BEST_3_STORAGE_KEY, this.leaderboardValue.third);
+    port.writeInt32(CRAZY_BEST_1_STORAGE_KEY, this.crazyLeaderboardValue.first);
+    port.writeInt32(CRAZY_BEST_2_STORAGE_KEY, this.crazyLeaderboardValue.second);
+    port.writeInt32(CRAZY_BEST_3_STORAGE_KEY, this.crazyLeaderboardValue.third);
+    port.writeInt32(OBJECTIVES_CURRENT_STORAGE_KEY, this.currentObjectiveValue);
+    port.writeInt32(OBJECTIVES_FRUITS_CUT_STORAGE_KEY, this.fruitsCutValue);
     port.writeBoolean(CLASSIC_MUSIC_ENABLED_STORAGE_KEY, this.musicEnabledValue);
     port.writeBoolean(CLASSIC_EFFECTS_ENABLED_STORAGE_KEY, this.effectsEnabledValue);
     // SaveData writes the network launch sentinel false, not the in-memory launch value.
@@ -258,6 +353,8 @@ function assertSnapshot(snapshot: ClassicSettingsSnapshot): void {
   if (typeof snapshot.effectsEnabled !== 'boolean') {
     throw new TypeError('effectsEnabled must be a boolean');
   }
+  assertCurrentObjective(snapshot.currentObjective, false);
+  assertSignedInt32(snapshot.fruitsCut, 'fruitsCut');
   if (typeof snapshot.musicEnabled !== 'boolean') {
     throw new TypeError('musicEnabled must be a boolean');
   }
@@ -284,15 +381,8 @@ function assertSnapshot(snapshot: ClassicSettingsSnapshot): void {
   );
   assertSignedInt32(snapshot.totalCoins, 'totalCoins');
   const leaderboard = snapshot.leaderboard;
-  if (leaderboard === null || typeof leaderboard !== 'object') {
-    throw new TypeError('Classic settings leaderboard must be an object');
-  }
-  assertSignedInt32(leaderboard.first, 'leaderboard.first');
-  assertSignedInt32(leaderboard.second, 'leaderboard.second');
-  assertSignedInt32(leaderboard.third, 'leaderboard.third');
-  if (leaderboard.first < leaderboard.second || leaderboard.second < leaderboard.third) {
-    throw new RangeError('Classic settings leaderboard must remain ordered');
-  }
+  assertOrderedLeaderboard(leaderboard, 'leaderboard');
+  assertOrderedLeaderboard(snapshot.crazyLeaderboard, 'crazyLeaderboard');
 }
 
 function assertBoolean(value: unknown, label: string): asserts value is boolean {
@@ -304,6 +394,13 @@ function assertBoolean(value: unknown, label: string): asserts value is boolean 
 function assertSelectionIndex(value: number, maximum: number, label: string): void {
   if (!Number.isInteger(value) || value < 0 || value > maximum) {
     throw new RangeError(`${label} must be an integer index from 0 through ${maximum}`);
+  }
+}
+
+function assertCurrentObjective(value: number, allowTransientResetPosition: boolean): void {
+  const maximum = allowTransientResetPosition ? OBJECTIVES_COUNT : OBJECTIVES_COUNT - 1;
+  if (!Number.isInteger(value) || value < 0 || value > maximum) {
+    throw new RangeError(`currentObjective must be an integer index from 0 through ${maximum}`);
   }
 }
 
@@ -323,4 +420,19 @@ function freezeLeaderboard(value: ClassicLeaderboard): ClassicLeaderboard {
     second: value.second,
     third: value.third,
   });
+}
+
+function assertOrderedLeaderboard(
+  value: ClassicLeaderboard | CrazyLeaderboard,
+  label: string,
+): void {
+  if (value === null || typeof value !== 'object') {
+    throw new TypeError(`Classic settings ${label} must be an object`);
+  }
+  assertSignedInt32(value.first, `${label}.first`);
+  assertSignedInt32(value.second, `${label}.second`);
+  assertSignedInt32(value.third, `${label}.third`);
+  if (value.first < value.second || value.second < value.third) {
+    throw new RangeError(`Classic settings ${label} must remain ordered`);
+  }
 }

@@ -33,12 +33,13 @@ The serialized persistent app shell now constructs shared Background/Leaf/Theme 
 Main Menu, replaces it transactionally with Mode Select, enters Classic only for recovered mode
 `0`, and routes Result back to Main Menu or Retry. Main Menu, Mode Select, shared presenters,
 RopeButton/FruitButton physics, input leases, rollback paths, and fail-closed destinations pass
-the deterministic suite and independent review. Fresh Browser Preview validation of that complete
-route remains pending.
+the deterministic suite and independent review. A fresh Creator-served Browser Preview confirms
+the same shell owns the complete route and production mode-1 handoff through
+Pause/Resume/Replay/Quit with zero runtime or console errors.
 Checkpoint report: [Blade and navigation foundations](reports/journal-2026-07-23-blade-navigation-foundations.md).
-The exact standard-bomb raster/audio/entity foundation is also implemented and tested, but is
-not scheduled into the playable loop until its unresolved procedural explosion geometry can be
-restored without guessing. Full first-launch Settings initialization and the Main Menu
+The exact standard-bomb raster/audio/entity, fuse-smoke, procedural explosion, and completion
+boundaries are implemented and tested; Crazy uses them in its production entity registry while
+Classic scheduling remains separate. Full first-launch Settings initialization and the Main Menu
 exit-save path remain open. The
 remaining scene/prefab map, consumer coverage, and full Classic scope still need to be
 completed before this phase can close.
@@ -127,10 +128,12 @@ Status: in progress. Continue this phase rather than creating a second restorati
 8. **Complete:** refactor scene boot behind one persistent app-shell host so Classic controllers
    stay passive until the recovered Mode Select handoff; preserve and extend Result/Retry/Menu
    transactions with rollback and committed-state isolation.
-9. **Automated gate complete; live Preview pending:** focused tests, `410/410` vertical-slice
-   tests, `38/38` source/staging/archive tests, strict Creator TypeScript, reconstruction policy,
-   and prohibited-runtime/source-boundary checks pass. A fresh Browser Preview and real built
-   artifact remain separate gates.
+9. **Automated gates and Browser Preview complete:** `739/739` vertical-slice tests,
+   `14/14` source/staging/archive inventory cases, strict Creator TypeScript, reconstruction
+   policy positive plus `4/4` negative fixtures, and prohibited-runtime/source-boundary checks
+   pass. Contract, automation, and fresh Creator-served Preview cover Main Menu -> Mode Select ->
+   Crazy -> Pause/Resume/Replay/Quit -> Main Menu with zero errors. A real built artifact remains
+   a separate gate.
 10. **Complete:** independent reviews found and closed the Mode Select per-particle burst and
     Shared Leaf physics-respawn gaps; contracts, evidence, plan, and architecture docs now state
     only the completed model/presenter boundaries.
@@ -227,8 +230,8 @@ Status: in progress. Continue this phase rather than creating a second restorati
 - [ ] Editor-generated project structure and final serialized-component map
 - [x] Deterministic time/random/input seams
 - [x] Lossless Creator resource import for the slice
-- [ ] Complete Classic vertical slice
-- [ ] Automated contract/traceability and prohibited-runtime audit
+- [x] Complete Classic vertical slice
+- [x] Automated contract/traceability and prohibited-runtime audit
 - [x] Static-evidence readiness gates recorded with evidence IDs
 
 ## Validation
@@ -280,21 +283,29 @@ Current Editor integration:
   and recovers corrupt target storage to exact defaults with diagnostics while disabling writes
   for that process to protect stored data. Full first-launch Settings initialization and Main
   Menu exit-save remain explicit follow-up work; Result-to-Main replacement is integrated.
-- The latest Preview pass opened at `720x1280` after clearing Creator's stale generated-code
-  cache and demonstrated the recovered `GOOD / LUCK!` intro, exact ordinary-fruit spawning,
+- The latest Preview attempt opened at `720x1280` after clearing Creator's stale generated-code
+  cache and exercised the recovered `GOOD / LUCK!` intro, exact ordinary-fruit spawning,
   score/best HUD, green-to-red fail-marker transitions, and 60 FPS with zero Creator Console
-  errors. A follow-up Preview verified two Result->Retry cycles at the same localhost URL
-  without a reload or game/Cocos console error; both runs re-entered the fresh `GOOD / LUCK!`
-  intro. That Preview is success-path verification only; a separate executable controller
+  errors. A follow-up Preview attempt exercised two Result->Retry cycles at the same localhost
+  URL without a reload or game/Cocos console error; both runs re-entered the fresh `GOOD /
+  LUCK!` intro. That Preview is success-path verification only; a separate executable controller
   harness injects construction, early/late physics, post-parent attachment, commit, and
   post-commit cleanup failures. It verifies rollback where still reversible, committed-state
-  isolation afterward, and no duplicate persistence or RNG work.
+  isolation afterward, and no duplicate persistence or RNG work. Controller confirmation for the
+  latest Crazy checkpoint remains pending.
+- The 2026-07-23 Crazy Preview attempt compiled the final source snapshot and exercised its
+  initially locked `2500`-coin card, a reversible production-route fixture, `60 / GO!`, live
+  entity spawning, Pause Replay, Pause Quit, re-entry, natural `0:00` Time-Up -> Result, and
+  Result Retry. The fixture was then restored to the exact prior `2199`-coin/locked state.
+  Creator Console remained at zero errors. Controller confirmation for the latest Crazy
+  checkpoint remains pending.
 - The current playable slice is not presentation-complete; the exact staging gate is complete
   for the recovered APK corpus, but 100% consumer coverage and canonical sample-project
   completeness remain open. Release rights are a separate review.
-- The deterministic vertical-slice suite passes `410/410`, source/staging/archive tests pass
-  `38/38`, Creator 3.8.8's bundled strict TypeScript compiler passes, and independent transaction
-  review has no remaining finding.
+- The deterministic vertical-slice suite passes `739/739`, including the focused
+  Crazy/TimeManager regressions; the complete inventory workflow passes `14/14`; reconstruction policy
+  positive and `4/4` negative fixtures pass; Creator 3.8.8's bundled strict TypeScript compiler
+  passes; and independent review reports no P0/P1 finding.
 
 ## Current Blockers
 
@@ -303,13 +314,10 @@ Current Editor integration:
   the custom variable-step boundary.
 - Canonical sample-project resource manifest/root resolution so the presentation coverage gate
   and `99%` metric can be finalized.
-- Exact ordinary-bomb explosion point generation/rasterization plus safe registry/controller
-  lifecycle integration, including the unresolved native lower-bound side effect; no sprite
-  substitute, Fruit-miss substitution, or invented triangle pattern is accepted.
+- Classic controller scheduling for the now-recovered standard-bomb presentation and the
+  unresolved native lower-bound side effect; no Fruit-miss substitution is accepted.
 - Full Settings coverage beyond the eleven implemented fields, including the recovered
   first-launch initialization and Main Menu exit-save checkpoint.
-- Fresh Browser Preview validation of Boot -> Main Menu -> Mode Select -> Classic and
-  Result -> Main Menu/Retry remains open; source-level transactions and rollback tests pass.
 - Electric-field compatibility decisions.
 - Android build validation and real APK/AAB post-build audit.
 - Rights review for original assets and product identity.
@@ -343,5 +351,7 @@ ad SDKs, or executable code from the APK.
 
 ## Next Steps
 
-Proceed to Phase 6 only after the Creator vertical-slice gate passes and the Classic
-presentation/gameplay/physics contracts are covered. Continue Phase 4 analysis for later modes.
+Phase 6 has started after the Creator vertical-slice and production Crazy gates passed.
+Continue the existing plan with the shared BaseBird/BirdBlade substrate and Classic Bird,
+then Crazy Bird, Combo Bird, and GN Style while Phase 4 static analysis closes each mode's
+remaining evidence gaps.

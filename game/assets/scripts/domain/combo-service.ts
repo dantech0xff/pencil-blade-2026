@@ -31,6 +31,35 @@ export interface ComboSnapshot {
   readonly startClockSeconds: number;
 }
 
+export type ComboCommandBatchFailurePhase = 'apply' | 'finalize' | 'publish';
+
+export interface ComboCommandBatchFailure {
+  readonly command: ComboCommand | null;
+  readonly error: unknown;
+  readonly phase: ComboCommandBatchFailurePhase;
+}
+
+export interface ComboCommandBatchPort {
+  readonly apply: (command: ComboCommand) => void;
+  readonly finalize: () => void;
+  readonly publish: (command: ComboCommand) => void;
+}
+
+export class ComboCommandBatchError extends Error {
+  readonly failures: readonly ComboCommandBatchFailure[];
+
+  constructor(failures: readonly ComboCommandBatchFailure[]) {
+    super(
+      `Combo command batch failed at ${failures.length} boundary/boundaries: `
+        + failures.map(({ error, phase }) => `${phase}: ${errorMessage(error)}`).join('; '),
+    );
+    this.name = 'ComboCommandBatchError';
+    this.failures = Object.freeze(failures.map((failure) => Object.freeze({
+      ...failure,
+    })));
+  }
+}
+
 const NO_COMBO_COMMANDS: readonly ComboCommand[] = Object.freeze([]);
 const ZERO_POSITION: ComboPosition = Object.freeze({ x: 0, y: 0 });
 
@@ -39,6 +68,7 @@ export class ComboService {
   private activeValue = false;
   private countValue = 0;
   private currentClockSecondsValue = Math.fround(0);
+  private pendingCommandsValue: readonly ComboCommand[] | null = null;
   private startClockSecondsValue = Math.fround(0);
   private latestPositionValue: ComboPosition = ZERO_POSITION;
 
@@ -75,6 +105,9 @@ export class ComboService {
     const delta = toNonNegativeFloat32(deltaSeconds, 'deltaSeconds');
     assertBoolean(effectsEnabled, 'effectsEnabled');
 
+    if (this.pendingCommandsValue !== null) {
+      return this.pendingCommandsValue;
+    }
     if (!this.activeValue) {
       // Recovered inactive updates keep the start clock aligned to the current clock.
       this.startClockSecondsValue = this.currentClockSecondsValue;
@@ -116,8 +149,30 @@ export class ComboService {
     }
 
     commands.push(Object.freeze({ type: 'reset-combo' }));
+    // Rotate immediately so a synchronous command/event listener can record a new cut without
+    // that new accumulator being erased when the closing batch is acknowledged.
     this.resetData();
-    return Object.freeze(commands);
+    this.pendingCommandsValue = Object.freeze(commands);
+    return this.pendingCommandsValue;
+  }
+
+  /**
+   * Acknowledges the exact rotated batch returned by update(). The live accumulator was already
+   * replaced atomically, so this must never reset cuts accepted by synchronous command listeners.
+   */
+  commitPendingUpdate(commands: readonly ComboCommand[]): void {
+    this.assertPendingUpdate(commands);
+    this.pendingCommandsValue = null;
+  }
+
+  /** Preflight used before any adapter side effect so an identity mismatch is never replayable. */
+  assertPendingUpdate(commands: readonly ComboCommand[]): void {
+    if (this.pendingCommandsValue === null) {
+      throw new Error('Combo has no pending update to commit');
+    }
+    if (commands !== this.pendingCommandsValue) {
+      throw new Error('Combo can commit only the exact pending update batch');
+    }
   }
 
   private resetData(): void {
@@ -126,6 +181,42 @@ export class ComboService {
     this.startClockSecondsValue = Math.fround(0);
     this.activeValue = false;
     this.latestPositionValue = ZERO_POSITION;
+  }
+}
+
+/**
+ * Applies every native command once, finalizes transient presentation ownership, then publishes
+ * the complete ordered trace. A post-commit observer or optional presentation/audio failure
+ * cannot skip the authoritative score/objective suffix or make the batch replay next frame.
+ */
+export function applyComboCommandBatch(
+  commands: readonly ComboCommand[],
+  port: ComboCommandBatchPort,
+): void {
+  assertComboCommandBatchPort(port);
+  if (commands.length === 0) {
+    return;
+  }
+  assertComboCommandBatchShape(commands);
+
+  const failures: ComboCommandBatchFailure[] = [];
+  let acknowledgementFailed = false;
+  for (const command of commands) {
+    const failureCountBefore = failures.length;
+    collectComboCommandFailure(failures, command, 'apply', () => port.apply(command));
+    if (command.type === 'reset-combo' && failures.length > failureCountBefore) {
+      acknowledgementFailed = true;
+    }
+  }
+  collectComboCommandFailure(failures, null, 'finalize', () => port.finalize());
+  if (acknowledgementFailed) {
+    throw new ComboCommandBatchError(failures);
+  }
+  for (const command of commands) {
+    collectComboCommandFailure(failures, command, 'publish', () => port.publish(command));
+  }
+  if (failures.length > 0) {
+    throw new ComboCommandBatchError(failures);
   }
 }
 
@@ -179,4 +270,60 @@ function assertFinite(value: number, label: string): void {
   if (!Number.isFinite(value)) {
     throw new RangeError(`${label} must be finite`);
   }
+}
+
+function assertComboCommandBatchPort(port: ComboCommandBatchPort): void {
+  if (
+    port === null
+    || typeof port !== 'object'
+    || typeof port.apply !== 'function'
+    || typeof port.finalize !== 'function'
+    || typeof port.publish !== 'function'
+  ) {
+    throw new TypeError(
+      'Combo command batch port must provide apply(), finalize(), and publish()',
+    );
+  }
+}
+
+function assertComboCommandBatchShape(commands: readonly ComboCommand[]): void {
+  const types = commands.map(({ type }) => type);
+  const valid = (
+    (types.length === 1 && types[0] === 'reset-combo')
+    || (
+      (types.length === 5 || types.length === 6)
+      && types[0] === 'process-objective'
+      && types[1] === 'create-combo-item'
+      && types[2] === 'add-score'
+      && types[3] === 'attach-combo-item'
+      && (
+        (types.length === 5 && types[4] === 'reset-combo')
+        || (
+          types.length === 6
+          && types[4] === 'play-combo-sound'
+          && types[5] === 'reset-combo'
+        )
+      )
+    )
+  );
+  if (!valid) {
+    throw new Error(`Invalid Combo command batch shape: ${types.join(', ')}`);
+  }
+}
+
+function collectComboCommandFailure(
+  failures: ComboCommandBatchFailure[],
+  command: ComboCommand | null,
+  phase: ComboCommandBatchFailurePhase,
+  operation: () => void,
+): void {
+  try {
+    operation();
+  } catch (error) {
+    failures.push(Object.freeze({ command, error, phase }));
+  }
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }

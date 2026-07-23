@@ -72,7 +72,7 @@ Verified starting point:
 | 3 | [Catalog Resources and Reconstruct Presentation](./phase-03-catalog-resources-and-reconstruct-presentation.md) | In progress |
 | 4 | [Recover Gameplay, Physics, and Progression Contracts](./phase-04-reverse-engineer-native-gameplay-contracts.md) | In progress |
 | 5 | [Build Cocos Creator Architecture and Vertical Slice](./phase-05-build-cocos-creator-architecture-and-vertical-slice.md) | In progress |
-| 6 | [Recreate Full Game Content and Progression](./phase-06-recreate-full-game-content-and-progression.md) | Pending |
+| 6 | [Recreate Full Game Content and Progression](./phase-06-recreate-full-game-content-and-progression.md) | In progress |
 | 7 | [Validate Static Reconstruction and Prepare Release](./phase-07-validate-fidelity-and-prepare-release.md) | Pending |
 
 ## Dependencies
@@ -86,7 +86,7 @@ Verified starting point:
   serialized the first `classic.scene`, and exercised exact background/text/ordinary-fruit,
   cut-half, critical-particle, score-HUD, and core-audio consumers in the bounded Classic loop.
   Exact recovered fail-marker resources and action timings are now integrated,
-  contract-tested, and visually verified in a fresh `720x1280` Preview after invalidating
+  contract-tested, and exercised in a fresh `720x1280` Preview attempt after invalidating
   Creator's stale code cache. The score HUD is exact and its `classic_best_1` baseline now
   comes from the process-owned persistence runtime. The static contracts and Creator boundary
   now also cover the exact mode-0 result
@@ -97,7 +97,7 @@ Verified starting point:
   for `total_coins`, `classic_best_1/2/3`, and `enable_effect` in recovered order with default
   effect `true`. App-hide saves are active; Retry mutations remain memory-only, and unreadable
   target storage recovers to exact defaults with diagnostics while writes stay disabled for
-  that process to prevent progression loss. Preview confirms the result boundary and a same-
+  that process to prevent progression loss. The current Preview attempt exercises the result boundary and a same-
   parent Result->Retry cycle at the captured parent without a reload or error overlay. Result-to-
   Main Menu replacement is now implemented transactionally. Main Menu exit-save and full first-
   launch Settings initialization remain open rather than being approximated.
@@ -114,14 +114,30 @@ Verified starting point:
   respawn commands. The persistent app shell, Main Menu, shared Background/Leaf/Theme, Mode Select
   rail, and RopeButton/FruitButton physics presenters are now implemented. Their lifecycle
   transactions, input/physics leases, rollback paths, exact resources, and fail-closed unrecovered
-  destinations pass the full deterministic suite and independent review. A fresh Creator Browser
-  Preview of Main Menu -> Mode Select -> Classic remains the runtime gate; no placeholder
-  destination screen is authorized.
+  destinations pass the full deterministic suite and independent review. A fresh
+  Creator-served Browser Preview confirms the latest Crazy checkpoint after the Dragon late-hit
+  splash `UIOpacity`-after-destroy crash fix, including Main Menu -> Mode Select -> Crazy ->
+  Pause/Resume/Replay/Quit -> Main Menu with zero errors; no placeholder destination screen is
+  authorized.
   The exact standard-bomb raster/audio/entity foundation and Concurrent batch partition are
-  also contract-tested, while bomb controllers remain deferred pending non-invented procedural
-  explosion geometry. Project completion still requires the remaining resource consumers and
-  scene/prefab map, a pinned integration/toolchain policy, and build validation.
-- Phase 6 expands only after the Cocos Creator vertical slice passes contract tests.
+  contract-tested. Crazy mode now owns its recovered 60-second session, controller graph,
+  standard-bomb explosion/fuse-smoke path, special/electric/magnet/Dragon entities, audio,
+  objectives, pause, result ranking/reward, and transactional Replay/Quit/Time-Up/Retry
+  lifecycles. Pre-commit Result failures restore the exact Crazy/TimeManager owner; post-commit
+  cleanup failures are retained for retry without reopening the committed session.
+  The final checkpoint passes `739/739` vertical-slice tests including the focused
+  Crazy/TimeManager regressions, `14/14` source/staging/archive inventory cases, strict Creator
+  TypeScript, reconstruction-policy positive plus `4/4` negative fixtures, and independent
+  P0/P1 review. Fresh Creator-served Preview verifies production mode-1 entry,
+  Pause/Resume/Replay/Quit, and return to Main Menu with zero errors after the Dragon fix. Its
+  isolated temporary storage profile is deleted after the run.
+  Project completion still requires the remaining resource consumers and scene/prefab map,
+  a pinned integration/toolchain policy, and build validation.
+- Phase 6 has started because the Cocos Creator vertical slice and production Crazy checkpoint
+  pass their contract gates and fresh Creator-served Browser Preview. Remaining mode
+  order is Classic Bird next, then Crazy Bird, Combo Bird, and GN Style so the shared
+  BaseBird/BirdBlade substrate is recovered once and the 439-call GN Style particle choreography
+  is not approximated.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
 
@@ -164,6 +180,8 @@ Verified starting point:
 - [Mode Select Creator runtime](./reports/implementer-2026-07-23-mode-select-creator-runtime.md)
 - [Menu/Mode checkpoint verification](./reports/tester-2026-07-23-menu-mode-checkpoint.md)
 - [Menu/Mode runtime simplification review](./reports/simplifier-2026-07-23-menu-mode-runtime.md)
+- [Crazy mode production checkpoint](./reports/implementer-2026-07-23-crazy-mode-runtime.md)
+- [Remaining mode implementation order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 - [Creator readiness audit](./reports/creator-readiness-2026-07-22.md)
 - [Android toolchain readiness audit](./reports/android-toolchain-readiness-2026-07-22.md)
 - [Retry and `enable_effect` checkpoint](./reports/pm-260722-2312-retry-checkpoint.md)

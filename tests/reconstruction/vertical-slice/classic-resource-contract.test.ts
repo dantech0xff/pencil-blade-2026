@@ -5,7 +5,9 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import {
+  CLASSIC_BOMB_SMOKE_RESOURCES,
   CLASSIC_BOMB_RESOURCES,
+  CLASSIC_COMBO_FONT_RESOURCE,
   CLASSIC_CRITICAL_PARTICLE_RESOURCES,
   CLASSIC_DEFAULT_BLADE_RESOURCES,
   CLASSIC_NORMAL_FRUIT_RESOURCES,
@@ -15,6 +17,7 @@ import {
   canonicalResourceToBundlePath,
   canonicalRasterToSpriteFrameBundlePath,
   getClassicBombResource,
+  getClassicBombSmokeResource,
   getClassicCriticalParticleResource,
   getClassicDefaultBladeResource,
   getClassicPresentationResources,
@@ -84,6 +87,32 @@ test('standard Classic bomb ID 0 maps only to the recovered bomb_X rasters', () 
   }
 });
 
+test('standard Bomb intact-fuse smoke uses the exact byte-identical 30-frame atlas', () => {
+  assert.deepEqual(CLASSIC_BOMB_SMOKE_RESOURCES, {
+    '480x800': {
+      canonicalPath: '480x800/Bomb/bombsmoke.png',
+      dimensions: { width: 1920, height: 256 },
+    },
+    '720x1280': {
+      canonicalPath: '720x1280/Bomb/bombsmoke.png',
+      dimensions: { width: 1920, height: 256 },
+    },
+  });
+
+  const low = readBinary('game/assets/game/480x800/Bomb/bombsmoke.png');
+  const high = readBinary('game/assets/game/720x1280/Bomb/bombsmoke.png');
+  assert.equal(low.equals(high), true);
+  assert.equal(
+    sha256(low),
+    '277f464434115cc79048013dc12d956865cf32e09802432ee097a636ccd3d4fe',
+  );
+
+  for (const tree of ['480x800', '720x1280'] as const) {
+    const resource = getClassicBombSmokeResource(tree);
+    assertStagedRasterGeometry(resource);
+  }
+});
+
 test('default BasicBlade ID 0 uses the exact byte-identical RGB texture in both trees', () => {
   assert.deepEqual(CLASSIC_DEFAULT_BLADE_RESOURCES, {
     '480x800': {
@@ -126,6 +155,21 @@ test('Creator loader includes one bomb descriptor and a runtime-validating catal
   assert.match(loaderSource, /getClassicBombResource\(bombId, this\.assetTree\)/);
   assert.match(loaderSource, /function bombKey\(bombId: ClassicBombId\): string/);
   assert.doesNotMatch(loaderSource, /getClassicBombResource\(1,/);
+});
+
+test('Creator loader exposes the exact standard-Bomb smoke atlas to shared modes', () => {
+  const loaderSource = readText('game/assets/scripts/creator/classic-resource-loader.ts');
+
+  assert.match(
+    loaderSource,
+    /descriptor\(bombSmokeKey\(\), getClassicBombSmokeResource\(assetTree\)\)/,
+  );
+  assert.match(
+    loaderSource,
+    /const bombSmoke = requireLoadedBombSmoke\(assetTree, loadedByKey\)/,
+  );
+  assert.match(loaderSource, /readonly bombSmoke: LoadedClassicRasterResource/);
+  assert.match(loaderSource, /this\.bombSmoke = bombSmoke/);
 });
 
 test('Creator loader exposes the exact default BasicBlade SpriteFrame', () => {
@@ -350,6 +394,35 @@ test('Creator loader exposes exact score HUD SpriteFrames and fail-closed Font l
   assert.match(loaderSource, /Creator returned no Classic score font for \$\{canonicalPath\}/);
   assert.match(loaderSource, /\.\.\.CLASSIC_SCORE_HUD_FONT_RESOURCE,[\s\S]*?font,/);
   assert.match(loaderSource, /bombResource,[\s\S]*?scoreFont,[\s\S]*?\);/);
+});
+
+test('shared ComboItem font preserves GroBold bytes and fail-closed catalog loading', () => {
+  assert.deepEqual(CLASSIC_COMBO_FONT_RESOURCE, {
+    canonicalPath: 'Fonts/GroBold.ttf',
+  });
+  assertStagedFontProvenance(CLASSIC_COMBO_FONT_RESOURCE, {
+    bytes: 25388,
+    fileName: 'GroBold.ttf',
+    sha256: '98e9c349709da1cd410d65b2954d30e355c154a8ea52004ecbe6eb0d8205d040',
+  });
+  assert.equal(
+    canonicalResourceToBundlePath(CLASSIC_COMBO_FONT_RESOURCE.canonicalPath),
+    'Fonts/GroBold',
+  );
+
+  const loaderSource = readText('game/assets/scripts/creator/classic-resource-loader.ts');
+  assert.match(loaderSource, /readonly comboFont: LoadedClassicFontResource/);
+  assert.match(loaderSource, /loadClassicComboFont\(bundle\)/);
+  assert.match(
+    loaderSource,
+    /const canonicalPath = CLASSIC_COMBO_FONT_RESOURCE\.canonicalPath/,
+  );
+  assert.match(loaderSource, /Failed to load Classic combo font/);
+  assert.match(loaderSource, /Creator returned no Classic combo font/);
+  assert.match(
+    loaderSource,
+    /scoreFont,[\s\S]*?comboFont,[\s\S]*?result,[\s\S]*?resultFonts/,
+  );
 });
 
 test('Classic result rasters preserve exact canonical paths and paired dimensions', () => {
@@ -611,6 +684,10 @@ test('resource lookup rejects IDs and trees outside the recovered contract', () 
   assert.throws(() => getClassicBombResource(Number.NaN, '480x800'), RangeError);
   assert.throws(
     () => getClassicBombResource(0, '1080x1920' as never),
+    RangeError,
+  );
+  assert.throws(
+    () => getClassicBombSmokeResource('1080x1920' as never),
     RangeError,
   );
   assert.throws(() => getClassicDefaultBladeResource(-1, '480x800'), RangeError);

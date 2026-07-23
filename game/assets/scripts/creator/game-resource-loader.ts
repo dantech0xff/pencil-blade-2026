@@ -6,12 +6,12 @@ import {
 
 import {
   canonicalRasterToSpriteFrameBundlePath,
-  type ClassicRasterResource,
-} from '../domain/classic-resource-contract';
+  type GameRasterResource,
+} from '../domain/game-resource-contract';
 
 export const GAME_RESOURCE_BUNDLE_NAME = 'game';
 
-export interface LoadedGameRasterResource extends ClassicRasterResource {
+export interface LoadedGameRasterResource extends GameRasterResource {
   readonly spriteFrame: SpriteFrame;
 }
 
@@ -36,7 +36,7 @@ export function loadGameResourceBundle(): Promise<AssetManager.Bundle> {
 }
 
 export async function loadExactGameRasters(
-  resources: readonly ClassicRasterResource[],
+  resources: readonly GameRasterResource[],
   bundle?: AssetManager.Bundle,
 ): Promise<readonly LoadedGameRasterResource[]> {
   if (!Array.isArray(resources) || resources.length === 0) {
@@ -63,7 +63,7 @@ export async function loadExactGameRasters(
 
 export function assertExactSpriteFrameGeometry(
   spriteFrame: SpriteFrame,
-  resource: ClassicRasterResource,
+  resource: GameRasterResource,
 ): void {
   const original = spriteFrame.originalSize;
   const rect = spriteFrame.rect;

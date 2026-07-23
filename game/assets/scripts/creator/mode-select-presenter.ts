@@ -111,7 +111,7 @@ export interface ModeSelectClassicResources {
 
 export type ModeSelectUnsupportedDestination = Exclude<
   ModeSelectDestination,
-  'ClassicModeLayer'
+  'ClassicModeLayer' | 'CrazyModeLayer'
 >;
 
 export interface ModeSelectNavigationTransaction {
@@ -123,6 +123,9 @@ export interface ModeSelectNavigationTransaction {
 
 export interface ModeSelectPresenterLifecycle {
   readonly onClassicRequested: (
+    transaction: ModeSelectNavigationTransaction,
+  ) => boolean | void;
+  readonly onCrazyRequested: (
     transaction: ModeSelectNavigationTransaction,
   ) => boolean | void;
   readonly onMainMenuRequested: (
@@ -177,6 +180,13 @@ interface RuntimeFailureSequence {
   elapsedSeconds: number;
 }
 
+interface RuntimeHorizontalGesture {
+  lastDeltaX: number;
+  lastDeltaY: number;
+  readonly slot: number;
+  readonly touchId: number;
+}
+
 interface RuntimeParticle {
   elapsedSeconds: number;
   readonly node: Node;
@@ -192,6 +202,8 @@ interface RuntimeUnlockBurst {
 
 const MAX_OPACITY = 255;
 const MAX_MODE_SELECT_UPDATE_SECONDS = 60;
+const MODE_SELECT_BLADE_SLOT_COUNT = 4;
+const MODE_SELECT_FLICK_MIN_DISTANCE = 1;
 const EPSILON = 1e-7;
 
 /** Detached, activation-gated Creator runtime for the recovered Mode Select foreground. */
@@ -223,6 +235,9 @@ export class ModeSelectPresenter {
   private readonly longRopeOpacity: UIOpacity;
   private model: ModeSelectState;
   private navigationTimers: number[] = [];
+  // Full-screen UI touch listeners preempt Creator's global BladeInput dispatcher,
+  // so gesture ownership derives from the already-delivered blade event stream.
+  private activeHorizontalGesture: RuntimeHorizontalGesture | null = null;
   private readonly persistedUnlocks: ModeSelectPersistedUnlocks;
   private readonly shellAnimations: RuntimeShellAnimation[] = [];
   private suspendedValue = false;
@@ -615,6 +630,7 @@ export class ModeSelectPresenter {
   }
 
   private unregisterEvents(): void {
+    this.activeHorizontalGesture = null;
     if (!this.listenersRegistered) {
       return;
     }
@@ -632,16 +648,17 @@ export class ModeSelectPresenter {
   }
 
   private readonly onBladeBegan = (event: ClassicBladeBeganEvent): void => {
-    if (!this.canInteract()) {
+    if (!this.canInteract() || !hasValidBladeBeganPayload(event)) {
       return;
     }
     this.activeBladeSlots.add(event.slot);
     this.blade.begin(event.slot);
     this.blade.move(event.slot, event.point);
+    this.beginHorizontalGesture(event);
   };
 
   private readonly onBladeMoved = (event: BladeMoveResult): void => {
-    if (!this.canInteract()) {
+    if (!this.canInteract() || !hasValidBladeMovePayload(event)) {
       return;
     }
     this.blade.move(event.segment.slot, event.segment.current);
@@ -649,32 +666,108 @@ export class ModeSelectPresenter {
       end: event.segment.current,
       start: event.segment.previous,
     }, this.presentation.viewport.logicalWidth);
-    if (plan === null) {
-      return;
-    }
-    const forwardHits = this.queryHits(plan.forward.start, plan.forward.end);
-    const reverseHits = this.queryHits(plan.reverse.start, plan.reverse.end);
-    const effectsEnabled = copySettingsSnapshot(
-      this.input.settings.state.snapshot,
-    ).effectsEnabled;
-    for (const command of createCutDispatchCommands(plan, forwardHits, reverseHits)) {
-      if (command.type !== 'cut') {
-        continue;
+    if (plan !== null) {
+      const forwardHits = this.queryHits(plan.forward.start, plan.forward.end);
+      const reverseHits = this.queryHits(plan.reverse.start, plan.reverse.end);
+      const effectsEnabled = copySettingsSnapshot(
+        this.input.settings.state.snapshot,
+      ).effectsEnabled;
+      for (const command of createCutDispatchCommands(plan, forwardHits, reverseHits)) {
+        if (command.type !== 'cut') {
+          continue;
+        }
+        const ropeButton = this.ropeButtons.find(
+          ({ targetId }) => targetId === command.targetId,
+        );
+        ropeButton?.cut(command.segment, effectsEnabled);
       }
-      const ropeButton = this.ropeButtons.find(
-        ({ targetId }) => targetId === command.targetId,
-      );
-      ropeButton?.cut(command.segment, effectsEnabled);
     }
+    this.moveHorizontalGesture(event);
   };
 
   private readonly onBladeEnded = (event: ClassicBladeEndedEvent): void => {
-    if (!this.canInteract()) {
+    if (!this.canInteract() || !hasValidBladeEndedPayload(event)) {
       return;
     }
     this.activeBladeSlots.delete(event.slot);
     this.blade.end(event.slot);
+    this.finishHorizontalGesture(event);
   };
+
+  private beginHorizontalGesture(event: ClassicBladeBeganEvent): void {
+    if (this.activeHorizontalGesture !== null) {
+      return;
+    }
+    const point = readFiniteGesturePoint(event.point);
+    if (
+      point === null
+      || !isGestureTouchId(event.touchId)
+      || !isGestureSlot(event.slot)
+    ) {
+      return;
+    }
+    this.activeHorizontalGesture = {
+      lastDeltaX: 0,
+      lastDeltaY: 0,
+      slot: event.slot,
+      touchId: event.touchId,
+    };
+  }
+
+  private moveHorizontalGesture(event: BladeMoveResult): void {
+    const gesture = this.activeHorizontalGesture;
+    if (
+      gesture === null
+      || event.segment.touchId !== gesture.touchId
+      || event.segment.slot !== gesture.slot
+    ) {
+      return;
+    }
+    const current = readFiniteGesturePoint(event.segment.current);
+    const previous = readFiniteGesturePoint(event.segment.previous);
+    if (current === null || previous === null) {
+      this.activeHorizontalGesture = null;
+      return;
+    }
+    const deltaX = Math.fround(current.x - previous.x);
+    const deltaY = Math.fround(current.y - previous.y);
+    if (!Number.isFinite(deltaX) || !Number.isFinite(deltaY)) {
+      this.activeHorizontalGesture = null;
+      return;
+    }
+    gesture.lastDeltaX = deltaX;
+    gesture.lastDeltaY = deltaY;
+    if (isHorizontalGestureDelta(deltaX, deltaY)) {
+      this.onHorizontalDrag(deltaX);
+    }
+  }
+
+  private finishHorizontalGesture(event: ClassicBladeEndedEvent): void {
+    const gesture = this.activeHorizontalGesture;
+    if (
+      gesture === null
+      || event.touchId !== gesture.touchId
+      || event.slot !== gesture.slot
+    ) {
+      return;
+    }
+    this.activeHorizontalGesture = null;
+    if (event.cancelled) {
+      return;
+    }
+    const { lastDeltaX: deltaX, lastDeltaY: deltaY } = gesture;
+    const deltaLength = gestureDeltaLength(deltaX, deltaY);
+    if (
+      !Number.isFinite(deltaX)
+      || !Number.isFinite(deltaY)
+      || !Number.isFinite(deltaLength)
+      || !isHorizontalGestureDelta(deltaX, deltaY)
+      || deltaLength <= MODE_SELECT_FLICK_MIN_DISTANCE
+    ) {
+      return;
+    }
+    this.onHorizontalFlick(deltaX);
+  }
 
   private readonly onHorizontalDrag = (payload: unknown): void => {
     if (!this.canInteract()) {
@@ -792,12 +885,11 @@ export class ModeSelectPresenter {
       zOrder: destinationCommand.zOrder,
     });
     try {
-      const result = destinationCommand.destination === 'ClassicModeLayer'
-        ? this.input.lifecycle.onClassicRequested(transaction)
-        : this.input.lifecycle.onUnsupportedDestinationRequested(
-          destinationCommand.destination,
-          transaction,
-        );
+      const result = dispatchModeNavigation(
+        this.input.lifecycle,
+        destinationCommand.destination,
+        transaction,
+      );
       if (result === false) {
         restoreRootAfterRejectedTransaction(this.root, parent, transaction.zOrder);
         this.rearmNavigationAfterFailure();
@@ -1328,6 +1420,116 @@ function readGestureDeltaX(payload: unknown, label: string): number {
   return deltaX;
 }
 
+function readFiniteGesturePoint(point: unknown): ModeSelectPoint | null {
+  if (
+    point === null
+    || typeof point !== 'object'
+    || !('x' in point)
+    || !('y' in point)
+  ) {
+    return null;
+  }
+  const { x, y } = point as Readonly<{ readonly x: unknown; readonly y: unknown }>;
+  if (
+    typeof x !== 'number'
+    || !Number.isFinite(x)
+    || typeof y !== 'number'
+    || !Number.isFinite(y)
+  ) {
+    return null;
+  }
+  return Object.freeze({ x, y });
+}
+
+function hasValidBladeBeganPayload(event: unknown): event is ClassicBladeBeganEvent {
+  if (event === null || typeof event !== 'object') {
+    return false;
+  }
+  const candidate = event as Readonly<{
+    readonly point?: unknown;
+    readonly slot?: unknown;
+    readonly touchId?: unknown;
+  }>;
+  return (
+    typeof candidate.touchId === 'number'
+    && isGestureTouchId(candidate.touchId)
+    && typeof candidate.slot === 'number'
+    && isGestureSlot(candidate.slot)
+    && readFiniteGesturePoint(candidate.point) !== null
+  );
+}
+
+function hasValidBladeMovePayload(event: unknown): event is BladeMoveResult {
+  if (
+    event === null
+    || typeof event !== 'object'
+    || !('segment' in event)
+    || event.segment === null
+    || typeof event.segment !== 'object'
+  ) {
+    return false;
+  }
+  const segment = event.segment as Readonly<{
+    readonly current?: unknown;
+    readonly previous?: unknown;
+    readonly slot?: unknown;
+    readonly touchId?: unknown;
+  }>;
+  const current = readFiniteGesturePoint(segment.current);
+  const previous = readFiniteGesturePoint(segment.previous);
+  if (
+    current === null
+    || previous === null
+    || typeof segment.touchId !== 'number'
+    || !isGestureTouchId(segment.touchId)
+    || typeof segment.slot !== 'number'
+    || !isGestureSlot(segment.slot)
+  ) {
+    return false;
+  }
+  return (
+    Number.isFinite(Math.fround(current.x - previous.x))
+    && Number.isFinite(Math.fround(current.y - previous.y))
+  );
+}
+
+function hasValidBladeEndedPayload(event: unknown): event is ClassicBladeEndedEvent {
+  if (event === null || typeof event !== 'object') {
+    return false;
+  }
+  const candidate = event as Readonly<{
+    readonly cancelled?: unknown;
+    readonly slot?: unknown;
+    readonly touchId?: unknown;
+  }>;
+  return (
+    typeof candidate.cancelled === 'boolean'
+    && typeof candidate.touchId === 'number'
+    && isGestureTouchId(candidate.touchId)
+    && typeof candidate.slot === 'number'
+    && isGestureSlot(candidate.slot)
+  );
+}
+
+function isGestureTouchId(touchId: number): boolean {
+  return Number.isSafeInteger(touchId) && touchId !== -1;
+}
+
+function isGestureSlot(slot: number): boolean {
+  return Number.isSafeInteger(slot) && slot >= 0 && slot < MODE_SELECT_BLADE_SLOT_COUNT;
+}
+
+function isHorizontalGestureDelta(deltaX: number, deltaY: number): boolean {
+  return Math.abs(deltaX) > Math.abs(deltaY);
+}
+
+function gestureDeltaLength(deltaX: number, deltaY: number): number {
+  const squaredLength = Math.fround(
+    Math.fround(deltaX * deltaX) + Math.fround(deltaY * deltaY),
+  );
+  return Math.fround(Math.sqrt(squaredLength));
+}
+
 function interpolateFloat32(start: number, end: number, progress: number): number {
   return Math.fround(Math.fround(start) + Math.fround(
     Math.fround(end - start) * Math.fround(progress),
@@ -1361,6 +1563,7 @@ function assertInput(input: ModeSelectPresenterInput): void {
   assertFunctions(input.settings.state, ['addTotalCoins'], 'settings.state');
   assertFunctions(input.lifecycle, [
     'onClassicRequested',
+    'onCrazyRequested',
     'onMainMenuRequested',
     'onUnsupportedDestinationRequested',
   ], 'lifecycle');
@@ -1369,6 +1572,20 @@ function assertInput(input: ModeSelectPresenterInput): void {
   if (!isValid(input.canvas, true) || !input.canvas.activeInHierarchy) {
     throw new Error('Mode Select canvas must be valid and active');
   }
+}
+
+function dispatchModeNavigation(
+  lifecycle: ModeSelectPresenterLifecycle,
+  destination: ModeSelectDestination,
+  transaction: ModeSelectNavigationTransaction,
+): boolean | void {
+  if (destination === 'ClassicModeLayer') {
+    return lifecycle.onClassicRequested(transaction);
+  }
+  if (destination === 'CrazyModeLayer') {
+    return lifecycle.onCrazyRequested(transaction);
+  }
+  return lifecycle.onUnsupportedDestinationRequested(destination, transaction);
 }
 
 function assertFunctions(

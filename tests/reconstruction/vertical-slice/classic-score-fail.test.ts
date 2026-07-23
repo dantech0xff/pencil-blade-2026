@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  applyComboCommandBatch,
   COMBO_WINDOW_SECONDS,
+  ComboCommandBatchError,
   ComboService,
 } from '../../../game/assets/scripts/domain/combo-service.ts';
 import {
@@ -182,7 +184,8 @@ test('combo remains open at exactly 0.25 and closes only beyond it', () => {
 
   assert.deepEqual(combo.update(COMBO_WINDOW_SECONDS, true), []);
   assert.equal(combo.snapshot().active, true);
-  assert.deepEqual(combo.update(0.0001, true), [
+  const closingBatch = combo.update(0.0001, true);
+  assert.deepEqual(closingBatch, [
     { type: 'process-objective', eventId: 0, count: 3 },
     { type: 'create-combo-item', count: 3, position: { x: 5, y: 6 } },
     { type: 'add-score', value: 3 },
@@ -190,6 +193,7 @@ test('combo remains open at exactly 0.25 and closes only beyond it', () => {
     { type: 'play-combo-sound', soundIndex: 2 },
     { type: 'reset-combo' },
   ]);
+  combo.commitPendingUpdate(closingBatch);
   assert.equal(randomCalls, 1);
   assert.deepEqual(combo.snapshot(), {
     active: false,
@@ -233,6 +237,7 @@ test('combo command and shared-RNG/reset order changes only with effects enabled
       startClockSeconds: 0,
     },
   }]);
+  enabledCombo.commitPendingUpdate(enabledCommands);
 
   let disabledRandomCalls = 0;
   const disabledCombo = new ComboService({
@@ -244,13 +249,15 @@ test('combo command and shared-RNG/reset order changes only with effects enabled
   disabledCombo.checkCombo({ x: 1, y: 1 });
   disabledCombo.checkCombo({ x: 2, y: 2 });
   disabledCombo.checkCombo({ x: 3, y: 3 });
-  assert.deepEqual(disabledCombo.update(Math.fround(0.2501), false).map((command) => command.type), [
+  const disabledCommands = disabledCombo.update(Math.fround(0.2501), false);
+  assert.deepEqual(disabledCommands.map((command) => command.type), [
     'process-objective',
     'create-combo-item',
     'add-score',
     'attach-combo-item',
     'reset-combo',
   ]);
+  disabledCombo.commitPendingUpdate(disabledCommands);
   assert.equal(disabledRandomCalls, 0);
 });
 
@@ -262,7 +269,135 @@ test('each accepted combo cut restarts the rolling window at the current clock',
 
   assert.deepEqual(combo.update(0.25, false), []);
   assert.equal(combo.snapshot().active, true);
-  assert.deepEqual(combo.update(0.0001, false), [{ type: 'reset-combo' }]);
+  const closingBatch = combo.update(0.0001, false);
+  assert.deepEqual(closingBatch, [{ type: 'reset-combo' }]);
+  combo.commitPendingUpdate(closingBatch);
+});
+
+test('pending close batches rotate the accumulator and cannot erase a reentrant cut', () => {
+  let randomCalls = 0;
+  const combo = new ComboService({
+    nextIntInclusive() {
+      randomCalls += 1;
+      return 1;
+    },
+  });
+  combo.checkCombo({ x: 1, y: 1 });
+  combo.checkCombo({ x: 2, y: 2 });
+  combo.checkCombo({ x: 3, y: 3 });
+  const closingBatch = combo.update(Math.fround(0.2501), true);
+
+  combo.checkCombo({ x: 99, y: 100 });
+  assert.deepEqual(combo.snapshot(), {
+    active: true,
+    count: 1,
+    currentClockSeconds: 0,
+    latestPosition: { x: 99, y: 100 },
+    startClockSeconds: 0,
+  });
+  assert.equal(combo.update(9, false), closingBatch);
+  assert.equal(randomCalls, 1);
+  assert.throws(
+    () => combo.assertPendingUpdate([...closingBatch]),
+    /exact pending update batch/,
+  );
+
+  combo.assertPendingUpdate(closingBatch);
+  combo.commitPendingUpdate(closingBatch);
+  assert.equal(combo.snapshot().count, 1);
+  assert.deepEqual(combo.update(COMBO_WINDOW_SECONDS, false), []);
+  const nextClosingBatch = combo.update(0.0001, false);
+  assert.deepEqual(nextClosingBatch, [{ type: 'reset-combo' }]);
+  combo.commitPendingUpdate(nextClosingBatch);
+});
+
+test('combo batch drain attempts every boundary once, acknowledges, then publishes in order', () => {
+  const combo = new ComboService({ nextIntInclusive: () => 2 });
+  combo.checkCombo({ x: 1, y: 1 });
+  combo.checkCombo({ x: 2, y: 2 });
+  combo.checkCombo({ x: 3, y: 3 });
+  const commands = combo.update(Math.fround(0.2501), true);
+  combo.assertPendingUpdate(commands);
+  const applied: string[] = [];
+  const published: string[] = [];
+  const failingApplyTypes = new Set([
+    'process-objective',
+    'create-combo-item',
+    'add-score',
+    'attach-combo-item',
+    'play-combo-sound',
+  ]);
+
+  assert.throws(
+    () => applyComboCommandBatch(commands, {
+      apply(command) {
+        applied.push(command.type);
+        if (command.type === 'reset-combo') {
+          combo.commitPendingUpdate(commands);
+        } else if (failingApplyTypes.has(command.type)) {
+          throw new Error(`injected ${command.type} failure`);
+        }
+      },
+      finalize() {
+        throw new Error('injected presenter cleanup failure');
+      },
+      publish(command) {
+        published.push(command.type);
+        if (command.type === 'attach-combo-item') {
+          throw new Error('injected command observer failure');
+        }
+      },
+    }),
+    (error: unknown) => {
+      assert.equal(error instanceof ComboCommandBatchError, true);
+      const batchError = error as ComboCommandBatchError;
+      assert.deepEqual(
+        batchError.failures.map(({ command, phase }) => ({
+          command: command?.type ?? null,
+          phase,
+        })),
+        [
+          { command: 'process-objective', phase: 'apply' },
+          { command: 'create-combo-item', phase: 'apply' },
+          { command: 'add-score', phase: 'apply' },
+          { command: 'attach-combo-item', phase: 'apply' },
+          { command: 'play-combo-sound', phase: 'apply' },
+          { command: null, phase: 'finalize' },
+          { command: 'attach-combo-item', phase: 'publish' },
+        ],
+      );
+      return true;
+    },
+  );
+  assert.deepEqual(applied, commands.map(({ type }) => type));
+  assert.deepEqual(published, commands.map(({ type }) => type));
+  assert.throws(
+    () => combo.commitPendingUpdate(commands),
+    /no pending update/,
+  );
+  assert.deepEqual(combo.update(0, true), []);
+});
+
+test('invalid combo batch shape fails before any adapter side effect', () => {
+  let operations = 0;
+  assert.throws(
+    () => applyComboCommandBatch([
+      { type: 'reset-combo' },
+      { type: 'add-score', value: 3 },
+    ], {
+      apply() {
+        operations += 1;
+      },
+      finalize() {
+        operations += 1;
+      },
+      publish() {
+        operations += 1;
+      },
+    }),
+    /Invalid Combo command batch shape/,
+  );
+  assert.equal(operations, 0);
 });
 
 test('miss indicators queue before increment and every pending callback may repeat at count three', () => {

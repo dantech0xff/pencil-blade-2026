@@ -17,6 +17,13 @@ import {
 } from './classic-gameplay-controller';
 import { ClassicSceneController } from './classic-scene-controller';
 import {
+  CRAZY_PAUSE_QUIT_REQUESTED_EVENT,
+  CRAZY_RESULT_MENU_REQUESTED_EVENT,
+  CrazyGameplayController,
+  type CrazyPauseQuitRequestedEvent,
+  type CrazyResultMenuRequestedEvent,
+} from './crazy-gameplay-controller';
+import {
   MainMenuPresenter,
   type MainMenuNavigationTransaction,
   type MainMenuUnsupportedDestination,
@@ -53,6 +60,7 @@ export const RECOVERED_APP_SHELL_PLATFORM_REVIEW_REQUESTED_EVENT
 export type RecoveredAppShellState =
   | 'booting'
   | 'classic'
+  | 'crazy'
   | 'destroyed'
   | 'failed'
   | 'main-menu'
@@ -79,17 +87,25 @@ interface RecoveredAppResources {
   readonly modeSelect: LoadedModeSelectResources;
 }
 
+interface CrazyMainMenuNavigationRequest {
+  readonly root: Node;
+  commit(previousRoot: Node): void;
+  rollback(): void;
+}
+
 /**
- * Persistent serialized owner for the recovered Boot -> Menu -> Mode Select -> Classic loop.
+ * Persistent serialized owner for the recovered Boot -> Menu -> Mode Select gameplay loop.
  * Every top-level screen swap is transactional; unsupported recovered destinations fail closed.
  */
 @ccclass('RecoveredAppShellController')
+@requireComponent(CrazyGameplayController)
 @requireComponent(ClassicGameplayController)
 export class RecoveredAppShellController extends Component {
   private activeMainMenu: MainMenuPresenter | null = null;
   private activeModeSelect: ModeSelectPresenter | null = null;
   private bladeInput: BladeInputController | null = null;
   private bootPromise: Promise<void> | null = null;
+  private crazyGameplayController: CrazyGameplayController | null = null;
   private destroyedValue = false;
   private gameplayController: ClassicGameplayController | null = null;
   private nonClassicPhysics: NonClassicPhysicsAdapter | null = null;
@@ -121,12 +137,27 @@ export class RecoveredAppShellController extends Component {
       ClassicGameplayController,
       'ClassicGameplayController',
     );
+    this.crazyGameplayController = requireComponentFromNode(
+      this.node,
+      CrazyGameplayController,
+      'CrazyGameplayController',
+    );
   }
 
   onEnable(): void {
     this.node.on(
       CLASSIC_RESULT_MENU_REQUESTED_EVENT,
       this.onClassicResultMenuRequested,
+      this,
+    );
+    this.node.on(
+      CRAZY_RESULT_MENU_REQUESTED_EVENT,
+      this.onCrazyResultMenuRequested,
+      this,
+    );
+    this.node.on(
+      CRAZY_PAUSE_QUIT_REQUESTED_EVENT,
+      this.onCrazyPauseQuitRequested,
       this,
     );
     game.on(Game.EVENT_HIDE, this.onApplicationHidden, this);
@@ -151,6 +182,16 @@ export class RecoveredAppShellController extends Component {
     this.node.off(
       CLASSIC_RESULT_MENU_REQUESTED_EVENT,
       this.onClassicResultMenuRequested,
+      this,
+    );
+    this.node.off(
+      CRAZY_RESULT_MENU_REQUESTED_EVENT,
+      this.onCrazyResultMenuRequested,
+      this,
+    );
+    this.node.off(
+      CRAZY_PAUSE_QUIT_REQUESTED_EVENT,
+      this.onCrazyPauseQuitRequested,
       this,
     );
     game.off(Game.EVENT_HIDE, this.onApplicationHidden, this);
@@ -207,11 +248,17 @@ export class RecoveredAppShellController extends Component {
     await gameplayController.prepareRecoveredRuntime();
     this.assertBootStillCurrent();
     const assetTree = gameplayController.sharedResourceCatalog.assetTree;
+    // Crazy supplements the already-loaded Classic catalog. Its failure is isolated: Menu and
+    // Classic remain available while the Crazy transaction stays fail-closed.
+    const crazyPreparation = this.requireCrazyGameplayController()
+      .prepareCrazyRuntime()
+      .catch(() => undefined);
     const [sharedResources, mainMenuResources, modeSelectResources] = await Promise.all([
       loadSharedGameSceneResources(assetTree),
       loadMainMenuResources(assetTree),
       loadModeSelectResources(assetTree),
     ]);
+    await crazyPreparation;
     this.assertBootStillCurrent();
 
     const settings = gameplayController.sharedSettingsRuntime.state.snapshot;
@@ -311,6 +358,7 @@ export class RecoveredAppShellController extends Component {
       },
       lifecycle: {
         onClassicRequested: (transaction) => this.transitionModeSelectToClassic(transaction),
+        onCrazyRequested: (transaction) => this.transitionModeSelectToCrazy(transaction),
         onMainMenuRequested: (transaction) => (
           this.transitionModeSelectToMainMenu(transaction)
         ),
@@ -437,6 +485,60 @@ export class RecoveredAppShellController extends Component {
     });
   }
 
+  private transitionModeSelectToCrazy(
+    transaction: ModeSelectNavigationTransaction,
+  ): boolean {
+    const oldPresenter = this.activeModeSelect;
+    const crazy = this.requireCrazyGameplayController();
+    if (
+      oldPresenter === null
+      || transaction.root !== oldPresenter.root
+      || transaction.destination !== 'CrazyModeLayer'
+      || !crazy.prepared
+    ) {
+      return false;
+    }
+    return this.runTransition('mode-select', 'crazy', () => {
+      const sharedScene = this.requireSharedScene();
+      const nonClassicPhysics = this.requireNonClassicPhysics();
+      let collisionFilterReleased = false;
+      try {
+        const previous = sharedScene.detachCurrentScreen(oldPresenter.root);
+        if (previous !== oldPresenter.root || !oldPresenter.suspendForTransition()) {
+          throw new Error('Mode Select did not surrender the shared input lease');
+        }
+        collisionFilterReleased = nonClassicPhysics.restorePreviousCollisionFilter();
+        crazy.activateCrazyFromAppShell(sharedScene);
+      } catch (error) {
+        const rollbackFailures: unknown[] = [];
+        try {
+          this.restoreModeSelectAfterFailedCrazyActivation(oldPresenter.root);
+        } catch (rollbackError) {
+          rollbackFailures.push(rollbackError);
+        }
+        if (collisionFilterReleased && !nonClassicPhysics.collisionFilterActive) {
+          try {
+            nonClassicPhysics.activateCollisionFilter();
+          } catch (rollbackError) {
+            rollbackFailures.push(rollbackError);
+          }
+        }
+        if (rollbackFailures.length > 0) {
+          throw aggregateWithPrimaryError(
+            'Mode Select to Crazy rollback failed',
+            error,
+            rollbackFailures,
+          );
+        }
+        throw error;
+      }
+      this.activeModeSelect = null;
+      this.stateValue = 'crazy';
+      disposeCommittedPresenter(oldPresenter, 'Mode Select');
+      return true;
+    });
+  }
+
   private readonly onClassicResultMenuRequested = (
     request: ClassicResultMenuRequestedEvent,
   ): void => {
@@ -486,6 +588,131 @@ export class RecoveredAppShellController extends Component {
       this.transitioning = false;
     }
   };
+
+  private readonly onCrazyResultMenuRequested = (
+    request: unknown,
+  ): void => {
+    if (!isCrazyResultMenuRequestedEvent(request)) {
+      rollbackRejectedCrazyNavigationRequest(request, 'Crazy Result');
+      return;
+    }
+    this.transitionCrazyToMainMenu({
+      root: request.resultRoot,
+      commit: (previousRoot) => request.commit(previousRoot),
+      rollback: () => request.rollback(),
+    }, 'Crazy Result');
+  };
+
+  private readonly onCrazyPauseQuitRequested = (
+    request: unknown,
+  ): void => {
+    if (!isCrazyPauseQuitRequestedEvent(request)) {
+      rollbackRejectedCrazyNavigationRequest(request, 'Crazy Pause Quit');
+      return;
+    }
+    this.transitionCrazyToMainMenu({
+      root: request.crazyRoot,
+      commit: (previousRoot) => request.commit(previousRoot),
+      rollback: () => request.rollback(),
+    }, 'Crazy Pause Quit');
+  };
+
+  private transitionCrazyToMainMenu(
+    request: CrazyMainMenuNavigationRequest,
+    source: 'Crazy Pause Quit' | 'Crazy Result',
+  ): void {
+    if (
+      this.destroyedValue
+      || this.stateValue !== 'crazy'
+      || this.transitioning
+      || request === null
+      || typeof request !== 'object'
+    ) {
+      try {
+        request?.rollback();
+      } catch (error) {
+        console.error(normalizeError(error, `Rejected ${source} rollback failed`));
+      }
+      return;
+    }
+    const from = this.stateValue;
+    this.transitioning = true;
+    let nextPresenter: MainMenuPresenter | null = null;
+    let collisionFilterActivated = false;
+    try {
+      const sharedScene = this.requireSharedScene();
+      if (sharedScene.currentScreen !== request.root) {
+        throw new Error(`${source} request does not own the current screen`);
+      }
+      collisionFilterActivated = this.requireNonClassicPhysics()
+        .activateCollisionFilter();
+      nextPresenter = this.createMainMenuPresenter();
+      const previous = sharedScene.replaceCurrentScreen(nextPresenter.root);
+      nextPresenter.activate();
+      commitCrazyMainMenuNavigationRequest(request, previous, source);
+      this.activeMainMenu = nextPresenter;
+      this.stateValue = 'main-menu';
+    } catch (error) {
+      runBestEffortCleanup(`${source} to Main Menu rollback`, [
+        () => this.restoreCrazyNavigationRootBeforeRollback(request.root),
+        () => nextPresenter?.dispose(),
+        () => this.requireGameplayController().sharedAudioPresenter.stopBackgroundMusic(),
+        () => {
+          if (collisionFilterActivated) {
+            this.requireNonClassicPhysics().restorePreviousCollisionFilter();
+          }
+        },
+        () => request.rollback(),
+      ]);
+      this.emitTransitionFailure(from, 'main-menu', error);
+    } finally {
+      this.transitioning = false;
+    }
+  }
+
+  private restoreCrazyNavigationRootBeforeRollback(root: Node): void {
+    const sharedScene = this.requireSharedScene();
+    const current = sharedScene.currentScreen;
+    if (current === root) {
+      return;
+    }
+    if (!isValid(root, true) || root.parent !== null) {
+      throw new Error('Crazy navigation rollback lost its detached source screen');
+    }
+    if (current === null) {
+      sharedScene.attachCurrentScreen(root);
+    } else {
+      const displaced = sharedScene.replaceCurrentScreen(root);
+      if (displaced !== current) {
+        throw new Error('Crazy navigation rollback displaced an unexpected destination');
+      }
+    }
+    if (sharedScene.currentScreen !== root) {
+      throw new Error('Crazy navigation rollback could not restore its source screen');
+    }
+  }
+
+  private restoreModeSelectAfterFailedCrazyActivation(previous: Node): void {
+    const sharedScene = this.requireSharedScene();
+    const current = sharedScene.currentScreen;
+    if (current === previous) {
+      return;
+    }
+    if (!isValid(previous, true) || previous.parent !== null) {
+      throw new Error('Crazy activation rollback lost the detached Mode Select root');
+    }
+    if (current === null) {
+      sharedScene.attachCurrentScreen(previous);
+    } else {
+      const displaced = sharedScene.replaceCurrentScreen(previous);
+      if (displaced !== current) {
+        throw new Error('Crazy activation rollback displaced an unexpected current screen');
+      }
+    }
+    if (sharedScene.currentScreen !== previous) {
+      throw new Error('Crazy activation rollback could not restore Mode Select ownership');
+    }
+  }
 
   private runTransition(
     from: RecoveredAppShellState,
@@ -594,6 +821,13 @@ export class RecoveredAppShellController extends Component {
     return this.gameplayController;
   }
 
+  private requireCrazyGameplayController(): CrazyGameplayController {
+    if (this.crazyGameplayController === null) {
+      throw new Error('Recovered app shell requires CrazyGameplayController');
+    }
+    return this.crazyGameplayController;
+  }
+
   private requireSceneController(): ClassicSceneController {
     if (this.sceneController === null) {
       throw new Error('Recovered app shell requires ClassicSceneController');
@@ -651,6 +885,113 @@ function disposeCommittedPresenter(
   } catch (error) {
     console.error(normalizeError(error, `${label} committed cleanup failed`));
   }
+}
+
+function isCrazyResultMenuRequestedEvent(
+  request: unknown,
+): request is CrazyResultMenuRequestedEvent {
+  if (request === null || typeof request !== 'object') {
+    return false;
+  }
+  try {
+    const candidate = request as Readonly<{
+      commit?: unknown;
+      completedRunScore?: unknown;
+      resultRoot?: unknown;
+      rollback?: unknown;
+    }>;
+    return (
+      candidate.resultRoot instanceof Node
+      && isValid(candidate.resultRoot, true)
+      && typeof candidate.completedRunScore === 'number'
+      && Number.isFinite(candidate.completedRunScore)
+      && candidate.completedRunScore >= 0
+      && typeof candidate.commit === 'function'
+      && typeof candidate.rollback === 'function'
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isCrazyPauseQuitRequestedEvent(
+  request: unknown,
+): request is CrazyPauseQuitRequestedEvent {
+  if (request === null || typeof request !== 'object') {
+    return false;
+  }
+  try {
+    const candidate = request as Readonly<{
+      commit?: unknown;
+      crazyRoot?: unknown;
+      rollback?: unknown;
+    }>;
+    return (
+      candidate.crazyRoot instanceof Node
+      && isValid(candidate.crazyRoot, true)
+      && typeof candidate.commit === 'function'
+      && typeof candidate.rollback === 'function'
+    );
+  } catch {
+    return false;
+  }
+}
+
+function rollbackRejectedCrazyNavigationRequest(
+  request: unknown,
+  source: 'Crazy Pause Quit' | 'Crazy Result',
+): void {
+  if (request === null || typeof request !== 'object') {
+    return;
+  }
+  try {
+    const rollback = (request as Readonly<{ rollback?: unknown }>).rollback;
+    if (typeof rollback === 'function') {
+      rollback.call(request);
+    }
+  } catch (error) {
+    console.error(normalizeError(error, `Rejected ${source} rollback failed`));
+  }
+}
+
+function commitCrazyMainMenuNavigationRequest(
+  request: CrazyMainMenuNavigationRequest,
+  previousRoot: Node,
+  source: 'Crazy Pause Quit' | 'Crazy Result',
+): void {
+  try {
+    request.commit(previousRoot);
+  } catch (error) {
+    try {
+      // Producer commits are idempotent. A second successful call confirms that the first call
+      // crossed its commit point before a post-disposal notification escaped.
+      request.commit(previousRoot);
+    } catch {
+      throw error;
+    }
+    try {
+      console.error(normalizeError(
+        error,
+        `${source} producer reported an error after committing Main Menu navigation`,
+      ));
+    } catch {
+      // Diagnostics cannot reopen a producer transaction whose idempotent commit was confirmed.
+    }
+  }
+}
+
+function aggregateWithPrimaryError(
+  label: string,
+  primary: unknown,
+  secondary: readonly unknown[],
+): Error {
+  return new Error(
+    `${label}: ${errorMessage(primary)}; secondary: ${secondary.map(errorMessage).join('; ')}`,
+  );
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function normalizeError(error: unknown, fallback: string): Error {

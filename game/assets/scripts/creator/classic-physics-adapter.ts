@@ -12,6 +12,7 @@ import {
 import { ClassicVariableStepRunner } from '../domain/classic-variable-step';
 import {
   BOMB_COLLISION_FILTER,
+  ELECTRIC_COLLISION_FILTER,
   FRUIT_COLLISION_FILTER,
 } from '../domain/classic-fixture-rules';
 
@@ -21,11 +22,35 @@ interface PreviousPhysicsState {
   readonly allowSleep: boolean;
   readonly autoSimulation: boolean;
   readonly bombCollisionMask: number;
+  readonly electricCollisionMask: number;
   readonly enable: boolean;
   readonly fruitCollisionMask: number;
   readonly gravity: Readonly<{ x: number; y: number }>;
   readonly positionIterations: number;
   readonly velocityIterations: number;
+}
+
+export interface ClassicPhysicsTransitionFailure {
+  readonly error: unknown;
+  readonly operation: string;
+}
+
+export class ClassicPhysicsTransitionError extends Error {
+  readonly failures: readonly ClassicPhysicsTransitionFailure[];
+
+  constructor(
+    message: string,
+    failures: readonly ClassicPhysicsTransitionFailure[],
+  ) {
+    super(`${message}: ${failures.map((failure) => (
+      `${failure.operation}: ${errorMessage(failure.error)}`
+    )).join('; ')}`);
+    this.name = 'ClassicPhysicsTransitionError';
+    this.failures = Object.freeze(failures.map((failure) => Object.freeze({
+      error: failure.error,
+      operation: failure.operation,
+    })));
+  }
 }
 
 type ResolveVariableDelta = (frameDeltaSeconds: number) => number;
@@ -77,20 +102,49 @@ export class ClassicPhysicsAdapter {
     if (this.configured) {
       return;
     }
+    if (this.previousState !== null) {
+      // A prior configuration rollback could not restore one or more singleton fields.
+      // Converge that retained snapshot before taking a fresh lease.
+      this.restorePreviousWorldProperties();
+    }
     // Creator may deserialize the next scene before destroying the current one. Acquire the
     // singleton snapshot only when onLoad configures this scene, after the old owner restores it.
     this.previousState = capturePreviousPhysicsState(this.physics);
+    const previousState = this.previousState;
+    try {
+      this.physics.autoSimulation = false;
+      this.physics.resetAccumulator();
+      this.physics.allowSleep = true;
+      this.physics.gravity = new Vec2(0, -320);
+      this.physics.velocityIterations = 10;
+      this.physics.positionIterations = 10;
+      this.physics.collisionMatrix[String(FRUIT_COLLISION_FILTER.categoryBits)]
+        = FRUIT_COLLISION_FILTER.maskBits;
+      this.physics.collisionMatrix[String(BOMB_COLLISION_FILTER.categoryBits)]
+        = BOMB_COLLISION_FILTER.maskBits;
+      this.physics.collisionMatrix[String(ELECTRIC_COLLISION_FILTER.categoryBits)]
+        = ELECTRIC_COLLISION_FILTER.maskBits;
+    } catch (error: unknown) {
+      const rollbackFailures = restoreCapturedPhysicsState(
+        this.physics,
+        previousState,
+      );
+      if (rollbackFailures.length === 0) {
+        this.previousState = null;
+        throw error;
+      }
+      throw new ClassicPhysicsTransitionError(
+        'Classic physics configuration and rollback failed',
+        Object.freeze([
+          Object.freeze({
+            error,
+            operation: 'configure-world-properties',
+          }),
+          ...rollbackFailures,
+        ]),
+      );
+    }
     this.configured = true;
-    this.physics.autoSimulation = false;
-    this.physics.resetAccumulator();
-    this.physics.allowSleep = true;
-    this.physics.gravity = new Vec2(0, -320);
-    this.physics.velocityIterations = 10;
-    this.physics.positionIterations = 10;
-    this.physics.collisionMatrix[String(FRUIT_COLLISION_FILTER.categoryBits)]
-      = FRUIT_COLLISION_FILTER.maskBits;
-    this.physics.collisionMatrix[String(BOMB_COLLISION_FILTER.categoryBits)]
-      = BOMB_COLLISION_FILTER.maskBits;
   }
 
   startVariableSimulation(
@@ -137,30 +191,42 @@ export class ClassicPhysicsAdapter {
   }
 
   restorePreviousWorldProperties(): void {
-    this.stopVariableSimulation();
-    if (!this.configured) {
+    const previousState = this.previousState;
+    if (previousState !== null) {
+      // Snapshot ownership survives a failed restore, but the configured lease does not.
+      // This blocks simulation restart and makes configure retry the retained restore first.
+      this.configured = false;
+    }
+    const failures: ClassicPhysicsTransitionFailure[] = [];
+    attemptPhysicsTransition(
+      failures,
+      'stop-variable-simulation',
+      () => this.stopVariableSimulation(),
+    );
+    if (previousState === null) {
+      if (this.configured) {
+        failures.push(Object.freeze({
+          error: new Error('Classic physics previous state is missing'),
+          operation: 'read-previous-state',
+        }));
+      }
+      if (failures.length > 0) {
+        throw new ClassicPhysicsTransitionError(
+          'Classic physics restoration failed',
+          failures,
+        );
+      }
       return;
     }
-    const previousState = this.previousState;
-    if (previousState === null) {
-      throw new Error('Classic physics previous state is missing');
+    failures.push(...restoreCapturedPhysicsState(this.physics, previousState));
+    if (failures.length === 0) {
+      this.previousState = null;
+      return;
     }
-    this.physics.resetAccumulator();
-    this.physics.allowSleep = previousState.allowSleep;
-    this.physics.gravity = new Vec2(
-      previousState.gravity.x,
-      previousState.gravity.y,
+    throw new ClassicPhysicsTransitionError(
+      'Classic physics restoration failed',
+      failures,
     );
-    this.physics.velocityIterations = previousState.velocityIterations;
-    this.physics.positionIterations = previousState.positionIterations;
-    this.physics.collisionMatrix[String(FRUIT_COLLISION_FILTER.categoryBits)]
-      = previousState.fruitCollisionMask;
-    this.physics.collisionMatrix[String(BOMB_COLLISION_FILTER.categoryBits)]
-      = previousState.bombCollisionMask;
-    this.physics.enable = previousState.enable;
-    this.physics.autoSimulation = previousState.autoSimulation;
-    this.previousState = null;
-    this.configured = false;
   }
 
   setWorldStopped(stopped: boolean): void {
@@ -215,12 +281,112 @@ function capturePreviousPhysicsState(physics: PhysicsSystem2D): PreviousPhysicsS
     allowSleep: physics.allowSleep,
     autoSimulation: physics.autoSimulation,
     bombCollisionMask: physics.collisionMatrix[String(BOMB_COLLISION_FILTER.categoryBits)],
+    electricCollisionMask:
+      physics.collisionMatrix[String(ELECTRIC_COLLISION_FILTER.categoryBits)],
     enable: physics.enable,
     fruitCollisionMask: physics.collisionMatrix[String(FRUIT_COLLISION_FILTER.categoryBits)],
     gravity: Object.freeze({ x: physics.gravity.x, y: physics.gravity.y }),
     positionIterations: physics.positionIterations,
     velocityIterations: physics.velocityIterations,
   });
+}
+
+function restoreCapturedPhysicsState(
+  physics: PhysicsSystem2D,
+  previousState: PreviousPhysicsState,
+): readonly ClassicPhysicsTransitionFailure[] {
+  const failures: ClassicPhysicsTransitionFailure[] = [];
+  attemptPhysicsTransition(
+    failures,
+    'reset-accumulator',
+    () => physics.resetAccumulator(),
+  );
+  attemptPhysicsTransition(
+    failures,
+    'restore-allow-sleep',
+    () => {
+      physics.allowSleep = previousState.allowSleep;
+    },
+  );
+  attemptPhysicsTransition(
+    failures,
+    'restore-gravity',
+    () => {
+      physics.gravity = new Vec2(
+        previousState.gravity.x,
+        previousState.gravity.y,
+      );
+    },
+  );
+  attemptPhysicsTransition(
+    failures,
+    'restore-velocity-iterations',
+    () => {
+      physics.velocityIterations = previousState.velocityIterations;
+    },
+  );
+  attemptPhysicsTransition(
+    failures,
+    'restore-position-iterations',
+    () => {
+      physics.positionIterations = previousState.positionIterations;
+    },
+  );
+  attemptPhysicsTransition(
+    failures,
+    'restore-fruit-collision-mask',
+    () => {
+      physics.collisionMatrix[String(FRUIT_COLLISION_FILTER.categoryBits)]
+        = previousState.fruitCollisionMask;
+    },
+  );
+  attemptPhysicsTransition(
+    failures,
+    'restore-bomb-collision-mask',
+    () => {
+      physics.collisionMatrix[String(BOMB_COLLISION_FILTER.categoryBits)]
+        = previousState.bombCollisionMask;
+    },
+  );
+  attemptPhysicsTransition(
+    failures,
+    'restore-electric-collision-mask',
+    () => {
+      physics.collisionMatrix[String(ELECTRIC_COLLISION_FILTER.categoryBits)]
+        = previousState.electricCollisionMask;
+    },
+  );
+  attemptPhysicsTransition(
+    failures,
+    'restore-enable',
+    () => {
+      physics.enable = previousState.enable;
+    },
+  );
+  attemptPhysicsTransition(
+    failures,
+    'restore-auto-simulation',
+    () => {
+      physics.autoSimulation = previousState.autoSimulation;
+    },
+  );
+  return Object.freeze(failures);
+}
+
+function attemptPhysicsTransition(
+  failures: ClassicPhysicsTransitionFailure[],
+  operation: string,
+  transition: () => void,
+): void {
+  try {
+    transition();
+  } catch (error: unknown) {
+    failures.push(Object.freeze({ error, operation }));
+  }
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function assertFinite(value: number, label: string): void {

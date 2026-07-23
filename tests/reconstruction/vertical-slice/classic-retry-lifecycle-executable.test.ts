@@ -770,6 +770,49 @@ test('runtime preparation deduplicates concurrent callers and guards shared owne
   assert.throws(() => gameplay.sharedResourceCatalog, /after teardown/);
 });
 
+test('runtime teardown attempts every owner cleanup and clears shared ownership after failures', () => {
+  cc.resetRuntime();
+  const canvas = new cc.Node('Canvas');
+  const gameplay = addComponent(canvas, ClassicGameplayController);
+  const resources = createResourceCatalog();
+  const preparation = Promise.resolve();
+  const placement = Object.freeze({ currentScreen: null });
+  const attempts: string[] = [];
+  const audio = {
+    stop() {
+      attempts.push('audio');
+      throw new Error('Injected audio cleanup failure');
+    },
+  };
+
+  setPrivate(gameplay, 'resourceCatalog', resources);
+  setPrivate(gameplay, 'audioPresenter', audio);
+  setPrivate(gameplay, 'recoveredRuntimePreparation', preparation);
+  setPrivate(gameplay, 'screenPlacement', placement);
+  setPrivate(gameplay, 'disposeClassicModePresentation', () => {
+    attempts.push('classic');
+    throw new Error('Injected Classic presentation cleanup failure');
+  });
+  setPrivate(gameplay, 'disposeResultPresentation', () => {
+    attempts.push('result');
+    throw new Error('Injected Result presentation cleanup failure');
+  });
+
+  assert.throws(
+    () => gameplay.onDestroy(),
+    /Classic recovered runtime teardown failed: Injected Classic presentation cleanup failure; Injected Result presentation cleanup failure; Injected audio cleanup failure/,
+  );
+
+  assert.deepEqual(attempts, ['classic', 'result', 'audio']);
+  assert.equal(getPrivate(gameplay, 'shuttingDown'), true);
+  assert.equal(getPrivate(gameplay, 'audioPresenter'), null);
+  assert.equal(getPrivate(gameplay, 'resourceCatalog'), null);
+  assert.equal(getPrivate(gameplay, 'recoveredRuntimePreparation'), null);
+  assert.equal(getPrivate(gameplay, 'screenPlacement'), null);
+  assert.throws(() => gameplay.sharedAudioPresenter, /after teardown/);
+  assert.throws(() => gameplay.sharedResourceCatalog, /after teardown/);
+});
+
 test('blade ownership reconciles when resource loading finishes during an active touch', () => {
   cc.resetRuntime();
   const canvas = new cc.Node('Canvas');

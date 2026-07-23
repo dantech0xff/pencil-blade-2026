@@ -133,6 +133,10 @@ export const CLASSIC_SCORE_HUD_FONT_RESOURCE: ClassicFontResource = Object.freez
   canonicalPath: 'Fonts/Linds.ttf',
 });
 
+export const CLASSIC_COMBO_FONT_RESOURCE: ClassicFontResource = Object.freeze({
+  canonicalPath: 'Fonts/GroBold.ttf',
+});
+
 export const CLASSIC_RESULT_FONT_RESOURCES: ClassicResultFontSet = Object.freeze({
   agencyB: Object.freeze({ canonicalPath: 'Fonts/AgencyB.ttf' }),
   slabThing: Object.freeze({ canonicalPath: 'Fonts/SlabThing.ttf' }),
@@ -258,6 +262,14 @@ export const CLASSIC_BOMB_RESOURCES: Readonly<Record<ClassicAssetTree, ClassicRa
     '720x1280': createRaster('720x1280/Bomb/bomb_X.png', [121, 161]),
   });
 
+/** Shared intact-fuse atlas used by the standard Bomb in every gameplay mode. */
+export const CLASSIC_BOMB_SMOKE_RESOURCES: Readonly<
+  Record<ClassicAssetTree, ClassicRasterResource>
+> = Object.freeze({
+  '480x800': createRaster('480x800/Bomb/bombsmoke.png', [1920, 256]),
+  '720x1280': createRaster('720x1280/Bomb/bombsmoke.png', [1920, 256]),
+});
+
 export const CLASSIC_DEFAULT_BLADE_RESOURCES: Readonly<
   Record<ClassicAssetTree, ClassicRasterResource>
 > = Object.freeze({
@@ -322,6 +334,15 @@ export function getClassicBombResource(
   return CLASSIC_BOMB_RESOURCES[assetTree];
 }
 
+export function getClassicBombSmokeResource(
+  assetTree: ClassicAssetTree,
+): ClassicRasterResource {
+  if (assetTree !== '480x800' && assetTree !== '720x1280') {
+    throw new RangeError('assetTree must be 480x800 or 720x1280');
+  }
+  return CLASSIC_BOMB_SMOKE_RESOURCES[assetTree];
+}
+
 export function getClassicDefaultBladeResource(
   selectedBladeId: number,
   assetTree: ClassicAssetTree,
@@ -348,11 +369,19 @@ export function getClassicCriticalParticleResource(
   return CLASSIC_CRITICAL_PARTICLE_RESOURCES[assetTree][index - 1];
 }
 
+/**
+ * Kept local for compatibility with the original Classic test/runtime import boundary.
+ * Generic and Crazy loaders accept this contract structurally.
+ */
 export function canonicalResourceToBundlePath(canonicalPath: string): string {
   if (typeof canonicalPath !== 'string' || canonicalPath.length === 0) {
     throw new TypeError('canonicalPath must be a non-empty string');
   }
-  if (canonicalPath.startsWith('/') || canonicalPath.includes('\\') || canonicalPath.includes('..')) {
+  if (
+    canonicalPath.startsWith('/')
+    || canonicalPath.includes('\\')
+    || canonicalPath.split('/').some((segment) => segment === '..')
+  ) {
     throw new RangeError('canonicalPath must remain a normalized bundle-relative path');
   }
   const extensionIndex = canonicalPath.lastIndexOf('.');

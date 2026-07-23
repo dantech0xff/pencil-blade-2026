@@ -30,20 +30,32 @@ import {
   type ClassicNormalFruitId,
   type ClassicRasterResource,
 } from '../domain/classic-resource-contract';
+import {
+  getCrazySpecialFruitResources,
+  type CrazySpecialFruitId,
+} from '../domain/crazy-resource-contract';
 import type {
   LoadedClassicNormalFruitResources,
   LoadedClassicRasterResource,
 } from './classic-resource-loader';
+import type { LoadedGameRasterResource } from './game-resource-loader';
 
 export type ClassicCutHalfPart = 'bottom' | 'top';
 export type ClassicCutHalfNativePart = 0 | 1;
+export type RecoveredCutHalfFruitId = ClassicNormalFruitId | CrazySpecialFruitId;
+
+export interface LoadedRecoveredCutHalfVisuals {
+  readonly cutBottom: LoadedClassicRasterResource | LoadedGameRasterResource;
+  readonly cutTop: LoadedClassicRasterResource | LoadedGameRasterResource;
+  readonly intact: LoadedClassicRasterResource | LoadedGameRasterResource;
+}
 
 export interface ClassicCutHalfPresenterInput {
-  readonly fruitId: ClassicNormalFruitId;
+  readonly fruitId: RecoveredCutHalfFruitId;
   /** Output of `createClassicCutHalfMotion` for this fruit and cut occurrence. */
   readonly motion: ClassicCutHalfMotionPair;
   readonly sourceEntityOccurrenceId: number;
-  readonly visuals: LoadedClassicNormalFruitResources;
+  readonly visuals: LoadedClassicNormalFruitResources | LoadedRecoveredCutHalfVisuals;
 }
 
 export type ClassicCutHalfDisposalReason =
@@ -397,7 +409,7 @@ function configureBody(
 
 function configureCollider(
   collider: BoxCollider2D,
-  resource: LoadedClassicRasterResource,
+  resource: LoadedClassicRasterResource | LoadedGameRasterResource,
 ): void {
   collider.size = new Size(
     2 * resource.dimensions.width,
@@ -419,8 +431,16 @@ function assertPresenterInput(input: ClassicCutHalfPresenterInput): void {
   if (!Number.isSafeInteger(input.sourceEntityOccurrenceId) || input.sourceEntityOccurrenceId <= 0) {
     throw new RangeError('sourceEntityOccurrenceId must be a positive safe integer');
   }
-  if (!Number.isSafeInteger(input.fruitId) || input.fruitId < 0 || input.fruitId > 8) {
-    throw new RangeError('fruitId must identify an ordinary Classic fruit from 0 through 8');
+  if (
+    !Number.isSafeInteger(input.fruitId)
+    || (
+      (input.fruitId < 0 || input.fruitId > 8)
+      && (input.fruitId < 10 || input.fruitId > 14)
+    )
+  ) {
+    throw new RangeError(
+      'fruitId must identify a recovered ordinary or Crazy special fruit',
+    );
   }
   assertMotionPair(input.motion);
   assertVisualPair(input.fruitId, input.visuals);
@@ -458,12 +478,16 @@ function assertMotionState(value: ClassicCutHalfMotionState, label: string): voi
 }
 
 function assertVisualPair(
-  fruitId: ClassicNormalFruitId,
-  visuals: LoadedClassicNormalFruitResources,
+  fruitId: RecoveredCutHalfFruitId,
+  visuals: LoadedClassicNormalFruitResources | LoadedRecoveredCutHalfVisuals,
 ): void {
   assertObject(visuals, 'visuals');
   const matchingPair = CLASSIC_ASSET_TREES
-    .map((assetTree) => getClassicNormalFruitResources(fruitId, assetTree))
+    .map((assetTree) => (
+      fruitId <= 8
+        ? getClassicNormalFruitResources(fruitId as ClassicNormalFruitId, assetTree)
+        : getCrazySpecialFruitResources(fruitId as CrazySpecialFruitId, assetTree)
+    ))
     .find((resources) => (
       visuals.cutBottom?.canonicalPath === resources.cutBottom.canonicalPath
       && visuals.cutTop?.canonicalPath === resources.cutTop.canonicalPath
@@ -476,8 +500,11 @@ function assertVisualPair(
 }
 
 function assertLoadedRaster(
-  loaded: LoadedClassicRasterResource,
-  expected: ClassicRasterResource,
+  loaded: LoadedClassicRasterResource | LoadedGameRasterResource,
+  expected: ClassicRasterResource | Readonly<{
+    readonly canonicalPath: string;
+    readonly dimensions: Readonly<{ readonly height: number; readonly width: number }>;
+  }>,
   label: string,
 ): void {
   assertObject(loaded, label);

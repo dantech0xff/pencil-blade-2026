@@ -24,6 +24,7 @@ export interface TossStrategyTimer {
   readonly elapsedSeconds: number;
   readonly thresholdSeconds: number | null;
   readonly scheduled: boolean;
+  setLimits(lowSeconds: number, highSeconds: number): void;
   start(): void;
   pause(): void;
   resume(): void;
@@ -171,6 +172,12 @@ abstract class TimedClassicTossStrategy {
       thresholdSeconds: this.timerValue.thresholdSeconds,
       scheduled: this.timerValue.scheduled,
     });
+  }
+
+  /** Changes only future timer samples; the currently armed threshold remains untouched. */
+  setLimits(lowSeconds: number, highSeconds: number): void {
+    validateInterval({ lowSeconds, highSeconds }, 'interval');
+    this.timerValue.setLimits(lowSeconds, highSeconds);
   }
 
   start(): void {
@@ -579,6 +586,7 @@ function assertTimer(timer: TossStrategyTimer): void {
     || typeof timer.resume !== 'function'
     || typeof timer.stop !== 'function'
     || typeof timer.restart !== 'function'
+    || typeof timer.setLimits !== 'function'
     || typeof timer.tick !== 'function'
   ) {
     throw new TypeError('createTimer() must return a TossTimer-compatible object');

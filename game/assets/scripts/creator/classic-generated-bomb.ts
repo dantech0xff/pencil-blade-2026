@@ -64,9 +64,13 @@ export interface ClassicGeneratedBombDisposedEvent {
 
 export interface ClassicGeneratedBombLifecycle {
   readonly callAfterStep: (mutation: () => void) => void;
-  /** Stops the two retained effect handles before native motion freeze. */
+  /**
+   * Stops both retained effect slots for every valid cut report. The historical callback name
+   * is retained for adapter compatibility, but this runs before the one-shot cut guard and
+   * therefore also runs when no second freeze will occur.
+   */
   readonly onBeforeFreeze: (event: ClassicGeneratedBombCutEvent) => void;
-  /** Future explosion ownership starts after motion freeze at this synchronous boundary. */
+  /** Explosion ownership starts once, after the accepted report freezes all body motion. */
   readonly onCut: (event: ClassicGeneratedBombCutEvent) => void;
   readonly onDisposed: (event: ClassicGeneratedBombDisposedEvent) => void;
 }
@@ -74,12 +78,11 @@ export interface ClassicGeneratedBombLifecycle {
 const CLASSIC_ASSET_TREES = Object.freeze(['480x800', '720x1280'] as const);
 
 /**
- * Standard Classic bomb body and intact-sprite foundation.
+ * Shared standard Bomb body, intact sprite, and first-cut lifecycle boundary.
  *
- * This class deliberately stops at the recovered first-cut boundary. It does not invent the
- * unresolved procedural triangle rasterization. A future exact explosion presenter receives
- * `onCut`, performs `AfterBombHit`, then calls `finishAfterBombHit()` to dispose this body at
- * the shared post-step boundary.
+ * `onCut` attaches the exact explosion before the mode's BombHit/audio sequence. Once that
+ * presenter has detached and synchronously completed AfterBombHit, `finishAfterBombHit()`
+ * requests body/node disposal through the shared post-step boundary.
  */
 export class ClassicGeneratedBomb {
   readonly body: RigidBody2D;
@@ -216,16 +219,12 @@ export class ClassicGeneratedBomb {
     });
   }
 
-  /** First hit freezes the bomb and emits exactly one synchronous explosion handoff. */
+  /**
+   * Every valid report repeats the recovered pre-guard effect stops. The first accepted report
+   * alone freezes the body and emits the synchronous explosion handoff.
+   */
   cut(segment: CutSegment): boolean {
-    if (this.cutDisabled) {
-      return false;
-    }
     const copiedSegment = copySegment(segment);
-
-    // Set the one-shot guard before any lifecycle callback so duplicate fixtures or callback
-    // re-entry cannot attach more than one explosion for this bomb.
-    this.cutValue = true;
     const event: ClassicGeneratedBombCutEvent = Object.freeze({
       bombId: this.bombId,
       entityOccurrenceId: this.entityOccurrenceId,
@@ -233,8 +232,29 @@ export class ClassicGeneratedBomb {
       targetId: this.targetId,
       worldPosition: this.worldPositionSnapshot(),
     });
+
+    // Native repeats both retained-slot stops before it reads the one-shot cut flag.
+    let preGuardFailure: Readonly<{ readonly error: unknown }> | null = null;
     try {
       this.lifecycle.onBeforeFreeze(event);
+    } catch (error) {
+      preGuardFailure = Object.freeze({ error });
+    }
+    if (this.cutDisabled) {
+      if (preGuardFailure !== null) {
+        throw preGuardFailure.error;
+      }
+      return false;
+    }
+
+    this.cutValue = true;
+    if (preGuardFailure !== null) {
+      this.freezeMotion();
+      this.queueDispose('cut-handoff-failed');
+      throw preGuardFailure.error;
+    }
+
+    try {
       this.freezeMotion();
       this.lifecycle.onCut(event);
     } catch (error) {
@@ -247,7 +267,7 @@ export class ClassicGeneratedBomb {
     return true;
   }
 
-  /** Called only after a future exact explosion has synchronously completed `AfterBombHit`. */
+  /** Called only after the exact explosion has detached and completed `AfterBombHit`. */
   finishAfterBombHit(): boolean {
     if (!this.cutValue) {
       throw new Error('Classic bomb cannot finish before its first cut');
@@ -304,8 +324,10 @@ export class ClassicGeneratedBomb {
       targetId: this.targetId,
     });
 
+    let mutationStarted = false;
     try {
       this.lifecycle.callAfterStep(() => {
+        mutationStarted = true;
         try {
           if (isValid(this.node, true)) {
             this.node.destroy();
@@ -316,7 +338,11 @@ export class ClassicGeneratedBomb {
         }
       });
     } catch (error) {
-      this.disposalQueuedValue = false;
+      // A synchronous after-step port can execute the mutation and then surface an observer
+      // failure. In that case the node may already be destroyed and must never be re-queued.
+      if (!mutationStarted) {
+        this.disposalQueuedValue = false;
+      }
       throw error;
     }
     return true;
@@ -334,6 +360,7 @@ export class ClassicGeneratedBomb {
   private freezeMotion(): void {
     this.body.linearVelocity = new Vec2(0, 0);
     this.body.angularVelocity = 0;
+    this.body.gravityScale = 0;
   }
 
   private worldPositionSnapshot(): Readonly<{ x: number; y: number }> {

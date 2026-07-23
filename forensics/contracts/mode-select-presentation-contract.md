@@ -339,6 +339,29 @@ On a horizontal flick:
 
 The flick changes only the index. The scheduled centering rule moves the rail afterward.
 
+The recovered `CCGesturesLayer` raw-touch bridge preserves both callbacks rather than treating
+drag and flick as mutually exclusive:
+
+- `ccTouchesMoved` at `0x001470E8` updates the retained previous/current touch positions,
+  invokes the generic drag callback, then invokes the horizontal or vertical drag callback
+  selected from the movement angle;
+- the inclusive angle sectors `45..135` and `-135..-45` degrees are vertical; horizontal
+  dispatch therefore requires `abs(delta.x) > abs(delta.y)`, with diagonal ties treated as
+  vertical;
+- `ccTouchesEnded` at `0x00146FF8` compares the Euclidean length of the retained last move
+  segment (`previous - current`) against binary32 `1.0`; it does not sample a new end position
+  or use the total begin-to-end displacement;
+- when that distance is strictly greater than `1.0`, it invokes the generic flick callback
+  and then the direction-specific flick callback before clearing the pressed state. The
+  callback reads `getDelta()`, which returns `current - previous`;
+- therefore a physical gesture can legitimately apply horizontal drag deltas and then a
+  horizontal flick. A compatibility bridge must not suppress the flick merely because a drag
+  callback already changed `currentIdx`.
+
+Creator touch-cancel has no corresponding recovered callback in this binary. The Creator
+adapter clears its owned gesture state without emitting a flick on cancel; that is an explicit
+platform-lifecycle inference, not a recovered gameplay rule.
+
 ### Frame-based centering
 
 `ModeSelectLayer::update` invokes `PhysicsBladeLayer::update` first. When the gesture is

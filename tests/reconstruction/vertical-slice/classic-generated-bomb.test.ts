@@ -294,7 +294,7 @@ test('standard bomb uses exact rasters, anchor, stable identifiers, body, fixtur
   }
 });
 
-test('first cut guards repeats before callback, freezes motion, and waits for afterBombHit finish', () => {
+test('each cut report stops effects before the guard while only the first freezes and hands off', () => {
   const deferred = createDeferredLifecycle();
   const cutOrder: string[] = [];
   const bomb = ClassicGeneratedBomb.create(
@@ -304,8 +304,15 @@ test('first cut guards repeats before callback, freezes motion, and waits for af
       ...deferred.lifecycle,
       onBeforeFreeze(event) {
         cutOrder.push('stop-retained-handles');
-        assert.deepEqual(vector(bomb.body.linearVelocity), { x: 4, y: 12 });
-        assert.equal(bomb.body.angularVelocity, -8);
+        if (cutOrder.length === 1) {
+          assert.deepEqual(vector(bomb.body.linearVelocity), { x: 4, y: 12 });
+          assert.equal(bomb.body.angularVelocity, -8);
+          assert.equal(bomb.body.gravityScale, 1);
+        } else {
+          assert.deepEqual(vector(bomb.body.linearVelocity), { x: 0, y: 0 });
+          assert.equal(bomb.body.angularVelocity, 0);
+          assert.equal(bomb.body.gravityScale, 0);
+        }
         deferred.lifecycle.onBeforeFreeze(event);
       },
       onCut(event) {
@@ -313,6 +320,7 @@ test('first cut guards repeats before callback, freezes motion, and waits for af
         assert.equal(bomb.cutDisabled, true);
         assert.deepEqual(vector(bomb.body.linearVelocity), { x: 0, y: 0 });
         assert.equal(bomb.body.angularVelocity, 0);
+        assert.equal(bomb.body.gravityScale, 0);
         deferred.lifecycle.onCut(event);
       },
     },
@@ -326,9 +334,13 @@ test('first cut guards repeats before callback, freezes motion, and waits for af
 
   assert.equal(bomb.cut(segment), true);
   segment.start.x = 999;
-  assert.equal(bomb.cut(null as never), false);
+  assert.equal(bomb.cut(segment), false);
   assert.equal(deferred.cuts.length, 1);
-  assert.deepEqual(cutOrder, ['stop-retained-handles', 'explosion-handoff']);
+  assert.deepEqual(cutOrder, [
+    'stop-retained-handles',
+    'explosion-handoff',
+    'stop-retained-handles',
+  ]);
   assert.deepEqual(deferred.cuts[0], {
     entityOccurrenceId: 41,
     targetId: 'classic-bomb:41',
@@ -377,7 +389,11 @@ test('throwing cut handoff keeps the one-shot guard and defers fail-closed dispo
   assert.equal(bomb.disposalQueued, true);
   assert.deepEqual(vector(bomb.body.linearVelocity), { x: 0, y: 0 });
   assert.equal(bomb.body.angularVelocity, 0);
-  assert.equal(bomb.cut(null as never), false);
+  assert.equal(bomb.body.gravityScale, 0);
+  assert.equal(
+    bomb.cut({ start: { x: 1, y: 2 }, end: { x: 3, y: 4 } }),
+    false,
+  );
   assert.equal(deferred.callbacks.length, 1);
 
   flushDeferred(deferred);
@@ -410,6 +426,7 @@ test('throwing pre-freeze hook still freezes motion and defers fail-closed dispo
   assert.equal(bomb.disposalQueued, true);
   assert.deepEqual(vector(bomb.body.linearVelocity), { x: 0, y: 0 });
   assert.equal(bomb.body.angularVelocity, 0);
+  assert.equal(bomb.body.gravityScale, 0);
   assert.equal(deferred.cuts.length, 0);
   assert.equal(deferred.callbacks.length, 1);
 

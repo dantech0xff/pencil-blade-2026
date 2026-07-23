@@ -1,6 +1,6 @@
 # Cocos Creator Architecture Decision
 
-Status: in progress; recovered-resource Classic checkpoint integrated
+Status: in progress; recovered-resource Classic and Crazy checkpoints integrated
 Date: 2026-07-22
 
 ## Decision
@@ -11,14 +11,15 @@ domain modules with explicit clock, RNG, input, persistence, and command ports. 
 components, prefabs, tweens, audio, and Physics2D calls are adapters rather than owners of
 gameplay state.
 
-The workspace now contains the Creator foundation, Classic contract/test baseline, all 862
-exact recovered APK game assets in a Creator bundle, and a bounded normal-fruit loop using
-the recovered background, text, intact/cut fruit, critical-particle, and core-audio resources.
-The exact score HUD now adds the recovered score icon, best-score cup, double-score panel,
-and `Fonts/Linds.ttf` through a dedicated presenter. Process-owned persistence now covers
-`total_coins`, `classic_best_1/2/3`, and `enable_effect` in recovered order.
-The remaining scene/prefab map, eight deferred toss controllers, most presentation consumers,
-and runtime physics-equivalence gate keep the architecture decision in progress.
+The workspace now contains the Creator foundation, Classic and Crazy contract/test baselines,
+all 862 exact recovered APK game assets in a Creator bundle, and a persistent app shell that
+routes Main Menu -> Mode Select -> production modes `0` and `1`. Classic owns the recovered
+normal-fruit, blade, HUD, fail, result, and core-audio path. Crazy adds its 60-second controller
+graph, standard/electric bombs, specials, magnet, Dragon, objectives, pause, audio, and
+transactional Result lifecycle. Process-owned persistence covers the eleven implemented
+Settings fields plus immediate mode-unlock keys. The remaining scene/prefab map, modes `2`
+through `5`, most presentation consumers, and runtime physics-equivalence gate keep the
+architecture decision in progress.
 
 ## Dependency Direction
 
@@ -67,16 +68,18 @@ must not.
 
 ## Current Workspace Boundary
 
-- `game/assets/scripts/domain/` contains the pure Classic modules.
-- `game/assets/scripts/creator/` contains the Physics2D, resolution, blade-input, Classic
-  scene, generated-entity, resource, audio/effect, and bounded gameplay bridges.
-- `game/assets/scenes/classic.scene` is Editor-authored and attaches `BladeInputController`,
-  `ClassicSceneController`, and `ClassicGameplayController` to Canvas.
+- `game/assets/scripts/domain/` contains the pure Classic, Crazy, menu/shared-scene,
+  timer/bonus/objective/result, and presentation contracts.
+- `game/assets/scripts/creator/` contains the Physics2D, resolution, blade-input, app-shell,
+  Classic/Crazy scene, generated-entity, resource, audio/effect, pause, and gameplay bridges.
+- `game/assets/scenes/classic.scene` is Editor-authored and attaches the persistent app shell
+  plus passive Classic and Crazy runtime owners to Canvas.
 - `game/assets/game/` contains byte-identical copies of all 862 recovered APK game assets.
   The current Classic subset uses exact rasters and audio, but consumer/UUID coverage is not
   complete and the canonical sample-project root remains unresolved. Release rights are
   tracked separately.
-- `tests/reconstruction/vertical-slice/` contains the current Classic regression suite.
+- `tests/reconstruction/vertical-slice/` contains the current `739/739` Classic/Crazy/menu
+  regression suite.
 - `scripts/audit-creator-build.mjs` contains the post-build archive audit.
 - `game/library/` is generated Creator cache and is not hand-authored gameplay source.
 
@@ -95,7 +98,14 @@ must not.
 - `FailService` exposes every fail callback invocation. `ClassicSession` independently guards
   its terminal transition, because multiple outstanding callbacks may observe fail count `3`.
 - Standard Classic is untimed and must not instantiate `TimeManagerService`; the shared
-  countdown service belongs only to modes whose recovered call graphs require it.
+  countdown service belongs only to modes whose recovered call graphs require it. Crazy mode
+  owns the recovered 60-second instance, freeze/thaw commands, warning ticks, Time-Up
+  presentation, and retryable finish callback.
+- `CrazySession` and `CrazyTossCoordinator` own the mode-1 lifecycle and recovered controller
+  graph. Time-Up drains its command suffix once even when a listener fails. Time-Up Finish
+  enlists the gameplay Result owner as a two-phase participant: pre-commit failure restores the
+  exact Crazy/TimeManager owner; post-commit cleanup cannot roll back the domain or rearm a
+  disposed TimeManager.
 - Terminal guard, pending fail callbacks, active bomb presentations, and the physics-stop
   Boolean are orthogonal. A same-query multi-bomb case can attach independent explosions;
   the first finish may resume physics while another remains pending.
@@ -152,6 +162,12 @@ ordered Score HUD, World, and Fail roots; all generated fruits, cut halves, and 
 particles attach to World so equal-z insertion cannot reorder presentation layers. Fail markers
 preserve their recovered `1 -> 2 -> 3` order inside the Fail root.
 
+`CrazySceneController` and `CrazyGameplayController` follow the same passive scene-lifetime
+pattern but claim their Physics2D/input leases only after the app shell commits mode `1`.
+Run-owned presenters and registry entities are replaced transactionally for Replay, Quit,
+Time-Up Result, and Retry. Cleanup that fails after a committed replacement moves to explicit
+retired ownership and must be drained before constructing the next run.
+
 ## Presentation and Asset Boundary
 
 - Domain emits presentation/audio commands; Creator adapters interpret them.
@@ -172,9 +188,11 @@ Map the recovered SharedPreferences keys/defaults into a versioned TypeScript sa
 Legacy ads, review, social, and network bridges are excluded. Migration reads may recognize
 legacy keys, but no JNI/native compatibility layer is permitted.
 
-The current bounded runtime reads and writes `total_coins`, `classic_best_1/2/3`, then Boolean
-`enable_effect`, whose recovered default is `true`. Result mutations remain memory-only until
-the app-hide save checkpoint. Full first-launch Settings and Main Menu exit-save remain open.
+The current runtime reads and writes the eleven implemented values for coins, selected
+theme/background/blade, Classic and Crazy leaderboards, music/effect flags, network sentinel,
+and rated state in recovered relative order. Indexed Mode Select unlocks use their separate
+immediate keys. Result mutations remain memory-only until the app-hide save checkpoint. Full
+first-launch Settings and Main Menu exit-save remain open.
 
 ## Verification Gates
 
@@ -185,26 +203,38 @@ the app-hide save checkpoint. Full first-launch Settings and Main Menu exit-save
    trajectories, post-step synchronization, deferred lifecycle behavior, and rendered rotation.
 4. Presentation/resource tests against registered hashes, geometry, and command order.
 5. Executable controller tests for same-parent Retry success, pre-commit rollback, and
-   post-commit Result-cleanup isolation.
+   post-commit Result-cleanup isolation in both Classic and Crazy. Crazy additionally proves
+   ordered Time-Up tail dispatch, exact-owner rollback, single leaderboard commit, retired
+   cleanup drain, and post-commit observer isolation.
 6. Build-content audit rejecting APKs, `libgame.so`, extracted native/decompiler output,
    old Cocos2d-x code/runtime, secrets, and obsolete platform SDKs. The audit hashes every
    archive entry, parses exact ZIP records, recurses through bounded nested archives, and
    permits ELF only at the pinned Creator 3.8.8 `libcocos.so` boundary.
 
+Current checkpoint: full vertical slice `739/739` including focused Crazy/TimeManager coverage,
+inventory/source/staging/archive workflow `14/14`, reconstruction policy positive plus `4/4`
+negative fixtures, strict Creator TypeScript, and independent P0/P1 review pass. A fresh
+Creator-served Browser Preview also confirms the latest Crazy crash/transaction fixes through
+Main Menu → Mode Select → Crazy → Pause/Resume/Replay/Quit → Main Menu with zero errors.
+
 ## Current Blockers
 
-- The Classic Canvas map is authoritative for the three scene components, but the remaining
-  scenes, prefabs, presentation consumers, and non-normal toss factories are not authored yet.
+- The persistent Canvas map is authoritative for the app shell and current Classic/Crazy
+  owners, but remaining mode presenters, prefabs, and consumers are not authored yet.
 - Creator Preview has exercised exact ordinary-fruit presentation, trajectories, cut halves,
   core audio, cut/score, three-miss game over, and two same-parent Result->Retry cycles without
   a reload or game/Cocos console error. The executable Retry harness covers construction,
   early/late physics, post-parent attachment, commit, and Result-cleanup failures. Exact contact,
   ray traversal order, deferred destruction, and deterministic trajectory equivalence remain open.
+- Crazy Preview has exercised production entry, live entity spawning, Replay, Quit, re-entry,
+  natural Time-Up -> Result, and Result Retry with zero Creator Console errors. Its transaction
+  harness covers command-listener, provisional Result, cleanup, and observer failures.
 - The canonical sample-project resource manifest/root remains unresolved; presentation
   completion and the `99%` metric both stay blocked on that source.
-- BombElectric contact compatibility remains unresolved.
-- TimeManager callback hardening and any post-fidelity reference-counted multi-bomb variant
-  need explicit compatibility decisions; they do not block the first preserved contract.
+- BombElectric runs through the memory-safe target adapter, but exact pinned-backend
+  contact-count/direction equivalence remains unresolved.
+- Modes `2` through `5` remain fail closed. Shared BaseBird/BirdBlade and Classic Bird are the
+  next architecture boundary, followed by Crazy Bird, Combo Bird, and GN Style.
 - Original content rights remain unknown.
 
 ## References
@@ -215,5 +245,7 @@ the app-hide save checkpoint. Full first-launch Settings and Main Menu exit-save
 - `../../forensics/contracts/classic-cut-score-contract.md`
 - `../../forensics/contracts/classic-time-state-contract.md`
 - `../../forensics/contracts/classic-presentation-contract.md`
+- `../../forensics/contracts/crazy-mode-contract.md`
 - `../../reference/reconstruction-policy.yaml`
 - `../../plans/260721-2253-pencil-blade-restoration/reports/creator-readiness-2026-07-22.md`
+- `../../plans/260721-2253-pencil-blade-restoration/reports/implementer-2026-07-23-crazy-mode-runtime.md`

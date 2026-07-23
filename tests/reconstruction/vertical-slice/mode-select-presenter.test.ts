@@ -28,6 +28,7 @@ class EventOwner {
   emit(type, event) {
     for (const listener of this.listeners.get(type) ?? []) listener.callback.call(listener.target, event);
   }
+  listenerCount(type) { return (this.listeners.get(type) ?? []).length; }
   off(type, callback, target) {
     this.listeners.set(type, (this.listeners.get(type) ?? []).filter((listener) => (
       listener.callback !== callback || listener.target !== target
@@ -118,12 +119,17 @@ const BLADE_STUB_URL = moduleUrl(`
 import { Node } from 'cc';
 export class ClassicBladePresenter {
   static create() { return new ClassicBladePresenter(); }
-  constructor() { this.disposed = false; this.root = new Node('ClassicBasicBladeRoot'); this.root.active = false; }
+  constructor() {
+    this.disposed = false;
+    this.events = [];
+    this.root = new Node('ClassicBasicBladeRoot');
+    this.root.active = false;
+  }
   attach(parent) { this.root.setParent(parent); this.root.active = true; }
-  begin() {}
+  begin(slot) { this.events.push('begin:' + slot); }
   dispose() { if (this.disposed) return false; this.disposed = true; this.root.destroy(); return true; }
-  end() {}
-  move() {}
+  end(slot) { this.events.push('end:' + slot); }
+  move(slot, point) { this.events.push('move:' + slot + ':' + point.x + ':' + point.y); }
   updateFrame() {}
 }
 `);
@@ -266,6 +272,12 @@ registerHooks({
 const cc = await import('cc') as unknown as CocosStub;
 const ropeStub = await import(ROPE_STUB_URL) as unknown as RopeStub;
 const {
+  CLASSIC_BLADE_BEGAN_EVENT,
+  CLASSIC_BLADE_ENDED_EVENT,
+  CLASSIC_BLADE_MOVED_EVENT,
+} = await import(BLADE_INPUT_STUB_URL);
+const {
+  MODE_SELECT_HORIZONTAL_DRAG_EVENT,
   MODE_SELECT_HORIZONTAL_FLICK_EVENT,
   ModeSelectPresenter,
 } = await import('../../../game/assets/scripts/creator/mode-select-presenter.ts');
@@ -279,6 +291,7 @@ interface StubNode {
   parent: StubNode | null;
   emit(type: string, event?: unknown): void;
   getComponent<T>(Type: new () => T): T | null;
+  listenerCount(type: string): number;
   setParent(parent: StubNode | null): void;
 }
 
@@ -338,6 +351,132 @@ test('constructs a detached exact six-card screen and acquires input only on act
   presenter.dispose();
 });
 
+test('a short real blade touch drag selects Crazy and the unpressed rail centers it', () => {
+  ropeStub.resetRopes();
+  const bladeInput = bladeInputHarness();
+  const presenter = ModeSelectPresenter.create(presenterInput(bladeInput).input as never);
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+  presenter.activate();
+  centerCard(presenter, 0);
+
+  emitBladeBegan(bladeInput, 7, 0, 320, 400);
+  emitBladeMoved(bladeInput, 7, 0, 320, 400, 319, 400, 999);
+  assert.equal(presenter.state.model.anchorXs[0], 239);
+  assert.equal(presenter.state.model.currentIndex, 1);
+  emitBladeEnded(bladeInput, 7, 0, false);
+
+  assert.equal(
+    presenter.state.model.currentIndex,
+    1,
+    'the recovered >1 flick threshold must not double-advance an exact one-unit drag',
+  );
+  centerCard(presenter, 1);
+  assert.equal(presenter.state.model.anchorXs[1], 240);
+  assert.deepEqual(
+    (presenter.blade as unknown as { readonly events: readonly string[] }).events.slice(-4),
+    ['begin:0', 'move:0:320:400', 'move:0:319:400', 'end:0'],
+  );
+  presenter.dispose();
+});
+
+test('one blade touch owns the gesture through recovered drag, flick, end, and cancel', () => {
+  ropeStub.resetRopes();
+  const bladeInput = bladeInputHarness();
+  const presenter = ModeSelectPresenter.create(presenterInput(bladeInput).input as never);
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+  presenter.activate();
+  centerCard(presenter, 0);
+
+  emitBladeBegan(bladeInput, 5, 0, 300, 400);
+  emitBladeMoved(bladeInput, 5, 0, 300, 400, 290, 410);
+  assert.equal(presenter.state.model.anchorXs[0], 240);
+  emitBladeEnded(bladeInput, 5, 0, false);
+  assert.equal(
+    presenter.state.model.currentIndex,
+    0,
+    'a 45-degree tie belongs to the recovered vertical sector for drag and flick',
+  );
+  assert.doesNotThrow(() => emitBladeBegan(bladeInput, 6, 4, 300, 400));
+  emitBladeMoved(bladeInput, 6, 4, 300, 400, 200, 400);
+  emitBladeEnded(bladeInput, 6, 4, false);
+  assert.equal(presenter.state.model.anchorXs[0], 240);
+
+  emitBladeBegan(bladeInput, 10, 0, 320, 400);
+  emitBladeBegan(bladeInput, 20, 1, 100, 400);
+  emitBladeMoved(bladeInput, 20, 1, 100, 400, 20, 400);
+  assert.equal(presenter.state.model.anchorXs[0], 240);
+
+  emitBladeMoved(bladeInput, 10, 0, 320, 400, 300, 400);
+  assert.equal(presenter.state.model.currentIndex, 1);
+  emitBladeEnded(bladeInput, 20, 1, false);
+  emitBladeMoved(bladeInput, 10, 0, 300, 400, 290, 400);
+  emitBladeEnded(bladeInput, 10, 0, false);
+  assert.equal(
+    presenter.state.model.currentIndex,
+    2,
+    'a >1 horizontal release preserves recovered drag-then-flick double dispatch',
+  );
+
+  const anchorBeforeReplacement = presenter.state.model.anchorXs[0];
+  emitBladeBegan(bladeInput, 30, 0, 200, 400);
+  emitBladeMoved(bladeInput, 30, 0, 200, 400, 220, 400);
+  const indexBeforeCancel = presenter.state.model.currentIndex;
+  emitBladeEnded(bladeInput, 30, 0, true);
+  assert.equal(presenter.state.model.currentIndex, indexBeforeCancel);
+  const anchorAfterCancel = presenter.state.model.anchorXs[0];
+  emitBladeMoved(bladeInput, 30, 0, 220, 400, 260, 400);
+  assert.equal(presenter.state.model.anchorXs[0], anchorAfterCancel);
+  assert.notEqual(anchorAfterCancel, anchorBeforeReplacement);
+  presenter.dispose();
+});
+
+test('gesture listeners and ownership reset on suspend, rearm, and dispose', () => {
+  ropeStub.resetRopes();
+  const bladeInput = bladeInputHarness();
+  const presenter = ModeSelectPresenter.create(presenterInput(bladeInput).input as never);
+  const gestures = presenter.root.children.find(({ name }) => name === 'gestures-layer');
+  assert.ok(gestures);
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+
+  assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_BEGAN_EVENT), 0);
+  presenter.activate();
+  assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_BEGAN_EVENT), 1);
+  assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_MOVED_EVENT), 1);
+  assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_ENDED_EVENT), 1);
+  assert.equal(gestures.listenerCount(MODE_SELECT_HORIZONTAL_DRAG_EVENT), 1);
+  assert.equal(gestures.listenerCount(MODE_SELECT_HORIZONTAL_FLICK_EVENT), 1);
+
+  centerCard(presenter, 0);
+  emitBladeBegan(bladeInput, 40, 0, 300, 400);
+  assert.equal(presenter.suspendForTransition(), true);
+  assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_BEGAN_EVENT), 0);
+  assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_MOVED_EVENT), 0);
+  assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_ENDED_EVENT), 0);
+  assert.equal(gestures.listenerCount(MODE_SELECT_HORIZONTAL_DRAG_EVENT), 0);
+  const suspendedAnchor = presenter.state.model.anchorXs[0];
+  emitBladeMoved(bladeInput, 40, 0, 300, 400, 250, 400);
+  assert.equal(presenter.state.model.anchorXs[0], suspendedAnchor);
+
+  assert.equal(presenter.rearmNavigationAfterFailure(), true);
+  assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_BEGAN_EVENT), 1);
+  assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_MOVED_EVENT), 1);
+  assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_ENDED_EVENT), 1);
+  assert.equal(gestures.listenerCount(MODE_SELECT_HORIZONTAL_DRAG_EVENT), 1);
+  emitBladeBegan(bladeInput, 41, 0, 300, 400);
+  emitBladeMoved(bladeInput, 41, 0, 300, 400, 299, 400);
+  emitBladeEnded(bladeInput, 41, 0, true);
+  assert.equal(presenter.state.model.anchorXs[0], suspendedAnchor - 1);
+
+  gestures.emit(MODE_SELECT_HORIZONTAL_DRAG_EVENT, { deltaX: 1 });
+  assert.equal(presenter.state.model.anchorXs[0], suspendedAnchor);
+  presenter.dispose();
+  assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_BEGAN_EVENT), 0);
+  assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_MOVED_EVENT), 0);
+  assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_ENDED_EVENT), 0);
+  assert.equal(gestures.listenerCount(MODE_SELECT_HORIZONTAL_DRAG_EVENT), 0);
+  assert.equal(gestures.listenerCount(MODE_SELECT_HORIZONTAL_FLICK_EVENT), 0);
+});
+
 test('partial RopeButton activation rolls back the input lease and permits retry', () => {
   ropeStub.resetRopes();
   ropeStub.configureActivationFailure(2);
@@ -356,10 +495,15 @@ test('partial RopeButton activation rolls back the input lease and permits retry
   presenter.dispose();
 });
 
-test('rejected unsupported route restores every cut card and permits recutting the same card', () => {
+test('rejected Crazy and unsupported routes restore every cut card and permit recutting', () => {
   ropeStub.resetRopes();
+  let crazyCalls = 0;
   let unsupportedCalls = 0;
   const lifecycle = defaultLifecycle();
+  lifecycle.onCrazyRequested = () => {
+    crazyCalls += 1;
+    return false;
+  };
   lifecycle.onUnsupportedDestinationRequested = () => {
     unsupportedCalls += 1;
     return false;
@@ -375,15 +519,19 @@ test('rejected unsupported route restores every cut card and permits recutting t
   assert.ok(crazy);
   assert.ok(crazyBird);
   assert.equal(crazy.cut(segment, true), true);
-  assert.equal(crazyBird.cut(segment, true), true);
-  assert.equal(presenter.state.navigationPendingCount, 2);
+  assert.equal(presenter.state.navigationPendingCount, 1);
+  presenter.update(0.75);
+  assert.equal(crazyCalls, 1);
+  assert.equal(unsupportedCalls, 0);
+  assert.equal(crazy.restoreCount, 1);
+  assert.equal(crazy.cutAccepted, false);
 
+  assert.equal(crazyBird.cut(segment, true), true);
+  assert.equal(presenter.state.navigationPendingCount, 1);
   presenter.update(0.75);
   assert.equal(unsupportedCalls, 1);
   assert.equal(presenter.state.navigationPendingCount, 0);
-  assert.equal(crazy.restoreCount, 1);
   assert.equal(crazyBird.restoreCount, 1);
-  assert.equal(crazy.cutAccepted, false);
   assert.equal(crazyBird.cutAccepted, false);
   assert.equal(crazy.cut(segment, true), true);
   presenter.dispose();
@@ -594,12 +742,75 @@ test('source keeps exact detached/lifecycle boundaries and no destination placeh
   assert.match(source, /this\.inputLeaseHeld = true/);
   assert.match(source, /this\.bladeInput\.deactivateForNonClassicScreen\(\)/);
   assert.match(source, /onClassicRequested/);
+  assert.match(source, /onCrazyRequested/);
   assert.match(source, /onMainMenuRequested/);
   assert.match(source, /onUnsupportedDestinationRequested/);
   assert.match(source, /restoreAfterFailedNavigation/);
   assert.doesNotMatch(source, /new Node\(['"](?:Crazy|GNStyle|ClassicBird|CrazyBird|ComboBird)Layer/);
   assert.doesNotMatch(source, /total-coins-label/);
 });
+
+function centerCard(
+  presenter: InstanceType<typeof ModeSelectPresenter>,
+  cardIndex: number,
+): void {
+  for (let frame = 0; frame < 256; frame += 1) {
+    if (presenter.state.model.anchorXs[cardIndex] === 240) {
+      return;
+    }
+    presenter.update(0);
+  }
+  assert.fail(`card ${String(cardIndex)} did not center within 256 frames`);
+}
+
+function emitBladeBegan(
+  bladeInput: BladeInputHarness,
+  touchId: number,
+  slot: number,
+  x: number,
+  y: number,
+): void {
+  bladeInput.node.emit(CLASSIC_BLADE_BEGAN_EVENT, {
+    point: { x, y },
+    slot,
+    touchId,
+  });
+}
+
+function emitBladeMoved(
+  bladeInput: BladeInputHarness,
+  touchId: number,
+  slot: number,
+  previousX: number,
+  previousY: number,
+  currentX: number,
+  currentY: number,
+  reportedDeltaX?: number,
+): void {
+  bladeInput.node.emit(CLASSIC_BLADE_MOVED_EVENT, {
+    deltaX: reportedDeltaX,
+    segment: {
+      current: { x: currentX, y: currentY },
+      previous: { x: previousX, y: previousY },
+      slot,
+      touchId,
+    },
+    shouldPlaySwish: false,
+  });
+}
+
+function emitBladeEnded(
+  bladeInput: BladeInputHarness,
+  touchId: number,
+  slot: number,
+  cancelled: boolean,
+): void {
+  bladeInput.node.emit(CLASSIC_BLADE_ENDED_EVENT, {
+    cancelled,
+    slot,
+    touchId,
+  });
+}
 
 function presenterInput(
   bladeInput: BladeInputHarness,
@@ -702,6 +913,7 @@ function bladeInputHarness(): BladeInputHarness {
 function defaultLifecycle() {
   return {
     onClassicRequested(_transaction?: unknown) { return true; },
+    onCrazyRequested(_transaction?: unknown) { return true; },
     onMainMenuRequested(_transaction?: unknown) { return true; },
     onUnsupportedDestinationRequested(
       _destination?: unknown,

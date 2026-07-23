@@ -8,6 +8,7 @@ import {
 } from 'cc';
 
 import {
+  CLASSIC_COMBO_FONT_RESOURCE,
   CLASSIC_CRITICAL_PARTICLE_RESOURCES,
   CLASSIC_NORMAL_FRUIT_RESOURCES,
   CLASSIC_RESULT_FONT_RESOURCES,
@@ -15,6 +16,7 @@ import {
   canonicalResourceToBundlePath,
   canonicalRasterToSpriteFrameBundlePath,
   getClassicBombResource,
+  getClassicBombSmokeResource,
   getClassicCriticalParticleResource,
   getClassicDefaultBladeResource,
   getClassicNormalFruitResources,
@@ -88,6 +90,8 @@ export interface LoadedClassicResultFonts {
 
 export class ClassicSliceResourceCatalog {
   readonly assetTree: ClassicAssetTree;
+  readonly bombSmoke: LoadedClassicRasterResource;
+  readonly comboFont: LoadedClassicFontResource;
   readonly criticalParticles: LoadedClassicCriticalParticleResources;
   readonly defaultBlade: LoadedClassicRasterResource;
   readonly presentation: LoadedClassicPresentationResources;
@@ -104,8 +108,10 @@ export class ClassicSliceResourceCatalog {
     normalFruitResources: readonly LoadedClassicNormalFruitResources[],
     criticalParticles: LoadedClassicCriticalParticleResources,
     bombResource: LoadedClassicRasterResource,
+    bombSmoke: LoadedClassicRasterResource,
     defaultBlade: LoadedClassicRasterResource,
     scoreFont: LoadedClassicFontResource,
+    comboFont: LoadedClassicFontResource,
     result: LoadedClassicResultResources,
     resultFonts: LoadedClassicResultFonts,
   ) {
@@ -114,6 +120,8 @@ export class ClassicSliceResourceCatalog {
     }
     this.assetTree = assetTree;
     this.bombResource = bombResource;
+    this.bombSmoke = bombSmoke;
+    this.comboFont = comboFont;
     this.criticalParticles = criticalParticles;
     this.defaultBlade = defaultBlade;
     this.presentation = presentation;
@@ -149,9 +157,10 @@ export async function loadClassicSliceResourceCatalog(
 ): Promise<ClassicSliceResourceCatalog> {
   const descriptors = createSpriteLoadDescriptors(assetTree);
   const bundle = await loadClassicGameResourceBundle();
-  const [spriteFrames, scoreFont, resultFonts] = await Promise.all([
+  const [spriteFrames, scoreFont, comboFont, resultFonts] = await Promise.all([
     loadSpriteFrames(bundle, descriptors),
     loadClassicScoreFont(bundle),
+    loadClassicComboFont(bundle),
     loadClassicResultFonts(bundle),
   ]);
   const loadedByKey = new Map<string, LoadedClassicRasterResource>();
@@ -171,6 +180,7 @@ export async function loadClassicSliceResourceCatalog(
   const presentation = requireLoadedPresentation(assetTree, loadedByKey);
   const result = requireLoadedResult(assetTree, loadedByKey);
   const bombResource = requireLoadedBomb(assetTree, loadedByKey);
+  const bombSmoke = requireLoadedBombSmoke(assetTree, loadedByKey);
   const normalFruitResources = CLASSIC_NORMAL_FRUIT_RESOURCES.map(({ fruitId }) => (
     requireLoadedNormalFruit(assetTree, fruitId, loadedByKey)
   ));
@@ -182,8 +192,10 @@ export async function loadClassicSliceResourceCatalog(
     normalFruitResources,
     criticalParticles,
     bombResource,
+    bombSmoke,
     defaultBlade,
     scoreFont,
+    comboFont,
     result,
     resultFonts,
   );
@@ -216,6 +228,7 @@ function createSpriteLoadDescriptors(assetTree: ClassicAssetTree): readonly Spri
     descriptor('result.retrySelected', result.retrySelected),
     descriptor('result.totalCoins', result.totalCoins),
     descriptor(bombKey(0), getClassicBombResource(0, assetTree)),
+    descriptor(bombSmokeKey(), getClassicBombSmokeResource(assetTree)),
     descriptor(defaultBladeKey(0), getClassicDefaultBladeResource(0, assetTree)),
   ];
   for (const definition of CLASSIC_NORMAL_FRUIT_RESOURCES) {
@@ -296,6 +309,27 @@ function loadClassicScoreFont(bundle: AssetManager.Bundle): Promise<LoadedClassi
       }
       resolve(Object.freeze({
         ...CLASSIC_SCORE_HUD_FONT_RESOURCE,
+        font,
+      }));
+    });
+  });
+}
+
+function loadClassicComboFont(bundle: AssetManager.Bundle): Promise<LoadedClassicFontResource> {
+  const canonicalPath = CLASSIC_COMBO_FONT_RESOURCE.canonicalPath;
+  const bundlePath = canonicalResourceToBundlePath(canonicalPath);
+  return new Promise((resolve, reject) => {
+    bundle.load(bundlePath, Cocos.Font, (error, font) => {
+      if (error !== null && error !== undefined) {
+        reject(new Error(`Failed to load Classic combo font: ${error.message}`));
+        return;
+      }
+      if (font === null || font === undefined) {
+        reject(new Error(`Creator returned no Classic combo font for ${canonicalPath}`));
+        return;
+      }
+      resolve(Object.freeze({
+        ...CLASSIC_COMBO_FONT_RESOURCE,
         font,
       }));
     });
@@ -412,6 +446,14 @@ function requireLoadedBomb(
   return requireLoaded(bombKey(bombId), contract, loadedByKey);
 }
 
+function requireLoadedBombSmoke(
+  assetTree: ClassicAssetTree,
+  loadedByKey: ReadonlyMap<string, LoadedClassicRasterResource>,
+): LoadedClassicRasterResource {
+  const contract = getClassicBombSmokeResource(assetTree);
+  return requireLoaded(bombSmokeKey(), contract, loadedByKey);
+}
+
 function requireLoadedCriticalParticles(
   assetTree: ClassicAssetTree,
   loadedByKey: ReadonlyMap<string, LoadedClassicRasterResource>,
@@ -464,6 +506,10 @@ function criticalParticleKey(index: ClassicCriticalParticleIndex): string {
 
 function bombKey(bombId: ClassicBombId): string {
   return `bomb.${bombId}`;
+}
+
+function bombSmokeKey(): string {
+  return 'bomb.smoke';
 }
 
 function defaultBladeKey(selectedBladeId: 0): string {

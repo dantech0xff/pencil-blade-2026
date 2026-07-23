@@ -10,6 +10,7 @@ export const CLASSIC_TOSS_AUDIO_PATH = 'Sounds/tossfruit.wav';
 export const CLASSIC_CRITICAL_AUDIO_PATH = 'Sounds/critical.wav';
 export const CLASSIC_ELECTRIC_BOMB_HIT_AUDIO_PATH = 'Sounds/boomhit.wav';
 export const CLASSIC_MENU_BUTTON_AUDIO_PATH = 'Sounds/menubuttonclick.wav';
+export const CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH = 'Sounds/cheer.wav';
 export const MAIN_MENU_MUSIC_AUDIO_PATH = 'Sounds/mainmenumusic.mp3';
 
 export const CLASSIC_RESULT_RANK_AUDIO_PATHS: Readonly<
@@ -73,6 +74,7 @@ export const CLASSIC_CORE_AUDIO_PATHS: readonly string[] = Object.freeze([
   CLASSIC_COMBO_AUDIO_PATHS[2],
   CLASSIC_COMBO_AUDIO_PATHS[3],
   CLASSIC_MENU_BUTTON_AUDIO_PATH,
+  CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH,
   MAIN_MENU_MUSIC_AUDIO_PATH,
   CLASSIC_RESULT_RANK_AUDIO_PATHS[1],
   CLASSIC_RESULT_RANK_AUDIO_PATHS[2],

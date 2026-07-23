@@ -38,8 +38,11 @@ import {
   ClassicFreeTossStrategy,
   type ClassicTossStrategyCommand,
 } from '../domain/classic-toss-strategies';
-import type { ComboCommand } from '../domain/combo-service';
-import { ComboService } from '../domain/combo-service';
+import {
+  applyComboCommandBatch,
+  ComboService,
+  type ComboCommand,
+} from '../domain/combo-service';
 import type { FailCommand } from '../domain/fail-service';
 import { FailService } from '../domain/fail-service';
 import {
@@ -66,6 +69,7 @@ import {
 } from './blade-input-controller';
 import { ClassicAudioPresenter } from './classic-audio-presenter';
 import { ClassicBladePresenter } from './classic-blade-presenter';
+import { ComboItemPresenter } from './combo-item-presenter';
 import { ClassicCriticalParticlePresenter } from './classic-critical-particle-presenter';
 import { ClassicCutHalfPresenter } from './classic-cut-half-presenter';
 import { ClassicEntityRegistry } from './classic-entity-registry';
@@ -213,6 +217,7 @@ export class ClassicGameplayController extends Component {
   private readonly cutHalfPresenters = new Set<ClassicCutHalfPresenter>();
   private readonly criticalCutHalfPresenters = new Set<ClassicCutHalfPresenter>();
   private readonly criticalParticlePresenters = new Set<ClassicCriticalParticlePresenter>();
+  private readonly comboItemPresenters = new Set<ComboItemPresenter>();
   private sceneController: ClassicSceneController | null = null;
   private audioPresenter: ClassicAudioPresenter | null = null;
   private classicModeRoot: Node | null = null;
@@ -538,6 +543,9 @@ export class ClassicGameplayController extends Component {
 
   update(deltaSeconds: number): void {
     this.bladePresenter?.updateFrame();
+    for (const presenter of [...this.comboItemPresenters]) {
+      presenter.updateAction(deltaSeconds);
+    }
     const lifecycle = this.sceneController?.sessionSnapshot().lifecycle;
     if (lifecycle === 'running' && !this.gameOver) {
       this.normalFree?.tick(deltaSeconds);
@@ -575,13 +583,30 @@ export class ClassicGameplayController extends Component {
   }
 
   private disposeRecoveredRuntime(): void {
-    this.disposeClassicModePresentation();
-    this.disposeResultPresentation();
-    this.audioPresenter?.stop();
-    this.audioPresenter = null;
-    this.resourceCatalog = null;
-    this.recoveredRuntimePreparation = null;
-    this.screenPlacement = null;
+    const cleanupFailures: unknown[] = [];
+    try {
+      collectClassicCleanupFailure(
+        cleanupFailures,
+        () => this.disposeClassicModePresentation(),
+      );
+      collectClassicCleanupFailure(
+        cleanupFailures,
+        () => this.disposeResultPresentation(),
+      );
+      collectClassicCleanupFailure(
+        cleanupFailures,
+        () => this.audioPresenter?.stop(),
+      );
+    } finally {
+      // Publish teardown ownership even when an individual presenter reports a cleanup
+      // failure. No later caller may reuse a partially disposed catalog, audio graph,
+      // preparation promise, or current-screen placement.
+      this.audioPresenter = null;
+      this.resourceCatalog = null;
+      this.recoveredRuntimePreparation = null;
+      this.screenPlacement = null;
+    }
+    throwClassicCleanupFailures('Classic recovered runtime teardown', cleanupFailures);
   }
 
   /** Removes only the native Classic layer's owned runtime and presentation. */
@@ -619,6 +644,10 @@ export class ClassicGameplayController extends Component {
       presenter.dispose();
     }
     this.criticalParticlePresenters.clear();
+    for (const presenter of [...this.comboItemPresenters]) {
+      presenter.dispose();
+    }
+    this.comboItemPresenters.clear();
     this.bladePresenter?.dispose();
     this.bladePresenter = null;
     this.failPresenter?.dispose();
@@ -912,17 +941,69 @@ export class ClassicGameplayController extends Component {
   }
 
   private applyComboCommands(commands: readonly ComboCommand[]): void {
-    for (const command of commands) {
-      if (command.type === 'add-score') {
-        this.score.addScore(command.value);
-      } else if (command.type === 'play-combo-sound') {
-        this.audioPresenter?.playOneShot(getClassicComboAudioPath(command.soundIndex));
-      }
+    if (commands.length === 0) {
+      return;
     }
-    this.emitCommands(commands);
-    if (commands.length > 0) {
-      this.emitSnapshot();
-    }
+    this.combo.assertPendingUpdate(commands);
+    let pendingPresenter: ComboItemPresenter | null = null;
+    applyComboCommandBatch(commands, {
+      apply: (command) => {
+        switch (command.type) {
+          case 'process-objective':
+            // Classic's objective bridge predates this Creator slice; retain the recovered
+            // command explicitly so the shared transaction never treats it as an unknown type.
+            return;
+          case 'create-combo-item': {
+            if (pendingPresenter !== null) {
+              throw new Error('Classic combo batch created more than one pending ComboItem');
+            }
+            let presenter: ComboItemPresenter;
+            presenter = ComboItemPresenter.create({
+              count: command.count,
+              fontResource: this.sharedResourceCatalog.comboFont,
+              position: command.position,
+              viewportWidth: this.requireViewport().width,
+            }, {
+              onDisposed: () => this.comboItemPresenters.delete(presenter),
+            });
+            pendingPresenter = presenter;
+            return;
+          }
+          case 'add-score':
+            this.score.addScore(command.value);
+            return;
+          case 'attach-combo-item': {
+            if (command.zOrder !== 1 || pendingPresenter === null) {
+              throw new Error(
+                'Classic combo attachment requires one pending z-order-1 ComboItem',
+              );
+            }
+            const presenter = pendingPresenter;
+            presenter.attach(this.requireWorldPresentationRoot());
+            this.comboItemPresenters.add(presenter);
+            pendingPresenter = null;
+            return;
+          }
+          case 'play-combo-sound':
+            this.audioPresenter?.playOneShot(getClassicComboAudioPath(command.soundIndex));
+            return;
+          case 'reset-combo':
+            this.combo.commitPendingUpdate(commands);
+            return;
+          default:
+            throwUnexpectedComboCommand(command);
+        }
+      },
+      finalize: () => {
+        const presenter = pendingPresenter;
+        pendingPresenter = null;
+        presenter?.dispose();
+      },
+      publish: (command) => {
+        this.emitCommand(command);
+      },
+    });
+    this.emitSnapshot();
   }
 
   private applyFailCommands(commands: readonly FailCommand[]): void {
@@ -1799,6 +1880,30 @@ function createRecoveredPresenterRoot(parent: Node, name: string): Node {
   return node;
 }
 
+function collectClassicCleanupFailure(
+  failures: unknown[],
+  cleanup: () => void,
+): void {
+  try {
+    cleanup();
+  } catch (error) {
+    failures.push(error);
+  }
+}
+
+function throwClassicCleanupFailures(
+  operation: string,
+  failures: readonly unknown[],
+): void {
+  if (failures.length === 0) {
+    return;
+  }
+  const details = failures
+    .map((error) => error instanceof Error ? error.message : String(error))
+    .join('; ');
+  throw new Error(`${operation} failed: ${details}`);
+}
+
 function assertScreenPlacementPort(
   screenPlacement: ClassicScreenPlacementPort,
 ): void {
@@ -1830,4 +1935,8 @@ function isSpawnCommand(
 
 function throwUnexpectedRetryCommand(command: ClassicResultNavigationCommand): never {
   throw new Error(`Classic Retry received unsupported command ${command.type}`);
+}
+
+function throwUnexpectedComboCommand(command: never): never {
+  throw new Error(`Classic Combo received unsupported command ${String(command)}`);
 }

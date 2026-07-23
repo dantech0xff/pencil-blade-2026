@@ -28,6 +28,12 @@ test('Editor-authored Classic scene resolves all Canvas script components throug
   const gameplayControllerMeta = readJson<{ imported: boolean; uuid: string }>(
     'game/assets/scripts/creator/classic-gameplay-controller.ts.meta',
   );
+  const crazySceneControllerMeta = readJson<{ imported: boolean; uuid: string }>(
+    'game/assets/scripts/creator/crazy-scene-controller.ts.meta',
+  );
+  const crazyGameplayControllerMeta = readJson<{ imported: boolean; uuid: string }>(
+    'game/assets/scripts/creator/crazy-gameplay-controller.ts.meta',
+  );
   const appShellControllerMeta = readJson<{ imported: boolean; uuid: string }>(
     'game/assets/scripts/creator/recovered-app-shell-controller.ts.meta',
   );
@@ -42,11 +48,15 @@ test('Editor-authored Classic scene resolves all Canvas script components throug
   assert.equal(bladeMeta.imported, true);
   assert.equal(sceneControllerMeta.imported, true);
   assert.equal(gameplayControllerMeta.imported, true);
+  assert.equal(crazySceneControllerMeta.imported, true);
+  assert.equal(crazyGameplayControllerMeta.imported, true);
   assert.equal(appShellControllerMeta.imported, true);
   assert.deepEqual(scriptTypes.map(decodeCreatorUuid), [
     bladeMeta.uuid,
     sceneControllerMeta.uuid,
     gameplayControllerMeta.uuid,
+    crazySceneControllerMeta.uuid,
+    crazyGameplayControllerMeta.uuid,
     appShellControllerMeta.uuid,
   ]);
 });
@@ -311,7 +321,12 @@ test('Classic audio preload and event consumers use the exact recovered clips', 
   assert.match(audioSource, /CLASSIC_CORE_AUDIO_PATHS\.map\(canonicalResourceToBundlePath\)/);
   assert.match(audioSource, /bundle\.load\(bundlePaths, AudioClip/);
   assert.match(audioSource, /error !== null && error !== undefined/);
-  assert.match(audioSource, /audioSource\.playOneShot\(clip, TARGET_ONE_SHOT_VOLUME_SCALE\)/);
+  assert.match(
+    audioSource,
+    /createEffectVoice\('ClassicOneShotAudio', clip, false, true\)/,
+  );
+  assert.match(audioSource, /voice\.volume = TARGET_ONE_SHOT_VOLUME_SCALE/);
+  assert.match(audioSource, /voice\.play\(\)/);
   assert.doesNotMatch(audioSource, /canonicalRasterToSpriteFrameBundlePath|\/spriteFrame/);
 
   assert.match(registrySource, /case 'play-toss-sound':[\s\S]*onPlayTossSound\(command\.sound\)/);

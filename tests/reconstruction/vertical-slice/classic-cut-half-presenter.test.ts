@@ -17,7 +17,6 @@ import {
   type ClassicNormalFruitId,
   type ClassicRasterResource,
 } from '../../../game/assets/scripts/domain/classic-resource-contract.ts';
-
 const REPOSITORY_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const CC_STUB_URL = `data:text/javascript,${encodeURIComponent(`
 export const centerImpulseApplications = [];
@@ -177,9 +176,17 @@ registerHooks({
 });
 
 const cc = await import('cc') as unknown as CocosStub;
+const {
+  CRAZY_SPECIAL_FRUIT_RESOURCES,
+  getCrazySpecialFruitResources,
+} = await import(
+  '../../../game/assets/scripts/domain/crazy-resource-contract.ts'
+);
 const { ClassicCutHalfPresenter } = await import(
   '../../../game/assets/scripts/creator/classic-cut-half-presenter.ts'
 );
+
+type CrazySpecialFruitId = 10 | 11 | 12 | 13 | 14;
 
 interface CocosStub {
   readonly ERigidBody2DType: Readonly<{ Dynamic: number }>;
@@ -372,6 +379,51 @@ test('every exact profile pair presents native bottom then top geometry, motion,
   }
 });
 
+test('all Crazy special fruit reuse the exact recovered cut-half physics with their own rasters', () => {
+  let occurrenceId = 100;
+  for (const definition of CRAZY_SPECIAL_FRUIT_RESOURCES) {
+    for (const assetTree of ['480x800', '720x1280'] as const) {
+      const parent = new cc.Node('CrazyWorld');
+      const visuals = createLoadedCrazyVisuals(definition.fruitId, assetTree);
+      const motion = createMotion(visuals, true);
+      const deferred = createDeferredLifecycle();
+      const presenter = ClassicCutHalfPresenter.create({
+        fruitId: definition.fruitId,
+        motion,
+        sourceEntityOccurrenceId: occurrenceId,
+        visuals: visuals as never,
+      }, deferred.lifecycle);
+
+      presenter.attach(parent as never, 1);
+      assert.deepEqual(
+        presenter.halves.map(({ sprite }) => sprite.spriteFrame),
+        [visuals.cutBottom.spriteFrame, visuals.cutTop.spriteFrame],
+      );
+      assert.deepEqual(
+        presenter.halves.map(({ collider }) => vectorSizeSnapshot(collider.size)),
+        [
+          {
+            width: 2 * visuals.cutBottom.dimensions.width,
+            height: 2 * visuals.cutBottom.dimensions.height,
+          },
+          {
+            width: 2 * visuals.cutTop.dimensions.width,
+            height: 2 * visuals.cutTop.dimensions.height,
+          },
+        ],
+      );
+      assert.deepEqual(
+        presenter.halves.map(({ collisionFilter }) => collisionFilter),
+        [
+          { categoryBits: 0x0001, groupIndex: 0, maskBits: 0xfffc },
+          { categoryBits: 0x0001, groupIndex: 0, maskBits: 0xfffc },
+        ],
+      );
+      occurrenceId += 1;
+    }
+  }
+});
+
 test('unscaled fade and bounds cleanup advance independently and defer destruction', () => {
   const visuals = createLoadedVisuals(0, '480x800');
   const deferred = createDeferredLifecycle();
@@ -545,6 +597,18 @@ function createLoadedVisuals(
   assetTree: '480x800' | '720x1280',
 ): LoadedVisuals {
   const resources = getClassicNormalFruitResources(fruitId, assetTree);
+  return Object.freeze({
+    cutBottom: loadRaster(resources.cutBottom),
+    cutTop: loadRaster(resources.cutTop),
+    intact: loadRaster(resources.intact),
+  });
+}
+
+function createLoadedCrazyVisuals(
+  fruitId: CrazySpecialFruitId,
+  assetTree: '480x800' | '720x1280',
+): LoadedVisuals {
+  const resources = getCrazySpecialFruitResources(fruitId, assetTree);
   return Object.freeze({
     cutBottom: loadRaster(resources.cutBottom),
     cutTop: loadRaster(resources.cutTop),

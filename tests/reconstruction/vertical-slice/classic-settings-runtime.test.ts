@@ -74,6 +74,11 @@ test('runtime keeps mutations in memory and writes only on save', () => {
   storage.values.set('classic_best_1', '30');
   storage.values.set('classic_best_2', '20');
   storage.values.set('classic_best_3', '10');
+  storage.values.set('crazy_best_1', '300');
+  storage.values.set('crazy_best_2', '200');
+  storage.values.set('crazy_best_3', '100');
+  storage.values.set('current_objective', '13');
+  storage.values.set('fruits_cut', '2468');
   storage.values.set('enable_music', 'true');
   storage.values.set('enable_effect', 'false');
   storage.values.set('network_available', 'true');
@@ -88,6 +93,7 @@ test('runtime keeps mutations in memory and writes only on save', () => {
   assert.equal(runtime.state.snapshot.effectsEnabled, false);
 
   runtime.state.recordClassicResultScore(40);
+  runtime.state.recordCrazyResultScore(250);
   runtime.state.awardClassicResultCoins(10);
   assert.equal(storage.values.get('total_coins'), '3000');
   assert.equal(storage.values.get('classic_best_1'), '30');
@@ -97,6 +103,11 @@ test('runtime keeps mutations in memory and writes only on save', () => {
   assert.equal(storage.values.get('classic_best_1'), '40');
   assert.equal(storage.values.get('classic_best_2'), '30');
   assert.equal(storage.values.get('classic_best_3'), '20');
+  assert.equal(storage.values.get('crazy_best_1'), '300');
+  assert.equal(storage.values.get('crazy_best_2'), '250');
+  assert.equal(storage.values.get('crazy_best_3'), '200');
+  assert.equal(storage.values.get('current_objective'), '13');
+  assert.equal(storage.values.get('fruits_cut'), '2468');
   assert.equal(storage.values.get('selected_theme'), '9');
   assert.equal(storage.values.get('selected_background'), '8');
   assert.equal(storage.values.get('selected_blade'), '17');
@@ -163,6 +174,41 @@ test('runtime preserves immediate rated and indexed unlock writes while coin cha
   assert.throws(() => runtime.persistModeUnlock(3), /1, 2, 4, or 5/);
 });
 
+test('runtime immediately persists indexed objectives while progression remains memory-only', () => {
+  const storage = new MemoryStorage();
+  storage.values.set('total_coins', '3000');
+  storage.values.set('current_objective', '8');
+  const runtime = new ClassicSettingsRuntime(
+    new ClassicCreatorInt32PreferencePort(storage),
+  );
+  const popupEvents: unknown[] = [];
+  const objectives = runtime.createObjectivesManager((event) => {
+    popupEvents.push(event);
+    assert.equal(storage.values.get('objectives_value_50'), '-2');
+    assert.equal(runtime.state.snapshot.currentObjective, 9);
+    assert.equal(runtime.state.snapshot.totalCoins, 3666);
+  });
+
+  assert.equal(runtime.readObjectiveValue(50), 0);
+  objectives.processGameEvent(8, 0);
+  assert.deepEqual(storage.writes, [['objectives_value_50', '0']]);
+  const popup = objectives.processGameEvent(8, 2);
+  assert.equal(popupEvents.length, 1);
+  assert.equal(popup?.completed.id, 50);
+  assert.equal(popup?.next.id, 10);
+  assert.equal(storage.values.get('total_coins'), '3000');
+  assert.equal(storage.values.get('current_objective'), '8');
+  assert.deepEqual(storage.writes, [
+    ['objectives_value_50', '0'],
+    ['objectives_value_50', '-2'],
+  ]);
+
+  runtime.save();
+  assert.equal(storage.values.get('total_coins'), '3666');
+  assert.equal(storage.values.get('current_objective'), '9');
+  assert.equal(storage.values.get('fruits_cut'), '0');
+});
+
 test('malformed indexed unlock data becomes diagnostic and disables every settings write', () => {
   const storage = new MemoryStorage();
   storage.values.set('mode_unlock_1', 'TRUE');
@@ -175,6 +221,24 @@ test('malformed indexed unlock data becomes diagnostic and disables every settin
   assert.match(runtime.loadFailure?.message ?? '', /canonical lowercase boolean/);
   assert.throws(() => runtime.persistModeUnlock(2), /disabled after load recovery/);
   assert.throws(() => runtime.persistRatedFlag(), /disabled after load recovery/);
+  assert.throws(() => runtime.save(), /disabled after load recovery/);
+  assert.deepEqual(storage.writes, []);
+});
+
+test('malformed indexed objective data becomes diagnostic and disables every settings write', () => {
+  const storage = new MemoryStorage();
+  storage.values.set('objectives_value_50', '01');
+  const runtime = new ClassicSettingsRuntime(
+    new ClassicCreatorInt32PreferencePort(storage),
+  );
+
+  assert.equal(runtime.loadFailure, null);
+  assert.throws(() => runtime.readObjectiveValue(50), /canonical decimal int32/);
+  assert.match(runtime.loadFailure?.message ?? '', /canonical decimal int32/);
+  assert.throws(
+    () => runtime.persistObjectiveValue(50, 0),
+    /disabled after load recovery/,
+  );
   assert.throws(() => runtime.save(), /disabled after load recovery/);
   assert.deepEqual(storage.writes, []);
 });
@@ -226,7 +290,10 @@ test('runtime recovers corrupt or unreadable target storage to exact defaults', 
 
   assert.match(corruptRuntime.loadFailure?.message ?? '', /canonical lowercase boolean/);
   assert.deepEqual(corruptRuntime.state.snapshot, {
+    crazyLeaderboard: { first: 0, second: 0, third: 0 },
+    currentObjective: 0,
     effectsEnabled: true,
+    fruitsCut: 0,
     leaderboard: { first: 0, second: 0, third: 0 },
     musicEnabled: true,
     networkAvailable: false,
@@ -244,6 +311,16 @@ test('runtime recovers corrupt or unreadable target storage to exact defaults', 
   assert.throws(
     () => corruptRuntime.persistRatedFlag(),
     /rated flag persistence is disabled after load recovery/,
+  );
+  assert.throws(
+    () => corruptRuntime.persistObjectiveValue(50, 0),
+    /objective value persistence is disabled after load recovery/,
+  );
+  corruptRuntime.state.setCurrentObjective(8);
+  const recoveredObjectives = corruptRuntime.createObjectivesManager(() => {});
+  assert.throws(
+    () => recoveredObjectives.processGameEvent(8, 0),
+    /objective value persistence is disabled after load recovery/,
   );
   assert.equal(corruptStorage.values.get('total_coins'), '3000');
   assert.equal(corruptStorage.values.get('classic_best_1'), '30');

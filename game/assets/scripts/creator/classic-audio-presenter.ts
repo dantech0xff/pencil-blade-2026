@@ -21,22 +21,29 @@ export interface ClassicRetainedAudioHandle {
 
 /** Loaded exact clips plus the target-side Creator playback adapter. */
 export class ClassicAudioPresenter {
-  private readonly audioSource: AudioSource;
+  private readonly audioRoot: Node;
+  private backgroundMusicPauseLeaseActive = false;
   private readonly backgroundMusicNode: Node;
+  private backgroundMusicPausedByPresenter = false;
   private readonly backgroundMusicSource: AudioSource;
+  private backgroundMusicStarted = false;
   private readonly clipsByCanonicalPath: ReadonlyMap<string, AudioClip>;
+  private effectsPauseLeaseActive = false;
+  private readonly effectsVoiceRoot: Node;
   private readonly parent: Node;
-  private readonly retainedHandles = new Set<CreatorRetainedAudioHandle>();
+  private readonly effectVoices = new Set<CreatorClassicOwnedAudioVoice>();
 
   private constructor(
     parent: Node,
-    audioSource: AudioSource,
+    audioRoot: Node,
+    effectsVoiceRoot: Node,
     backgroundMusicNode: Node,
     backgroundMusicSource: AudioSource,
     clipsByCanonicalPath: ReadonlyMap<string, AudioClip>,
   ) {
     this.parent = parent;
-    this.audioSource = audioSource;
+    this.audioRoot = audioRoot;
+    this.effectsVoiceRoot = effectsVoiceRoot;
     this.backgroundMusicNode = backgroundMusicNode;
     this.backgroundMusicSource = backgroundMusicSource;
     this.clipsByCanonicalPath = clipsByCanonicalPath;
@@ -47,7 +54,9 @@ export class ClassicAudioPresenter {
       throw new Error('Classic audio parent must be a valid Creator node');
     }
     const bundle = await loadClassicGameResourceBundle();
+    assertValidAudioParent(parent);
     const clips = await loadCoreAudioClips(bundle);
+    assertValidAudioParent(parent);
     const clipsByCanonicalPath = new Map<string, AudioClip>();
     for (let index = 0; index < CLASSIC_CORE_AUDIO_PATHS.length; index += 1) {
       const canonicalPath = CLASSIC_CORE_AUDIO_PATHS[index];
@@ -61,79 +70,159 @@ export class ClassicAudioPresenter {
       throw new Error('Classic core audio catalog contains duplicate canonical paths');
     }
 
-    const audioSource = parent.getComponent(AudioSource) ?? parent.addComponent(AudioSource);
-    audioSource.loop = false;
-    audioSource.volume = TARGET_ONE_SHOT_VOLUME_SCALE;
-    const backgroundMusicNode = new Node('RecoveredBackgroundMusicAudio');
-    backgroundMusicNode.setParent(parent);
-    const backgroundMusicSource = backgroundMusicNode.addComponent(AudioSource);
-    backgroundMusicSource.playOnAwake = false;
-    backgroundMusicSource.loop = true;
-    backgroundMusicSource.volume = 1;
-    return new ClassicAudioPresenter(
-      parent,
-      audioSource,
-      backgroundMusicNode,
-      backgroundMusicSource,
-      clipsByCanonicalPath,
-    );
+    let audioRoot: Node | null = null;
+    try {
+      audioRoot = new Node('ClassicAudioRoot');
+      const effectsVoiceRoot = new Node('ClassicEffectAudioVoices');
+      effectsVoiceRoot.setParent(audioRoot);
+      const backgroundMusicNode = new Node('RecoveredBackgroundMusicAudio');
+      backgroundMusicNode.setParent(audioRoot);
+      const backgroundMusicSource = backgroundMusicNode.addComponent(AudioSource);
+      backgroundMusicSource.playOnAwake = false;
+      backgroundMusicSource.loop = true;
+      backgroundMusicSource.volume = 1;
+
+      assertValidAudioParent(parent);
+      audioRoot.setParent(parent);
+      if (audioRoot.parent !== parent || !isValid(audioRoot, true)) {
+        throw new Error('Classic audio root failed to attach to its valid parent');
+      }
+      return new ClassicAudioPresenter(
+        parent,
+        audioRoot,
+        effectsVoiceRoot,
+        backgroundMusicNode,
+        backgroundMusicSource,
+        clipsByCanonicalPath,
+      );
+    } catch (error: unknown) {
+      if (audioRoot !== null && isValid(audioRoot, true)) {
+        const cleanupRoot = audioRoot;
+        const failures: unknown[] = [];
+        runCleanup(failures, () => cleanupRoot.destroy());
+        if (failures.length > 0) {
+          throw aggregateWithPrimary(
+            'Classic audio load rollback failed',
+            error,
+            failures,
+          );
+        }
+      }
+      throw error;
+    }
   }
 
   playOneShot(canonicalPath: string): void {
     const clip = this.requireClip(canonicalPath);
-    // Exact native gain/voice policy is unresolved. Unity gain preserves the clip bytes
-    // without inventing per-event attenuation while playOneShot permits recovered overlap.
-    this.audioSource.playOneShot(clip, TARGET_ONE_SHOT_VOLUME_SCALE);
+    this.createEffectVoice('ClassicOneShotAudio', clip, false, true);
   }
 
   playRetained(canonicalPath: string): ClassicRetainedAudioHandle {
-    if (!isValid(this.parent, true)) {
-      throw new Error('Classic audio parent is no longer valid');
-    }
     const clip = this.requireClip(canonicalPath);
-    const voiceNode = new Node('ClassicRetainedAudio');
-    voiceNode.setParent(this.parent);
-    const voice = voiceNode.addComponent(AudioSource);
-    voice.playOnAwake = false;
-    voice.loop = false;
-    voice.volume = TARGET_ONE_SHOT_VOLUME_SCALE;
-    voice.clip = clip;
-
-    const handle = new CreatorRetainedAudioHandle(
-      voiceNode,
-      voice,
-      (disposed) => this.retainedHandles.delete(disposed),
+    return this.createEffectVoice(
+      'ClassicRetainedAudio',
+      clip,
+      false,
+      false,
     );
-    this.retainedHandles.add(handle);
-    voice.play();
-    return handle;
   }
 
   playLoopingBackground(canonicalPath: string): void {
-    if (!isValid(this.parent, true) || !isValid(this.backgroundMusicNode, true)) {
+    if (
+      !isValid(this.parent, true)
+      || !isValid(this.audioRoot, true)
+      || !isValid(this.backgroundMusicNode, true)
+    ) {
       throw new Error('Recovered background-music parent is no longer valid');
     }
     this.backgroundMusicSource.clip = this.requireClip(canonicalPath);
     this.backgroundMusicSource.loop = true;
     this.backgroundMusicSource.play();
+    this.backgroundMusicStarted = true;
+    this.backgroundMusicPausedByPresenter = false;
+    if (this.backgroundMusicPauseLeaseActive) {
+      this.backgroundMusicSource.pause();
+      this.backgroundMusicPausedByPresenter = true;
+    }
+  }
+
+  pauseAllEffects(): void {
+    this.effectsPauseLeaseActive = true;
+    const failures: unknown[] = [];
+    for (const voice of [...this.effectVoices]) {
+      runCleanup(failures, () => voice.pauseForPresenter());
+    }
+    throwOperationFailures('Classic effect pause', failures);
+  }
+
+  resumeAllEffects(): void {
+    if (!this.effectsPauseLeaseActive) {
+      return;
+    }
+    const failures: unknown[] = [];
+    for (const voice of [...this.effectVoices]) {
+      runCleanup(failures, () => voice.resumeFromPresenterPause());
+    }
+    if (![...this.effectVoices].some((voice) => voice.pausedByPresenter)) {
+      this.effectsPauseLeaseActive = false;
+    }
+    throwOperationFailures('Classic effect resume', failures);
+  }
+
+  pauseBackgroundMusic(): void {
+    this.backgroundMusicPauseLeaseActive = true;
+    if (
+      !this.backgroundMusicStarted
+      || this.backgroundMusicPausedByPresenter
+      || !isValid(this.backgroundMusicNode, true)
+    ) {
+      return;
+    }
+    this.backgroundMusicSource.pause();
+    this.backgroundMusicPausedByPresenter = true;
+  }
+
+  resumeBackgroundMusic(): void {
+    if (!this.backgroundMusicPauseLeaseActive) {
+      return;
+    }
+    if (this.backgroundMusicPausedByPresenter) {
+      if (!isValid(this.backgroundMusicNode, true)) {
+        this.backgroundMusicPausedByPresenter = false;
+        this.backgroundMusicStarted = false;
+      } else {
+        this.backgroundMusicSource.play();
+        this.backgroundMusicPausedByPresenter = false;
+      }
+    }
+    if (!this.backgroundMusicPausedByPresenter) {
+      this.backgroundMusicPauseLeaseActive = false;
+    }
   }
 
   stopBackgroundMusic(): void {
+    this.backgroundMusicPauseLeaseActive = false;
+    this.backgroundMusicPausedByPresenter = false;
     if (isValid(this.backgroundMusicNode, true)) {
       this.backgroundMusicSource.stop();
     }
+    this.backgroundMusicStarted = false;
   }
 
   stopAllEffects(): void {
-    for (const handle of [...this.retainedHandles]) {
-      handle.dispose();
+    this.effectsPauseLeaseActive = false;
+    const failures: unknown[] = [];
+    for (const voice of [...this.effectVoices]) {
+      runCleanup(failures, () => voice.dispose());
     }
-    this.audioSource.stop();
+    throwOperationFailures('Classic effect voices', failures);
   }
 
   stop(): void {
-    this.stopAllEffects();
-    this.stopBackgroundMusic();
+    const failures: unknown[] = [];
+    runCleanup(failures, () => this.stopAllEffects());
+    runCleanup(failures, () => this.stopBackgroundMusic());
+    throwOperationFailures('Classic audio', failures);
   }
 
   private requireClip(canonicalPath: string): AudioClip {
@@ -146,11 +235,73 @@ export class ClassicAudioPresenter {
     }
     return clip;
   }
+
+  private createEffectVoice(
+    name: string,
+    clip: AudioClip,
+    loop: boolean,
+    disposeOnEnd: boolean,
+  ): CreatorClassicOwnedAudioVoice {
+    if (
+      !isValid(this.parent, true)
+      || !isValid(this.audioRoot, true)
+      || !isValid(this.effectsVoiceRoot, true)
+    ) {
+      throw new Error('Classic audio parent is no longer valid');
+    }
+
+    const voiceNode = new Node(name);
+    let handle: CreatorClassicOwnedAudioVoice | null = null;
+    try {
+      voiceNode.setParent(this.effectsVoiceRoot);
+      const voice = voiceNode.addComponent(AudioSource);
+      voice.playOnAwake = false;
+      voice.loop = loop;
+      voice.volume = TARGET_ONE_SHOT_VOLUME_SCALE;
+      handle = new CreatorClassicOwnedAudioVoice(
+        voiceNode,
+        voice,
+        (disposed) => this.effectVoices.delete(disposed),
+      );
+      this.effectVoices.add(handle);
+      if (disposeOnEnd) {
+        voiceNode.once(AudioSource.EventType.ENDED, () => {
+          handle?.dispose();
+        });
+      }
+      voice.clip = clip;
+      voice.play();
+      if (this.effectsPauseLeaseActive) {
+        handle.pauseForPresenter();
+      }
+      return handle;
+    } catch (error) {
+      const failures: unknown[] = [];
+      if (handle !== null) {
+        const cleanupHandle = handle;
+        runCleanup(failures, () => cleanupHandle.dispose());
+      } else if (isValid(voiceNode, true)) {
+        runCleanup(failures, () => voiceNode.destroy());
+      }
+      if (failures.length > 0) {
+        throw aggregateWithPrimary(
+          'Classic effect voice creation rollback failed',
+          error,
+          failures,
+        );
+      }
+      throw error;
+    }
+  }
 }
 
-class CreatorRetainedAudioHandle implements ClassicRetainedAudioHandle {
+class CreatorClassicOwnedAudioVoice implements ClassicRetainedAudioHandle {
+  private clipClearedValue = false;
   private disposedValue = false;
-  private readonly onDisposed: (handle: CreatorRetainedAudioHandle) => void;
+  private nodeDestroyedValue = false;
+  private readonly onDisposed: (handle: CreatorClassicOwnedAudioVoice) => void;
+  private ownerReleasedValue = false;
+  private pausedByPresenterValue = false;
   private stoppedValue = false;
   private readonly voice: AudioSource;
   private readonly voiceNode: Node;
@@ -158,7 +309,7 @@ class CreatorRetainedAudioHandle implements ClassicRetainedAudioHandle {
   constructor(
     voiceNode: Node,
     voice: AudioSource,
-    onDisposed: (handle: CreatorRetainedAudioHandle) => void,
+    onDisposed: (handle: CreatorClassicOwnedAudioVoice) => void,
   ) {
     this.voiceNode = voiceNode;
     this.voice = voice;
@@ -173,27 +324,112 @@ class CreatorRetainedAudioHandle implements ClassicRetainedAudioHandle {
     return this.stoppedValue;
   }
 
+  get pausedByPresenter(): boolean {
+    return this.pausedByPresenterValue;
+  }
+
+  pauseForPresenter(): boolean {
+    if (
+      this.disposedValue
+      || this.stoppedValue
+      || this.pausedByPresenterValue
+      || !isValid(this.voiceNode, true)
+    ) {
+      return false;
+    }
+    this.voice.pause();
+    this.pausedByPresenterValue = true;
+    return true;
+  }
+
+  resumeFromPresenterPause(): boolean {
+    if (
+      !this.pausedByPresenterValue
+      || this.disposedValue
+      || this.stoppedValue
+    ) {
+      return false;
+    }
+    if (!isValid(this.voiceNode, true)) {
+      this.pausedByPresenterValue = false;
+      return false;
+    }
+    this.voice.play();
+    this.pausedByPresenterValue = false;
+    return true;
+  }
+
   stop(): void {
     if (this.stoppedValue) {
       return;
     }
-    this.stoppedValue = true;
     if (isValid(this.voiceNode, true)) {
       this.voice.stop();
     }
+    this.stoppedValue = true;
+    this.pausedByPresenterValue = false;
   }
 
   dispose(): void {
     if (this.disposedValue) {
       return;
     }
-    this.disposedValue = true;
     this.stop();
-    if (isValid(this.voiceNode, true)) {
-      this.voiceNode.destroy();
+    if (!this.clipClearedValue) {
+      this.voice.clip = null;
+      this.clipClearedValue = true;
     }
-    this.onDisposed(this);
+    if (!this.nodeDestroyedValue) {
+      if (isValid(this.voiceNode, true)) {
+        this.voiceNode.destroy();
+      }
+      this.nodeDestroyedValue = true;
+    }
+    if (!this.ownerReleasedValue) {
+      this.onDisposed(this);
+      this.ownerReleasedValue = true;
+    }
+    this.disposedValue = true;
   }
+}
+
+function assertValidAudioParent(parent: Node): void {
+  if (!isValid(parent, true)) {
+    throw new Error('Classic audio parent was destroyed while audio was loading');
+  }
+}
+
+function runCleanup(failures: unknown[], cleanup: () => void): void {
+  try {
+    cleanup();
+  } catch (error) {
+    failures.push(error);
+  }
+}
+
+function throwOperationFailures(
+  label: string,
+  failures: readonly unknown[],
+): void {
+  if (failures.length > 0) {
+    throw new Error(
+      `${label} failed: ${failures.map(errorMessage).join('; ')}`,
+    );
+  }
+}
+
+function aggregateWithPrimary(
+  label: string,
+  primary: unknown,
+  failures: readonly unknown[],
+): Error {
+  return new Error(
+    `${label}: ${errorMessage(primary)}; ${failures.map(errorMessage).join('; ')}`,
+  );
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function loadCoreAudioClips(bundle: AssetManager.Bundle): Promise<readonly AudioClip[]> {

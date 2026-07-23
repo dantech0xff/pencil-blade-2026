@@ -353,8 +353,10 @@ export class ClassicGeneratedFruit {
       targetId: this.targetId,
     });
 
+    let mutationStarted = false;
     try {
       this.lifecycle.callAfterStep(() => {
+        mutationStarted = true;
         try {
           if (isValid(this.node, true)) {
             this.node.destroy();
@@ -364,7 +366,9 @@ export class ClassicGeneratedFruit {
         }
       });
     } catch (error) {
-      this.disposalQueued = false;
+      if (!mutationStarted) {
+        this.disposalQueued = false;
+      }
       throw error;
     }
     return true;

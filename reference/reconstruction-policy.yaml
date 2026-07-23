@@ -78,8 +78,8 @@
       {
         "id": "DER-MODE-SELECT-PRESENTATION-001",
         "path": "forensics/contracts/mode-select-presentation-contract.md",
-        "sha256": "548845640b543e7a9b7fc67b19e4eecdac7e14e8fde05812fdf48b957d5a9e83",
-        "bytes": 42049
+        "sha256": "18673a78c9784257098026464c1cb6ae701f4126fe5303b340957c08b7094323",
+        "bytes": 43539
       },
       {
         "id": "DER-SHARED-GAME-SCENE-PRESENTATION-001",

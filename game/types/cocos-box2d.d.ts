@@ -1,4 +1,4 @@
-declare module '@cocos/box2d' {
+declare module '@cocos/box2d/build/box2d/box2d.umd.js' {
   class Vec2 {
     x: number;
     y: number;
@@ -63,13 +63,13 @@ declare module '@cocos/box2d' {
     Step(deltaSeconds: number, velocityIterations: number, positionIterations: number): void;
   }
 
-  const box2d: {
-    readonly BodyDef: typeof BodyDef;
-    readonly FixtureDef: typeof FixtureDef;
-    readonly PolygonShape: typeof PolygonShape;
-    readonly Vec2: typeof Vec2;
-    readonly World: typeof World;
+  const box2dRuntime: {
+    readonly b2BodyDef: typeof BodyDef;
+    readonly b2FixtureDef: typeof FixtureDef;
+    readonly b2PolygonShape: typeof PolygonShape;
+    readonly b2Vec2: typeof Vec2;
+    readonly b2World: typeof World;
   };
 
-  export default box2d;
+  export default box2dRuntime;
 }

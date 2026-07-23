@@ -1,4 +1,4 @@
-import box2d from '@cocos/box2d';
+import box2dRuntime from '@cocos/box2d/build/box2d/box2d.umd.js';
 
 import {
   SHARED_LEAF_BODY_DEFAULTS,
@@ -11,6 +11,14 @@ import {
   type SharedLeafRespawnCommand,
   type SharedLeafWorldStepCommand,
 } from '../domain/shared-leaf-layer';
+
+const box2d = Object.freeze({
+  BodyDef: box2dRuntime.b2BodyDef,
+  FixtureDef: box2dRuntime.b2FixtureDef,
+  PolygonShape: box2dRuntime.b2PolygonShape,
+  Vec2: box2dRuntime.b2Vec2,
+  World: box2dRuntime.b2World,
+});
 
 type Box2dWorld = InstanceType<typeof box2d.World>;
 type Box2dBody = ReturnType<Box2dWorld['CreateBody']>;

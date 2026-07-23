@@ -6,6 +6,14 @@ import {
   classicModeUnlockStorageKey,
   type ClassicInt32PreferencePort,
 } from '../domain/classic-settings-state';
+import {
+  OBJECTIVES_VALUE_DEFAULT,
+  OBJECTIVES_VALUE_STORAGE_KEY_PREFIX,
+  ObjectivesManagerState,
+  objectivesValueStorageKey,
+  type ObjectiveAchievementPopupCallback,
+  type ObjectivesManagerInt32PreferencePort,
+} from '../domain/objectives-manager-state';
 
 export interface ClassicStringStorage {
   getItem(key: string): string | null;
@@ -101,6 +109,32 @@ export class ClassicSettingsRuntime {
     this.state.save(this.port);
   }
 
+  createObjectivesManager(
+    onPopup: ObjectiveAchievementPopupCallback,
+  ): ObjectivesManagerState {
+    const preferences: ObjectivesManagerInt32PreferencePort = Object.freeze({
+      readInt32: (key: string, defaultValue: number): number => (
+        this.readImmediateObjectiveInt32(key, defaultValue)
+      ),
+      writeInt32: (key: string, value: number): void => {
+        this.writeImmediateObjectiveInt32(key, value);
+      },
+    });
+    return new ObjectivesManagerState(this.state, preferences, onPopup);
+  }
+
+  readObjectiveValue(objectiveId: number): number {
+    return this.readImmediateObjectiveInt32(
+      objectivesValueStorageKey(objectiveId),
+      OBJECTIVES_VALUE_DEFAULT,
+    );
+  }
+
+  /** Immediately commits one indexed objective value independently from bulk Settings save. */
+  persistObjectiveValue(objectiveId: number, value: number): void {
+    this.writeImmediateObjectiveInt32(objectivesValueStorageKey(objectiveId), value);
+  }
+
   readModeUnlock(modeIndex: number): boolean {
     const storageKey = classicModeUnlockStorageKey(modeIndex);
     try {
@@ -125,6 +159,29 @@ export class ClassicSettingsRuntime {
   persistRatedFlag(): void {
     this.assertWritesEnabled('rated flag persistence');
     this.port.writeBoolean(CLASSIC_RATED_STORAGE_KEY, true);
+  }
+
+  private readImmediateObjectiveInt32(key: string, defaultValue: number): number {
+    assertObjectiveValueStorageKey(key);
+    if (defaultValue !== OBJECTIVES_VALUE_DEFAULT) {
+      throw new RangeError('Objective preference default must be zero');
+    }
+    try {
+      const value = this.port.readInt32(key, defaultValue);
+      assertSignedInt32(value, `stored ${key}`);
+      return value;
+    } catch (error) {
+      const failure = normalizeError(error, `Objective value ${key} load failed`);
+      this.loadFailureValue ??= failure;
+      throw failure;
+    }
+  }
+
+  private writeImmediateObjectiveInt32(key: string, value: number): void {
+    assertObjectiveValueStorageKey(key);
+    assertSignedInt32(value, 'objective value');
+    this.assertWritesEnabled('objective value persistence');
+    this.port.writeInt32(key, value);
   }
 
   private assertWritesEnabled(operation: string): void {
@@ -175,6 +232,18 @@ function assertStorageKey(key: string): void {
   if (typeof key !== 'string' || key.length === 0) {
     throw new TypeError('Classic settings key must be a non-empty string');
   }
+}
+
+function assertObjectiveValueStorageKey(key: string): void {
+  assertStorageKey(key);
+  if (!key.startsWith(OBJECTIVES_VALUE_STORAGE_KEY_PREFIX)) {
+    throw new RangeError('Objective value key must use the recovered indexed prefix');
+  }
+  const suffix = key.slice(OBJECTIVES_VALUE_STORAGE_KEY_PREFIX.length);
+  if (!/^(?:0|-?[1-9][0-9]*)$/.test(suffix)) {
+    throw new RangeError('Objective value key must end in a canonical signed integer');
+  }
+  assertSignedInt32(Number(suffix), 'objectiveId');
 }
 
 function assertSignedInt32(value: number, label: string): void {

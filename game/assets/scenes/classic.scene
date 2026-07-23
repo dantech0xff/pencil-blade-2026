@@ -90,6 +90,12 @@
         "__id__": 10
       },
       {
+        "__id__": 21
+      },
+      {
+        "__id__": 22
+      },
+      {
         "__id__": 20
       }
     ],
@@ -505,5 +511,29 @@
     "_enabled": true,
     "__prefab": null,
     "_id": "12e4ed82ce3b48cdadb520"
+  },
+  {
+    "__type__": "ef2ac3mw8xDIpVBfm0R65H+",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 2
+    },
+    "_enabled": true,
+    "__prefab": null,
+    "_id": "ef2acde6c3cc432295417e"
+  },
+  {
+    "__type__": "39723lNg/VK+6hzPnPuRtsx",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 2
+    },
+    "_enabled": true,
+    "__prefab": null,
+    "_id": "3972394d83f54afba8733e"
   }
 ]

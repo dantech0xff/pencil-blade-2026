@@ -5,11 +5,21 @@ import { fileURLToPath } from 'node:url';
 
 const REPOSITORY_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 
+test('project declares the Box2D runtime package used by the independent leaf world', () => {
+  const packageJson = JSON.parse(readText('game/package.json')) as {
+    dependencies?: Record<string, string>;
+  };
+  assert.equal(packageJson.dependencies?.['@cocos/box2d'], '1.0.2');
+});
+
 test('leaf adapter owns a second Box2D world with the recovered configuration', () => {
   const source = readText('game/assets/scripts/creator/shared-leaf-physics-adapter.ts');
   const constructor = extractMethod(source, 'constructor');
 
-  assert.match(source, /import box2d from '@cocos\/box2d'/);
+  assert.match(
+    source,
+    /import box2dRuntime from '@cocos\/box2d\/build\/box2d\/box2d\.umd\.js'/,
+  );
   assert.match(constructor, /this\.world = new box2d\.World\(new box2d\.Vec2\(/);
   assert.match(constructor, /gravityMetresPerSecondSquared\.x/);
   assert.match(constructor, /gravityMetresPerSecondSquared\.y/);
