@@ -426,11 +426,17 @@ test('Time Up constructs mode-1 Result with ranking, reward, Retry rollback, and
   assertOrderedSubstrings(commit, [
     'this.sharedSettingsRuntime.state.recordCrazyResultScore(configured.score)',
     "transaction.status = 'committed'",
+    'createRecoveredResultObjectiveCommand(',
+    'this.requireObjectivesManager().processGameEvent(',
     'this.disposeCrazyModePresentation()',
     'this.retiredCrazyRuns.push',
     'this.installCrazyRunOwnership(this.createEmptyCrazyRunOwnership())',
     'this.pendingResultConfiguration = retainedResultConfiguration',
   ]);
+  assert.equal(
+    occurrences(commit, 'createRecoveredResultObjectiveCommand('),
+    1,
+  );
   assert.match(
     commit,
     /reportCleanupFailures\('Committed Crazy-to-Result cleanup'/,
@@ -503,7 +509,7 @@ test('Time Up constructs mode-1 Result with ranking, reward, Retry rollback, and
   );
 });
 
-test('committed Result retires failed Crazy cleanup without blocking a later drain', () => {
+test('committed Result latches objective and cleanup failures without replaying either', () => {
   const cleanupReports: unknown[][] = [];
   const dependencies = replayDependencies(cleanupReports);
   const commit = compileSourceMethod<
@@ -528,6 +534,7 @@ test('committed Result retires failed Crazy cleanup without blocking a later dra
   };
   let cleanupAttempts = 0;
   let failCleanup = true;
+  let objectiveCalls = 0;
   let scoreRecords = 0;
   const controller: Record<string, any> = {
     crazyModeRoot: crazyRoot,
@@ -584,6 +591,16 @@ test('committed Result retires failed Crazy cleanup without blocking a later dra
     requireCrazySceneController() {
       return this.crazySceneController;
     },
+    requireObjectivesManager() {
+      return {
+        processGameEvent(selector: number, score: number) {
+          assert.equal(selector, 3);
+          assert.equal(score, 321);
+          objectiveCalls += 1;
+          throw new Error('injected committed objective observer failure');
+        },
+      };
+    },
     requireScreenPlacement() {
       return { currentScreen: resultRoot };
     },
@@ -592,6 +609,7 @@ test('committed Result retires failed Crazy cleanup without blocking a later dra
   commit.call(controller, transaction);
   commit.call(controller, transaction);
   assert.equal(scoreRecords, 1);
+  assert.equal(objectiveCalls, 1);
   assert.equal(cleanupAttempts, 1);
   assert.equal(transaction.status, 'committed');
   assert.equal(controller.pendingResultEntryTransaction, null);
@@ -613,6 +631,7 @@ test('committed Result retires failed Crazy cleanup without blocking a later dra
     null,
   );
   assert.equal(cleanupReports.length, 1);
+  assert.equal(cleanupReports[0]?.length, 2);
 
   failCleanup = false;
   drain.call(controller);
@@ -1226,6 +1245,10 @@ function assertOrderedSubstrings(source: string, values: readonly string[]): voi
   }
 }
 
+function occurrences(source: string, value: string): number {
+  return source.split(value).length - 1;
+}
+
 function compileSourceMethod<T extends (...args: any[]) => unknown>(
   methodName: string,
   dependencies: Readonly<Record<string, unknown>>,
@@ -1319,6 +1342,14 @@ function replayDependencies(cleanupReports: unknown[][] = []) {
       } catch (error) {
         failures.push(error);
       }
+    },
+    createRecoveredResultObjectiveCommand(mode: number, completedScore: number) {
+      return {
+        completedScore,
+        mode,
+        selector: mode === 4 ? 20 : 3,
+        type: 'process-result-objective',
+      };
     },
     isValid(value: unknown) {
       return (

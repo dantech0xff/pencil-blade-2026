@@ -167,6 +167,7 @@ export {
   unused as createCrazyResultNavigationCommands,
   unused as createCutDispatchCommands,
   unused as createDetachedScreenRoot,
+  unused as createRecoveredResultObjectiveCommand,
   unused as crazyBirdLeaderboardPanelValues,
   unused as crazyLeaderboardPanelValues,
   unused as executeCrazyBombElectricHitAudio,

@@ -79,6 +79,9 @@ import {
   type CrazyTimedModeId,
   type CrazyTimedModeProfile,
 } from '../domain/crazy-timed-mode-profile';
+import {
+  createRecoveredResultObjectiveCommand,
+} from '../domain/recovered-result-objective';
 import type { CrazyTossControllerId } from '../domain/crazy-toss-config';
 import {
   CrazyTossCoordinator,
@@ -3177,6 +3180,16 @@ export class CrazyGameplayController extends Component {
     };
     const releasedScene = this.requireCrazySceneController();
     const cleanupFailures: unknown[] = [];
+    collectCleanupFailure(cleanupFailures, () => {
+      const objective = createRecoveredResultObjectiveCommand(
+        configured.mode,
+        configured.score,
+      );
+      this.requireObjectivesManager().processGameEvent(
+        objective.selector,
+        objective.completedScore,
+      );
+    });
     try {
       this.disposeCrazyModePresentation();
     } catch (error) {

@@ -48,7 +48,7 @@ test('Classic exports the exact app-shell screen placement and shared-runtime po
   );
 });
 
-test('recovered preparation deduplicates catalog and audio loading without constructing UI', () => {
+test('recovered preparation deduplicates catalogs, objectives, and audio without constructing UI', () => {
   const source = readGameplaySource();
   const prepare = extractMethod(source, 'prepareRecoveredRuntime');
   const initialize = extractMethod(source, 'initializeRecoveredResources');
@@ -68,8 +68,12 @@ test('recovered preparation deduplicates catalog and audio loading without const
   ]);
   assertOrderedSubstrings(initialize, [
     'await loadClassicSliceResourceCatalog(assetTree)',
+    'await loadBaseGameplayResources(assetTree)',
     'await ClassicAudioPresenter.load(this.node)',
+    '.createObjectivesManager(this.onObjectiveAchievement)',
     'this.audioPresenter = loadedAudioPresenter',
+    'this.baseGameplayResources = baseGameplayResources',
+    'this.objectivesManager = objectivesManager',
     'this.resourceCatalog = resources',
   ]);
   assert.match(initialize, /this\.shuttingDown[\s\S]*?!isValid\(this\.node, true\)/);
@@ -188,6 +192,36 @@ test('Classic to Result to Retry routes every top-level screen through the place
   for (const boundary of [attachResult, removeResult, attachFreshClassic, rollbackRetry]) {
     assert.doesNotMatch(boundary, /\.setParent\(|\.setSiblingIndex\(|\.addChild\(|\.removeFromParent\(/);
   }
+});
+
+test('Classic Result commits the native objective tail once only after visible attachment', () => {
+  const source = readGameplaySource();
+  const attachResult = extractMethod(source, 'attachRecoveredResult');
+  const dispatchObjective = extractMethod(
+    source,
+    'dispatchRecoveredResultObjectiveTail',
+  );
+  const resetRun = extractMethod(source, 'resetRecoveredClassicRunState');
+
+  assertOrderedSubstrings(attachResult, [
+    'settings.state.recordClassicResultScore(configured.score)',
+    'this.requireScreenPlacement().attachCurrentScreen(root)',
+    'presenter.attach(root)',
+    'this.resultPresentationRoot = root',
+    'this.resultPresenter = presenter',
+    'this.dispatchRecoveredResultObjectiveTail(configured.mode, configured.score)',
+  ]);
+  assertOrderedSubstrings(dispatchObjective, [
+    'if (this.resultObjectiveTailAttempted)',
+    'this.resultObjectiveTailAttempted = true',
+    'createRecoveredResultObjectiveCommand(mode, score)',
+    'this.requireObjectivesManager().processGameEvent(',
+  ]);
+  assert.match(
+    dispatchObjective,
+    /collectClassicCleanupFailure\(failures,[\s\S]*?console\.error/,
+  );
+  assert.match(resetRun, /this\.resultObjectiveTailAttempted = false/);
 });
 
 test('Result Menu exposes idempotent commit and rollback tokens around atomic replacement', () => {

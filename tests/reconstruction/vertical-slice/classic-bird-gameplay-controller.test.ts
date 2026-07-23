@@ -166,21 +166,16 @@ test('session bridge owns the nine-controller, fail, score, electric, magnet, an
   }
   assert.match(
     bridge,
-    /case 'add-score':[\s\S]*?command\.application !== 'already-applied'[\s\S]*?this\.processBirdScoreObjective\(\)/,
+    /case 'add-score':[\s\S]*?command\.application !== 'already-applied'[\s\S]*?Classic Bird score observation must already be applied/,
   );
   assert.doesNotMatch(
     bridge.slice(
       bridge.indexOf("case 'add-score':"),
       bridge.indexOf("case 'stop-electric-bomb':"),
     ),
-    /addScore\(/,
+    /addScore\(|processGameEvent|processBirdScoreObjective/,
   );
-
-  const objective = extractMethod(SOURCE, 'processBirdScoreObjective');
-  assert.match(
-    objective,
-    /processGameEvent\(\s*19,\s*this\.requireSceneController\(\)\.sessionSnapshot\(\)\.score\.authoritativeScore/,
-  );
+  assert.doesNotMatch(SOURCE, /processBirdScoreObjective/);
   const cleanup = extractMethod(SOURCE, 'disposeModePresentation');
   assertOrderedSubstrings(cleanup, [
     'coordinator.stopAll()',
@@ -305,10 +300,16 @@ test('mode-3 Result uses pure preview, transactional settings commit, Retry, and
     'recordClassicBirdResultScore(',
     "transaction.status = 'committed'",
     'this.pendingResultEntryTransaction = null',
+    'createRecoveredResultObjectiveCommand(',
+    'this.requireObjectivesManager().processGameEvent(',
     'this.disposeModePresentation()',
     'this.installRunOwnership(this.createEmptyRunOwnership())',
     'this.pendingResultConfiguration = retainedResultConfiguration',
   ]);
+  assert.equal(
+    occurrences(commit, 'createRecoveredResultObjectiveCommand('),
+    1,
+  );
 
   const retry = extractMethod(SOURCE, 'restartFromResult');
   assertOrderedSubstrings(retry, [
@@ -1466,6 +1467,10 @@ function assertOrderedSubstrings(
     assert.ok(current > previous, `${value} must appear in recovered order`);
     previous = current;
   }
+}
+
+function occurrences(source: string, value: string): number {
+  return source.split(value).length - 1;
 }
 
 function compileSourceMethod<T extends (...args: any[]) => unknown>(

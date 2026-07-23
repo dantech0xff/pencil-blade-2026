@@ -60,6 +60,9 @@ import {
   insertComboBirdResultScore,
 } from '../domain/combo-bird-result-ranking';
 import {
+  createRecoveredResultObjectiveCommand,
+} from '../domain/recovered-result-objective';
+import {
   COMBO_BIRD_BLADE_ASSET,
   COMBO_BIRD_BLADE_TYPE,
   COMBO_BIRD_INITIAL_TIME_SECONDS,
@@ -2426,6 +2429,16 @@ export class ComboBirdGameplayController extends Component {
     };
     const releasedScene = this.requireSceneController();
     const failures: unknown[] = [];
+    collectCleanupFailure(failures, () => {
+      const objective = createRecoveredResultObjectiveCommand(
+        configured.mode,
+        configured.score,
+      );
+      this.requireObjectivesManager().processGameEvent(
+        objective.selector,
+        objective.completedScore,
+      );
+    });
     try {
       this.disposeModePresentation();
     } catch (error) {

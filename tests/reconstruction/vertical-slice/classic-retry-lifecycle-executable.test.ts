@@ -813,6 +813,52 @@ test('runtime teardown attempts every owner cleanup and clears shared ownership 
   assert.throws(() => gameplay.sharedResourceCatalog, /after teardown/);
 });
 
+test('committed Classic Result latches a failing objective tail without replay', () => {
+  cc.resetRuntime();
+  const canvas = new cc.Node('Canvas');
+  const gameplay = addComponent(canvas, ClassicGameplayController);
+  const calls: Array<readonly [number, number]> = [];
+  setPrivate(gameplay, 'objectivesManager', {
+    processGameEvent(selector: number, completedScore: number) {
+      calls.push(Object.freeze([selector, completedScore]));
+      throw new Error('Injected Classic objective storage failure');
+    },
+  });
+
+  const errors: Error[] = [];
+  const originalConsoleError = console.error;
+  console.error = (value?: unknown) => {
+    errors.push(value instanceof Error ? value : new Error(String(value)));
+  };
+  try {
+    invokePrivate<void>(
+      gameplay,
+      'dispatchRecoveredResultObjectiveTail',
+      0,
+      321,
+    );
+  } finally {
+    console.error = originalConsoleError;
+  }
+
+  assert.deepEqual(calls, [Object.freeze([1, 321])]);
+  assert.equal(getPrivate(gameplay, 'resultObjectiveTailAttempted'), true);
+  assert.match(
+    errors[0]?.message ?? '',
+    /Classic Result committed with objective-tail failure: Injected Classic objective storage failure/,
+  );
+  assert.throws(
+    () => invokePrivate<void>(
+      gameplay,
+      'dispatchRecoveredResultObjectiveTail',
+      0,
+      321,
+    ),
+    /Classic Result objective tail can be attempted only once per run/,
+  );
+  assert.deepEqual(calls, [Object.freeze([1, 321])]);
+});
+
 test('blade ownership reconciles when resource loading finishes during an active touch', () => {
   cc.resetRuntime();
   const canvas = new cc.Node('Canvas');
@@ -1233,6 +1279,12 @@ function createRetryFixture(): RetryFixture {
   setPrivate(gameplay, 'gameOver', true);
   setPrivate(gameplay, 'sceneController', scene);
   setPrivate(gameplay, 'resourceCatalog', createResourceCatalog());
+  setPrivate(gameplay, 'baseGameplayResources', Object.freeze({
+    assetTree: '720x1280',
+  }));
+  setPrivate(gameplay, 'objectivesManager', Object.freeze({
+    processGameEvent() { return null; },
+  }));
 
   const audio: AudioProbe = {
     played: [],

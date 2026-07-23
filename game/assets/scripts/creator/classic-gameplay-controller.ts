@@ -18,6 +18,7 @@ import {
 import type { BladeMoveResult } from '../domain/blade-tracks';
 import {
   CLASSIC_MENU_BUTTON_AUDIO_PATH,
+  CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH,
   getClassicComboAudioPath,
   getClassicFruitCutAudioSequence,
   getClassicResultRankAudioPath,
@@ -59,6 +60,13 @@ import {
   createClassicResultNavigationCommands,
   type ClassicResultNavigationCommand,
 } from '../domain/classic-result-navigation';
+import {
+  createRecoveredResultObjectiveCommand,
+} from '../domain/recovered-result-objective';
+import type {
+  ObjectiveAchievementPopupEvent,
+  ObjectivesManagerState,
+} from '../domain/objectives-manager-state';
 import { TossTimer } from '../domain/toss-timer';
 import {
   CLASSIC_BLADE_BEGAN_EVENT,
@@ -68,6 +76,10 @@ import {
   type ClassicBladeEndedEvent,
 } from './blade-input-controller';
 import { ClassicAudioPresenter } from './classic-audio-presenter';
+import {
+  loadBaseGameplayResources,
+  type LoadedBaseGameplayResources,
+} from './base-gameplay-resource-loader';
 import { ClassicBladePresenter } from './classic-blade-presenter';
 import { ComboItemPresenter } from './combo-item-presenter';
 import { ClassicCriticalParticlePresenter } from './classic-critical-particle-presenter';
@@ -96,6 +108,7 @@ import {
   loadClassicSliceResourceCatalog,
   type LoadedClassicRasterResource,
 } from './classic-resource-loader';
+import { ObjectiveAchievementPresenter } from './objective-achievement-presenter';
 
 const { ccclass, requireComponent } = _decorator;
 
@@ -218,8 +231,12 @@ export class ClassicGameplayController extends Component {
   private readonly criticalCutHalfPresenters = new Set<ClassicCutHalfPresenter>();
   private readonly criticalParticlePresenters = new Set<ClassicCriticalParticlePresenter>();
   private readonly comboItemPresenters = new Set<ComboItemPresenter>();
+  private readonly objectiveAchievementPresenters = new Set<
+    ObjectiveAchievementPresenter
+  >();
   private sceneController: ClassicSceneController | null = null;
   private audioPresenter: ClassicAudioPresenter | null = null;
+  private baseGameplayResources: LoadedBaseGameplayResources | null = null;
   private classicModeRoot: Node | null = null;
   private scoreHudRoot: Node | null = null;
   private worldPresentationRoot: Node | null = null;
@@ -237,7 +254,10 @@ export class ClassicGameplayController extends Component {
   private terminalGameNode: Node | null = null;
   private terminalOverNode: Node | null = null;
   private settingsRuntime: ClassicSettingsRuntime | null = null;
+  private objectiveAchievementTargetRoot: Node | null = null;
+  private objectivesManager: ObjectivesManagerState | null = null;
   private resultConstructionRequested = false;
+  private resultObjectiveTailAttempted = false;
   private resultMode: 0 | null = null;
   private resultScore: number | null = null;
   private gameOver = false;
@@ -294,7 +314,12 @@ export class ClassicGameplayController extends Component {
     if (this.shuttingDown || !isValid(this.node, true)) {
       throw new Error('Classic runtime cannot be prepared after destruction');
     }
-    if (this.resourceCatalog !== null && this.audioPresenter !== null) {
+    if (
+      this.resourceCatalog !== null
+      && this.audioPresenter !== null
+      && this.baseGameplayResources !== null
+      && this.objectivesManager !== null
+    ) {
       return this.recoveredRuntimePreparation ?? Promise.resolve();
     }
     if (this.recoveredRuntimePreparation !== null) {
@@ -328,6 +353,7 @@ export class ClassicGameplayController extends Component {
       // Load the bundle-backed visual catalog first so audio reuses the registered bundle.
       // This avoids issuing two first-load requests against Creator's bundle registry.
       const resources = await loadClassicSliceResourceCatalog(assetTree);
+      const baseGameplayResources = await loadBaseGameplayResources(assetTree);
       if (this.shuttingDown || !isValid(this.node, true)) {
         throw new Error('Classic runtime preparation completed after destruction');
       }
@@ -340,7 +366,11 @@ export class ClassicGameplayController extends Component {
         throw new Error('Classic runtime preparation completed after destruction');
       }
 
+      const objectivesManager = this.requireSettingsRuntime()
+        .createObjectivesManager(this.onObjectiveAchievement);
       this.audioPresenter = loadedAudioPresenter;
+      this.baseGameplayResources = baseGameplayResources;
+      this.objectivesManager = objectivesManager;
       this.resourceCatalog = resources;
     } catch (error) {
       if (loadedAudioPresenter !== null && loadedAudioPresenter !== this.audioPresenter) {
@@ -374,6 +404,9 @@ export class ClassicGameplayController extends Component {
     const audioPresenter = this.audioPresenter;
     if (sceneController === null || resources === null || audioPresenter === null) {
       throw new Error('Classic runtime must be prepared before activation');
+    }
+    if (this.baseGameplayResources === null || this.objectivesManager === null) {
+      throw new Error('Classic objective runtime must be prepared before activation');
     }
     const lifecycle = sceneController.sessionSnapshot().lifecycle;
     const isReentry = this.initialClassicRuntimeActivated;
@@ -542,6 +575,9 @@ export class ClassicGameplayController extends Component {
   }
 
   update(deltaSeconds: number): void {
+    for (const presenter of this.objectiveAchievementPresenters) {
+      presenter.updateAction(deltaSeconds);
+    }
     this.bladePresenter?.updateFrame();
     for (const presenter of [...this.comboItemPresenters]) {
       presenter.updateAction(deltaSeconds);
@@ -595,6 +631,10 @@ export class ClassicGameplayController extends Component {
       );
       collectClassicCleanupFailure(
         cleanupFailures,
+        () => this.disposeObjectiveAchievementPresentation(),
+      );
+      collectClassicCleanupFailure(
+        cleanupFailures,
         () => this.audioPresenter?.stop(),
       );
     } finally {
@@ -602,6 +642,9 @@ export class ClassicGameplayController extends Component {
       // failure. No later caller may reuse a partially disposed catalog, audio graph,
       // preparation promise, or current-screen placement.
       this.audioPresenter = null;
+      this.baseGameplayResources = null;
+      this.objectivesManager = null;
+      this.objectiveAchievementTargetRoot = null;
       this.resourceCatalog = null;
       this.recoveredRuntimePreparation = null;
       this.screenPlacement = null;
@@ -685,6 +728,23 @@ export class ClassicGameplayController extends Component {
       root.destroy();
     }
     this.resultPresentationRoot = null;
+  }
+
+  private disposeObjectiveAchievementPresentation(): void {
+    const failures: unknown[] = [];
+    for (const presenter of [...this.objectiveAchievementPresenters]) {
+      collectClassicCleanupFailure(failures, () => presenter.dispose());
+    }
+    this.objectiveAchievementPresenters.clear();
+    const target = this.objectiveAchievementTargetRoot;
+    this.objectiveAchievementTargetRoot = null;
+    if (target !== null && isValid(target, true)) {
+      collectClassicCleanupFailure(failures, () => target.destroy());
+    }
+    throwClassicCleanupFailures(
+      'Classic objective-achievement presentation teardown',
+      failures,
+    );
   }
 
   snapshot(): ClassicGameplaySnapshot {
@@ -1314,6 +1374,33 @@ export class ClassicGameplayController extends Component {
     }
     this.resultPresentationRoot = root;
     this.resultPresenter = presenter;
+    this.dispatchRecoveredResultObjectiveTail(configured.mode, configured.score);
+  }
+
+  private dispatchRecoveredResultObjectiveTail(mode: 0, score: number): void {
+    if (this.resultObjectiveTailAttempted) {
+      throw new Error('Classic Result objective tail can be attempted only once per run');
+    }
+    // Result ownership and leaderboard persistence are already committed. Publish the latch
+    // before the observer/storage callback so a partial failure can never replay this native
+    // final operation against the next objective.
+    this.resultObjectiveTailAttempted = true;
+    const failures: unknown[] = [];
+    collectClassicCleanupFailure(failures, () => {
+      const objective = createRecoveredResultObjectiveCommand(mode, score);
+      this.requireObjectivesManager().processGameEvent(
+        objective.selector,
+        objective.completedScore,
+      );
+    });
+    if (failures.length > 0) {
+      const details = failures
+        .map((error) => error instanceof Error ? error.message : String(error))
+        .join('; ');
+      console.error(new Error(
+        `Classic Result committed with objective-tail failure: ${details}`,
+      ));
+    }
   }
 
   private readonly onResultRetry = (): void => {
@@ -1595,6 +1682,7 @@ export class ClassicGameplayController extends Component {
     );
     this.deferredControllers.clear();
     this.resultConstructionRequested = false;
+    this.resultObjectiveTailAttempted = false;
     this.resultMode = null;
     this.resultScore = null;
     this.gameOver = false;
@@ -1744,6 +1832,71 @@ export class ClassicGameplayController extends Component {
     this.node.emit(CLASSIC_RESULT_REWARD_READY_EVENT, payload);
     return bonusCoins;
   };
+
+  private readonly onObjectiveAchievement = (
+    event: ObjectiveAchievementPopupEvent,
+  ): void => {
+    if (this.effectsEnabled()) {
+      this.sharedAudioPresenter.playOneShot(CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH);
+    }
+    const presenter = ObjectiveAchievementPresenter.create({
+      event,
+      random: this.random,
+      resources: this.requireBaseGameplayResources(),
+      viewport: this.requireViewport(),
+    });
+    try {
+      presenter.attach(this.requireObjectiveAchievementTargetRoot());
+      this.objectiveAchievementPresenters.add(presenter);
+    } catch (error) {
+      const failures: unknown[] = [];
+      collectClassicCleanupFailure(failures, () => presenter.dispose());
+      if (this.objectiveAchievementPresenters.size === 0) {
+        const target = this.objectiveAchievementTargetRoot;
+        this.objectiveAchievementTargetRoot = null;
+        if (target !== null && isValid(target, true)) {
+          collectClassicCleanupFailure(failures, () => target.destroy());
+        }
+      }
+      if (failures.length > 0) {
+        const details = failures
+          .map((failure) => failure instanceof Error ? failure.message : String(failure))
+          .join('; ');
+        throw new Error(
+          `Classic objective-achievement rollback failed after ${String(error)}: ${details}`,
+        );
+      }
+      throw error;
+    }
+  };
+
+  private requireBaseGameplayResources(): LoadedBaseGameplayResources {
+    if (this.baseGameplayResources === null) {
+      throw new Error(
+        'Classic base-gameplay resources are unavailable before preparation',
+      );
+    }
+    return this.baseGameplayResources;
+  }
+
+  private requireObjectivesManager(): ObjectivesManagerState {
+    if (this.objectivesManager === null) {
+      throw new Error('Classic objectives manager is unavailable before preparation');
+    }
+    return this.objectivesManager;
+  }
+
+  private requireObjectiveAchievementTargetRoot(): Node {
+    const retained = this.objectiveAchievementTargetRoot;
+    if (retained !== null && isValid(retained, true)) {
+      return retained;
+    }
+    const target = new Node('ClassicObjectiveAchievementTargetRoot');
+    target.layer = this.node.layer;
+    target.setParent(this.node);
+    this.objectiveAchievementTargetRoot = target;
+    return target;
+  }
 
   private requireSettingsRuntime(): ClassicSettingsRuntime {
     const runtime = this.settingsRuntime;

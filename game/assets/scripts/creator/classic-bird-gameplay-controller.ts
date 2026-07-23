@@ -65,6 +65,9 @@ import {
   type ClassicBirdTossRuntimeCommand,
 } from '../domain/classic-bird-toss-coordinator';
 import {
+  createRecoveredResultObjectiveCommand,
+} from '../domain/recovered-result-objective';
+import {
   partitionCrazyRuntimeCommands,
   type CrazyRuntimeCommandBatch,
 } from '../domain/crazy-runtime-command-batches';
@@ -1173,7 +1176,6 @@ export class ClassicBirdGameplayController extends Component {
         if (command.application !== 'already-applied') {
           throw new Error('Classic Bird score observation must already be applied');
         }
-        this.processBirdScoreObjective();
         break;
       case 'stop-electric-bomb':
         this.requireBombElectricPresenter().stop();
@@ -1436,7 +1438,6 @@ export class ClassicBirdGameplayController extends Component {
     event: CrazyGeneratedDragonFruitFinishedEvent,
   ): void => {
     this.requireSceneController().addScore(event.acceptedHitCount);
-    this.processBirdScoreObjective();
     this.emitCommand(event);
   };
 
@@ -1557,7 +1558,6 @@ export class ClassicBirdGameplayController extends Component {
           }
           case 'add-score':
             this.requireSceneController().addScore(command.value);
-            this.processBirdScoreObjective();
             return;
           case 'attach-combo-item': {
             if (command.zOrder !== 1 || pendingPresenter === null) {
@@ -1591,13 +1591,6 @@ export class ClassicBirdGameplayController extends Component {
       },
       publish: (command) => this.emitCommand(command),
     });
-  }
-
-  private processBirdScoreObjective(): void {
-    this.requireObjectivesManager().processGameEvent(
-      19,
-      this.requireSceneController().sessionSnapshot().score.authoritativeScore,
-    );
   }
 
   private createMagnetPresenter(zOrder: 1): void {
@@ -2879,6 +2872,16 @@ export class ClassicBirdGameplayController extends Component {
     };
     const releasedScene = this.requireSceneController();
     const cleanupFailures: unknown[] = [];
+    collectCleanupFailure(cleanupFailures, () => {
+      const objective = createRecoveredResultObjectiveCommand(
+        configured.mode,
+        configured.score,
+      );
+      this.requireObjectivesManager().processGameEvent(
+        objective.selector,
+        objective.completedScore,
+      );
+    });
     try {
       this.disposeModePresentation();
     } catch (error) {

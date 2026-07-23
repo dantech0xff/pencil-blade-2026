@@ -481,10 +481,16 @@ test('Time Up result entry is transactional and samples score only at finish dis
     'recordComboBirdResultScore(',
     "transaction.status = 'committed'",
     'this.pendingResultEntryTransaction = null',
+    'createRecoveredResultObjectiveCommand(',
+    'this.requireObjectivesManager().processGameEvent(',
     'this.disposeModePresentation()',
   ]);
   assert.equal(
     occurrences(commit, 'recordComboBirdResultScore('),
+    1,
+  );
+  assert.equal(
+    occurrences(commit, 'createRecoveredResultObjectiveCommand('),
     1,
   );
 });
