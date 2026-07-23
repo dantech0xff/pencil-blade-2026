@@ -107,7 +107,8 @@ Status: in progress. Continue this phase rather than creating a second restorati
 2. **Complete:** implement a pure four-slot trail model with exact point, geometry, UV, width, and disposal
    semantics; keep it independent from post-physics cut rays in `BladeTracks`.
 3. **Complete:** load the exact paired `blade0.png` resources and render four persistent dynamic textured meshes through
-   a dedicated Creator presenter at recovered z-order `1`.
+   a dedicated Creator presenter at recovered z-order `1`. Keep Creator's Basic 3D Feature Cropping module enabled because
+   the 2D `UIMeshRenderer` adapter requires `MeshRenderer`; this is renderer availability, not 3D gameplay.
 4. **Complete:** integrate began/moved/ended events and per-frame disposal without changing cut, swish,
    physics, score, result, or retry ownership.
 5. **Contract complete; implementation pending:** implement the exact Main Menu visible shell,
@@ -120,7 +121,7 @@ Status: in progress. Continue this phase rather than creating a second restorati
    Background/Leaf/Theme Creator owners while preserving equal-z append order and inert fades.
 8. Refactor scene boot behind one persistent app-shell host so Classic controllers are passive
    until the recovered Mode Select handoff; preserve existing Result/Retry transactions.
-9. **Complete for this source checkpoint:** focused tests, `282/282` vertical-slice tests,
+9. **Complete for this source checkpoint:** focused tests, `283/283` vertical-slice tests,
    strict Creator TypeScript, `38/38` source/staging tests, reconstruction policy, and
    prohibited-runtime/source-boundary checks pass. A real built artifact remains a later gate.
 10. **Complete:** independent reviews found and closed the Mode Select per-particle burst and

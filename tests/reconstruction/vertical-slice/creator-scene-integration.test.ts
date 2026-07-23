@@ -61,6 +61,34 @@ test('Classic project and serialized Canvas start from the canonical high portra
   assert.ok(canvasSize);
 });
 
+test('BasicBlade mesh presentation enables its required Creator 3D renderer module', () => {
+  const engineSettings = readJson<{
+    modules: {
+      configs: {
+        defaultConfig: {
+          cache: Record<string, { _value: boolean }>;
+          includeModules: string[];
+        };
+      };
+    };
+  }>('game/settings/v2/packages/engine.json');
+  const presenterSource = readText(
+    'game/assets/scripts/creator/classic-blade-presenter.ts',
+  );
+
+  assert.match(presenterSource, /node\.addComponent\(MeshRenderer\)/);
+  assert.match(presenterSource, /node\.addComponent\(UIMeshRenderer\)/);
+  assert.equal(
+    engineSettings.modules.configs.defaultConfig.cache['3d']?._value,
+    true,
+    'MeshRenderer is undefined at runtime when Creator strips the 3D engine module',
+  );
+  assert.ok(
+    engineSettings.modules.configs.defaultConfig.includeModules.includes('3d'),
+    'Preview engine excludes MeshRenderer unless the 3D module is included',
+  );
+});
+
 test('Creator bridge owns recovered variable stepping and emits initial state after onEnable', () => {
   const physicsSource = readText('game/assets/scripts/creator/classic-physics-adapter.ts');
   const sceneSource = readText('game/assets/scripts/creator/classic-scene-controller.ts');
