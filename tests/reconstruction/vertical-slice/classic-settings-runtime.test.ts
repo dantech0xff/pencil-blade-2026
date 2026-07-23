@@ -77,6 +77,9 @@ test('runtime keeps mutations in memory and writes only on save', () => {
   storage.values.set('crazy_best_1', '300');
   storage.values.set('crazy_best_2', '200');
   storage.values.set('crazy_best_3', '100');
+  storage.values.set('bird_classic_best_1', '3000');
+  storage.values.set('bird_classic_best_2', '2000');
+  storage.values.set('bird_classic_best_3', '1000');
   storage.values.set('current_objective', '13');
   storage.values.set('fruits_cut', '2468');
   storage.values.set('enable_music', 'true');
@@ -94,6 +97,7 @@ test('runtime keeps mutations in memory and writes only on save', () => {
 
   runtime.state.recordClassicResultScore(40);
   runtime.state.recordCrazyResultScore(250);
+  runtime.state.recordClassicBirdResultScore(2500);
   runtime.state.awardClassicResultCoins(10);
   assert.equal(storage.values.get('total_coins'), '3000');
   assert.equal(storage.values.get('classic_best_1'), '30');
@@ -106,6 +110,9 @@ test('runtime keeps mutations in memory and writes only on save', () => {
   assert.equal(storage.values.get('crazy_best_1'), '300');
   assert.equal(storage.values.get('crazy_best_2'), '250');
   assert.equal(storage.values.get('crazy_best_3'), '200');
+  assert.equal(storage.values.get('bird_classic_best_1'), '3000');
+  assert.equal(storage.values.get('bird_classic_best_2'), '2500');
+  assert.equal(storage.values.get('bird_classic_best_3'), '2000');
   assert.equal(storage.values.get('current_objective'), '13');
   assert.equal(storage.values.get('fruits_cut'), '2468');
   assert.equal(storage.values.get('selected_theme'), '9');
@@ -301,7 +308,7 @@ test('runtime recovers corrupt or unreadable target storage to exact defaults', 
     selectedBackground: 0,
     selectedBlade: 0,
     selectedTheme: 2,
-    totalCoins: 2014,
+    totalCoins: 999_999,
   });
   assert.throws(() => corruptRuntime.save(), /save is disabled after load recovery/);
   assert.throws(
@@ -343,7 +350,7 @@ test('runtime recovers corrupt or unreadable target storage to exact defaults', 
     },
   });
   assert.equal(unavailableRuntime.loadFailure, readFailure);
-  assert.equal(unavailableRuntime.state.snapshot.totalCoins, 2014);
+  assert.equal(unavailableRuntime.state.snapshot.totalCoins, 999_999);
   assert.throws(() => unavailableRuntime.save(), /save is disabled after load recovery/);
   assert.equal(unavailableWrites, 0);
   assert.throws(

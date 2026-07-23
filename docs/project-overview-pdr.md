@@ -12,11 +12,13 @@ the Creator bundle. The current playable loop consumes the exact paper backgroun
 intro/terminal/fail-marker art, score icon, best-score cup, double-score panel, Linds font,
 ordinary intact/cut fruit, critical particles, and 23 reviewed core/ordinary-bomb audio clips.
 The exact standard-bomb raster, body, fixture, cut guard, and retained-audio seam are also
-implemented and tested, but bomb controllers remain deferred until the unresolved procedural
-explosion geometry can be restored without guessing. The mode-0 result now includes its exact
-rank order, delayed particle burst, rotating reward tree, and the Classic-relevant
-`total_coins` plus `classic_best_1/2/3` persistence subset. This is a bounded Classic checkpoint, not presentation
-completion: most resource consumers and the full scene/prefab map remain open.
+implemented and tested, and the shared BaseBird/BirdBlade substrate now powers the production
+Classic Bird mode `3` route. The mode-0 result now includes its exact rank order, delayed
+particle burst, rotating reward tree, and the Classic-relevant `total_coins` plus
+`classic_best_1/2/3` persistence subset. Missing or corrupt save restores `999999` coins while
+a valid persisted balance wins. This is a bounded production checkpoint, not presentation
+completion: most resource consumers and the full scene/prefab map remain open, and modes `2`,
+`4`, and `5` still fail closed.
 
 ## Authority and evidence
 
@@ -51,7 +53,10 @@ replay, and device comparison are unavailable and are not project gates.
 - The Classic score HUD now uses the exact recovered score icon, best-score cup,
   double-score panel, and `Fonts/Linds.ttf`. Best-score display follows the authoritative
   score service seeded from persisted `classic_best_1`; app hide saves all four restored
-  Classic Settings integers. Full first-launch/Main Menu Settings behavior remains open.
+  Classic Settings integers. Missing or corrupt save falls back to `999999` coins while a
+  valid persisted balance wins. Full first-launch/Main Menu Settings behavior remains open.
+- The current implementation checkpoint covers production routes `0`, `1`, and `3`; modes `2`,
+  `4`, and `5` remain fail closed.
 - Presentation restoration is complete only when the canonical user-supplied sample project
   has 100% inventory, staging, and consumer coverage for every resource actually present.
 - No canonical graphics, animation frame, sound, music, font, shader/material, level/layout,

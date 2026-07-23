@@ -88,8 +88,8 @@ test('Classic leaderboard rejects unsafe or unordered state', () => {
   );
 });
 
-test('Classic result coin callback keeps the recovered default and float32 60% truncation', () => {
-  assert.equal(CLASSIC_INITIAL_TOTAL_COINS, 2014);
+test('Classic result coin callback uses the restoration default and float32 60% truncation', () => {
+  assert.equal(CLASSIC_INITIAL_TOTAL_COINS, 999_999);
   assert.equal(CLASSIC_RESULT_COIN_FACTOR, Math.fround(0.6));
   assert.equal(calculateClassicResultCoinBonus(0), 0);
   assert.equal(calculateClassicResultCoinBonus(1), 0);

@@ -19,7 +19,8 @@ export const CLASSIC_INITIAL_LEADERBOARD: ClassicLeaderboard = Object.freeze({
   third: 0,
 });
 
-export const CLASSIC_INITIAL_TOTAL_COINS = 2014;
+/** Restoration fallback for missing or failed saves; persisted balances override it. */
+export const CLASSIC_INITIAL_TOTAL_COINS = 999_999;
 export const CLASSIC_RESULT_COIN_FACTOR = Math.fround(0.6);
 
 export interface ClassicResultCoinAward {

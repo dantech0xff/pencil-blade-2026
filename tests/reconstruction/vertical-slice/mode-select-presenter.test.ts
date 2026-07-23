@@ -279,6 +279,7 @@ const {
 const {
   MODE_SELECT_HORIZONTAL_DRAG_EVENT,
   MODE_SELECT_HORIZONTAL_FLICK_EVENT,
+  ModeSelectFatalNavigationError,
   ModeSelectPresenter,
 } = await import('../../../game/assets/scripts/creator/mode-select-presenter.ts');
 
@@ -495,13 +496,18 @@ test('partial RopeButton activation rolls back the input lease and permits retry
   presenter.dispose();
 });
 
-test('rejected Crazy and unsupported routes restore every cut card and permit recutting', () => {
+test('rejected Crazy, Classic Bird, and unsupported routes restore every cut card', () => {
   ropeStub.resetRopes();
   let crazyCalls = 0;
+  let classicBirdCalls = 0;
   let unsupportedCalls = 0;
   const lifecycle = defaultLifecycle();
   lifecycle.onCrazyRequested = () => {
     crazyCalls += 1;
+    return false;
+  };
+  lifecycle.onClassicBirdRequested = () => {
+    classicBirdCalls += 1;
     return false;
   };
   lifecycle.onUnsupportedDestinationRequested = () => {
@@ -515,16 +521,28 @@ test('rejected Crazy and unsupported routes restore every cut card and permit re
   presenter.activate();
   const segment = { end: { x: 2, y: 2 }, start: { x: 1, y: 1 } };
   const crazy = ropeStub.createdRopes[1];
+  const classicBird = ropeStub.createdRopes[3];
   const crazyBird = ropeStub.createdRopes[4];
   assert.ok(crazy);
+  assert.ok(classicBird);
   assert.ok(crazyBird);
   assert.equal(crazy.cut(segment, true), true);
   assert.equal(presenter.state.navigationPendingCount, 1);
   presenter.update(0.75);
   assert.equal(crazyCalls, 1);
+  assert.equal(classicBirdCalls, 0);
   assert.equal(unsupportedCalls, 0);
   assert.equal(crazy.restoreCount, 1);
   assert.equal(crazy.cutAccepted, false);
+
+  assert.equal(classicBird.cut(segment, true), true);
+  assert.equal(presenter.state.navigationPendingCount, 1);
+  presenter.update(0.75);
+  assert.equal(classicBirdCalls, 1);
+  assert.equal(unsupportedCalls, 0);
+  assert.equal(presenter.state.navigationPendingCount, 0);
+  assert.equal(classicBird.restoreCount, 1);
+  assert.equal(classicBird.cutAccepted, false);
 
   assert.equal(crazyBird.cut(segment, true), true);
   assert.equal(presenter.state.navigationPendingCount, 1);
@@ -534,6 +552,52 @@ test('rejected Crazy and unsupported routes restore every cut card and permit re
   assert.equal(crazyBird.restoreCount, 1);
   assert.equal(crazyBird.cutAccepted, false);
   assert.equal(crazy.cut(segment, true), true);
+  presenter.dispose();
+});
+
+test('fatal navigation rollback keeps Mode Select inert instead of reacquiring input', () => {
+  ropeStub.resetRopes();
+  const bladeInput = bladeInputHarness();
+  const lifecycle = defaultLifecycle();
+  let presenter: InstanceType<typeof ModeSelectPresenter>;
+  lifecycle.onClassicBirdRequested = () => {
+    assert.equal(presenter.suspendForTransition(), true);
+    throw new ModeSelectFatalNavigationError(
+      'injected rollback-incomplete route',
+      new Error('collision filter remains inactive'),
+    );
+  };
+  presenter = ModeSelectPresenter.create(
+    presenterInput(bladeInput, { lifecycle }).input as never,
+  );
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+  presenter.activate();
+  const classicBird = ropeStub.createdRopes[3];
+  assert.ok(classicBird);
+  assert.equal(
+    classicBird.cut(
+      { end: { x: 2, y: 2 }, start: { x: 1, y: 1 } },
+      true,
+    ),
+    true,
+  );
+
+  assert.throws(
+    () => presenter.update(0.75),
+    /injected rollback-incomplete route[\s\S]*collision filter remains inactive/,
+  );
+  assert.equal(presenter.state.suspended, true);
+  assert.equal(presenter.state.navigationPendingCount, 0);
+  assert.equal(classicBird.restoreCount, 0);
+  assert.equal(classicBird.cutAccepted, true);
+  assert.equal(
+    bladeInput.events.filter((event) => event === 'activate').length,
+    1,
+  );
+  assert.equal(
+    bladeInput.node.listenerCount(CLASSIC_BLADE_BEGAN_EVENT),
+    0,
+  );
   presenter.dispose();
 });
 
@@ -743,6 +807,7 @@ test('source keeps exact detached/lifecycle boundaries and no destination placeh
   assert.match(source, /this\.bladeInput\.deactivateForNonClassicScreen\(\)/);
   assert.match(source, /onClassicRequested/);
   assert.match(source, /onCrazyRequested/);
+  assert.match(source, /onClassicBirdRequested/);
   assert.match(source, /onMainMenuRequested/);
   assert.match(source, /onUnsupportedDestinationRequested/);
   assert.match(source, /restoreAfterFailedNavigation/);
@@ -914,6 +979,7 @@ function defaultLifecycle() {
   return {
     onClassicRequested(_transaction?: unknown) { return true; },
     onCrazyRequested(_transaction?: unknown) { return true; },
+    onClassicBirdRequested(_transaction?: unknown) { return true; },
     onMainMenuRequested(_transaction?: unknown) { return true; },
     onUnsupportedDestinationRequested(
       _destination?: unknown,

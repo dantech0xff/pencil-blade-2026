@@ -19,8 +19,11 @@ test('app shell boots the shared scene into Main Menu before any Classic activat
     'await gameplayController.prepareRecoveredRuntime()',
     'this.requireCrazyGameplayController()',
     '.prepareCrazyRuntime()',
+    'const classicBirdPreparation = crazyPreparation',
+    'this.requireClassicBirdGameplayController()',
+    '.prepareClassicBirdRuntime()',
     'await Promise.all([',
-    'await crazyPreparation',
+    'await Promise.all([crazyPreparation, classicBirdPreparation])',
     'SharedLeafPresenter.create({',
     'SharedGameScenePresenter.create({',
     'nonClassicPhysics.activateCollisionFilter()',
@@ -33,16 +36,82 @@ test('app shell boots the shared scene into Main Menu before any Classic activat
   assert.doesNotMatch(initialize, /activateClassicFromAppShell|activateInitialClassic/);
 });
 
-test('serialized shell binds all Crazy navigation events and the production owner', () => {
+test('destroyed shell never starts delayed Classic Bird preparation', async () => {
+  const initialize = compileAsyncSourceMethod<
+    (this: Record<string, unknown>) => Promise<void>
+  >('initializeRecoveredApp', {
+    createRecoveredAppViewport: () => Object.freeze({}),
+    loadMainMenuResources: async () => Object.freeze({}),
+    loadModeSelectResources: async () => Object.freeze({}),
+    loadSharedGameSceneResources: async () => Object.freeze({}),
+  });
+  let resolveCrazyPreparation: (() => void) | null = null;
+  let markCrazyPreparationStarted: (() => void) | null = null;
+  const crazyPreparationStarted = new Promise<void>((resolve) => {
+    markCrazyPreparationStarted = resolve;
+  });
+  const crazyPreparation = new Promise<void>((resolve) => {
+    resolveCrazyPreparation = resolve;
+  });
+  let classicBirdPreparationCount = 0;
+  const shell: Record<string, unknown> = {
+    assertBootStillCurrent() {
+      if (this.destroyedValue === true) {
+        throw new Error('Recovered app shell boot completed after destruction');
+      }
+    },
+    destroyedValue: false,
+    requireClassicBirdGameplayController: () => ({
+      async prepareClassicBirdRuntime() {
+        classicBirdPreparationCount += 1;
+      },
+    }),
+    requireCrazyGameplayController: () => ({
+      prepareCrazyRuntime() {
+        markCrazyPreparationStarted?.();
+        return crazyPreparation;
+      },
+    }),
+    requireGameplayController: () => ({
+      async prepareRecoveredRuntime() {},
+      sharedResourceCatalog: {
+        assetTree: Object.freeze({}),
+      },
+    }),
+    requireSceneController: () => ({
+      prepareSceneResolution: () => Object.freeze({}),
+    }),
+  };
+
+  const initialization = initialize.call(shell);
+  await crazyPreparationStarted;
+  shell.destroyedValue = true;
+  resolveCrazyPreparation?.();
+
+  await assert.rejects(
+    initialization,
+    /Recovered app shell boot completed after destruction/,
+  );
+  assert.equal(classicBirdPreparationCount, 0);
+});
+
+test('serialized shell binds every Crazy and Classic Bird navigation event and owner', () => {
   const onLoad = extractMethod(SOURCE, 'onLoad');
   const onEnable = extractMethod(SOURCE, 'onEnable');
   const onDisable = extractMethod(SOURCE, 'onDisable');
 
   assert.match(SOURCE, /@requireComponent\(CrazyGameplayController\)/);
+  assert.match(SOURCE, /@requireComponent\(ClassicBirdGameplayController\)/);
   assert.match(onLoad, /CrazyGameplayController,[\s\S]*?'CrazyGameplayController'/);
+  assert.match(
+    onLoad,
+    /ClassicBirdGameplayController,[\s\S]*?'ClassicBirdGameplayController'/,
+  );
   for (const event of [
     'CRAZY_RESULT_MENU_REQUESTED_EVENT',
     'CRAZY_PAUSE_QUIT_REQUESTED_EVENT',
+    'CLASSIC_BIRD_RESULT_MENU_REQUESTED_EVENT',
+    'CLASSIC_BIRD_PAUSE_QUIT_REQUESTED_EVENT',
   ]) {
     assert.match(onEnable, new RegExp(`this\\.node\\.on\\([\\s\\S]*?${event}`));
     assert.match(onDisable, new RegExp(`this\\.node\\.off\\([\\s\\S]*?${event}`));
@@ -77,10 +146,17 @@ test('Mode Select enters Classic only through an empty shared current-screen hos
     "this.stateValue = 'classic'",
     "disposeCommittedPresenter(oldPresenter, 'Mode Select')",
   ]);
-  assert.match(
-    transition,
-    /catch \(error\)[\s\S]*?sharedScene\.currentScreen === null[\s\S]*?attachCurrentScreen\(oldPresenter\.root\)/,
-  );
+  const rollbackStart = transition.indexOf('} catch (error) {');
+  assert.ok(rollbackStart > -1);
+  assertOrderedSubstrings(transition.slice(rollbackStart), [
+    'const rollbackFailures: unknown[] = []',
+    'this.restoreModeSelectAfterFailedClassicActivation(oldPresenter.root)',
+    'nonClassicPhysics.activateCollisionFilter()',
+    'if (rollbackFailures.length > 0)',
+    'new ModeSelectFatalNavigationError(',
+    'aggregateWithPrimaryError(',
+    "'Mode Select to Classic rollback failed'",
+  ]);
 });
 
 test('Mode Select enters prepared Crazy through the same empty transactional host', () => {
@@ -108,10 +184,11 @@ test('Mode Select enters prepared Crazy through the same empty transactional hos
   assertOrderedSubstrings(rollbackBlock, [
     'const rollbackFailures: unknown[] = []',
     'this.restoreModeSelectAfterFailedCrazyActivation(oldPresenter.root)',
-    'if (collisionFilterReleased && !nonClassicPhysics.collisionFilterActive)',
     'nonClassicPhysics.activateCollisionFilter()',
     'if (rollbackFailures.length > 0)',
-    "aggregateWithPrimaryError(\n            'Mode Select to Crazy rollback failed'",
+    'new ModeSelectFatalNavigationError(',
+    'aggregateWithPrimaryError(',
+    "'Mode Select to Crazy rollback failed'",
   ]);
   assert.match(
     rollbackBlock,
@@ -119,6 +196,57 @@ test('Mode Select enters prepared Crazy through the same empty transactional hos
   );
 
   const rollback = extractMethod(SOURCE, 'restoreModeSelectAfterFailedCrazyActivation');
+  assertOrderedSubstrings(rollback, [
+    'const current = sharedScene.currentScreen',
+    'if (current === previous)',
+    'if (!isValid(previous, true) || previous.parent !== null)',
+    'if (current === null)',
+    'sharedScene.attachCurrentScreen(previous)',
+    'sharedScene.replaceCurrentScreen(previous)',
+    'sharedScene.currentScreen !== previous',
+  ]);
+  assert.doesNotMatch(rollback, /previous\.setParent\(|previous\.parent\s*=/);
+});
+
+test('Mode Select enters prepared Classic Bird through its isolated transactional host', () => {
+  const createModeSelect = extractMethod(SOURCE, 'createModeSelectPresenter');
+  const transition = extractMethod(SOURCE, 'transitionModeSelectToClassicBird');
+
+  assert.match(
+    createModeSelect,
+    /onClassicBirdRequested: \(transaction\) => \([\s\S]*?this\.transitionModeSelectToClassicBird\(transaction\)/,
+  );
+  assertOrderedSubstrings(transition, [
+    "transaction.destination !== 'ClassicBirdLayer'",
+    '!classicBird.prepared',
+    "this.runTransition('mode-select', 'classic-bird'",
+    'sharedScene.detachCurrentScreen(oldPresenter.root)',
+    'oldPresenter.suspendForTransition()',
+    'nonClassicPhysics.restorePreviousCollisionFilter()',
+    'classicBird.activateClassicBirdFromAppShell(sharedScene)',
+    "this.stateValue = 'classic-bird'",
+    "disposeCommittedPresenter(oldPresenter, 'Mode Select')",
+  ]);
+  const rollbackStart = transition.indexOf('} catch (error) {');
+  assert.ok(rollbackStart > -1);
+  const rollbackBlock = transition.slice(rollbackStart);
+  assertOrderedSubstrings(rollbackBlock, [
+    'const rollbackFailures: unknown[] = []',
+    'this.restoreModeSelectAfterFailedClassicBirdActivation(oldPresenter.root)',
+    'nonClassicPhysics.activateCollisionFilter()',
+    'oldPresenter.rearmNavigationAfterFailure()',
+    'if (rollbackFailures.length > 0)',
+    'new ModeSelectFatalNavigationError(',
+    'aggregateWithPrimaryError(',
+    "'Mode Select to Classic Bird rollback failed'",
+    'error instanceof ClassicBirdLifecycleRollbackError',
+    "'Mode Select to Classic Bird retained poisoned runtime ownership'",
+  ]);
+
+  const rollback = extractMethod(
+    SOURCE,
+    'restoreModeSelectAfterFailedClassicBirdActivation',
+  );
   assertOrderedSubstrings(rollback, [
     'const current = sharedScene.currentScreen',
     'if (current === previous)',
@@ -204,6 +332,58 @@ test('Crazy Result and Pause Quit share one commit-after-activation Main Menu tr
   assert.ok(rollbackIndex > filterIndex);
 });
 
+test('Classic Bird Result and Pause Quit share one commit-after-activation transaction', () => {
+  const result = extractMemberBlock(
+    SOURCE,
+    '  private readonly onClassicBirdResultMenuRequested = (',
+  );
+  const quit = extractMemberBlock(
+    SOURCE,
+    '  private readonly onClassicBirdPauseQuitRequested = (',
+  );
+  const transition = extractMethod(SOURCE, 'transitionClassicBirdToMainMenu');
+
+  assertOrderedSubstrings(result, [
+    'captureClassicBirdResultMenuNavigationRequest(request)',
+    'if (captured.request === null)',
+    'this.rejectClassicBirdNavigationRequest(',
+    "'Classic Bird Result'",
+    'this.transitionClassicBirdToMainMenu(captured.request',
+  ]);
+  assertOrderedSubstrings(quit, [
+    'captureClassicBirdPauseQuitNavigationRequest(request)',
+    'if (captured.request === null)',
+    'this.rejectClassicBirdNavigationRequest(',
+    "'Classic Bird Pause Quit'",
+    'this.transitionClassicBirdToMainMenu(captured.request',
+  ]);
+  assertOrderedSubstrings(transition, [
+    "this.stateValue !== 'classic-bird'",
+    'this.requireNonClassicPhysics()',
+    '.activateCollisionFilter()',
+    'sharedScene.replaceCurrentScreen(nextPresenter.root)',
+    'nextPresenter.activate()',
+    'commitClassicBirdMainMenuNavigationRequest(request, previous, source)',
+    'this.activeMainMenu = nextPresenter',
+    "this.stateValue = 'main-menu'",
+  ]);
+  const catchIndex = transition.indexOf('} catch (error) {');
+  const restoreIndex = transition.indexOf(
+    'this.restoreClassicBirdNavigationRootBeforeRollback(request.root)',
+    catchIndex,
+  );
+  const rollbackIndex = transition.indexOf('request.rollback()', catchIndex);
+  const disposeIndex = transition.indexOf('nextPresenter?.dispose()', catchIndex);
+  const filterIndex = transition.indexOf(
+    'this.requireNonClassicPhysics().restorePreviousCollisionFilter()',
+    catchIndex,
+  );
+  assert.ok(restoreIndex > catchIndex);
+  assert.ok(disposeIndex > restoreIndex);
+  assert.ok(filterIndex > disposeIndex);
+  assert.ok(rollbackIndex > filterIndex);
+});
+
 test('Crazy shell payload guards reject malformed events before dereferencing navigation fields', () => {
   const resultGuard = extractMemberBlock(
     SOURCE,
@@ -240,22 +420,67 @@ test('Crazy shell payload guards reject malformed events before dereferencing na
   ]);
 });
 
-test('Crazy producer commit errors use the idempotent commit contract before shell rollback', () => {
-  const commit = extractMemberBlock(
+test('Classic Bird payload captures reject malformed events without repeat dereferences', () => {
+  const resultCapture = extractMemberBlock(
     SOURCE,
-    'function commitCrazyMainMenuNavigationRequest(',
+    'function captureClassicBirdResultMenuNavigationRequest(',
   );
-  const calls = commit.match(/request\.commit\(previousRoot\)/g) ?? [];
+  const quitCapture = extractMemberBlock(
+    SOURCE,
+    'function captureClassicBirdPauseQuitNavigationRequest(',
+  );
+  const reject = extractMemberBlock(
+    SOURCE,
+    'function rollbackRejectedClassicBirdNavigationRequest(',
+  );
 
-  assert.equal(calls.length, 2);
-  assert.match(
-    commit,
-    /try \{[\s\S]*?request\.commit\(previousRoot\)[\s\S]*?catch \(error\) \{[\s\S]*?try \{[\s\S]*?request\.commit\(previousRoot\)[\s\S]*?catch \{[\s\S]*?throw error/,
-  );
-  assert.match(
-    commit,
-    /producer reported an error after committing Main Menu navigation/,
-  );
+  for (const capture of [resultCapture, quitCapture]) {
+    assertOrderedSubstrings(capture, [
+      "request === null || typeof request !== 'object'",
+      'request: null',
+      'try {',
+      'const rollback = candidate.rollback',
+      'capturedRollback = () => rollback.call(request)',
+    ]);
+    assert.match(capture, /instanceof Node/);
+    assert.match(capture, /typeof commit !== 'function'/);
+    assert.match(capture, /catch \{/);
+  }
+  assert.equal((resultCapture.match(/candidate\.resultRoot/g) ?? []).length, 1);
+  assert.equal((resultCapture.match(/candidate\.completedRunScore/g) ?? []).length, 1);
+  assert.equal((resultCapture.match(/candidate\.commit/g) ?? []).length, 1);
+  assert.equal((resultCapture.match(/candidate\.rollback/g) ?? []).length, 1);
+  assert.equal((quitCapture.match(/candidate\.classicBirdRoot/g) ?? []).length, 1);
+  assert.equal((quitCapture.match(/candidate\.commit/g) ?? []).length, 1);
+  assert.equal((quitCapture.match(/candidate\.rollback/g) ?? []).length, 1);
+  assert.match(resultCapture, /Number\.isFinite\(completedRunScore\)/);
+  assert.match(resultCapture, /completedRunScore < 0/);
+  assertOrderedSubstrings(reject, [
+    'if (rollback === null)',
+    'return Object.freeze([])',
+    'runBestEffortCleanup(',
+    '[rollback]',
+  ]);
+});
+
+test('non-Classic producer commit errors use the idempotent commit contract', () => {
+  for (const functionName of [
+    'commitCrazyMainMenuNavigationRequest',
+    'commitClassicBirdMainMenuNavigationRequest',
+  ]) {
+    const commit = extractMemberBlock(SOURCE, `function ${functionName}(`);
+    const calls = commit.match(/request\.commit\(previousRoot\)/g) ?? [];
+
+    assert.equal(calls.length, 2);
+    assert.match(
+      commit,
+      /try \{[\s\S]*?request\.commit\(previousRoot\)[\s\S]*?catch \(error\) \{[\s\S]*?try \{[\s\S]*?request\.commit\(previousRoot\)[\s\S]*?catch \{[\s\S]*?throw error/,
+    );
+    assert.match(
+      commit,
+      /producer reported an error after committing Main Menu navigation/,
+    );
+  }
 });
 
 test('Crazy transaction helpers execute malformed, commit, and partial-root failure paths', () => {
@@ -385,12 +610,20 @@ test('Crazy transaction helpers execute malformed, commit, and partial-root fail
   const aggregateWithPrimaryError = compileSourceFunction<
     (label: string, primary: unknown, secondary: readonly unknown[]) => Error
   >('aggregateWithPrimaryError', { errorMessage });
+  class TestFatalNavigationError extends Error {
+    constructor(message: string, cause: unknown) {
+      super(`${message}: ${String(cause)}`);
+    }
+  }
   const transitionToCrazy = compileSourceMethod<
     (this: Record<string, unknown>, transaction: Readonly<{
       destination: string;
       root: ExecutableScreenNode;
     }>) => boolean
-  >('transitionModeSelectToCrazy', { aggregateWithPrimaryError });
+  >('transitionModeSelectToCrazy', {
+    aggregateWithPrimaryError,
+    ModeSelectFatalNavigationError: TestFatalNavigationError,
+  });
 
   for (const attachPartialCrazy of [false, true]) {
     const modeSelectRoot = new ExecutableScreenNode();
@@ -454,6 +687,712 @@ test('Crazy transaction helpers execute malformed, commit, and partial-root fail
       /injected Crazy activation failure.*injected collision-filter reacquisition failure/,
     );
   }
+});
+
+test('Classic Bird transaction helpers execute malformed and partial-root failure paths', () => {
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const errors: unknown[] = [];
+  const testConsole = { error: (error: unknown) => errors.push(error) };
+  const resultCapture = compileSourceFunction<
+    (request: unknown) => Readonly<{
+      request: Readonly<{
+        commit(previousRoot: ExecutableScreenNode): void;
+        rollback(): void;
+        root: ExecutableScreenNode;
+      }> | null;
+      rollback: (() => void) | null;
+    }>
+  >(
+    'captureClassicBirdResultMenuNavigationRequest',
+    { Node: ExecutableScreenNode, isValid },
+  );
+  const quitCapture = compileSourceFunction<
+    (request: unknown) => Readonly<{
+      request: Readonly<{
+        commit(previousRoot: ExecutableScreenNode): void;
+        rollback(): void;
+        root: ExecutableScreenNode;
+      }> | null;
+      rollback: (() => void) | null;
+    }>
+  >(
+    'captureClassicBirdPauseQuitNavigationRequest',
+    { Node: ExecutableScreenNode, isValid },
+  );
+  const runBestEffortCleanup = compileSourceFunction<
+    (label: string, operations: readonly (() => void)[]) => readonly Error[]
+  >('runBestEffortCleanup', {
+    console: testConsole,
+    normalizeError,
+  });
+  const reject = compileSourceFunction<
+    (
+      rollback: (() => void) | null,
+      source: 'Classic Bird Pause Quit' | 'Classic Bird Result',
+    ) => readonly Error[]
+  >(
+    'rollbackRejectedClassicBirdNavigationRequest',
+    { runBestEffortCleanup },
+  );
+
+  assert.equal(resultCapture(null).request, null);
+  assert.equal(quitCapture(undefined).request, null);
+  assert.equal(resultCapture({
+    commit() {},
+    completedRunScore: Number.NaN,
+    resultRoot: new ExecutableScreenNode(),
+    rollback() {},
+  }).request, null);
+  assert.equal(quitCapture({
+    classicBirdRoot: Object.assign(new ExecutableScreenNode(), { destroyed: true }),
+    commit() {},
+    rollback() {},
+  }).request, null);
+  const validResultRoot = new ExecutableScreenNode();
+  const capturedResult = resultCapture({
+    commit() {},
+    completedRunScore: 42,
+    resultRoot: validResultRoot,
+    rollback() {},
+  });
+  assert.equal(capturedResult.request?.root, validResultRoot);
+
+  let rollbackCount = 0;
+  assert.equal(reject(() => { rollbackCount += 1; }, 'Classic Bird Result').length, 0);
+  assert.equal(rollbackCount, 1);
+  const rejectedFailures = reject(
+    () => {
+      throw new Error('injected rejected Bird rollback failure');
+    },
+    'Classic Bird Pause Quit',
+  );
+  assert.equal(rejectedFailures.length, 1);
+  assert.equal(errors.length, 1);
+
+  const commit = compileSourceFunction<
+    (
+      request: Readonly<{ commit(previousRoot: ExecutableScreenNode): void }>,
+      previousRoot: ExecutableScreenNode,
+      source: 'Classic Bird Pause Quit' | 'Classic Bird Result',
+    ) => void
+  >(
+    'commitClassicBirdMainMenuNavigationRequest',
+    { console: testConsole, normalizeError },
+  );
+  const previousRoot = new ExecutableScreenNode();
+  let committed = false;
+  let commitCalls = 0;
+  assert.doesNotThrow(() => commit({
+    commit() {
+      commitCalls += 1;
+      if (committed) {
+        return;
+      }
+      committed = true;
+      throw new Error('injected post-commit Bird failure');
+    },
+  }, previousRoot, 'Classic Bird Result'));
+  assert.equal(commitCalls, 2);
+  assert.equal(committed, true);
+
+  const restore = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      previous: ExecutableScreenNode,
+    ) => void
+  >('restoreModeSelectAfterFailedClassicBirdActivation', { isValid });
+  const detachedModeSelect = new ExecutableScreenNode();
+  const emptyScene = new ExecutableSharedScene();
+  restore.call({ requireSharedScene: () => emptyScene }, detachedModeSelect);
+  assert.equal(emptyScene.currentScreen, detachedModeSelect);
+
+  const restoreBirdRoot = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >('restoreClassicBirdNavigationRootBeforeRollback', { isValid });
+  const birdRoot = new ExecutableScreenNode();
+  const failedMenuRoot = new ExecutableScreenNode();
+  const rollbackScene = new ExecutableSharedScene(failedMenuRoot);
+  restoreBirdRoot.call({ requireSharedScene: () => rollbackScene }, birdRoot);
+  assert.equal(rollbackScene.currentScreen, birdRoot);
+  assert.equal(failedMenuRoot.parent, null);
+});
+
+test('incomplete Classic Bird activation rollback fails the shell and never returns rejection', () => {
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const errorMessage = compileSourceFunction<(error: unknown) => string>('errorMessage');
+  const aggregateWithPrimaryError = compileSourceFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  class TestFatalNavigationError extends Error {
+    readonly cause: unknown;
+
+    constructor(message: string, cause: unknown) {
+      super(`${message}: ${String(cause)}`);
+      this.cause = cause;
+    }
+  }
+  class TestBirdLifecycleRollbackError extends Error {}
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      transaction: Readonly<{
+        destination: string;
+        root: ExecutableScreenNode;
+      }>,
+    ) => boolean
+  >('transitionModeSelectToClassicBird', {
+    aggregateWithPrimaryError,
+    ClassicBirdLifecycleRollbackError: TestBirdLifecycleRollbackError,
+    ModeSelectFatalNavigationError: TestFatalNavigationError,
+  });
+  const runTransition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      from: string,
+      to: string,
+      operation: () => boolean,
+    ) => boolean
+  >('runTransition', {
+    ModeSelectFatalNavigationError: TestFatalNavigationError,
+  });
+  const restore = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >('restoreModeSelectAfterFailedClassicBirdActivation', { isValid });
+
+  const modeSelectRoot = new ExecutableScreenNode();
+  const sharedScene = new ExecutableSharedScene(modeSelectRoot);
+  const partialBirdRoot = new ExecutableScreenNode();
+  let filterActive = true;
+  let filterReacquireCount = 0;
+  let transitionFailureCount = 0;
+  let suspended = false;
+  const shell: Record<string, unknown> = {
+    activeModeSelect: {
+      dispose: () => true,
+      root: modeSelectRoot,
+      suspendForTransition() {
+        suspended = true;
+        return true;
+      },
+    },
+    destroyedValue: false,
+    emitTransitionFailure() {
+      transitionFailureCount += 1;
+    },
+    requireClassicBirdGameplayController: () => ({
+      activateClassicBirdFromAppShell() {
+        sharedScene.attachCurrentScreen(partialBirdRoot);
+        throw new Error('injected Classic Bird activation failure');
+      },
+      prepared: true,
+    }),
+    requireNonClassicPhysics: () => ({
+      activateCollisionFilter() {
+        filterReacquireCount += 1;
+        throw new Error('injected Bird filter reacquisition failure');
+      },
+      get collisionFilterActive() {
+        return filterActive;
+      },
+      restorePreviousCollisionFilter() {
+        filterActive = false;
+        return true;
+      },
+    }),
+    requireSharedScene: () => sharedScene,
+    restoreModeSelectAfterFailedClassicBirdActivation(root: ExecutableScreenNode) {
+      restore.call(this as never, root);
+    },
+    runTransition(from: string, to: string, operation: () => boolean) {
+      return runTransition.call(this, from, to, operation);
+    },
+    stateValue: 'mode-select',
+    transitioning: false,
+  };
+
+  assert.throws(
+    () => transition.call(shell, {
+      destination: 'ClassicBirdLayer',
+      root: modeSelectRoot,
+    }),
+    /Mode Select to Classic Bird rollback is incomplete[\s\S]*injected Bird filter reacquisition failure/,
+  );
+  assert.equal(shell.stateValue, 'failed');
+  assert.equal(sharedScene.currentScreen, modeSelectRoot);
+  assert.equal(partialBirdRoot.parent, null);
+  assert.equal(suspended, true);
+  assert.equal(filterReacquireCount, 1);
+  assert.equal(transitionFailureCount, 1);
+});
+
+test('poisoned Classic Bird runtime ownership fails closed after shell rollback succeeds', () => {
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const errorMessage = compileSourceFunction<(error: unknown) => string>('errorMessage');
+  const aggregateWithPrimaryError = compileSourceFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  class TestFatalNavigationError extends Error {
+    readonly cause: unknown;
+
+    constructor(message: string, cause: unknown) {
+      super(message);
+      this.cause = cause;
+    }
+  }
+  class TestBirdLifecycleRollbackError extends Error {}
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      transaction: Readonly<{
+        destination: string;
+        root: ExecutableScreenNode;
+      }>,
+    ) => boolean
+  >('transitionModeSelectToClassicBird', {
+    aggregateWithPrimaryError,
+    ClassicBirdLifecycleRollbackError: TestBirdLifecycleRollbackError,
+    ModeSelectFatalNavigationError: TestFatalNavigationError,
+  });
+  const runTransition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      from: string,
+      to: string,
+      operation: () => boolean,
+    ) => boolean
+  >('runTransition', {
+    ModeSelectFatalNavigationError: TestFatalNavigationError,
+  });
+  const restore = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >('restoreModeSelectAfterFailedClassicBirdActivation', { isValid });
+
+  const modeSelectRoot = new ExecutableScreenNode();
+  const sharedScene = new ExecutableSharedScene(modeSelectRoot);
+  let filterActive = true;
+  let transitionFailureCount = 0;
+  const poisoned = new TestBirdLifecycleRollbackError(
+    'injected poisoned Classic Bird ownership',
+  );
+  const shell: Record<string, unknown> = {
+    activeModeSelect: {
+      dispose: () => true,
+      root: modeSelectRoot,
+      rearmNavigationAfterFailure: () => true,
+      suspendForTransition: () => true,
+    },
+    destroyedValue: false,
+    emitTransitionFailure() {
+      transitionFailureCount += 1;
+    },
+    requireClassicBirdGameplayController: () => ({
+      activateClassicBirdFromAppShell() {
+        throw poisoned;
+      },
+      prepared: true,
+    }),
+    requireNonClassicPhysics: () => ({
+      activateCollisionFilter() {
+        filterActive = true;
+        return true;
+      },
+      get collisionFilterActive() {
+        return filterActive;
+      },
+      restorePreviousCollisionFilter() {
+        filterActive = false;
+        return true;
+      },
+    }),
+    requireSharedScene: () => sharedScene,
+    restoreModeSelectAfterFailedClassicBirdActivation(root: ExecutableScreenNode) {
+      restore.call(this as never, root);
+    },
+    runTransition(from: string, to: string, operation: () => boolean) {
+      return runTransition.call(this, from, to, operation);
+    },
+    stateValue: 'mode-select',
+    transitioning: false,
+  };
+
+  assert.throws(
+    () => transition.call(shell, {
+      destination: 'ClassicBirdLayer',
+      root: modeSelectRoot,
+    }),
+    (error: unknown) => (
+      error instanceof TestFatalNavigationError
+      && error.cause === poisoned
+    ),
+  );
+  assert.equal(shell.stateValue, 'failed');
+  assert.equal(sharedScene.currentScreen, modeSelectRoot);
+  assert.equal(filterActive, true);
+  assert.equal(transitionFailureCount, 1);
+});
+
+test('failed nonfatal Classic Bird activation restores and rearms every Mode Select lease', () => {
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const errorMessage = compileSourceFunction<(error: unknown) => string>('errorMessage');
+  const aggregateWithPrimaryError = compileSourceFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  class TestFatalNavigationError extends Error {
+    readonly cause: unknown;
+
+    constructor(message: string, cause: unknown) {
+      super(`${message}: ${String(cause)}`);
+      this.cause = cause;
+    }
+  }
+  class TestBirdLifecycleRollbackError extends Error {}
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      transaction: Readonly<{
+        destination: string;
+        root: ExecutableScreenNode;
+      }>,
+    ) => boolean
+  >('transitionModeSelectToClassicBird', {
+    aggregateWithPrimaryError,
+    ClassicBirdLifecycleRollbackError: TestBirdLifecycleRollbackError,
+    ModeSelectFatalNavigationError: TestFatalNavigationError,
+  });
+  const runTransition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      from: string,
+      to: string,
+      operation: () => boolean,
+    ) => boolean
+  >('runTransition', {
+    ModeSelectFatalNavigationError: TestFatalNavigationError,
+  });
+  const restore = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >('restoreModeSelectAfterFailedClassicBirdActivation', { isValid });
+
+  for (const injectedRearmFailure of [
+    null,
+    new Error('injected Mode Select input lease reacquisition failure'),
+  ]) {
+    const modeSelectRoot = new ExecutableScreenNode();
+    const partialBirdRoot = new ExecutableScreenNode();
+    const sharedScene = new ExecutableSharedScene(modeSelectRoot);
+    let filterActive = true;
+    let inputLeaseHeld = true;
+    let rearmCount = 0;
+    let transitionFailureCount = 0;
+    const oldPresenter = {
+      dispose: () => true,
+      root: modeSelectRoot,
+      rearmNavigationAfterFailure() {
+        rearmCount += 1;
+        assert.equal(sharedScene.currentScreen, modeSelectRoot);
+        assert.equal(filterActive, true);
+        if (injectedRearmFailure !== null) {
+          throw injectedRearmFailure;
+        }
+        inputLeaseHeld = true;
+        return true;
+      },
+      suspendForTransition() {
+        inputLeaseHeld = false;
+        return true;
+      },
+    };
+    const shell: Record<string, unknown> = {
+      activeModeSelect: oldPresenter,
+      destroyedValue: false,
+      emitTransitionFailure() {
+        transitionFailureCount += 1;
+      },
+      requireClassicBirdGameplayController: () => ({
+        activateClassicBirdFromAppShell() {
+          sharedScene.attachCurrentScreen(partialBirdRoot);
+          throw new Error('injected nonfatal Classic Bird activation failure');
+        },
+        prepared: true,
+      }),
+      requireNonClassicPhysics: () => ({
+        activateCollisionFilter() {
+          filterActive = true;
+          return true;
+        },
+        get collisionFilterActive() {
+          return filterActive;
+        },
+        restorePreviousCollisionFilter() {
+          filterActive = false;
+          return true;
+        },
+      }),
+      requireSharedScene: () => sharedScene,
+      restoreModeSelectAfterFailedClassicBirdActivation(root: ExecutableScreenNode) {
+        restore.call(this as never, root);
+      },
+      runTransition(from: string, to: string, operation: () => boolean) {
+        return runTransition.call(this, from, to, operation);
+      },
+      stateValue: 'mode-select',
+      transitioning: false,
+    };
+    const transaction = {
+      destination: 'ClassicBirdLayer',
+      root: modeSelectRoot,
+    };
+
+    if (injectedRearmFailure === null) {
+      assert.equal(transition.call(shell, transaction), false);
+      assert.equal(shell.stateValue, 'mode-select');
+      assert.equal(inputLeaseHeld, true);
+    } else {
+      assert.throws(
+        () => transition.call(shell, transaction),
+        /Mode Select to Classic Bird rollback is incomplete[\s\S]*input lease reacquisition/,
+      );
+      assert.equal(shell.stateValue, 'failed');
+      assert.equal(inputLeaseHeld, false);
+    }
+    assert.equal(sharedScene.currentScreen, modeSelectRoot);
+    assert.equal(partialBirdRoot.parent, null);
+    assert.equal(filterActive, true);
+    assert.equal(rearmCount, 1);
+    assert.equal(transitionFailureCount, 1);
+  }
+});
+
+test('incomplete Classic activation rollback fails the shell and never returns rejection', () => {
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const errorMessage = compileSourceFunction<(error: unknown) => string>('errorMessage');
+  const aggregateWithPrimaryError = compileSourceFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  class TestFatalNavigationError extends Error {
+    readonly cause: unknown;
+
+    constructor(message: string, cause: unknown) {
+      super(`${message}: ${String(cause)}`);
+      this.cause = cause;
+    }
+  }
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      transaction: Readonly<{
+        destination: string;
+        root: ExecutableScreenNode;
+      }>,
+    ) => boolean
+  >('transitionModeSelectToClassic', {
+    aggregateWithPrimaryError,
+    ModeSelectFatalNavigationError: TestFatalNavigationError,
+  });
+  const runTransition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      from: string,
+      to: string,
+      operation: () => boolean,
+    ) => boolean
+  >('runTransition', {
+    ModeSelectFatalNavigationError: TestFatalNavigationError,
+  });
+  const restore = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >('restoreModeSelectAfterFailedClassicActivation', { isValid });
+
+  const modeSelectRoot = new ExecutableScreenNode();
+  const sharedScene = new ExecutableSharedScene(modeSelectRoot);
+  const partialClassicRoot = new ExecutableScreenNode();
+  let filterActive = true;
+  let filterReacquireCount = 0;
+  let transitionFailureCount = 0;
+  let suspended = false;
+  const shell: Record<string, unknown> = {
+    activeModeSelect: {
+      dispose: () => true,
+      root: modeSelectRoot,
+      suspendForTransition() {
+        suspended = true;
+        return true;
+      },
+    },
+    destroyedValue: false,
+    emitTransitionFailure() {
+      transitionFailureCount += 1;
+    },
+    requireGameplayController: () => ({
+      activateClassicFromAppShell() {
+        sharedScene.attachCurrentScreen(partialClassicRoot);
+        throw new Error('injected Classic activation failure');
+      },
+    }),
+    requireNonClassicPhysics: () => ({
+      activateCollisionFilter() {
+        filterReacquireCount += 1;
+        throw new Error('injected Classic filter reacquisition failure');
+      },
+      get collisionFilterActive() {
+        return filterActive;
+      },
+      restorePreviousCollisionFilter() {
+        filterActive = false;
+        return true;
+      },
+    }),
+    requireSharedScene: () => sharedScene,
+    restoreModeSelectAfterFailedClassicActivation(root: ExecutableScreenNode) {
+      restore.call(this as never, root);
+    },
+    runTransition(from: string, to: string, operation: () => boolean) {
+      return runTransition.call(this, from, to, operation);
+    },
+    stateValue: 'mode-select',
+    transitioning: false,
+  };
+
+  assert.throws(
+    () => transition.call(shell, {
+      destination: 'ClassicModeLayer',
+      root: modeSelectRoot,
+    }),
+    /Mode Select to Classic rollback is incomplete[\s\S]*injected Classic filter reacquisition failure/,
+  );
+  assert.equal(shell.stateValue, 'failed');
+  assert.equal(sharedScene.currentScreen, modeSelectRoot);
+  assert.equal(partialClassicRoot.parent, null);
+  assert.equal(suspended, true);
+  assert.equal(filterReacquireCount, 1);
+  assert.equal(transitionFailureCount, 1);
+});
+
+test('post-mutation collision-filter release failure repairs the mask before rejection', () => {
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  class TestFatalNavigationError extends Error {}
+  class TestBirdLifecycleRollbackError extends Error {}
+  const errorMessage = compileSourceFunction<(error: unknown) => string>('errorMessage');
+  const aggregateWithPrimaryError = compileSourceFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      transaction: Readonly<{
+        destination: string;
+        root: ExecutableScreenNode;
+      }>,
+    ) => boolean
+  >('transitionModeSelectToClassicBird', {
+    aggregateWithPrimaryError,
+    ClassicBirdLifecycleRollbackError: TestBirdLifecycleRollbackError,
+    ModeSelectFatalNavigationError: TestFatalNavigationError,
+  });
+  const runTransition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      from: string,
+      to: string,
+      operation: () => boolean,
+    ) => boolean
+  >('runTransition', {
+    ModeSelectFatalNavigationError: TestFatalNavigationError,
+  });
+  const restore = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >('restoreModeSelectAfterFailedClassicBirdActivation', { isValid });
+
+  const recoveredMask = 0xfffc;
+  const previousMask = 0x1234;
+  let mask = recoveredMask;
+  let activationCalls = 0;
+  let transitionFailureCount = 0;
+  const modeSelectRoot = new ExecutableScreenNode();
+  const sharedScene = new ExecutableSharedScene(modeSelectRoot);
+  const shell: Record<string, unknown> = {
+    activeModeSelect: {
+      dispose: () => true,
+      root: modeSelectRoot,
+      rearmNavigationAfterFailure: () => true,
+      suspendForTransition: () => true,
+    },
+    destroyedValue: false,
+    emitTransitionFailure() {
+      transitionFailureCount += 1;
+    },
+    requireClassicBirdGameplayController: () => ({
+      activateClassicBirdFromAppShell() {
+        activationCalls += 1;
+      },
+      prepared: true,
+    }),
+    requireNonClassicPhysics: () => ({
+      activateCollisionFilter() {
+        mask = recoveredMask;
+        return false;
+      },
+      get collisionFilterActive() {
+        return mask === recoveredMask;
+      },
+      restorePreviousCollisionFilter() {
+        mask = previousMask;
+        throw new Error('injected post-mutation release failure');
+      },
+    }),
+    requireSharedScene: () => sharedScene,
+    restoreModeSelectAfterFailedClassicBirdActivation(root: ExecutableScreenNode) {
+      restore.call(this as never, root);
+    },
+    runTransition(from: string, to: string, operation: () => boolean) {
+      return runTransition.call(this, from, to, operation);
+    },
+    stateValue: 'mode-select',
+    transitioning: false,
+  };
+
+  assert.equal(transition.call(shell, {
+    destination: 'ClassicBirdLayer',
+    root: modeSelectRoot,
+  }), false);
+  assert.equal(shell.stateValue, 'mode-select');
+  assert.equal(sharedScene.currentScreen, modeSelectRoot);
+  assert.equal(mask, recoveredMask);
+  assert.equal(activationCalls, 0);
+  assert.equal(transitionFailureCount, 1);
 });
 
 test('failed Crazy Main Menu activation releases destination leases before producer rollback', () => {
@@ -556,6 +1495,434 @@ test('failed Crazy Main Menu activation releases destination leases before produ
     'producer:rollback',
     'transition:failed',
   ]);
+});
+
+test('failed Classic Bird Main Menu activation restores source before producer rollback', () => {
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const runBestEffortCleanup = compileSourceFunction<
+    (label: string, operations: readonly (() => void)[]) => readonly Error[]
+  >('runBestEffortCleanup', {
+    console: { error() {} },
+    normalizeError,
+  });
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      request: Readonly<{
+        root: ExecutableScreenNode;
+        commit(previousRoot: ExecutableScreenNode): void;
+        rollback(): void;
+      }>,
+      source: 'Classic Bird Pause Quit',
+    ) => void
+  >('transitionClassicBirdToMainMenu', { runBestEffortCleanup });
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const restore = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >('restoreClassicBirdNavigationRootBeforeRollback', { isValid });
+
+  const timeline: string[] = [];
+  const birdRoot = new ExecutableScreenNode();
+  const menuRoot = new ExecutableScreenNode();
+  const sharedScene = new ExecutableSharedScene(birdRoot);
+  let collisionFilterActive = false;
+  const originalReplace = sharedScene.replaceCurrentScreen.bind(sharedScene);
+  sharedScene.replaceCurrentScreen = (nextScreen) => {
+    timeline.push(nextScreen === menuRoot ? 'screen:menu' : 'screen:bird');
+    return originalReplace(nextScreen);
+  };
+  const request = {
+    commit() {
+      timeline.push('producer:commit');
+    },
+    rollback() {
+      assert.equal(sharedScene.currentScreen, birdRoot);
+      timeline.push('producer:rollback');
+    },
+    root: birdRoot,
+  };
+  const shell = {
+    activeMainMenu: null,
+    createMainMenuPresenter() {
+      timeline.push('menu:create');
+      return {
+        activate() {
+          timeline.push('menu:activate');
+          throw new Error('injected Main Menu activation failure');
+        },
+        dispose() {
+          timeline.push('menu:dispose');
+        },
+        root: menuRoot,
+      };
+    },
+    destroyedValue: false,
+    emitTransitionFailure() {
+      timeline.push('transition:failed');
+    },
+    requireGameplayController: () => ({
+      sharedAudioPresenter: {
+        stopBackgroundMusic() {
+          timeline.push('audio:stop');
+        },
+      },
+    }),
+    requireNonClassicPhysics: () => ({
+      activateCollisionFilter() {
+        timeline.push('filter:activate');
+        collisionFilterActive = true;
+        return true;
+      },
+      get collisionFilterActive() {
+        return collisionFilterActive;
+      },
+      restorePreviousCollisionFilter() {
+        timeline.push('filter:restore');
+        collisionFilterActive = false;
+        return true;
+      },
+    }),
+    requireSharedScene: () => sharedScene,
+    assertClassicBirdNavigationRollbackRestored(root: ExecutableScreenNode) {
+      assert.equal(sharedScene.currentScreen, root);
+      assert.equal(collisionFilterActive, false);
+    },
+    restoreClassicBirdNavigationRootBeforeRollback(root: ExecutableScreenNode) {
+      restore.call(this, root);
+    },
+    stateValue: 'classic-bird',
+    transitioning: false,
+  };
+
+  transition.call(shell, request, 'Classic Bird Pause Quit');
+  assert.deepEqual(timeline, [
+    'filter:activate',
+    'menu:create',
+    'screen:menu',
+    'menu:activate',
+    'screen:bird',
+    'menu:dispose',
+    'audio:stop',
+    'filter:restore',
+    'producer:rollback',
+    'transition:failed',
+  ]);
+});
+
+test('Classic Bird Main Menu rollback failures aggregate and retain failed shell state', () => {
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const errorMessage = compileSourceFunction<(error: unknown) => string>('errorMessage');
+  const aggregateWithPrimaryError = compileSourceFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  const cleanupDiagnostics: unknown[] = [];
+  const runBestEffortCleanup = compileSourceFunction<
+    (label: string, operations: readonly (() => void)[]) => readonly Error[]
+  >('runBestEffortCleanup', {
+    console: { error: (error: unknown) => cleanupDiagnostics.push(error) },
+    normalizeError,
+  });
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      request: Readonly<{
+        root: ExecutableScreenNode;
+        commit(previousRoot: ExecutableScreenNode): void;
+        rollback(): void;
+      }>,
+      source: 'Classic Bird Result',
+    ) => void
+  >('transitionClassicBirdToMainMenu', {
+    aggregateWithPrimaryError,
+    console: { error() {} },
+    normalizeError,
+    runBestEffortCleanup,
+  });
+
+  const birdRoot = new ExecutableScreenNode();
+  const menuRoot = new ExecutableScreenNode();
+  const sharedScene = new ExecutableSharedScene(birdRoot);
+  const reported: Error[] = [];
+  const request = {
+    commit() {},
+    rollback() {
+      throw new Error('injected producer rollback failure');
+    },
+    root: birdRoot,
+  };
+  const shell: Record<string, unknown> = {
+    activeMainMenu: null,
+    createMainMenuPresenter: () => ({
+      activate() {
+        throw new Error('injected Main Menu activation failure');
+      },
+      dispose() {
+        throw new Error('injected Main Menu disposal failure');
+      },
+      root: menuRoot,
+    }),
+    destroyedValue: false,
+    emitTransitionFailure(_from: string, _to: string, error: unknown) {
+      reported.push(error instanceof Error ? error : new Error(String(error)));
+    },
+    requireGameplayController: () => ({
+      sharedAudioPresenter: {
+        stopBackgroundMusic() {
+          throw new Error('injected audio cleanup failure');
+        },
+      },
+    }),
+    requireNonClassicPhysics: () => ({
+      activateCollisionFilter: () => true,
+      get collisionFilterActive() {
+        return true;
+      },
+      restorePreviousCollisionFilter() {
+        throw new Error('injected filter rollback failure');
+      },
+    }),
+    requireSharedScene: () => sharedScene,
+    assertClassicBirdNavigationRollbackRestored() {
+      throw new Error('injected final rollback invariant failure');
+    },
+    restoreClassicBirdNavigationRootBeforeRollback() {
+      throw new Error('injected source-root rollback failure');
+    },
+    retainClassicBirdShellFailure(
+      from: string,
+      error: unknown,
+    ) {
+      this.stateValue = 'failed';
+      this.emitTransitionFailure(from, 'main-menu', error);
+    },
+    stateValue: 'classic-bird',
+    transitioning: false,
+  };
+
+  transition.call(shell, request, 'Classic Bird Result');
+
+  assert.equal(shell.stateValue, 'failed');
+  assert.equal(reported.length, 1);
+  for (const message of [
+    'injected Main Menu activation failure',
+    'injected source-root rollback failure',
+    'injected Main Menu disposal failure',
+    'injected audio cleanup failure',
+    'injected filter rollback failure',
+    'injected producer rollback failure',
+    'injected final rollback invariant failure',
+  ]) {
+    assert.match(reported[0]?.message ?? '', new RegExp(message));
+  }
+  assert.equal(cleanupDiagnostics.length, 1);
+});
+
+test('rejected Classic Bird Main Menu rollback failures retain failed shell state', () => {
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const errorMessage = compileSourceFunction<(error: unknown) => string>('errorMessage');
+  const aggregateWithPrimaryError = compileSourceFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  const runBestEffortCleanup = compileSourceFunction<
+    (label: string, operations: readonly (() => void)[]) => readonly Error[]
+  >('runBestEffortCleanup', {
+    console: { error() {} },
+    normalizeError,
+  });
+  const rollbackRejectedClassicBirdNavigationRequest = compileSourceFunction<
+    (
+      rollback: (() => void) | null,
+      source: 'Classic Bird Pause Quit' | 'Classic Bird Result',
+    ) => readonly Error[]
+  >('rollbackRejectedClassicBirdNavigationRequest', { runBestEffortCleanup });
+  const rejectClassicBirdNavigationRequest = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      rollback: (() => void) | null,
+      source: 'Classic Bird Pause Quit' | 'Classic Bird Result',
+    ) => void
+  >('rejectClassicBirdNavigationRequest', {
+    aggregateWithPrimaryError,
+    rollbackRejectedClassicBirdNavigationRequest,
+  });
+  const captureClassicBirdPauseQuitNavigationRequest = compileSourceFunction<
+    (request: unknown) => Readonly<{
+      request: unknown;
+      rollback: (() => void) | null;
+    }>
+  >(
+    'captureClassicBirdPauseQuitNavigationRequest',
+    { Node: ExecutableScreenNode, isValid },
+  );
+  const rejectedEventHandler = compileSourceArrowMember<
+    (this: Record<string, unknown>, request: unknown) => void
+  >('onClassicBirdPauseQuitRequested', {
+    captureClassicBirdPauseQuitNavigationRequest,
+  });
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      request: Readonly<{
+        root: ExecutableScreenNode;
+        commit(previousRoot: ExecutableScreenNode): void;
+        rollback(): void;
+      }>,
+      source: 'Classic Bird Pause Quit',
+    ) => void
+  >('transitionClassicBirdToMainMenu', {
+    aggregateWithPrimaryError,
+    console: { error() {} },
+    normalizeError,
+    runBestEffortCleanup,
+  });
+  const reported: Error[] = [];
+  const shell: Record<string, unknown> = {
+    destroyedValue: false,
+    emitTransitionFailure(_from: string, _to: string, error: unknown) {
+      reported.push(error instanceof Error ? error : new Error(String(error)));
+    },
+    retainClassicBirdShellFailure(
+      from: string,
+      error: unknown,
+    ) {
+      this.stateValue = 'failed';
+      this.emitTransitionFailure(from, 'main-menu', error);
+    },
+    rejectClassicBirdNavigationRequest(
+      rollback: (() => void) | null,
+      source: 'Classic Bird Pause Quit' | 'Classic Bird Result',
+    ) {
+      rejectClassicBirdNavigationRequest.call(this, rollback, source);
+    },
+    stateValue: 'classic-bird',
+    transitioning: true,
+  };
+
+  transition.call(shell, {
+    commit() {},
+    rollback() {
+      throw new Error('injected rejected request rollback failure');
+    },
+    root: new ExecutableScreenNode(),
+  }, 'Classic Bird Pause Quit');
+
+  assert.equal(shell.stateValue, 'failed');
+  assert.equal(reported.length, 1);
+  assert.match(
+    reported[0]?.message ?? '',
+    /Rejected Classic Bird Pause Quit[\s\S]*injected rejected request rollback failure/,
+  );
+
+  const rejectedEventFailures: Error[] = [];
+  const rejectedEventShell: Record<string, unknown> = {
+    destroyedValue: false,
+    emitTransitionFailure(_from: string, _to: string, error: unknown) {
+      rejectedEventFailures.push(
+        error instanceof Error ? error : new Error(String(error)),
+      );
+    },
+    rejectClassicBirdNavigationRequest(
+      rollback: (() => void) | null,
+      source: 'Classic Bird Pause Quit' | 'Classic Bird Result',
+    ) {
+      rejectClassicBirdNavigationRequest.call(this, rollback, source);
+    },
+    retainClassicBirdShellFailure(
+      from: string,
+      error: unknown,
+    ) {
+      this.stateValue = 'failed';
+      this.emitTransitionFailure(from, 'main-menu', error);
+    },
+    stateValue: 'classic-bird',
+    transitionClassicBirdToMainMenu() {
+      throw new Error('Rejected Classic Bird payload must not reach transition');
+    },
+  };
+  rejectedEventHandler.call(rejectedEventShell, {
+    classicBirdRoot: Object.assign(new ExecutableScreenNode(), { destroyed: true }),
+    commit() {},
+    rollback() {
+      throw new Error('injected malformed-event rollback failure');
+    },
+  });
+
+  assert.equal(rejectedEventShell.stateValue, 'failed');
+  assert.equal(rejectedEventFailures.length, 1);
+  assert.match(
+    rejectedEventFailures[0]?.message ?? '',
+    /Rejected Classic Bird Pause Quit[\s\S]*injected malformed-event rollback failure/,
+  );
+});
+
+test('Classic Bird event dispatch captures mutable request properties exactly once', () => {
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const captureClassicBirdResultMenuNavigationRequest = compileSourceFunction<
+    (request: unknown) => Readonly<{
+      request: Readonly<{
+        commit(previousRoot: ExecutableScreenNode): void;
+        rollback(): void;
+        root: ExecutableScreenNode;
+      }> | null;
+      rollback: (() => void) | null;
+    }>
+  >(
+    'captureClassicBirdResultMenuNavigationRequest',
+    { Node: ExecutableScreenNode, isValid },
+  );
+  const handler = compileSourceArrowMember<
+    (this: Record<string, unknown>, request: unknown) => void
+  >('onClassicBirdResultMenuRequested', {
+    captureClassicBirdResultMenuNavigationRequest,
+  });
+  const firstRoot = new ExecutableScreenNode();
+  const changedRoot = new ExecutableScreenNode();
+  let rootReads = 0;
+  let capturedRoot: ExecutableScreenNode | null = null;
+  const payload = {
+    get commit() {
+      return () => {};
+    },
+    get completedRunScore() {
+      return 5;
+    },
+    get resultRoot() {
+      rootReads += 1;
+      return rootReads === 1 ? firstRoot : changedRoot;
+    },
+    get rollback() {
+      return () => {};
+    },
+  };
+  const shell = {
+    rejectClassicBirdNavigationRequest() {},
+    transitionClassicBirdToMainMenu(
+      request: Readonly<{ root: ExecutableScreenNode }>,
+    ) {
+      capturedRoot = request.root;
+    },
+  };
+
+  handler.call(shell, payload);
+
+  assert.equal(rootReads, 1);
+  assert.equal(capturedRoot, firstRoot);
 });
 
 test('unrecovered destinations and platform review fail closed at isolated shell ports', () => {
@@ -700,6 +2067,33 @@ function compileSourceMethod<T extends (...args: any[]) => unknown>(
     `function ${methodName}`,
   );
   return compileTypeScriptFunction<T>(source, methodName, dependencies);
+}
+
+function compileAsyncSourceMethod<T extends (...args: any[]) => unknown>(
+  methodName: string,
+  dependencies: Readonly<Record<string, unknown>> = {},
+): T {
+  const source = extractMethod(SOURCE, methodName).replace(
+    new RegExp(`^\\s*private\\s+async\\s+${methodName}`),
+    `async function ${methodName}`,
+  );
+  return compileTypeScriptFunction<T>(source, methodName, dependencies);
+}
+
+function compileSourceArrowMember<T extends (...args: any[]) => unknown>(
+  memberName: string,
+  dependencies: Readonly<Record<string, unknown>> = {},
+): T {
+  const source = extractMemberBlock(
+    SOURCE,
+    `  private readonly ${memberName} = (`,
+  )
+    .replace(
+      new RegExp(`^\\s*private\\s+readonly\\s+${memberName}\\s*=\\s*\\(`),
+      `function ${memberName}(`,
+    )
+    .replace(/\): void => \{/, '): void {');
+  return compileTypeScriptFunction<T>(source, memberName, dependencies);
 }
 
 function compileTypeScriptFunction<T extends (...args: any[]) => unknown>(

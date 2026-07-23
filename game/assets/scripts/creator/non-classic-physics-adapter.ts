@@ -32,21 +32,21 @@ export class NonClassicPhysicsAdapter {
   /** Installs the recovered fruit mask while Main Menu or Mode Select owns Physics2D. */
   activateCollisionFilter(): boolean {
     if (activeCollisionFilterOwner === this) {
+      this.assertAutoSimulatedPhysics();
+      this.ensureRecoveredFruitMask();
       return false;
     }
     if (activeCollisionFilterOwner !== null) {
       throw new Error('Another non-Classic physics adapter owns the collision filter');
     }
-    if (!this.physics.enable || !this.physics.autoSimulation) {
-      throw new Error('Non-Classic collision filter requires auto-simulated Physics2D');
-    }
+    this.assertAutoSimulatedPhysics();
     const key = String(FRUIT_COLLISION_FILTER.categoryBits);
     const previous = this.physics.collisionMatrix[key];
     if (!Number.isSafeInteger(previous)) {
       throw new Error('Physics2D fruit collision mask is unavailable');
     }
     this.previousFruitCollisionMask = previous;
-    this.physics.collisionMatrix[key] = FRUIT_COLLISION_FILTER.maskBits;
+    this.ensureRecoveredFruitMask();
     this.leaseGeneration += 1;
     activeCollisionFilterOwner = this;
     return true;
@@ -121,6 +121,23 @@ export class NonClassicPhysicsAdapter {
   private assertActiveCollisionFilter(): void {
     if (activeCollisionFilterOwner !== this) {
       throw new Error('Non-Classic physics adapter does not own the collision filter');
+    }
+  }
+
+  private assertAutoSimulatedPhysics(): void {
+    if (!this.physics.enable || !this.physics.autoSimulation) {
+      throw new Error('Non-Classic collision filter requires auto-simulated Physics2D');
+    }
+  }
+
+  private ensureRecoveredFruitMask(): void {
+    const key = String(FRUIT_COLLISION_FILTER.categoryBits);
+    const current = this.physics.collisionMatrix[key];
+    if (!Number.isSafeInteger(current)) {
+      throw new Error('Physics2D fruit collision mask is unavailable');
+    }
+    if (current !== FRUIT_COLLISION_FILTER.maskBits) {
+      this.physics.collisionMatrix[key] = FRUIT_COLLISION_FILTER.maskBits;
     }
   }
 

@@ -92,8 +92,9 @@ function createHarness(
   const settings = ClassicSettingsState.defaults();
   settings.setCurrentObjective(currentObjective);
   settings.setFruitsCut(fruitsCut);
-  if (totalCoins !== 2014) {
-    settings.addTotalCoins(totalCoins - 2014);
+  const initialTotalCoins = settings.snapshot.totalCoins;
+  if (totalCoins !== initialTotalCoins) {
+    settings.addTotalCoins(totalCoins - initialTotalCoins);
   }
   const values: Record<string, number> = {};
   for (const [objectiveId, value] of Object.entries(objectiveValues)) {

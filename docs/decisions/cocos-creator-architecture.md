@@ -1,6 +1,6 @@
 # Cocos Creator Architecture Decision
 
-Status: in progress; recovered-resource Classic and Crazy checkpoints integrated
+Status: in progress; recovered-resource Classic, Crazy, and Classic Bird checkpoints integrated
 Date: 2026-07-22
 
 ## Decision
@@ -11,15 +11,17 @@ domain modules with explicit clock, RNG, input, persistence, and command ports. 
 components, prefabs, tweens, audio, and Physics2D calls are adapters rather than owners of
 gameplay state.
 
-The workspace now contains the Creator foundation, Classic and Crazy contract/test baselines,
-all 862 exact recovered APK game assets in a Creator bundle, and a persistent app shell that
-routes Main Menu -> Mode Select -> production modes `0` and `1`. Classic owns the recovered
-normal-fruit, blade, HUD, fail, result, and core-audio path. Crazy adds its 60-second controller
-graph, standard/electric bombs, specials, magnet, Dragon, objectives, pause, audio, and
-transactional Result lifecycle. Process-owned persistence covers the eleven implemented
-Settings fields plus immediate mode-unlock keys. The remaining scene/prefab map, modes `2`
-through `5`, most presentation consumers, and runtime physics-equivalence gate keep the
-architecture decision in progress.
+The workspace now contains the Creator foundation, Classic, Crazy, and Classic Bird
+contract/test baselines, all 862 exact recovered APK game assets in a Creator bundle, and a
+persistent app shell that routes Main Menu -> Mode Select -> production modes `0`, `1`, and
+`3`. Classic owns the recovered normal-fruit, blade, HUD, fail, result, and core-audio path.
+Crazy adds its 60-second controller graph, standard/electric bombs, specials, magnet, Dragon,
+objectives, pause, audio, and transactional Result lifecycle. Classic Bird adds the shared
+BaseBird/BirdBlade substrate and mode-3 result/retry chain. Process-owned persistence covers
+the eleven implemented Settings fields plus immediate mode-unlock keys and the `999999`-coin
+missing/corrupt-save fallback. The remaining scene/prefab map, modes `2`, `4`, and `5`, most
+presentation consumers, and runtime physics-equivalence gate keep the architecture decision
+in progress.
 
 ## Dependency Direction
 
@@ -68,17 +70,18 @@ must not.
 
 ## Current Workspace Boundary
 
-- `game/assets/scripts/domain/` contains the pure Classic, Crazy, menu/shared-scene,
+- `game/assets/scripts/domain/` contains the pure Classic, Crazy, Bird, menu/shared-scene,
   timer/bonus/objective/result, and presentation contracts.
-- `game/assets/scripts/creator/` contains the Physics2D, resolution, blade-input, app-shell,
-  Classic/Crazy scene, generated-entity, resource, audio/effect, pause, and gameplay bridges.
+- `game/assets/scripts/creator/` contains the Physics2D, resolution, blade-input, bird-input,
+  app-shell, Classic/Crazy/Bird scene, generated-entity, resource, audio/effect, pause, and
+  gameplay bridges.
 - `game/assets/scenes/classic.scene` is Editor-authored and attaches the persistent app shell
   plus passive Classic and Crazy runtime owners to Canvas.
 - `game/assets/game/` contains byte-identical copies of all 862 recovered APK game assets.
-  The current Classic subset uses exact rasters and audio, but consumer/UUID coverage is not
-  complete and the canonical sample-project root remains unresolved. Release rights are
-  tracked separately.
-- `tests/reconstruction/vertical-slice/` contains the current `739/739` Classic/Crazy/menu
+  The current Classic, Crazy, and Bird subsets use exact rasters and audio, but consumer/UUID
+  coverage is not complete and the canonical sample-project root remains unresolved. Release
+  rights are tracked separately.
+- `tests/reconstruction/vertical-slice/` contains the current `876/876` Classic/Crazy/Bird/menu
   regression suite.
 - `scripts/audit-creator-build.mjs` contains the post-build archive audit.
 - `game/library/` is generated Creator cache and is not hand-authored gameplay source.
@@ -91,6 +94,9 @@ must not.
 - `GameplayRandom` is injected and shared by every recovered gameplay consumer. It preserves
   inclusive integer and decile semantics. Tests use scripted draws; production records its
   chosen seed. Exact native `lrand48` sequence parity is not claimed.
+- `BaseBirdLayer` owns the single touch-began Bird blade, cached ray path, always-running
+  particle trail, and shared result handoff. Classic Bird reuses the classic fail/result
+  terminal model while keeping Bird-specific blade and toss policies.
 - `ComboService` emits commands in recovered order:
   objective event, item creation, score, item attach, conditional sound draw, reset.
 - `ScoreService` owns authoritative, displayed, and pending-double state. Presentation does
@@ -191,8 +197,9 @@ legacy keys, but no JNI/native compatibility layer is permitted.
 The current runtime reads and writes the eleven implemented values for coins, selected
 theme/background/blade, Classic and Crazy leaderboards, music/effect flags, network sentinel,
 and rated state in recovered relative order. Indexed Mode Select unlocks use their separate
-immediate keys. Result mutations remain memory-only until the app-hide save checkpoint. Full
-first-launch Settings and Main Menu exit-save remain open.
+immediate keys. Missing or corrupt storage falls back to `999999` coins while a valid
+persisted balance wins. Result mutations remain memory-only until the app-hide save checkpoint.
+Full first-launch Settings and Main Menu exit-save remain open.
 
 ## Verification Gates
 
@@ -211,15 +218,15 @@ first-launch Settings and Main Menu exit-save remain open.
    archive entry, parses exact ZIP records, recurses through bounded nested archives, and
    permits ELF only at the pinned Creator 3.8.8 `libcocos.so` boundary.
 
-Current checkpoint: full vertical slice `739/739` including focused Crazy/TimeManager coverage,
-inventory/source/staging/archive workflow `14/14`, reconstruction policy positive plus `4/4`
-negative fixtures, strict Creator TypeScript, and independent P0/P1 review pass. A fresh
-Creator-served Browser Preview also confirms the latest Crazy crash/transaction fixes through
-Main Menu → Mode Select → Crazy → Pause/Resume/Replay/Quit → Main Menu with zero errors.
+Current checkpoint: full vertical slice `876/876` including focused Crazy/TimeManager and
+Classic Bird coverage, inventory/source/staging/archive workflow `14/14`, reconstruction policy
+positive plus `4/4` negative fixtures, strict Creator TypeScript, and independent review at the
+checkpoint. A fresh Creator-served Browser Preview confirms Main Menu → Mode Select → Classic Bird →
+live Bird presentation → Game Over → Result → Retry/Pause Resume → Replay/Quit with zero errors.
 
 ## Current Blockers
 
-- The persistent Canvas map is authoritative for the app shell and current Classic/Crazy
+- The persistent Canvas map is authoritative for the app shell and current Classic/Crazy/Bird
   owners, but remaining mode presenters, prefabs, and consumers are not authored yet.
 - Creator Preview has exercised exact ordinary-fruit presentation, trajectories, cut halves,
   core audio, cut/score, three-miss game over, and two same-parent Result->Retry cycles without
@@ -229,12 +236,14 @@ Main Menu → Mode Select → Crazy → Pause/Resume/Replay/Quit → Main Menu w
 - Crazy Preview has exercised production entry, live entity spawning, Replay, Quit, re-entry,
   natural Time-Up -> Result, and Result Retry with zero Creator Console errors. Its transaction
   harness covers command-listener, provisional Result, cleanup, and observer failures.
+- Classic Bird Preview has exercised the live Bird blade, particle trail, Game Over -> Result,
+  Result Retry, Pause/Resume, and Replay/Quit with zero errors.
 - The canonical sample-project resource manifest/root remains unresolved; presentation
   completion and the `99%` metric both stay blocked on that source.
 - BombElectric runs through the memory-safe target adapter, but exact pinned-backend
   contact-count/direction equivalence remains unresolved.
-- Modes `2` through `5` remain fail closed. Shared BaseBird/BirdBlade and Classic Bird are the
-  next architecture boundary, followed by Crazy Bird, Combo Bird, and GN Style.
+- Modes `2`, `4`, and `5` remain fail closed. Shared BaseBird/BirdBlade and Classic Bird are
+  complete; Crazy Bird is the next architecture boundary, followed by Combo Bird and GN Style.
 - Original content rights remain unknown.
 
 ## References

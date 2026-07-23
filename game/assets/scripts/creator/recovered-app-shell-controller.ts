@@ -15,6 +15,14 @@ import {
   ClassicGameplayController,
   type ClassicResultMenuRequestedEvent,
 } from './classic-gameplay-controller';
+import {
+  CLASSIC_BIRD_PAUSE_QUIT_REQUESTED_EVENT,
+  CLASSIC_BIRD_RESULT_MENU_REQUESTED_EVENT,
+  ClassicBirdGameplayController,
+} from './classic-bird-gameplay-controller';
+import {
+  ClassicBirdLifecycleRollbackError,
+} from './classic-bird-scene-controller';
 import { ClassicSceneController } from './classic-scene-controller';
 import {
   CRAZY_PAUSE_QUIT_REQUESTED_EVENT,
@@ -30,6 +38,7 @@ import {
 } from './main-menu-presenter';
 import { loadMainMenuResources, type LoadedMainMenuResources } from './main-menu-resource-loader';
 import {
+  ModeSelectFatalNavigationError,
   ModeSelectPresenter,
   type ModeSelectNavigationTransaction,
   type ModeSelectUnsupportedDestination,
@@ -59,6 +68,7 @@ export const RECOVERED_APP_SHELL_PLATFORM_REVIEW_REQUESTED_EVENT
 
 export type RecoveredAppShellState =
   | 'booting'
+  | 'classic-bird'
   | 'classic'
   | 'crazy'
   | 'destroyed'
@@ -93,11 +103,24 @@ interface CrazyMainMenuNavigationRequest {
   rollback(): void;
 }
 
+interface ClassicBirdMainMenuNavigationRequest {
+  readonly root: Node;
+  /** Idempotent producer commit; the shell retries once to detect a post-commit throw. */
+  commit(previousRoot: Node): void;
+  rollback(): void;
+}
+
+interface CapturedClassicBirdMainMenuNavigationRequest {
+  readonly request: ClassicBirdMainMenuNavigationRequest | null;
+  readonly rollback: (() => void) | null;
+}
+
 /**
  * Persistent serialized owner for the recovered Boot -> Menu -> Mode Select gameplay loop.
  * Every top-level screen swap is transactional; unsupported recovered destinations fail closed.
  */
 @ccclass('RecoveredAppShellController')
+@requireComponent(ClassicBirdGameplayController)
 @requireComponent(CrazyGameplayController)
 @requireComponent(ClassicGameplayController)
 export class RecoveredAppShellController extends Component {
@@ -105,6 +128,7 @@ export class RecoveredAppShellController extends Component {
   private activeModeSelect: ModeSelectPresenter | null = null;
   private bladeInput: BladeInputController | null = null;
   private bootPromise: Promise<void> | null = null;
+  private classicBirdGameplayController: ClassicBirdGameplayController | null = null;
   private crazyGameplayController: CrazyGameplayController | null = null;
   private destroyedValue = false;
   private gameplayController: ClassicGameplayController | null = null;
@@ -137,6 +161,11 @@ export class RecoveredAppShellController extends Component {
       ClassicGameplayController,
       'ClassicGameplayController',
     );
+    this.classicBirdGameplayController = requireComponentFromNode(
+      this.node,
+      ClassicBirdGameplayController,
+      'ClassicBirdGameplayController',
+    );
     this.crazyGameplayController = requireComponentFromNode(
       this.node,
       CrazyGameplayController,
@@ -158,6 +187,16 @@ export class RecoveredAppShellController extends Component {
     this.node.on(
       CRAZY_PAUSE_QUIT_REQUESTED_EVENT,
       this.onCrazyPauseQuitRequested,
+      this,
+    );
+    this.node.on(
+      CLASSIC_BIRD_RESULT_MENU_REQUESTED_EVENT,
+      this.onClassicBirdResultMenuRequested,
+      this,
+    );
+    this.node.on(
+      CLASSIC_BIRD_PAUSE_QUIT_REQUESTED_EVENT,
+      this.onClassicBirdPauseQuitRequested,
       this,
     );
     game.on(Game.EVENT_HIDE, this.onApplicationHidden, this);
@@ -192,6 +231,16 @@ export class RecoveredAppShellController extends Component {
     this.node.off(
       CRAZY_PAUSE_QUIT_REQUESTED_EVENT,
       this.onCrazyPauseQuitRequested,
+      this,
+    );
+    this.node.off(
+      CLASSIC_BIRD_RESULT_MENU_REQUESTED_EVENT,
+      this.onClassicBirdResultMenuRequested,
+      this,
+    );
+    this.node.off(
+      CLASSIC_BIRD_PAUSE_QUIT_REQUESTED_EVENT,
+      this.onClassicBirdPauseQuitRequested,
       this,
     );
     game.off(Game.EVENT_HIDE, this.onApplicationHidden, this);
@@ -253,12 +302,24 @@ export class RecoveredAppShellController extends Component {
     const crazyPreparation = this.requireCrazyGameplayController()
       .prepareCrazyRuntime()
       .catch(() => undefined);
+    // Classic Bird reuses the process-owned Classic/Crazy catalogs but remains an independent
+    // fail-closed destination. Its preparation waits for Crazy to settle so both modes never race
+    // the same supplemental bundle on first load.
+    const classicBirdPreparation = crazyPreparation.then(async () => {
+      this.assertBootStillCurrent();
+      try {
+        await this.requireClassicBirdGameplayController().prepareClassicBirdRuntime();
+      } catch {
+        // Menu and the prepared modes remain available when Classic Bird cannot prepare.
+      }
+      this.assertBootStillCurrent();
+    });
     const [sharedResources, mainMenuResources, modeSelectResources] = await Promise.all([
       loadSharedGameSceneResources(assetTree),
       loadMainMenuResources(assetTree),
       loadModeSelectResources(assetTree),
     ]);
-    await crazyPreparation;
+    await Promise.all([crazyPreparation, classicBirdPreparation]);
     this.assertBootStillCurrent();
 
     const settings = gameplayController.sharedSettingsRuntime.state.snapshot;
@@ -359,6 +420,9 @@ export class RecoveredAppShellController extends Component {
       lifecycle: {
         onClassicRequested: (transaction) => this.transitionModeSelectToClassic(transaction),
         onCrazyRequested: (transaction) => this.transitionModeSelectToCrazy(transaction),
+        onClassicBirdRequested: (transaction) => (
+          this.transitionModeSelectToClassicBird(transaction)
+        ),
         onMainMenuRequested: (transaction) => (
           this.transitionModeSelectToMainMenu(transaction)
         ),
@@ -461,20 +525,34 @@ export class RecoveredAppShellController extends Component {
     return this.runTransition('mode-select', 'classic', () => {
       const sharedScene = this.requireSharedScene();
       const nonClassicPhysics = this.requireNonClassicPhysics();
-      let collisionFilterReleased = false;
       try {
         const previous = sharedScene.detachCurrentScreen(oldPresenter.root);
         if (previous !== oldPresenter.root || !oldPresenter.suspendForTransition()) {
           throw new Error('Mode Select did not surrender the shared input lease');
         }
-        collisionFilterReleased = nonClassicPhysics.restorePreviousCollisionFilter();
+        nonClassicPhysics.restorePreviousCollisionFilter();
         this.requireGameplayController().activateClassicFromAppShell(sharedScene);
       } catch (error) {
-        if (collisionFilterReleased && !nonClassicPhysics.collisionFilterActive) {
-          nonClassicPhysics.activateCollisionFilter();
+        const rollbackFailures: unknown[] = [];
+        try {
+          this.restoreModeSelectAfterFailedClassicActivation(oldPresenter.root);
+        } catch (rollbackError) {
+          rollbackFailures.push(rollbackError);
         }
-        if (sharedScene.currentScreen === null) {
-          sharedScene.attachCurrentScreen(oldPresenter.root);
+        try {
+          nonClassicPhysics.activateCollisionFilter();
+        } catch (rollbackError) {
+          rollbackFailures.push(rollbackError);
+        }
+        if (rollbackFailures.length > 0) {
+          throw new ModeSelectFatalNavigationError(
+            'Mode Select to Classic rollback is incomplete',
+            aggregateWithPrimaryError(
+              'Mode Select to Classic rollback failed',
+              error,
+              rollbackFailures,
+            ),
+          );
         }
         throw error;
       }
@@ -501,13 +579,12 @@ export class RecoveredAppShellController extends Component {
     return this.runTransition('mode-select', 'crazy', () => {
       const sharedScene = this.requireSharedScene();
       const nonClassicPhysics = this.requireNonClassicPhysics();
-      let collisionFilterReleased = false;
       try {
         const previous = sharedScene.detachCurrentScreen(oldPresenter.root);
         if (previous !== oldPresenter.root || !oldPresenter.suspendForTransition()) {
           throw new Error('Mode Select did not surrender the shared input lease');
         }
-        collisionFilterReleased = nonClassicPhysics.restorePreviousCollisionFilter();
+        nonClassicPhysics.restorePreviousCollisionFilter();
         crazy.activateCrazyFromAppShell(sharedScene);
       } catch (error) {
         const rollbackFailures: unknown[] = [];
@@ -516,24 +593,101 @@ export class RecoveredAppShellController extends Component {
         } catch (rollbackError) {
           rollbackFailures.push(rollbackError);
         }
-        if (collisionFilterReleased && !nonClassicPhysics.collisionFilterActive) {
-          try {
-            nonClassicPhysics.activateCollisionFilter();
-          } catch (rollbackError) {
-            rollbackFailures.push(rollbackError);
-          }
+        try {
+          nonClassicPhysics.activateCollisionFilter();
+        } catch (rollbackError) {
+          rollbackFailures.push(rollbackError);
         }
         if (rollbackFailures.length > 0) {
-          throw aggregateWithPrimaryError(
-            'Mode Select to Crazy rollback failed',
-            error,
-            rollbackFailures,
+          throw new ModeSelectFatalNavigationError(
+            'Mode Select to Crazy rollback is incomplete',
+            aggregateWithPrimaryError(
+              'Mode Select to Crazy rollback failed',
+              error,
+              rollbackFailures,
+            ),
           );
         }
         throw error;
       }
       this.activeModeSelect = null;
       this.stateValue = 'crazy';
+      disposeCommittedPresenter(oldPresenter, 'Mode Select');
+      return true;
+    });
+  }
+
+  private transitionModeSelectToClassicBird(
+    transaction: ModeSelectNavigationTransaction,
+  ): boolean {
+    const oldPresenter = this.activeModeSelect;
+    const classicBird = this.requireClassicBirdGameplayController();
+    if (
+      oldPresenter === null
+      || transaction.root !== oldPresenter.root
+      || transaction.destination !== 'ClassicBirdLayer'
+      || !classicBird.prepared
+    ) {
+      return false;
+    }
+    return this.runTransition('mode-select', 'classic-bird', () => {
+      const sharedScene = this.requireSharedScene();
+      const nonClassicPhysics = this.requireNonClassicPhysics();
+      try {
+        const previous = sharedScene.detachCurrentScreen(oldPresenter.root);
+        if (previous !== oldPresenter.root || !oldPresenter.suspendForTransition()) {
+          throw new Error('Mode Select did not surrender the shared input lease');
+        }
+        nonClassicPhysics.restorePreviousCollisionFilter();
+        classicBird.activateClassicBirdFromAppShell(sharedScene);
+      } catch (error) {
+        const rollbackFailures: unknown[] = [];
+        try {
+          this.restoreModeSelectAfterFailedClassicBirdActivation(oldPresenter.root);
+        } catch (rollbackError) {
+          rollbackFailures.push(rollbackError);
+        }
+        try {
+          nonClassicPhysics.activateCollisionFilter();
+          if (!nonClassicPhysics.collisionFilterActive) {
+            throw new Error(
+              'Classic Bird activation rollback could not reacquire the collision filter',
+            );
+          }
+        } catch (rollbackError) {
+          rollbackFailures.push(rollbackError);
+        }
+        if (rollbackFailures.length === 0) {
+          try {
+            if (!oldPresenter.rearmNavigationAfterFailure()) {
+              throw new Error(
+                'Classic Bird activation rollback could not reacquire Mode Select input',
+              );
+            }
+          } catch (rollbackError) {
+            rollbackFailures.push(rollbackError);
+          }
+        }
+        if (rollbackFailures.length > 0) {
+          throw new ModeSelectFatalNavigationError(
+            'Mode Select to Classic Bird rollback is incomplete',
+            aggregateWithPrimaryError(
+              'Mode Select to Classic Bird rollback failed',
+              error,
+              rollbackFailures,
+            ),
+          );
+        }
+        if (error instanceof ClassicBirdLifecycleRollbackError) {
+          throw new ModeSelectFatalNavigationError(
+            'Mode Select to Classic Bird retained poisoned runtime ownership',
+            error,
+          );
+        }
+        throw error;
+      }
+      this.activeModeSelect = null;
+      this.stateValue = 'classic-bird';
       disposeCommittedPresenter(oldPresenter, 'Mode Select');
       return true;
     });
@@ -617,6 +771,34 @@ export class RecoveredAppShellController extends Component {
     }, 'Crazy Pause Quit');
   };
 
+  private readonly onClassicBirdResultMenuRequested = (
+    request: unknown,
+  ): void => {
+    const captured = captureClassicBirdResultMenuNavigationRequest(request);
+    if (captured.request === null) {
+      this.rejectClassicBirdNavigationRequest(
+        captured.rollback,
+        'Classic Bird Result',
+      );
+      return;
+    }
+    this.transitionClassicBirdToMainMenu(captured.request, 'Classic Bird Result');
+  };
+
+  private readonly onClassicBirdPauseQuitRequested = (
+    request: unknown,
+  ): void => {
+    const captured = captureClassicBirdPauseQuitNavigationRequest(request);
+    if (captured.request === null) {
+      this.rejectClassicBirdNavigationRequest(
+        captured.rollback,
+        'Classic Bird Pause Quit',
+      );
+      return;
+    }
+    this.transitionClassicBirdToMainMenu(captured.request, 'Classic Bird Pause Quit');
+  };
+
   private transitionCrazyToMainMenu(
     request: CrazyMainMenuNavigationRequest,
     source: 'Crazy Pause Quit' | 'Crazy Result',
@@ -670,6 +852,114 @@ export class RecoveredAppShellController extends Component {
     }
   }
 
+  private transitionClassicBirdToMainMenu(
+    request: ClassicBirdMainMenuNavigationRequest,
+    source: 'Classic Bird Pause Quit' | 'Classic Bird Result',
+  ): void {
+    if (
+      this.destroyedValue
+      || this.stateValue !== 'classic-bird'
+      || this.transitioning
+    ) {
+      this.rejectClassicBirdNavigationRequest(request.rollback, source);
+      return;
+    }
+    const from = this.stateValue;
+    this.transitioning = true;
+    let nextPresenter: MainMenuPresenter | null = null;
+    let collisionFilterActivated = false;
+    try {
+      const sharedScene = this.requireSharedScene();
+      if (sharedScene.currentScreen !== request.root) {
+        throw new Error(`${source} request does not own the current screen`);
+      }
+      collisionFilterActivated = this.requireNonClassicPhysics()
+        .activateCollisionFilter();
+      nextPresenter = this.createMainMenuPresenter();
+      const previous = sharedScene.replaceCurrentScreen(nextPresenter.root);
+      nextPresenter.activate();
+      commitClassicBirdMainMenuNavigationRequest(request, previous, source);
+      this.activeMainMenu = nextPresenter;
+      this.stateValue = 'main-menu';
+    } catch (error) {
+      const rollbackFailures = runBestEffortCleanup(
+        `${source} to Main Menu rollback`,
+        [
+          () => this.restoreClassicBirdNavigationRootBeforeRollback(request.root),
+          () => nextPresenter?.dispose(),
+          () => this.requireGameplayController().sharedAudioPresenter.stopBackgroundMusic(),
+          () => {
+            if (collisionFilterActivated) {
+              this.requireNonClassicPhysics().restorePreviousCollisionFilter();
+            }
+          },
+          () => request.rollback(),
+          () => this.assertClassicBirdNavigationRollbackRestored(request.root),
+        ],
+      );
+      if (rollbackFailures.length > 0) {
+        this.retainClassicBirdShellFailure(
+          from,
+          aggregateWithPrimaryError(
+            `${source} to Main Menu rollback failed`,
+            error,
+            rollbackFailures,
+          ),
+        );
+      } else {
+        this.emitTransitionFailure(from, 'main-menu', error);
+      }
+    } finally {
+      this.transitioning = false;
+    }
+  }
+
+  private rejectClassicBirdNavigationRequest(
+    rollback: (() => void) | null,
+    source: 'Classic Bird Pause Quit' | 'Classic Bird Result',
+  ): void {
+    const from = this.stateValue;
+    const rollbackFailures = rollbackRejectedClassicBirdNavigationRequest(
+      rollback,
+      source,
+    );
+    if (rollbackFailures.length === 0) {
+      return;
+    }
+    this.retainClassicBirdShellFailure(
+      from,
+      aggregateWithPrimaryError(
+        `Rejected ${source} navigation rollback failed`,
+        new Error(`Recovered app shell rejected ${source} navigation`),
+        rollbackFailures,
+      ),
+    );
+  }
+
+  private retainClassicBirdShellFailure(
+    from: RecoveredAppShellState,
+    error: unknown,
+  ): void {
+    const failure = normalizeError(
+      error,
+      'Recovered Classic Bird navigation rollback failed',
+    );
+    if (this.destroyedValue) {
+      console.error(failure);
+      return;
+    }
+    this.stateValue = 'failed';
+    try {
+      this.emitTransitionFailure(from, 'main-menu', failure);
+    } catch (reportingError) {
+      console.error(aggregateWithPrimaryError(
+        'Recovered fatal Classic Bird transition reporting failed',
+        failure,
+        [reportingError],
+      ));
+    }
+  }
+
   private restoreCrazyNavigationRootBeforeRollback(root: Node): void {
     const sharedScene = this.requireSharedScene();
     const current = sharedScene.currentScreen;
@@ -689,6 +979,48 @@ export class RecoveredAppShellController extends Component {
     }
     if (sharedScene.currentScreen !== root) {
       throw new Error('Crazy navigation rollback could not restore its source screen');
+    }
+  }
+
+  private restoreClassicBirdNavigationRootBeforeRollback(root: Node): void {
+    const sharedScene = this.requireSharedScene();
+    const current = sharedScene.currentScreen;
+    if (current === root) {
+      return;
+    }
+    if (!isValid(root, true) || root.parent !== null) {
+      throw new Error('Classic Bird navigation rollback lost its detached source screen');
+    }
+    if (current === null) {
+      sharedScene.attachCurrentScreen(root);
+    } else {
+      const displaced = sharedScene.replaceCurrentScreen(root);
+      if (displaced !== current) {
+        throw new Error(
+          'Classic Bird navigation rollback displaced an unexpected destination',
+        );
+      }
+    }
+    if (sharedScene.currentScreen !== root) {
+      throw new Error('Classic Bird navigation rollback could not restore its source screen');
+    }
+  }
+
+  private assertClassicBirdNavigationRollbackRestored(root: Node): void {
+    const sharedScene = this.requireSharedScene();
+    if (
+      sharedScene.currentScreen !== root
+      || !isValid(root, true)
+      || root.parent === null
+    ) {
+      throw new Error(
+        'Classic Bird navigation rollback did not retain its source screen',
+      );
+    }
+    if (this.requireNonClassicPhysics().collisionFilterActive) {
+      throw new Error(
+        'Classic Bird navigation rollback retained the non-Classic collision filter',
+      );
     }
   }
 
@@ -714,6 +1046,56 @@ export class RecoveredAppShellController extends Component {
     }
   }
 
+  private restoreModeSelectAfterFailedClassicActivation(previous: Node): void {
+    const sharedScene = this.requireSharedScene();
+    const current = sharedScene.currentScreen;
+    if (current === previous) {
+      return;
+    }
+    if (!isValid(previous, true) || previous.parent !== null) {
+      throw new Error('Classic activation rollback lost the detached Mode Select root');
+    }
+    if (current === null) {
+      sharedScene.attachCurrentScreen(previous);
+    } else {
+      const displaced = sharedScene.replaceCurrentScreen(previous);
+      if (displaced !== current) {
+        throw new Error('Classic activation rollback displaced an unexpected current screen');
+      }
+    }
+    if (sharedScene.currentScreen !== previous) {
+      throw new Error('Classic activation rollback could not restore Mode Select ownership');
+    }
+  }
+
+  private restoreModeSelectAfterFailedClassicBirdActivation(previous: Node): void {
+    const sharedScene = this.requireSharedScene();
+    const current = sharedScene.currentScreen;
+    if (current === previous) {
+      return;
+    }
+    if (!isValid(previous, true) || previous.parent !== null) {
+      throw new Error(
+        'Classic Bird activation rollback lost the detached Mode Select root',
+      );
+    }
+    if (current === null) {
+      sharedScene.attachCurrentScreen(previous);
+    } else {
+      const displaced = sharedScene.replaceCurrentScreen(previous);
+      if (displaced !== current) {
+        throw new Error(
+          'Classic Bird activation rollback displaced an unexpected current screen',
+        );
+      }
+    }
+    if (sharedScene.currentScreen !== previous) {
+      throw new Error(
+        'Classic Bird activation rollback could not restore Mode Select ownership',
+      );
+    }
+  }
+
   private runTransition(
     from: RecoveredAppShellState,
     to: RecoveredAppShellState,
@@ -726,6 +1108,18 @@ export class RecoveredAppShellController extends Component {
     try {
       return operation();
     } catch (error) {
+      if (error instanceof ModeSelectFatalNavigationError) {
+        this.stateValue = 'failed';
+        try {
+          this.emitTransitionFailure(from, to, error);
+        } catch (reportingError) {
+          console.error(normalizeError(
+            reportingError,
+            'Recovered fatal transition reporting failed',
+          ));
+        }
+        throw error;
+      }
       this.emitTransitionFailure(from, to, error);
       return false;
     } finally {
@@ -826,6 +1220,13 @@ export class RecoveredAppShellController extends Component {
       throw new Error('Recovered app shell requires CrazyGameplayController');
     }
     return this.crazyGameplayController;
+  }
+
+  private requireClassicBirdGameplayController(): ClassicBirdGameplayController {
+    if (this.classicBirdGameplayController === null) {
+      throw new Error('Recovered app shell requires ClassicBirdGameplayController');
+    }
+    return this.classicBirdGameplayController;
   }
 
   private requireSceneController(): ClassicSceneController {
@@ -937,6 +1338,109 @@ function isCrazyPauseQuitRequestedEvent(
   }
 }
 
+function captureClassicBirdResultMenuNavigationRequest(
+  request: unknown,
+): CapturedClassicBirdMainMenuNavigationRequest {
+  if (request === null || typeof request !== 'object') {
+    return Object.freeze({
+      request: null,
+      rollback: null,
+    });
+  }
+  let capturedRollback: (() => void) | null = null;
+  try {
+    const candidate = request as Readonly<{
+      commit?: unknown;
+      completedRunScore?: unknown;
+      resultRoot?: unknown;
+      rollback?: unknown;
+    }>;
+    const rollback = candidate.rollback;
+    if (typeof rollback === 'function') {
+      capturedRollback = () => rollback.call(request);
+    }
+    const resultRoot = candidate.resultRoot;
+    const completedRunScore = candidate.completedRunScore;
+    const commit = candidate.commit;
+    if (
+      !(resultRoot instanceof Node)
+      || !isValid(resultRoot, true)
+      || typeof completedRunScore !== 'number'
+      || !Number.isFinite(completedRunScore)
+      || completedRunScore < 0
+      || typeof commit !== 'function'
+      || capturedRollback === null
+    ) {
+      return Object.freeze({
+        request: null,
+        rollback: capturedRollback,
+      });
+    }
+    return Object.freeze({
+      request: Object.freeze({
+        commit: (previousRoot: Node) => commit.call(request, previousRoot),
+        rollback: capturedRollback,
+        root: resultRoot,
+      }),
+      rollback: capturedRollback,
+    });
+  } catch {
+    return Object.freeze({
+      request: null,
+      rollback: capturedRollback,
+    });
+  }
+}
+
+function captureClassicBirdPauseQuitNavigationRequest(
+  request: unknown,
+): CapturedClassicBirdMainMenuNavigationRequest {
+  if (request === null || typeof request !== 'object') {
+    return Object.freeze({
+      request: null,
+      rollback: null,
+    });
+  }
+  let capturedRollback: (() => void) | null = null;
+  try {
+    const candidate = request as Readonly<{
+      classicBirdRoot?: unknown;
+      commit?: unknown;
+      rollback?: unknown;
+    }>;
+    const rollback = candidate.rollback;
+    if (typeof rollback === 'function') {
+      capturedRollback = () => rollback.call(request);
+    }
+    const classicBirdRoot = candidate.classicBirdRoot;
+    const commit = candidate.commit;
+    if (
+      !(classicBirdRoot instanceof Node)
+      || !isValid(classicBirdRoot, true)
+      || typeof commit !== 'function'
+      || capturedRollback === null
+    ) {
+      return Object.freeze({
+        request: null,
+        rollback: capturedRollback,
+      });
+    }
+    return Object.freeze({
+      request: Object.freeze({
+        commit: (previousRoot: Node) => commit.call(request, previousRoot),
+        rollback: capturedRollback,
+        root: classicBirdRoot,
+      }),
+      rollback: capturedRollback,
+    });
+  } catch {
+    return Object.freeze({
+      request: null,
+      rollback: capturedRollback,
+    });
+  }
+}
+
 function rollbackRejectedCrazyNavigationRequest(
   request: unknown,
   source: 'Crazy Pause Quit' | 'Crazy Result',
@@ -954,6 +1458,19 @@ function rollbackRejectedCrazyNavigationRequest(
   }
 }
 
+function rollbackRejectedClassicBirdNavigationRequest(
+  rollback: (() => void) | null,
+  source: 'Classic Bird Pause Quit' | 'Classic Bird Result',
+): readonly Error[] {
+  if (rollback === null) {
+    return Object.freeze([]);
+  }
+  return runBestEffortCleanup(
+    `Rejected ${source} rollback`,
+    [rollback],
+  );
+}
+
 function commitCrazyMainMenuNavigationRequest(
   request: CrazyMainMenuNavigationRequest,
   previousRoot: Node,
@@ -965,6 +1482,30 @@ function commitCrazyMainMenuNavigationRequest(
     try {
       // Producer commits are idempotent. A second successful call confirms that the first call
       // crossed its commit point before a post-disposal notification escaped.
+      request.commit(previousRoot);
+    } catch {
+      throw error;
+    }
+    try {
+      console.error(normalizeError(
+        error,
+        `${source} producer reported an error after committing Main Menu navigation`,
+      ));
+    } catch {
+      // Diagnostics cannot reopen a producer transaction whose idempotent commit was confirmed.
+    }
+  }
+}
+
+function commitClassicBirdMainMenuNavigationRequest(
+  request: ClassicBirdMainMenuNavigationRequest,
+  previousRoot: Node,
+  source: 'Classic Bird Pause Quit' | 'Classic Bird Result',
+): void {
+  try {
+    request.commit(previousRoot);
+  } catch (error) {
+    try {
       request.commit(previousRoot);
     } catch {
       throw error;
@@ -1001,7 +1542,7 @@ function normalizeError(error: unknown, fallback: string): Error {
 function runBestEffortCleanup(
   label: string,
   operations: readonly (() => unknown)[],
-): void {
+): readonly Error[] {
   const failures: Error[] = [];
   for (const operation of operations) {
     try {
@@ -1015,4 +1556,5 @@ function runBestEffortCleanup(
       `${label} completed with cleanup failures: ${failures.map(({ message }) => message).join('; ')}`,
     ));
   }
+  return Object.freeze(failures);
 }

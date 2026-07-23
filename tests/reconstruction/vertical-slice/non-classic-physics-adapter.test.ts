@@ -88,7 +88,11 @@ test('non-Classic screens own and restore the recovered fruit collision mask', (
   assert.match(SOURCE, /activeCollisionFilterOwner/);
   assert.match(
     SOURCE,
-    /this\.previousFruitCollisionMask = previous[\s\S]*?FRUIT_COLLISION_FILTER\.maskBits[\s\S]*?activeCollisionFilterOwner = this/,
+    /this\.previousFruitCollisionMask = previous[\s\S]*?this\.ensureRecoveredFruitMask\(\)[\s\S]*?activeCollisionFilterOwner = this/,
+  );
+  assert.match(
+    SOURCE,
+    /ensureRecoveredFruitMask[\s\S]*?FRUIT_COLLISION_FILTER\.maskBits/,
   );
   assert.match(
     SOURCE,
@@ -121,6 +125,48 @@ test('collision-filter lease is exclusive, idempotent, and exactly restored', ()
     0x1234,
   );
   assert.equal(adapter.restorePreviousCollisionFilter(), false);
+});
+
+test('same-owner activation verifies and repairs a drifted recovered mask', () => {
+  const physics = createPhysicsStub();
+  const adapter = new NonClassicPhysicsAdapter(physics as never);
+  const key = String(FRUIT_COLLISION_FILTER.categoryBits);
+
+  adapter.activateCollisionFilter();
+  physics.collisionMatrix[key] = 0x1234;
+  assert.equal(adapter.collisionFilterActive, true);
+  assert.equal(adapter.activateCollisionFilter(), false);
+  assert.equal(
+    physics.collisionMatrix[key],
+    FRUIT_COLLISION_FILTER.maskBits,
+  );
+  adapter.dispose();
+  assert.equal(physics.collisionMatrix[key], 0x1234);
+});
+
+test('failed release remains recoverable whether its setter throws before or after mutation', () => {
+  for (const fault of ['before', 'after'] as const) {
+    const fixture = createFaultingPhysicsStub();
+    const adapter = new NonClassicPhysicsAdapter(fixture.physics as never);
+    const key = String(FRUIT_COLLISION_FILTER.categoryBits);
+
+    adapter.activateCollisionFilter();
+    fixture.setFault(fault);
+    assert.throws(
+      () => adapter.restorePreviousCollisionFilter(),
+      new RegExp(`injected ${fault}-mutation collision-mask failure`),
+    );
+    assert.equal(adapter.collisionFilterActive, true);
+
+    fixture.setFault(null);
+    assert.equal(adapter.activateCollisionFilter(), false);
+    assert.equal(
+      fixture.physics.collisionMatrix[key],
+      FRUIT_COLLISION_FILTER.maskBits,
+    );
+    assert.equal(adapter.restorePreviousCollisionFilter(), true);
+    assert.equal(fixture.physics.collisionMatrix[key], 0x1234);
+  }
 });
 
 test('raycast and after-step mutation reject callers without the active lease', () => {
@@ -176,5 +222,34 @@ function createPhysicsStub() {
     } as Record<string, number>,
     enable: true,
     raycast() { return []; },
+  };
+}
+
+function createFaultingPhysicsStub() {
+  const key = String(FRUIT_COLLISION_FILTER.categoryBits);
+  const target: Record<string, number> = { [key]: 0x1234 };
+  let fault: 'after' | 'before' | null = null;
+  const collisionMatrix = new Proxy(target, {
+    set(record, property, value: number) {
+      if (fault === 'before') {
+        throw new Error('injected before-mutation collision-mask failure');
+      }
+      Reflect.set(record, property, value);
+      if (fault === 'after') {
+        throw new Error('injected after-mutation collision-mask failure');
+      }
+      return true;
+    },
+  });
+  return {
+    physics: {
+      autoSimulation: true,
+      collisionMatrix,
+      enable: true,
+      raycast() { return []; },
+    },
+    setFault(next: typeof fault) {
+      fault = next;
+    },
   };
 }

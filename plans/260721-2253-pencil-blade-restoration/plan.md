@@ -114,30 +114,29 @@ Verified starting point:
   respawn commands. The persistent app shell, Main Menu, shared Background/Leaf/Theme, Mode Select
   rail, and RopeButton/FruitButton physics presenters are now implemented. Their lifecycle
   transactions, input/physics leases, rollback paths, exact resources, and fail-closed unrecovered
-  destinations pass the full deterministic suite and independent review. A fresh
-  Creator-served Browser Preview confirms the latest Crazy checkpoint after the Dragon late-hit
-  splash `UIOpacity`-after-destroy crash fix, including Main Menu -> Mode Select -> Crazy ->
-  Pause/Resume/Replay/Quit -> Main Menu with zero errors; no placeholder destination screen is
-  authorized.
+  destinations currently hold the checkpoint. Fresh Creator-served Browser Preview runs reach
+  the latest Classic Bird checkpoint, including Main Menu -> Mode Select -> Classic Bird ->
+  live Bird presentation -> Game Over -> Result -> Retry/Pause Resume -> Replay/Quit -> Main Menu
+  with zero game errors. No placeholder destination screen is authorized.
   The exact standard-bomb raster/audio/entity foundation and Concurrent batch partition are
   contract-tested. Crazy mode now owns its recovered 60-second session, controller graph,
   standard-bomb explosion/fuse-smoke path, special/electric/magnet/Dragon entities, audio,
   objectives, pause, result ranking/reward, and transactional Replay/Quit/Time-Up/Retry
   lifecycles. Pre-commit Result failures restore the exact Crazy/TimeManager owner; post-commit
   cleanup failures are retained for retry without reopening the committed session.
-  The final checkpoint passes `739/739` vertical-slice tests including the focused
-  Crazy/TimeManager regressions, `14/14` source/staging/archive inventory cases, strict Creator
-  TypeScript, reconstruction-policy positive plus `4/4` negative fixtures, and independent
-  P0/P1 review. Fresh Creator-served Preview verifies production mode-1 entry,
-  Pause/Resume/Replay/Quit, and return to Main Menu with zero errors after the Dragon fix. Its
-  isolated temporary storage profile is deleted after the run.
+  The current checkpoint reaches `876/876` vertical-slice tests including the focused
+  Crazy/TimeManager regressions and the Classic Bird checkpoint, `14/14` source/staging/archive
+  inventory cases, strict Creator TypeScript, reconstruction-policy positive plus `4/4`
+  negative fixtures, and independent review. Fresh Creator-served Preview now reaches
+  production mode-1 entry, Pause/Resume/Replay/Quit, and return to Main Menu with zero errors
+  after the Dragon fix. Its isolated temporary storage profile is deleted after the run.
   Project completion still requires the remaining resource consumers and scene/prefab map,
   a pinned integration/toolchain policy, and build validation.
-- Phase 6 has started because the Cocos Creator vertical slice and production Crazy checkpoint
-  pass their contract gates and fresh Creator-served Browser Preview. Remaining mode
-  order is Classic Bird next, then Crazy Bird, Combo Bird, and GN Style so the shared
-  BaseBird/BirdBlade substrate is recovered once and the 439-call GN Style particle choreography
-  is not approximated.
+- Phase 6 continues because the Cocos Creator vertical slice and production Crazy checkpoint
+  reached their contract gates and a fresh Creator-served Browser Preview. The shared
+  BaseBird/BirdBlade substrate and Classic Bird are now complete; remaining mode order is Crazy
+  Bird, Combo Bird, and GN Style so the remaining work preserves the dedicated particle
+  choreography and mode-specific contracts.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
 
@@ -181,6 +180,7 @@ Verified starting point:
 - [Menu/Mode checkpoint verification](./reports/tester-2026-07-23-menu-mode-checkpoint.md)
 - [Menu/Mode runtime simplification review](./reports/simplifier-2026-07-23-menu-mode-runtime.md)
 - [Crazy mode production checkpoint](./reports/implementer-2026-07-23-crazy-mode-runtime.md)
+- [Classic Bird production checkpoint](./reports/implementer-2026-07-23-classic-bird-runtime.md)
 - [Remaining mode implementation order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 - [Creator readiness audit](./reports/creator-readiness-2026-07-22.md)
 - [Android toolchain readiness audit](./reports/android-toolchain-readiness-2026-07-22.md)

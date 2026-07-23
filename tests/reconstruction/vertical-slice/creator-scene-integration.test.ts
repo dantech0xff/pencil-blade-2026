@@ -34,6 +34,18 @@ test('Editor-authored Classic scene resolves all Canvas script components throug
   const crazyGameplayControllerMeta = readJson<{ imported: boolean; uuid: string }>(
     'game/assets/scripts/creator/crazy-gameplay-controller.ts.meta',
   );
+  const birdInputControllerMeta = readJson<{ imported: boolean; uuid: string }>(
+    'game/assets/scripts/creator/bird-input-controller.ts.meta',
+  );
+  const classicBirdSceneControllerMeta = readJson<{ imported: boolean; uuid: string }>(
+    'game/assets/scripts/creator/classic-bird-scene-controller.ts.meta',
+  );
+  const classicBirdGameplayControllerMeta = readJson<{
+    imported: boolean;
+    uuid: string;
+  }>(
+    'game/assets/scripts/creator/classic-bird-gameplay-controller.ts.meta',
+  );
   const appShellControllerMeta = readJson<{ imported: boolean; uuid: string }>(
     'game/assets/scripts/creator/recovered-app-shell-controller.ts.meta',
   );
@@ -50,6 +62,9 @@ test('Editor-authored Classic scene resolves all Canvas script components throug
   assert.equal(gameplayControllerMeta.imported, true);
   assert.equal(crazySceneControllerMeta.imported, true);
   assert.equal(crazyGameplayControllerMeta.imported, true);
+  assert.equal(birdInputControllerMeta.imported, true);
+  assert.equal(classicBirdSceneControllerMeta.imported, true);
+  assert.equal(classicBirdGameplayControllerMeta.imported, true);
   assert.equal(appShellControllerMeta.imported, true);
   assert.deepEqual(scriptTypes.map(decodeCreatorUuid), [
     bladeMeta.uuid,
@@ -57,6 +72,9 @@ test('Editor-authored Classic scene resolves all Canvas script components throug
     gameplayControllerMeta.uuid,
     crazySceneControllerMeta.uuid,
     crazyGameplayControllerMeta.uuid,
+    birdInputControllerMeta.uuid,
+    classicBirdSceneControllerMeta.uuid,
+    classicBirdGameplayControllerMeta.uuid,
     appShellControllerMeta.uuid,
   ]);
 });

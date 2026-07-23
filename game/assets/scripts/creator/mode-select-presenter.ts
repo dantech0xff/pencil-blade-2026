@@ -111,7 +111,7 @@ export interface ModeSelectClassicResources {
 
 export type ModeSelectUnsupportedDestination = Exclude<
   ModeSelectDestination,
-  'ClassicModeLayer' | 'CrazyModeLayer'
+  'ClassicModeLayer' | 'CrazyModeLayer' | 'ClassicBirdLayer'
 >;
 
 export interface ModeSelectNavigationTransaction {
@@ -126,6 +126,9 @@ export interface ModeSelectPresenterLifecycle {
     transaction: ModeSelectNavigationTransaction,
   ) => boolean | void;
   readonly onCrazyRequested: (
+    transaction: ModeSelectNavigationTransaction,
+  ) => boolean | void;
+  readonly onClassicBirdRequested: (
     transaction: ModeSelectNavigationTransaction,
   ) => boolean | void;
   readonly onMainMenuRequested: (
@@ -167,6 +170,21 @@ export class ModeSelectCleanupError extends Error {
     super(message);
     this.name = 'ModeSelectCleanupError';
     this.causes = Object.freeze([...causes]);
+  }
+}
+
+/**
+ * The destination failed and one or more source-screen leases could not be restored. The
+ * presenter must remain inert; treating this as an ordinary rejected route would reacquire input
+ * against an invalid shared Physics2D boundary.
+ */
+export class ModeSelectFatalNavigationError extends Error {
+  readonly cause: unknown;
+
+  constructor(message: string, cause: unknown) {
+    super(`${message}: ${errorMessage(cause)}`);
+    this.name = 'ModeSelectFatalNavigationError';
+    this.cause = cause;
   }
 }
 
@@ -898,8 +916,34 @@ export class ModeSelectPresenter {
       return true;
     } catch (error) {
       restoreRootAfterRejectedTransaction(this.root, parent, transaction.zOrder);
+      if (error instanceof ModeSelectFatalNavigationError) {
+        this.retainFatalNavigationBoundary();
+        throw error;
+      }
       this.rearmNavigationAfterFailure();
       throw error;
+    }
+  }
+
+  private retainFatalNavigationBoundary(): void {
+    const cleanupFailures: unknown[] = [];
+    this.navigationTimers = [];
+    this.activeBladeSlots.clear();
+    attemptCleanup(cleanupFailures, () => this.unregisterEvents());
+    attemptCleanup(cleanupFailures, () => this.bladeInput.setCutEnabled(false));
+    if (this.inputLeaseHeld) {
+      attemptCleanup(
+        cleanupFailures,
+        () => this.bladeInput.deactivateForNonClassicScreen(),
+      );
+    }
+    this.inputLeaseHeld = false;
+    this.suspendedValue = true;
+    if (cleanupFailures.length > 0) {
+      console.error(new ModeSelectCleanupError(
+        'Mode Select fatal navigation cleanup failed',
+        cleanupFailures,
+      ));
     }
   }
 
@@ -1564,6 +1608,7 @@ function assertInput(input: ModeSelectPresenterInput): void {
   assertFunctions(input.lifecycle, [
     'onClassicRequested',
     'onCrazyRequested',
+    'onClassicBirdRequested',
     'onMainMenuRequested',
     'onUnsupportedDestinationRequested',
   ], 'lifecycle');
@@ -1584,6 +1629,9 @@ function dispatchModeNavigation(
   }
   if (destination === 'CrazyModeLayer') {
     return lifecycle.onCrazyRequested(transaction);
+  }
+  if (destination === 'ClassicBirdLayer') {
+    return lifecycle.onClassicBirdRequested(transaction);
   }
   return lifecycle.onUnsupportedDestinationRequested(destination, transaction);
 }
@@ -1621,6 +1669,10 @@ function assertSignedInt32(value: number, label: string): void {
 
 function assertNever(value: never): never {
   throw new Error(`Unsupported Mode Select value: ${String(value)}`);
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function attemptCleanup(failures: unknown[], cleanup: () => unknown): void {

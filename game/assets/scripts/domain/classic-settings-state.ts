@@ -1,4 +1,15 @@
 import {
+  CLASSIC_BIRD_BEST_1_STORAGE_KEY,
+  CLASSIC_BIRD_BEST_2_STORAGE_KEY,
+  CLASSIC_BIRD_BEST_3_STORAGE_KEY,
+  CLASSIC_BIRD_INITIAL_LEADERBOARD,
+  awardClassicBirdResultCoins,
+  insertClassicBirdResultScore,
+  type ClassicBirdLeaderboard,
+  type ClassicBirdLeaderboardUpdate,
+  type ClassicBirdResultCoinAward,
+} from './classic-bird-result-ranking';
+import {
   CLASSIC_INITIAL_LEADERBOARD,
   CLASSIC_INITIAL_TOTAL_COINS,
   awardClassicResultCoins,
@@ -24,6 +35,11 @@ import {
   OBJECTIVES_FRUITS_CUT_STORAGE_KEY,
 } from './objectives-manager-state';
 
+export {
+  CLASSIC_BIRD_BEST_1_STORAGE_KEY,
+  CLASSIC_BIRD_BEST_2_STORAGE_KEY,
+  CLASSIC_BIRD_BEST_3_STORAGE_KEY,
+} from './classic-bird-result-ranking';
 export {
   CRAZY_BEST_1_STORAGE_KEY,
   CRAZY_BEST_2_STORAGE_KEY,
@@ -90,6 +106,7 @@ export interface ClassicTotalCoinsAdjustment {
  * This is intentionally not the complete recovered 50-integer Settings schema.
  */
 export class ClassicSettingsState {
+  private birdClassicLeaderboardValue: ClassicBirdLeaderboard;
   private crazyLeaderboardValue: CrazyLeaderboard;
   private currentObjectiveValue: number;
   private effectsEnabledValue: boolean;
@@ -103,8 +120,13 @@ export class ClassicSettingsState {
   private selectedThemeValue: number;
   private totalCoinsValue: number;
 
-  private constructor(snapshot: ClassicSettingsSnapshot) {
+  private constructor(
+    snapshot: ClassicSettingsSnapshot,
+    birdClassicLeaderboard: ClassicBirdLeaderboard,
+  ) {
     assertSnapshot(snapshot);
+    assertOrderedLeaderboard(birdClassicLeaderboard, 'birdClassicLeaderboard');
+    this.birdClassicLeaderboardValue = freezeLeaderboard(birdClassicLeaderboard);
     this.crazyLeaderboardValue = freezeLeaderboard(snapshot.crazyLeaderboard);
     this.currentObjectiveValue = snapshot.currentObjective;
     this.effectsEnabledValue = snapshot.effectsEnabled;
@@ -120,20 +142,23 @@ export class ClassicSettingsState {
   }
 
   static defaults(): ClassicSettingsState {
-    return new ClassicSettingsState(Object.freeze({
-      crazyLeaderboard: CRAZY_INITIAL_LEADERBOARD,
-      currentObjective: 0,
-      effectsEnabled: true,
-      fruitsCut: 0,
-      leaderboard: CLASSIC_INITIAL_LEADERBOARD,
-      musicEnabled: true,
-      networkAvailable: false,
-      rated: false,
-      selectedBackground: CLASSIC_INITIAL_SELECTED_BACKGROUND,
-      selectedBlade: CLASSIC_INITIAL_SELECTED_BLADE,
-      selectedTheme: CLASSIC_INITIAL_SELECTED_THEME,
-      totalCoins: CLASSIC_INITIAL_TOTAL_COINS,
-    }));
+    return new ClassicSettingsState(
+      Object.freeze({
+        crazyLeaderboard: CRAZY_INITIAL_LEADERBOARD,
+        currentObjective: 0,
+        effectsEnabled: true,
+        fruitsCut: 0,
+        leaderboard: CLASSIC_INITIAL_LEADERBOARD,
+        musicEnabled: true,
+        networkAvailable: false,
+        rated: false,
+        selectedBackground: CLASSIC_INITIAL_SELECTED_BACKGROUND,
+        selectedBlade: CLASSIC_INITIAL_SELECTED_BLADE,
+        selectedTheme: CLASSIC_INITIAL_SELECTED_THEME,
+        totalCoins: CLASSIC_INITIAL_TOTAL_COINS,
+      }),
+      CLASSIC_BIRD_INITIAL_LEADERBOARD,
+    );
   }
 
   static load(port: ClassicInt32PreferencePort): ClassicSettingsState {
@@ -161,30 +186,44 @@ export class ClassicSettingsState {
     const crazyFirst = port.readInt32(CRAZY_BEST_1_STORAGE_KEY, 0);
     const crazySecond = port.readInt32(CRAZY_BEST_2_STORAGE_KEY, 0);
     const crazyThird = port.readInt32(CRAZY_BEST_3_STORAGE_KEY, 0);
+    const birdClassicFirst = port.readInt32(CLASSIC_BIRD_BEST_1_STORAGE_KEY, 0);
+    const birdClassicSecond = port.readInt32(CLASSIC_BIRD_BEST_2_STORAGE_KEY, 0);
+    const birdClassicThird = port.readInt32(CLASSIC_BIRD_BEST_3_STORAGE_KEY, 0);
     const currentObjective = port.readInt32(OBJECTIVES_CURRENT_STORAGE_KEY, 0);
     const fruitsCut = port.readInt32(OBJECTIVES_FRUITS_CUT_STORAGE_KEY, 0);
     const musicEnabled = port.readBoolean(CLASSIC_MUSIC_ENABLED_STORAGE_KEY, true);
     const effectsEnabled = port.readBoolean(CLASSIC_EFFECTS_ENABLED_STORAGE_KEY, true);
     const networkAvailable = port.readBoolean(CLASSIC_NETWORK_AVAILABLE_STORAGE_KEY, false);
     const rated = port.readBoolean(CLASSIC_RATED_STORAGE_KEY, false);
-    return new ClassicSettingsState(Object.freeze({
-      crazyLeaderboard: Object.freeze({
-        first: crazyFirst,
-        second: crazySecond,
-        third: crazyThird,
+    return new ClassicSettingsState(
+      Object.freeze({
+        crazyLeaderboard: Object.freeze({
+          first: crazyFirst,
+          second: crazySecond,
+          third: crazyThird,
+        }),
+        currentObjective,
+        effectsEnabled,
+        fruitsCut,
+        leaderboard: Object.freeze({ first, second, third }),
+        musicEnabled,
+        networkAvailable,
+        rated,
+        selectedBackground,
+        selectedBlade,
+        selectedTheme,
+        totalCoins,
       }),
-      currentObjective,
-      effectsEnabled,
-      fruitsCut,
-      leaderboard: Object.freeze({ first, second, third }),
-      musicEnabled,
-      networkAvailable,
-      rated,
-      selectedBackground,
-      selectedBlade,
-      selectedTheme,
-      totalCoins,
-    }));
+      Object.freeze({
+        first: birdClassicFirst,
+        second: birdClassicSecond,
+        third: birdClassicThird,
+      }),
+    );
+  }
+
+  get birdClassicLeaderboard(): ClassicBirdLeaderboard {
+    return freezeLeaderboard(this.birdClassicLeaderboardValue);
   }
 
   get snapshot(): ClassicSettingsSnapshot {
@@ -289,6 +328,17 @@ export class ClassicSettingsState {
     return update;
   }
 
+  recordClassicBirdResultScore(
+    completedScore: number,
+  ): ClassicBirdLeaderboardUpdate {
+    const update = insertClassicBirdResultScore(
+      completedScore,
+      this.birdClassicLeaderboardValue,
+    );
+    this.birdClassicLeaderboardValue = update.leaderboard;
+    return update;
+  }
+
   awardClassicResultCoins(completedScore: number): ClassicResultCoinAward {
     const award = awardClassicResultCoins(this.totalCoinsValue, completedScore);
     this.totalCoinsValue = award.totalCoins;
@@ -297,6 +347,14 @@ export class ClassicSettingsState {
 
   awardCrazyResultCoins(completedScore: number): CrazyResultCoinAward {
     const award = awardCrazyResultCoins(this.totalCoinsValue, completedScore);
+    this.totalCoinsValue = award.totalCoins;
+    return award;
+  }
+
+  awardClassicBirdResultCoins(
+    completedScore: number,
+  ): ClassicBirdResultCoinAward {
+    const award = awardClassicBirdResultCoins(this.totalCoinsValue, completedScore);
     this.totalCoinsValue = award.totalCoins;
     return award;
   }
@@ -314,6 +372,18 @@ export class ClassicSettingsState {
     port.writeInt32(CRAZY_BEST_1_STORAGE_KEY, this.crazyLeaderboardValue.first);
     port.writeInt32(CRAZY_BEST_2_STORAGE_KEY, this.crazyLeaderboardValue.second);
     port.writeInt32(CRAZY_BEST_3_STORAGE_KEY, this.crazyLeaderboardValue.third);
+    port.writeInt32(
+      CLASSIC_BIRD_BEST_1_STORAGE_KEY,
+      this.birdClassicLeaderboardValue.first,
+    );
+    port.writeInt32(
+      CLASSIC_BIRD_BEST_2_STORAGE_KEY,
+      this.birdClassicLeaderboardValue.second,
+    );
+    port.writeInt32(
+      CLASSIC_BIRD_BEST_3_STORAGE_KEY,
+      this.birdClassicLeaderboardValue.third,
+    );
     port.writeInt32(OBJECTIVES_CURRENT_STORAGE_KEY, this.currentObjectiveValue);
     port.writeInt32(OBJECTIVES_FRUITS_CUT_STORAGE_KEY, this.fruitsCutValue);
     port.writeBoolean(CLASSIC_MUSIC_ENABLED_STORAGE_KEY, this.musicEnabledValue);
@@ -414,16 +484,16 @@ function assertSignedInt32(value: number, label: string): void {
   }
 }
 
-function freezeLeaderboard(value: ClassicLeaderboard): ClassicLeaderboard {
+function freezeLeaderboard<T extends ClassicLeaderboard>(value: T): T {
   return Object.freeze({
     first: value.first,
     second: value.second,
     third: value.third,
-  });
+  }) as T;
 }
 
 function assertOrderedLeaderboard(
-  value: ClassicLeaderboard | CrazyLeaderboard,
+  value: ClassicBirdLeaderboard | ClassicLeaderboard | CrazyLeaderboard,
   label: string,
 ): void {
   if (value === null || typeof value !== 'object') {

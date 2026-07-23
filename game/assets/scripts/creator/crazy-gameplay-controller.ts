@@ -562,6 +562,30 @@ export class CrazyGameplayController extends Component {
     return this.requireClassicGameplayController().sharedSettingsRuntime;
   }
 
+  /**
+   * Process-owned supplemental catalogs are shared by the three Bird modes.
+   * Their gameplay owners remain mutually exclusive under the app-shell screen lease.
+   */
+  get sharedBaseGameplayResources(): LoadedBaseGameplayResources {
+    return this.requireBaseGameplayResources();
+  }
+
+  get sharedCrazyAudioPresenter(): CrazyAudioPresenter {
+    return this.requireCrazyAudioPresenter();
+  }
+
+  get sharedCrazyDragonFont(): LoadedCrazyDragonFont {
+    return this.requireDragonFont();
+  }
+
+  get sharedCrazyResources(): LoadedCrazyResources {
+    return this.requireCrazyResources();
+  }
+
+  get sharedObjectivesManager(): ObjectivesManagerState {
+    return this.requireObjectivesManager();
+  }
+
   snapshot(): CrazyGameplaySnapshot {
     const session = this.crazySceneController?.sessionSnapshot()
       ?? Object.freeze({

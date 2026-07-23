@@ -23,6 +23,9 @@ const {
   CLASSIC_BEST_1_STORAGE_KEY,
   CLASSIC_BEST_2_STORAGE_KEY,
   CLASSIC_BEST_3_STORAGE_KEY,
+  CLASSIC_BIRD_BEST_1_STORAGE_KEY,
+  CLASSIC_BIRD_BEST_2_STORAGE_KEY,
+  CLASSIC_BIRD_BEST_3_STORAGE_KEY,
   CLASSIC_EFFECTS_ENABLED_STORAGE_KEY,
   CLASSIC_MODE_UNLOCK_INDICES,
   CLASSIC_MUSIC_ENABLED_STORAGE_KEY,
@@ -71,8 +74,8 @@ class RecordingPort implements ClassicInt32PreferencePort {
   }
 }
 
-const RECOVERED_READS = [
-  [CLASSIC_TOTAL_COINS_STORAGE_KEY, 2014],
+const RESTORATION_READS = [
+  [CLASSIC_TOTAL_COINS_STORAGE_KEY, 999_999],
   [CLASSIC_SELECTED_THEME_STORAGE_KEY, 2],
   [CLASSIC_SELECTED_BACKGROUND_STORAGE_KEY, 0],
   [CLASSIC_SELECTED_BLADE_STORAGE_KEY, 0],
@@ -82,6 +85,9 @@ const RECOVERED_READS = [
   [CRAZY_BEST_1_STORAGE_KEY, 0],
   [CRAZY_BEST_2_STORAGE_KEY, 0],
   [CRAZY_BEST_3_STORAGE_KEY, 0],
+  [CLASSIC_BIRD_BEST_1_STORAGE_KEY, 0],
+  [CLASSIC_BIRD_BEST_2_STORAGE_KEY, 0],
+  [CLASSIC_BIRD_BEST_3_STORAGE_KEY, 0],
   [OBJECTIVES_CURRENT_STORAGE_KEY, 0],
   [OBJECTIVES_FRUITS_CUT_STORAGE_KEY, 0],
   [CLASSIC_MUSIC_ENABLED_STORAGE_KEY, true],
@@ -90,10 +96,11 @@ const RECOVERED_READS = [
   [CLASSIC_RATED_STORAGE_KEY, false],
 ] as const;
 
-test('Classic settings load exact keys and defaults in recovered relative order', () => {
+test('Classic settings load exact keys and restoration defaults in recovered relative order', () => {
   const port = new RecordingPort();
   const state = ClassicSettingsState.load(port);
 
+  assert.equal(ClassicSettingsState.defaults().snapshot.totalCoins, 999_999);
   assert.equal(CLASSIC_SELECTED_THEME_STORAGE_KEY, 'selected_theme');
   assert.equal(CLASSIC_SELECTED_BACKGROUND_STORAGE_KEY, 'selected_background');
   assert.equal(CLASSIC_SELECTED_BLADE_STORAGE_KEY, 'selected_blade');
@@ -103,7 +110,10 @@ test('Classic settings load exact keys and defaults in recovered relative order'
   assert.equal(CLASSIC_RATED_STORAGE_KEY, 'rated');
   assert.equal(OBJECTIVES_CURRENT_STORAGE_KEY, 'current_objective');
   assert.equal(OBJECTIVES_FRUITS_CUT_STORAGE_KEY, 'fruits_cut');
-  assert.deepEqual(port.reads, RECOVERED_READS);
+  assert.equal(CLASSIC_BIRD_BEST_1_STORAGE_KEY, 'bird_classic_best_1');
+  assert.equal(CLASSIC_BIRD_BEST_2_STORAGE_KEY, 'bird_classic_best_2');
+  assert.equal(CLASSIC_BIRD_BEST_3_STORAGE_KEY, 'bird_classic_best_3');
+  assert.deepEqual(port.reads, RESTORATION_READS);
   assert.deepEqual(state.snapshot, {
     crazyLeaderboard: { first: 0, second: 0, third: 0 },
     currentObjective: 0,
@@ -116,14 +126,20 @@ test('Classic settings load exact keys and defaults in recovered relative order'
     selectedBackground: 0,
     selectedBlade: 0,
     selectedTheme: 2,
-    totalCoins: 2014,
+    totalCoins: 999_999,
   });
   assert.equal(Object.isFrozen(state.snapshot), true);
   assert.equal(Object.isFrozen(state.snapshot.crazyLeaderboard), true);
   assert.equal(Object.isFrozen(state.snapshot.leaderboard), true);
+  assert.deepEqual(state.birdClassicLeaderboard, {
+    first: 0,
+    second: 0,
+    third: 0,
+  });
+  assert.equal(Object.isFrozen(state.birdClassicLeaderboard), true);
 });
 
-test('loaded first place seeds the shared Classic leaderboard baseline', () => {
+test('persisted total coins and rankings override the restoration defaults', () => {
   const state = ClassicSettingsState.load(new RecordingPort({
     [CLASSIC_TOTAL_COINS_STORAGE_KEY]: 900,
     [CLASSIC_BEST_1_STORAGE_KEY]: 30,
@@ -132,6 +148,9 @@ test('loaded first place seeds the shared Classic leaderboard baseline', () => {
     [CRAZY_BEST_1_STORAGE_KEY]: 300,
     [CRAZY_BEST_2_STORAGE_KEY]: 200,
     [CRAZY_BEST_3_STORAGE_KEY]: 100,
+    [CLASSIC_BIRD_BEST_1_STORAGE_KEY]: 30_000,
+    [CLASSIC_BIRD_BEST_2_STORAGE_KEY]: 20_000,
+    [CLASSIC_BIRD_BEST_3_STORAGE_KEY]: 10_000,
     [OBJECTIVES_CURRENT_STORAGE_KEY]: 13,
     [OBJECTIVES_FRUITS_CUT_STORAGE_KEY]: 2468,
     [CLASSIC_EFFECTS_ENABLED_STORAGE_KEY]: false,
@@ -165,6 +184,10 @@ test('loaded first place seeds the shared Classic leaderboard baseline', () => {
     achievedRank: 2,
     leaderboard: { first: 300, second: 250, third: 200 },
   });
+  assert.deepEqual(state.recordClassicBirdResultScore(25_000), {
+    achievedRank: 2,
+    leaderboard: { first: 30_000, second: 25_000, third: 20_000 },
+  });
 });
 
 test('result mutations remain memory-only until explicit save checkpoint', () => {
@@ -174,13 +197,13 @@ test('result mutations remain memory-only until explicit save checkpoint', () =>
   state.recordClassicResultScore(40);
   assert.deepEqual(state.awardClassicResultCoins(40), {
     bonusCoins: 24,
-    totalCoins: 2038,
+    totalCoins: 1_000_023,
   });
   assert.deepEqual(port.writes, []);
 
   state.save(port);
   assert.deepEqual(port.writes, [
-    [CLASSIC_TOTAL_COINS_STORAGE_KEY, 2038],
+    [CLASSIC_TOTAL_COINS_STORAGE_KEY, 1_000_023],
     [CLASSIC_SELECTED_THEME_STORAGE_KEY, 2],
     [CLASSIC_SELECTED_BACKGROUND_STORAGE_KEY, 0],
     [CLASSIC_SELECTED_BLADE_STORAGE_KEY, 0],
@@ -190,6 +213,9 @@ test('result mutations remain memory-only until explicit save checkpoint', () =>
     [CRAZY_BEST_1_STORAGE_KEY, 0],
     [CRAZY_BEST_2_STORAGE_KEY, 0],
     [CRAZY_BEST_3_STORAGE_KEY, 0],
+    [CLASSIC_BIRD_BEST_1_STORAGE_KEY, 0],
+    [CLASSIC_BIRD_BEST_2_STORAGE_KEY, 0],
+    [CLASSIC_BIRD_BEST_3_STORAGE_KEY, 0],
     [OBJECTIVES_CURRENT_STORAGE_KEY, 0],
     [OBJECTIVES_FRUITS_CUT_STORAGE_KEY, 0],
     [CLASSIC_MUSIC_ENABLED_STORAGE_KEY, true],
@@ -299,13 +325,42 @@ test('Crazy result uses a distinct leaderboard and the shared recovered coin bal
   assert.deepEqual(state.snapshot.leaderboard, { first: 30, second: 20, third: 10 });
   assert.deepEqual(state.awardCrazyResultCoins(25), {
     bonusCoins: 15,
-    totalCoins: 2029,
+    totalCoins: 1_000_014,
   });
   state.save(port);
   assert.deepEqual(port.writes.slice(7, 10), [
     [CRAZY_BEST_1_STORAGE_KEY, 300],
     [CRAZY_BEST_2_STORAGE_KEY, 250],
     [CRAZY_BEST_3_STORAGE_KEY, 200],
+  ]);
+});
+
+test('Classic Bird result uses its own ranking and float32 0.8 coin balance', () => {
+  const port = new RecordingPort({
+    [CLASSIC_BIRD_BEST_1_STORAGE_KEY]: 300,
+    [CLASSIC_BIRD_BEST_2_STORAGE_KEY]: 200,
+    [CLASSIC_BIRD_BEST_3_STORAGE_KEY]: 100,
+  });
+  const state = ClassicSettingsState.load(port);
+
+  assert.deepEqual(state.recordClassicBirdResultScore(250), {
+    achievedRank: 2,
+    leaderboard: { first: 300, second: 250, third: 200 },
+  });
+  assert.deepEqual(state.birdClassicLeaderboard, {
+    first: 300,
+    second: 250,
+    third: 200,
+  });
+  assert.deepEqual(state.awardClassicBirdResultCoins(25), {
+    bonusCoins: 20,
+    totalCoins: 1_000_019,
+  });
+  state.save(port);
+  assert.deepEqual(port.writes.slice(10, 13), [
+    [CLASSIC_BIRD_BEST_1_STORAGE_KEY, 300],
+    [CLASSIC_BIRD_BEST_2_STORAGE_KEY, 250],
+    [CLASSIC_BIRD_BEST_3_STORAGE_KEY, 200],
   ]);
 });
 
@@ -335,6 +390,14 @@ test('settings reject invalid ports, values, and unordered persisted rankings', 
       [CRAZY_BEST_3_STORAGE_KEY]: 2,
     })),
     /crazyLeaderboard must remain ordered/,
+  );
+  assert.throws(
+    () => ClassicSettingsState.load(new RecordingPort({
+      [CLASSIC_BIRD_BEST_1_STORAGE_KEY]: 1,
+      [CLASSIC_BIRD_BEST_2_STORAGE_KEY]: 3,
+      [CLASSIC_BIRD_BEST_3_STORAGE_KEY]: 2,
+    })),
+    /birdClassicLeaderboard must remain ordered/,
   );
   assert.throws(
     () => ClassicSettingsState.load(new RecordingPort({
