@@ -88,6 +88,9 @@
       },
       {
         "__id__": 10
+      },
+      {
+        "__id__": 20
       }
     ],
     "_prefab": null,
@@ -490,5 +493,17 @@
   {
     "__type__": "cc.PostSettingsInfo",
     "_toneMappingType": 0
+  },
+  {
+    "__type__": "12e4e2CzjtIza21IDsQPWH2",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 2
+    },
+    "_enabled": true,
+    "__prefab": null,
+    "_id": "12e4ed82ce3b48cdadb520"
   }
 ]

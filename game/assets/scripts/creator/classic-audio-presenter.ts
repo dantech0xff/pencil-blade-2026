@@ -22,6 +22,8 @@ export interface ClassicRetainedAudioHandle {
 /** Loaded exact clips plus the target-side Creator playback adapter. */
 export class ClassicAudioPresenter {
   private readonly audioSource: AudioSource;
+  private readonly backgroundMusicNode: Node;
+  private readonly backgroundMusicSource: AudioSource;
   private readonly clipsByCanonicalPath: ReadonlyMap<string, AudioClip>;
   private readonly parent: Node;
   private readonly retainedHandles = new Set<CreatorRetainedAudioHandle>();
@@ -29,10 +31,14 @@ export class ClassicAudioPresenter {
   private constructor(
     parent: Node,
     audioSource: AudioSource,
+    backgroundMusicNode: Node,
+    backgroundMusicSource: AudioSource,
     clipsByCanonicalPath: ReadonlyMap<string, AudioClip>,
   ) {
     this.parent = parent;
     this.audioSource = audioSource;
+    this.backgroundMusicNode = backgroundMusicNode;
+    this.backgroundMusicSource = backgroundMusicSource;
     this.clipsByCanonicalPath = clipsByCanonicalPath;
   }
 
@@ -58,7 +64,19 @@ export class ClassicAudioPresenter {
     const audioSource = parent.getComponent(AudioSource) ?? parent.addComponent(AudioSource);
     audioSource.loop = false;
     audioSource.volume = TARGET_ONE_SHOT_VOLUME_SCALE;
-    return new ClassicAudioPresenter(parent, audioSource, clipsByCanonicalPath);
+    const backgroundMusicNode = new Node('RecoveredBackgroundMusicAudio');
+    backgroundMusicNode.setParent(parent);
+    const backgroundMusicSource = backgroundMusicNode.addComponent(AudioSource);
+    backgroundMusicSource.playOnAwake = false;
+    backgroundMusicSource.loop = true;
+    backgroundMusicSource.volume = 1;
+    return new ClassicAudioPresenter(
+      parent,
+      audioSource,
+      backgroundMusicNode,
+      backgroundMusicSource,
+      clipsByCanonicalPath,
+    );
   }
 
   playOneShot(canonicalPath: string): void {
@@ -91,11 +109,31 @@ export class ClassicAudioPresenter {
     return handle;
   }
 
-  stop(): void {
+  playLoopingBackground(canonicalPath: string): void {
+    if (!isValid(this.parent, true) || !isValid(this.backgroundMusicNode, true)) {
+      throw new Error('Recovered background-music parent is no longer valid');
+    }
+    this.backgroundMusicSource.clip = this.requireClip(canonicalPath);
+    this.backgroundMusicSource.loop = true;
+    this.backgroundMusicSource.play();
+  }
+
+  stopBackgroundMusic(): void {
+    if (isValid(this.backgroundMusicNode, true)) {
+      this.backgroundMusicSource.stop();
+    }
+  }
+
+  stopAllEffects(): void {
     for (const handle of [...this.retainedHandles]) {
       handle.dispose();
     }
     this.audioSource.stop();
+  }
+
+  stop(): void {
+    this.stopAllEffects();
+    this.stopBackgroundMusic();
   }
 
   private requireClip(canonicalPath: string): AudioClip {

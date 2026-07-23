@@ -12,6 +12,7 @@ import {
   CLASSIC_ORDINARY_BOMB_AUDIO_PATHS,
   CLASSIC_RESULT_RANK_AUDIO_PATHS,
   CLASSIC_TOSS_AUDIO_PATH,
+  MAIN_MENU_MUSIC_AUDIO_PATH,
   getClassicComboAudioPath,
   getClassicFruitCutAudioSequence,
   getClassicOrdinaryBombAudioPath,
@@ -26,9 +27,9 @@ const STAGING_MANIFEST = readJson<{
 }>('assets/catalog/creator-staging-manifest.json');
 const STAGED_PATHS = new Set(STAGING_MANIFEST.entries.map((entry) => entry.canonicalPath));
 
-test('all 27 recovered core, menu, rank, and ordinary-bomb clips are unique and staged', () => {
-  assert.equal(CLASSIC_CORE_AUDIO_PATHS.length, 27);
-  assert.equal(new Set(CLASSIC_CORE_AUDIO_PATHS).size, 27);
+test('all 28 recovered core, menu, music, rank, and ordinary-bomb clips are unique and staged', () => {
+  assert.equal(CLASSIC_CORE_AUDIO_PATHS.length, 28);
+  assert.equal(new Set(CLASSIC_CORE_AUDIO_PATHS).size, 28);
   for (const canonicalPath of CLASSIC_CORE_AUDIO_PATHS) {
     assert.equal(STAGED_PATHS.has(canonicalPath), true, canonicalPath);
     const meta = readJson<{
@@ -48,6 +49,7 @@ test('all 27 recovered core, menu, rank, and ordinary-bomb clips are unique and 
   assert.equal(CLASSIC_MODE_SELECTED_AUDIO_PATH, 'Sounds/gameplayselected.wav');
   assert.equal(CLASSIC_MENU_BUTTON_AUDIO_PATH, 'Sounds/menubuttonclick.wav');
   assert.equal(CLASSIC_TOSS_AUDIO_PATH, 'Sounds/tossfruit.wav');
+  assert.equal(MAIN_MENU_MUSIC_AUDIO_PATH, 'Sounds/mainmenumusic.mp3');
 });
 
 test('ordinary-bomb audio paths stay exact and exclude the electric-only hit clip', () => {

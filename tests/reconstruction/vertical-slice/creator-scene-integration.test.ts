@@ -28,6 +28,9 @@ test('Editor-authored Classic scene resolves all Canvas script components throug
   const gameplayControllerMeta = readJson<{ imported: boolean; uuid: string }>(
     'game/assets/scripts/creator/classic-gameplay-controller.ts.meta',
   );
+  const appShellControllerMeta = readJson<{ imported: boolean; uuid: string }>(
+    'game/assets/scripts/creator/recovered-app-shell-controller.ts.meta',
+  );
   const canvas = scene.find((entry) => entry.__type__ === 'cc.Node' && entry._name === 'Canvas');
   assert.ok(canvas?._components);
 
@@ -39,10 +42,12 @@ test('Editor-authored Classic scene resolves all Canvas script components throug
   assert.equal(bladeMeta.imported, true);
   assert.equal(sceneControllerMeta.imported, true);
   assert.equal(gameplayControllerMeta.imported, true);
+  assert.equal(appShellControllerMeta.imported, true);
   assert.deepEqual(scriptTypes.map(decodeCreatorUuid), [
     bladeMeta.uuid,
     sceneControllerMeta.uuid,
     gameplayControllerMeta.uuid,
+    appShellControllerMeta.uuid,
   ]);
 });
 
@@ -89,7 +94,7 @@ test('BasicBlade mesh presentation enables its required Creator 3D renderer modu
   );
 });
 
-test('Creator bridge owns recovered variable stepping and emits initial state after onEnable', () => {
+test('Creator bridge stays passive until explicit resolution and Classic activation', () => {
   const physicsSource = readText('game/assets/scripts/creator/classic-physics-adapter.ts');
   const sceneSource = readText('game/assets/scripts/creator/classic-scene-controller.ts');
   const physicsAdapterStart = physicsSource.indexOf('export class ClassicPhysicsAdapter');
@@ -103,6 +108,11 @@ test('Creator bridge owns recovered variable stepping and emits initial state af
   const restorePhysics = extractMethod(physicsSource, 'restorePreviousWorldProperties');
   const onLoad = extractMethod(sceneSource, 'onLoad');
   const start = extractMethod(sceneSource, 'start');
+  const prepareResolution = extractMemberBlock(
+    sceneSource,
+    '  prepareSceneResolution(): AppliedClassicResolution {',
+  );
+  const activateClassic = extractMethod(sceneSource, 'activateInitialClassicLayer');
   const onDestroy = extractMethod(sceneSource, 'onDestroy');
 
   assert.match(physicsSource, /autoSimulation = false/);
@@ -119,11 +129,22 @@ test('Creator bridge owns recovered variable stepping and emits initial state af
     /this\.previousState = capturePreviousPhysicsState\(this\.physics\)/,
   );
   assert.match(restorePhysics, /this\.previousState = null/);
-  assert.match(onLoad, /startVariableSimulation/);
+  assert.match(onLoad, /bladeInput\.deactivateForNonClassicScreen\(\)/);
+  assert.doesNotMatch(onLoad, /startVariableSimulation|resolution\.apply\(\)/);
   assert.doesNotMatch(onLoad, /CLASSIC_RESOLUTION_APPLIED_EVENT|emitSessionSnapshot/);
-  assert.match(start, /enableClassicSpeedUp/);
-  assert.match(start, /CLASSIC_RESOLUTION_APPLIED_EVENT/);
-  assert.match(start, /emitSessionSnapshot/);
+  assert.doesNotMatch(start, /enableClassicSpeedUp|startVariableSimulation|emitSessionSnapshot/);
+  assertOrderedSubstrings(prepareResolution, [
+    'this.resolution.apply()',
+    'this.appliedResolution = appliedResolution',
+    'CLASSIC_RESOLUTION_APPLIED_EVENT',
+  ]);
+  assertOrderedSubstrings(activateClassic, [
+    'this.physics.configureResolvedWorldProperties()',
+    'this.physics.startVariableSimulation(',
+    'bladeInput.activateForClassicLayer()',
+    'freshWorldSpeed.enableClassicSpeedUp()',
+    'this.emitSessionSnapshot()',
+  ]);
   assert.match(onDestroy, /restorePreviousWorldProperties/);
 });
 
@@ -161,6 +182,9 @@ test('Classic presentation loads the exact game bundle before using recovered fr
   }>('game/assets/game.meta');
   const loaderSource = readText('game/assets/scripts/creator/classic-resource-loader.ts');
   const gameplaySource = readText('game/assets/scripts/creator/classic-gameplay-controller.ts');
+  const sharedBackgroundSource = readText(
+    'game/assets/scripts/creator/shared-background-presenter.ts',
+  );
   const fruitSource = readText('game/assets/scripts/creator/classic-generated-fruit.ts');
 
   assert.equal(bundleMeta.imported, true);
@@ -177,18 +201,11 @@ test('Classic presentation loads the exact game bundle before using recovered fr
 
   assert.match(gameplaySource, /await loadClassicSliceResourceCatalog\(assetTree\)/);
   assert.match(gameplaySource, /resourceCatalog: resources/);
-  const backgroundStart = gameplaySource.indexOf(
-    '  private createRecoveredBackground(resources: ClassicSliceResourceCatalog): void {',
-  );
-  const presentationStart = gameplaySource.indexOf(
-    '  private createRecoveredPresentation(',
-    backgroundStart,
-  );
-  assert.notEqual(backgroundStart, -1);
-  assert.ok(presentationStart > backgroundStart);
-  const backgroundSource = gameplaySource.slice(backgroundStart, presentationStart);
-  assert.match(backgroundSource, /background\.setSiblingIndex\(0\)/);
-  assert.doesNotMatch(backgroundSource, /UIOpacity|opacity\s*=\s*0|tween\(/);
+  assert.doesNotMatch(gameplaySource, /createRecoveredBackground|ClassicRecoveredPaperBackground/);
+  assert.match(sharedBackgroundSource, /new Node\('SharedBackgroundRoot'\)/);
+  assert.match(sharedBackgroundSource, /this\.root\.setSiblingIndex\(siblingIndex\)/);
+  assert.match(sharedBackgroundSource, /this\.opacity\.opacity = 255/);
+  assert.doesNotMatch(sharedBackgroundSource, /tween\(|opacity\s*=\s*0/);
   assert.match(
     gameplaySource,
     /playRecoveredIntro\(classicModeRoot, viewport, resources\)/,
@@ -260,15 +277,15 @@ test('Classic score HUD replaces the provisional label and routes smoothing thro
   assert.match(gameplaySource, /this\.scoreHudPresenter\?\.setBestScore\(this\.score\.bestScore, this\.score\.bestScoreIsNew\)/);
   assert.match(
     gameplaySource,
-    /initializeRecoveredResources\(viewport\)\.catch\([\s\S]*?onRecoveredResourceInitializationFailed/,
+    /const preparation = this\.initializeRecoveredResources\(assetTree\)[\s\S]*?preparation\.catch\([\s\S]*?onRecoveredResourceInitializationFailed/,
   );
   assert.match(
     gameplaySource,
-    /this\.shuttingDown[\s\S]*?!isValid\(this\.node, true\)[\s\S]*?!this\.node\.activeInHierarchy/,
+    /this\.shuttingDown[\s\S]*?!isValid\(this\.node, true\)/,
   );
   assert.match(
     gameplaySource,
-    /catch \(error\) \{[\s\S]*?disposeRecoveredRuntime\(\);[\s\S]*?throw error/,
+    /activateInitialClassicRuntime[\s\S]*?catch \(error\) \{[\s\S]*?disposeClassicModePresentation\(\)[\s\S]*?this\.screenPlacement = null[\s\S]*?throw error/,
   );
   assert.doesNotMatch(gameplaySource, /ClassicGeneratedScore|`SCORE \$\{|setContentSize\(260, 90\)|fontSize \+ 8/);
   assert.match(presenterSource, /label\.lineHeight\s*=\s*layout\.fontSize/);
@@ -452,6 +469,11 @@ test('terminal completion replaces Classic with the recovered result shell and e
   assert.match(gameplaySource, /const settings = this\.requireSettingsRuntime\(\)/);
   assert.match(gameplaySource, /settings\.state\.recordClassicResultScore\(configured\.score\)/);
   assert.match(gameplaySource, /totalCoins: settings\.state\.snapshot\.totalCoins/);
+  assert.match(
+    gameplaySource,
+    /createDetachedScreenRoot\([\s\S]*?'ClassicResultPresentationRoot',[\s\S]*?this\.node/,
+  );
+  assert.match(gameplaySource, /this\.requireScreenPlacement\(\)\.attachCurrentScreen\(root\)/);
   assert.match(gameplaySource, /presenter\.attach\(root\)/);
   assert.match(gameplaySource, /getClassicResultRankAudioPath\(ranking\.achievedRank\)/);
 
@@ -525,7 +547,10 @@ test('terminal completion replaces Classic with the recovered result shell and e
     retryApplySource,
     /retryContext\.audioPresenter\.playOneShot\(command\.canonicalPath\)/,
   );
-  assert.match(retryApplySource, /retryState\.capturedParent = retryContext\.resultRoot\.parent/);
+  assert.match(
+    retryApplySource,
+    /retryContext\.screenPlacement\.currentScreen !== retryContext\.resultRoot[\s\S]*?retryState\.capturedResultRoot = retryContext\.resultRoot/,
+  );
   assert.match(
     retryApplySource,
     /this\.removeResultForRetry\(command, retryContext, retryState\)/,
@@ -536,7 +561,7 @@ test('terminal completion replaces Classic with the recovered result shell and e
     /this\.attachClassicForRetry\(command, retryContext, retryState\)/,
   );
   assertOrderedSubstrings(resultDisposalSource, [
-    'root.removeFromParent()',
+    "this.detachOwnedScreen(root, 'Classic Result')",
     'this.resultPresenter?.dispose()',
     'root.destroy()',
   ]);
@@ -546,9 +571,13 @@ test('terminal completion replaces Classic with the recovered result shell and e
     'classicModeRoot.setWorldScale(this.node.worldScale)',
     'this.createRecoveredPresentation(classicModeRoot, viewport, resources)',
   ]);
-  assert.match(modeAttachmentSource, /root\.setParent\(this\.node, true\)/);
+  assertOrderedSubstrings(modeAttachmentSource, [
+    'const screenPlacement = this.requireScreenPlacement()',
+    'screenPlacement.attachCurrentScreen(root)',
+    'screenPlacement.currentScreen !== root',
+  ]);
   assertOrderedSubstrings(modeDisposalSource, [
-    'classicModeRoot.removeFromParent()',
+    "this.detachOwnedScreen(classicModeRoot, 'Classic mode')",
     'this.failPresenter?.dispose()',
     'classicModeRoot.destroy()',
   ]);
@@ -563,7 +592,10 @@ test('terminal completion replaces Classic with the recovered result shell and e
     retryAttachmentSource,
     /catch \(error\)[\s\S]*?rollbackClassicLayerRestart\(\)[\s\S]*?disposeClassicModePresentation\(\)/,
   );
-  assert.match(retryRemovalSource, /retryContext\.resultRoot\.removeFromParent\(\)/);
+  assert.match(
+    retryRemovalSource,
+    /retryContext\.screenPlacement\.detachCurrentScreen\([\s\S]*?retryContext\.resultRoot/,
+  );
   assert.doesNotMatch(retryRemovalSource, /disposeResultPresentation\(\)/);
   assertOrderedSubstrings(retryCleanupSource, [
     'this.resultPresentationRoot = null',
@@ -587,8 +619,7 @@ test('terminal completion replaces Classic with the recovered result shell and e
     'this.resultConstructionRequested = true',
     'this.resultMode = retryContext.mode',
     'this.resultScore = retryContext.score',
-    'parent.addChild(retryContext.resultRoot)',
-    'retryContext.resultRoot.setSiblingIndex(1)',
+    'retryContext.screenPlacement.attachCurrentScreen(retryContext.resultRoot)',
     "this.resultPresenter.rearmNavigationAfterFailure('retry')",
     'this.emitSnapshot()',
   ]);
@@ -614,7 +645,7 @@ test('terminal completion replaces Classic with the recovered result shell and e
   );
   assert.match(
     gameplaySource,
-    /requireAttachedResultPresentationRoot\(\): Node \{[\s\S]*?resultRoot\.parent !== this\.node/,
+    /requireAttachedResultPresentationRoot\(\): Node \{[\s\S]*?resultRoot\.parent === null[\s\S]*?screenPlacement\?\.currentScreen !== resultRoot/,
   );
   assert.match(
     retrySource,
@@ -623,7 +654,7 @@ test('terminal completion replaces Classic with the recovered result shell and e
   assert.doesNotMatch(retrySource, /director|loadScene|settingsRuntime\?\.save/);
   assert.match(
     sceneSource,
-    /restartClassicLayer\(\): void \{[\s\S]*?new ClassicSession\(\)[\s\S]*?new ClassicWorldSpeed\(\)[\s\S]*?resetForFreshClassicLayer\(\)[\s\S]*?catch \(error\)[\s\S]*?restorePreviousWorldProperties\(\)/,
+    /restartClassicLayer\(\): void \{[\s\S]*?new ClassicSession\(\)[\s\S]*?new ClassicWorldSpeed\(\)[\s\S]*?activateForClassicLayer\(\)[\s\S]*?catch \(error\)[\s\S]*?restorePendingClassicLayerRestart\(\)/,
   );
   assert.match(gameplaySource, /CLASSIC_RESULT_MENU_REQUESTED_EVENT/);
   assert.match(gameplaySource, /state\.awardClassicResultCoins\(score\)/);
@@ -643,16 +674,12 @@ test('terminal completion replaces Classic with the recovered result shell and e
     gameplaySource,
     /new ScoreService\([\s\S]*?settingsRuntime\.state\.snapshot\.leaderboard\.first/,
   );
-  assert.match(gameplaySource, /game\.on\(Game\.EVENT_HIDE, this\.onGameHidden, this\)/);
-  assert.match(gameplaySource, /onGameHidden[\s\S]*?settingsRuntime\?\.save\(\)/);
+  assert.doesNotMatch(gameplaySource, /game\.on\(Game\.EVENT_HIDE|onGameHidden/);
   assert.match(
     gameplaySource,
     /settingsRuntime\.loadFailure !== null[\s\S]*?CLASSIC_SETTINGS_LOAD_RECOVERED_EVENT/,
   );
-  assert.match(
-    gameplaySource,
-    /onGameHidden[\s\S]*?catch \(error\)[\s\S]*?CLASSIC_SETTINGS_SAVE_FAILED_EVENT/,
-  );
+  assert.match(gameplaySource, /CLASSIC_SETTINGS_SAVE_FAILED_EVENT/);
   assert.doesNotMatch(gameplaySource, /new MainMenuLayer|scorescreen\.wav/);
 });
 

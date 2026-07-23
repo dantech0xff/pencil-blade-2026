@@ -1,7 +1,9 @@
 import { sys } from 'cc';
 
 import {
+  CLASSIC_RATED_STORAGE_KEY,
   ClassicSettingsState,
+  classicModeUnlockStorageKey,
   type ClassicInt32PreferencePort,
 } from '../domain/classic-settings-state';
 
@@ -74,9 +76,8 @@ export class ClassicCreatorInt32PreferencePort implements ClassicInt32Preference
 
 /** Stable process-owned Settings state shared across recovered same-parent layer replacements. */
 export class ClassicSettingsRuntime {
-  /** Target-only recovery diagnostic; native normal-state load order remains unchanged. */
-  readonly loadFailure: Error | null;
   readonly state: ClassicSettingsState;
+  private loadFailureValue: Error | null = null;
   private readonly port: ClassicInt32PreferencePort;
 
   constructor(port: ClassicInt32PreferencePort) {
@@ -84,20 +85,54 @@ export class ClassicSettingsRuntime {
     this.port = port;
     try {
       this.state = ClassicSettingsState.load(port);
-      this.loadFailure = null;
     } catch (error) {
       this.state = ClassicSettingsState.defaults();
-      this.loadFailure = normalizeError(error, 'Classic settings load failed');
+      this.loadFailureValue = normalizeError(error, 'Classic settings load failed');
     }
   }
 
+  /** Target-only recovery diagnostic; native normal-state load order remains unchanged. */
+  get loadFailure(): Error | null {
+    return this.loadFailureValue;
+  }
+
   save(): void {
-    if (this.loadFailure !== null) {
+    this.assertWritesEnabled('save');
+    this.state.save(this.port);
+  }
+
+  readModeUnlock(modeIndex: number): boolean {
+    const storageKey = classicModeUnlockStorageKey(modeIndex);
+    try {
+      const unlocked = this.port.readBoolean(storageKey, false);
+      assertBoolean(unlocked, storageKey);
+      return unlocked;
+    } catch (error) {
+      const failure = normalizeError(error, `Classic mode unlock ${modeIndex} load failed`);
+      this.loadFailureValue ??= failure;
+      throw failure;
+    }
+  }
+
+  /** Immediately commits the indexed unlock independently from bulk Settings save. */
+  persistModeUnlock(modeIndex: number): void {
+    const storageKey = classicModeUnlockStorageKey(modeIndex);
+    this.assertWritesEnabled('mode unlock persistence');
+    this.port.writeBoolean(storageKey, true);
+  }
+
+  /** Storage-only first step of the recovered review reward sequence. */
+  persistRatedFlag(): void {
+    this.assertWritesEnabled('rated flag persistence');
+    this.port.writeBoolean(CLASSIC_RATED_STORAGE_KEY, true);
+  }
+
+  private assertWritesEnabled(operation: string): void {
+    if (this.loadFailureValue !== null) {
       throw new Error(
-        `Classic settings save is disabled after load recovery: ${this.loadFailure.message}`,
+        `Classic settings ${operation} is disabled after load recovery: ${this.loadFailureValue.message}`,
       );
     }
-    this.state.save(this.port);
   }
 }
 

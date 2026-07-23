@@ -1,0 +1,715 @@
+import assert from 'node:assert/strict';
+import { extname } from 'node:path';
+import { registerHooks } from 'node:module';
+import test from 'node:test';
+
+const CC_STUB_URL = moduleUrl(`
+export class Color {
+  constructor(r = 0, g = 0, b = 0, a = 255) { this.r = r; this.g = g; this.b = b; this.a = a; }
+}
+export class UITransform {
+  setAnchorPoint(x, y) { this.anchorPoint = { x, y }; }
+  setContentSize(width, height) { this.contentSize = { width, height }; }
+}
+export class UIOpacity { constructor() { this.opacity = 255; } }
+export class Sprite {
+  static SizeMode = Object.freeze({ CUSTOM: 'CUSTOM' });
+  constructor() { this.sizeMode = null; this.spriteFrame = null; }
+}
+export class Label {
+  constructor() { this.color = null; this.font = null; this.fontSize = 0; this.string = ''; }
+}
+export class Collider2D { constructor() { this.enabled = true; this.tag = 0; } }
+export class EventKeyboard { constructor(keyCode = 0) { this.keyCode = keyCode; } }
+export const Input = Object.freeze({ EventType: Object.freeze({ KEY_UP: 'key-up' }) });
+export const KeyCode = Object.freeze({ MOBILE_BACK: 6 });
+class EventOwner {
+  constructor() { this.listeners = new Map(); }
+  emit(type, event) {
+    for (const listener of this.listeners.get(type) ?? []) listener.callback.call(listener.target, event);
+  }
+  off(type, callback, target) {
+    this.listeners.set(type, (this.listeners.get(type) ?? []).filter((listener) => (
+      listener.callback !== callback || listener.target !== target
+    )));
+  }
+  on(type, callback, target) {
+    const listeners = this.listeners.get(type) ?? [];
+    listeners.push({ callback, target });
+    this.listeners.set(type, listeners);
+  }
+}
+export const input = new EventOwner();
+export const nodeConstructions = [];
+export class Node extends EventOwner {
+  static EventType = Object.freeze({
+    TOUCH_CANCEL: 'touch-cancel',
+    TOUCH_END: 'touch-end',
+    TOUCH_START: 'touch-start',
+  });
+  constructor(name = '') {
+    super();
+    this.active = true;
+    this.children = [];
+    this.components = new Map();
+    this.destroyed = false;
+    this.eulerAngles = { x: 0, y: 0, z: 0 };
+    this.layer = 0;
+    this.name = name;
+    nodeConstructions.push(name);
+    this.parent = null;
+    this.position = { x: 0, y: 0, z: 0 };
+    this.scale = { x: 1, y: 1, z: 1 };
+  }
+  get activeInHierarchy() {
+    return this.active && (this.parent === null || this.parent.activeInHierarchy);
+  }
+  get worldPosition() {
+    if (this.parent === null) return this.position;
+    const parent = this.parent.worldPosition;
+    return { x: parent.x + this.position.x, y: parent.y + this.position.y, z: parent.z + this.position.z };
+  }
+  addComponent(Type) {
+    const component = new Type();
+    component.node = this;
+    this.components.set(Type, component);
+    return component;
+  }
+  destroy() {
+    if (this.destroyed) return;
+    for (const child of [...this.children]) child.destroy();
+    this.destroyed = true;
+    this.active = false;
+    this.setParent(null);
+  }
+  getComponent(Type) { return this.components.get(Type) ?? null; }
+  setParent(parent) {
+    if (this.parent !== null) {
+      const index = this.parent.children.indexOf(this);
+      if (index >= 0) this.parent.children.splice(index, 1);
+    }
+    this.parent = parent;
+    if (parent !== null) parent.children.push(this);
+  }
+  setPosition(x, y, z = 0) { this.position = { x, y, z }; }
+  setRotationFromEuler(x, y, z) { this.eulerAngles = { x, y, z }; }
+  setScale(x, y, z = 1) { this.scale = { x, y, z }; }
+  setSiblingIndex(index) {
+    if (this.parent === null) return;
+    const siblings = this.parent.children;
+    const current = siblings.indexOf(this);
+    if (current >= 0) siblings.splice(current, 1);
+    siblings.splice(Math.max(0, Math.min(index, siblings.length)), 0, this);
+  }
+  setWorldPosition(x, y, z = 0) {
+    if (this.parent === null) this.position = { x, y, z };
+    else {
+      const parent = this.parent.worldPosition;
+      this.position = { x: x - parent.x, y: y - parent.y, z: z - parent.z };
+    }
+  }
+}
+export function isValid(value) {
+  return value !== null && value !== undefined && !value.destroyed;
+}
+`);
+
+const BLADE_STUB_URL = moduleUrl(`
+import { Node } from 'cc';
+export class ClassicBladePresenter {
+  static create() { return new ClassicBladePresenter(); }
+  constructor() { this.disposed = false; this.root = new Node('ClassicBasicBladeRoot'); this.root.active = false; }
+  attach(parent) { this.root.setParent(parent); this.root.active = true; }
+  begin() {}
+  dispose() { if (this.disposed) return false; this.disposed = true; this.root.destroy(); return true; }
+  end() {}
+  move() {}
+  updateFrame() {}
+}
+`);
+
+const BLADE_INPUT_STUB_URL = moduleUrl(`
+export const CLASSIC_BLADE_BEGAN_EVENT = 'classic-blade-began';
+export const CLASSIC_BLADE_MOVED_EVENT = 'classic-blade-moved';
+export const CLASSIC_BLADE_ENDED_EVENT = 'classic-blade-ended';
+`);
+
+const DETACHED_ROOT_STUB_URL = moduleUrl(`
+import { Node } from 'cc';
+export function createDetachedScreenRoot(name, canvas) {
+  const root = new Node(name);
+  root.layer = canvas.layer;
+  return root;
+}
+`);
+
+const ROPE_STUB_URL = moduleUrl(`
+import { Collider2D, Node } from 'cc';
+export const createdRopes = [];
+let failActivationIndex = -1;
+let activationFailureConsumed = false;
+let failDisposeIndex = -1;
+export function configureActivationFailure(index) {
+  failActivationIndex = index;
+  activationFailureConsumed = false;
+}
+export function configureDisposeFailure(index) { failDisposeIndex = index; }
+export function resetRopes() {
+  createdRopes.length = 0;
+  configureActivationFailure(-1);
+  configureDisposeFailure(-1);
+}
+export class ModeSelectRopeButtonPresenter {
+  static create(input, lifecycle) {
+    const rope = new ModeSelectRopeButtonPresenter(input.presentation, lifecycle, createdRopes.length);
+    createdRopes.push(rope);
+    return rope;
+  }
+  constructor(presentation, lifecycle, index) {
+    this.activated = false;
+    this.collider = new Collider2D();
+    this.cutAccepted = false;
+    this.disposed = false;
+    this.index = index;
+    this.lifecycle = lifecycle;
+    this.locked = presentation.initialLocked;
+    this.modeIndex = presentation.card.destinationState;
+    this.presentation = presentation;
+    this.restoreCount = 0;
+    this.updateCount = 0;
+    this.root = new Node(presentation.card.purpose + '-rope-button');
+    this.root.active = false;
+    this.targetId = 'mode-select-fruit:' + this.modeIndex;
+    this.wrapperCut = false;
+    this.fruitButton = { collider: this.collider };
+  }
+  get state() {
+    return Object.freeze({ activated: this.activated, attached: this.root.parent !== null, cutAccepted: this.cutAccepted, disposed: this.disposed, locked: this.locked, wrapperCut: this.wrapperCut });
+  }
+  activate() {
+    if (this.index === failActivationIndex && !activationFailureConsumed) {
+      activationFailureConsumed = true;
+      throw new Error('injected rope activation failure');
+    }
+    if (this.activated) throw new Error('rope already activated');
+    this.activated = true;
+    this.root.active = true;
+  }
+  attach(parent, siblingIndex) { this.root.setParent(parent); this.root.setSiblingIndex(siblingIndex); }
+  cut(segment, effectsEnabled) {
+    if (!this.activated || this.disposed || this.locked || this.cutAccepted) return false;
+    this.cutAccepted = true;
+    try {
+      if (effectsEnabled) this.lifecycle.onPlayFruitAudio('fruit.wav');
+      this.lifecycle.onModeSelected(this.modeIndex);
+    } catch (error) {
+      this.cutAccepted = false;
+      throw error;
+    }
+    this.wrapperCut = true;
+    return true;
+  }
+  deactivateAfterActivationFailure() {
+    this.activated = false;
+    this.root.active = false;
+    return true;
+  }
+  dispose() {
+    if (this.disposed) return false;
+    this.disposed = true;
+    this.root.destroy();
+    if (this.index === failDisposeIndex) throw new Error('injected rope dispose failure');
+    return true;
+  }
+  moveAnchor() {}
+  requestUnlock() { this.lifecycle.onUnlockRequested(); }
+  restoreAfterFailedNavigation(locked) {
+    this.cutAccepted = false;
+    this.wrapperCut = false;
+    this.locked = locked;
+    this.restoreCount += 1;
+    this.lifecycle.onColliderRestored(this.collider, this);
+  }
+  snapshot() {
+    return Object.freeze({ bodyWorldPosition: { x: 0, y: 0 }, cutDisabled: this.locked || this.cutAccepted, id: this.targetId, isFruit: true, nodeTag: 0 });
+  }
+  unlock() { this.locked = false; this.collider.enabled = true; }
+  update() { this.updateCount += 1; }
+}
+`);
+
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (specifier === 'cc') return { shortCircuit: true, url: CC_STUB_URL };
+    if (specifier === './classic-blade-presenter') {
+      return { shortCircuit: true, url: BLADE_STUB_URL };
+    }
+    if (specifier === './blade-input-controller') {
+      return { shortCircuit: true, url: BLADE_INPUT_STUB_URL };
+    }
+    if (specifier === './detached-screen-root') {
+      return { shortCircuit: true, url: DETACHED_ROOT_STUB_URL };
+    }
+    if (specifier === './mode-select-rope-button-presenter') {
+      return { shortCircuit: true, url: ROPE_STUB_URL };
+    }
+    if (
+      (specifier.startsWith('./') || specifier.startsWith('../'))
+      && extname(specifier) === ''
+    ) {
+      return nextResolve(`${specifier}.ts`, context);
+    }
+    return nextResolve(specifier, context);
+  },
+});
+
+const cc = await import('cc') as unknown as CocosStub;
+const ropeStub = await import(ROPE_STUB_URL) as unknown as RopeStub;
+const {
+  MODE_SELECT_HORIZONTAL_FLICK_EVENT,
+  ModeSelectPresenter,
+} = await import('../../../game/assets/scripts/creator/mode-select-presenter.ts');
+
+interface StubNode {
+  active: boolean;
+  readonly activeInHierarchy: boolean;
+  readonly children: StubNode[];
+  destroyed: boolean;
+  readonly name: string;
+  parent: StubNode | null;
+  emit(type: string, event?: unknown): void;
+  getComponent<T>(Type: new () => T): T | null;
+  setParent(parent: StubNode | null): void;
+}
+
+interface CocosStub {
+  readonly Collider2D: new () => StubCollider;
+  readonly Node: new (name?: string) => StubNode;
+  readonly UIOpacity: new () => { opacity: number };
+  readonly nodeConstructions: string[];
+}
+
+interface StubCollider { enabled: boolean; tag: number }
+
+interface StubRope {
+  activated: boolean;
+  readonly collider: StubCollider;
+  cut(segment: unknown, effectsEnabled: boolean): boolean;
+  cutAccepted: boolean;
+  disposed: boolean;
+  locked: boolean;
+  requestUnlock(): void;
+  restoreCount: number;
+  updateCount: number;
+  wrapperCut: boolean;
+}
+
+interface RopeStub {
+  readonly createdRopes: StubRope[];
+  configureActivationFailure(index: number): void;
+  configureDisposeFailure(index: number): void;
+  resetRopes(): void;
+}
+
+interface BladeInputHarness {
+  readonly events: string[];
+  readonly node: StubNode;
+  activateForClassicLayer(): void;
+  deactivateForNonClassicScreen(): void;
+  setCutEnabled(enabled: boolean): void;
+}
+
+test('constructs a detached exact six-card screen and acquires input only on activation', () => {
+  ropeStub.resetRopes();
+  const bladeInput = bladeInputHarness();
+  const harness = presenterInput(bladeInput);
+  const presenter = ModeSelectPresenter.create(harness.input as never);
+  assert.equal(presenter.root.parent, null);
+  assert.equal(presenter.root.active, false);
+  assert.equal(presenter.presentation.shell.totalCoinsLabelPresent, false);
+  assert.equal(presenter.ropeButtons.length, 6);
+  assert.deepEqual(harness.unlockReads, [1, 2, 4, 5]);
+
+  const host = new cc.Node('SharedGameSceneRoot');
+  presenter.root.setParent(host);
+  presenter.activate();
+  assert.equal(presenter.state.activated, true);
+  assert.deepEqual(bladeInput.events.slice(0, 2), ['activate', 'cut:true']);
+  presenter.dispose();
+});
+
+test('partial RopeButton activation rolls back the input lease and permits retry', () => {
+  ropeStub.resetRopes();
+  ropeStub.configureActivationFailure(2);
+  const bladeInput = bladeInputHarness();
+  const presenter = ModeSelectPresenter.create(presenterInput(bladeInput).input as never);
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+
+  assert.throws(() => presenter.activate(), /injected rope activation failure/);
+  assert.equal(presenter.state.activated, false);
+  assert.equal(presenter.root.active, false);
+  assert.equal(ropeStub.createdRopes.every(({ activated }) => !activated), true);
+  assert.deepEqual(bladeInput.events.filter((event) => event === 'deactivate'), ['deactivate']);
+
+  presenter.activate();
+  assert.equal(ropeStub.createdRopes.every(({ activated }) => activated), true);
+  presenter.dispose();
+});
+
+test('rejected unsupported route restores every cut card and permits recutting the same card', () => {
+  ropeStub.resetRopes();
+  let unsupportedCalls = 0;
+  const lifecycle = defaultLifecycle();
+  lifecycle.onUnsupportedDestinationRequested = () => {
+    unsupportedCalls += 1;
+    return false;
+  };
+  const presenter = ModeSelectPresenter.create(
+    presenterInput(bladeInputHarness(), { lifecycle, unlocks: [1, 2, 4, 5] }).input as never,
+  );
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+  presenter.activate();
+  const segment = { end: { x: 2, y: 2 }, start: { x: 1, y: 1 } };
+  const crazy = ropeStub.createdRopes[1];
+  const crazyBird = ropeStub.createdRopes[4];
+  assert.ok(crazy);
+  assert.ok(crazyBird);
+  assert.equal(crazy.cut(segment, true), true);
+  assert.equal(crazyBird.cut(segment, true), true);
+  assert.equal(presenter.state.navigationPendingCount, 2);
+
+  presenter.update(0.75);
+  assert.equal(unsupportedCalls, 1);
+  assert.equal(presenter.state.navigationPendingCount, 0);
+  assert.equal(crazy.restoreCount, 1);
+  assert.equal(crazyBird.restoreCount, 1);
+  assert.equal(crazy.cutAccepted, false);
+  assert.equal(crazyBird.cutAccepted, false);
+  assert.equal(crazy.cut(segment, true), true);
+  presenter.dispose();
+});
+
+test('suspended disposal cannot deactivate a newer owner of shared BladeInput', () => {
+  ropeStub.resetRopes();
+  const bladeInput = bladeInputHarness();
+  const presenter = ModeSelectPresenter.create(presenterInput(bladeInput).input as never);
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+  presenter.activate();
+  assert.equal(presenter.suspendForTransition(), true);
+  const releasesAtSuspend = bladeInput.events.filter((event) => event === 'deactivate').length;
+  assert.equal(releasesAtSuspend, 1);
+  bladeInput.activateForClassicLayer();
+  presenter.dispose();
+  assert.equal(
+    bladeInput.events.filter((event) => event === 'deactivate').length,
+    releasesAtSuspend,
+  );
+});
+
+test('selection-audio failure rolls back destination state and the cut card', () => {
+  ropeStub.resetRopes();
+  const harness = presenterInput(bladeInputHarness(), {
+    audioFailurePath: 'Sounds/gameplayselected.wav',
+    unlocks: [1],
+  });
+  const presenter = ModeSelectPresenter.create(harness.input as never);
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+  presenter.activate();
+  const crazy = ropeStub.createdRopes[1];
+  assert.ok(crazy);
+  assert.throws(
+    () => crazy.cut({ end: { x: 2, y: 2 }, start: { x: 1, y: 1 } }, true),
+    /injected audio failure/,
+  );
+  assert.equal(crazy.cutAccepted, false);
+  assert.equal(presenter.state.model.destinationState, -1);
+  assert.equal(presenter.state.navigationPendingCount, 0);
+  presenter.dispose();
+});
+
+test('failed unlock persistence restores coins and keeps model/card locked', () => {
+  ropeStub.resetRopes();
+  const harness = presenterInput(bladeInputHarness(), {
+    failPersist: true,
+    totalCoins: 2500,
+  });
+  const presenter = ModeSelectPresenter.create(harness.input as never);
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+  presenter.activate();
+  const gestures = presenter.root.children.find(({ name }) => name === 'gestures-layer');
+  assert.ok(gestures);
+  gestures.emit(MODE_SELECT_HORIZONTAL_FLICK_EVENT, -1);
+  const crazy = ropeStub.createdRopes[1];
+  assert.ok(crazy);
+  const burstConstructionsBefore = cc.nodeConstructions.filter(
+    (name) => name === 'unlock-particle-container',
+  ).length;
+  assert.throws(() => crazy.requestUnlock(), /injected persist failure/);
+  assert.equal(harness.data.totalCoins, 2500);
+  assert.equal(presenter.state.model.cardLocks[1], true);
+  assert.equal(crazy.locked, true);
+  assert.deepEqual(harness.coinDeltas, [-2500, 2500]);
+  assert.equal(
+    cc.nodeConstructions.filter((name) => name === 'unlock-particle-container').length,
+    burstConstructionsBefore,
+  );
+  presenter.dispose();
+});
+
+test('post-persist domain failure converges model and RopeButton to committed unlock', () => {
+  ropeStub.resetRopes();
+  const harness = presenterInput(bladeInputHarness(), { totalCoins: 2500 });
+  const presenter = ModeSelectPresenter.create(harness.input as never);
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+  presenter.activate();
+  const gestures = presenter.root.children.find(({ name }) => name === 'gestures-layer');
+  assert.ok(gestures);
+  gestures.emit(MODE_SELECT_HORIZONTAL_FLICK_EVENT, -1);
+  const crazy = ropeStub.createdRopes[1];
+  assert.ok(crazy);
+  const exposed = presenter as unknown as {
+    readonly model: { unlockCurrentMode(totalCoins: number): never };
+  };
+  exposed.model.unlockCurrentMode = () => {
+    throw new Error('injected post-persist domain failure');
+  };
+
+  assert.throws(() => crazy.requestUnlock(), /injected post-persist domain failure/);
+  assert.equal(harness.data.totalCoins, 0);
+  assert.equal(presenter.state.model.cardLocks[1], false);
+  assert.equal(crazy.locked, false);
+  assert.deepEqual(harness.coinDeltas, [-2500]);
+  presenter.dispose();
+});
+
+test('oversized frame delta is rejected before RopeButton updates', () => {
+  ropeStub.resetRopes();
+  const presenter = ModeSelectPresenter.create(
+    presenterInput(bladeInputHarness()).input as never,
+  );
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+  presenter.activate();
+
+  assert.throws(() => presenter.update(60.01), /must not exceed 60 seconds/);
+  assert.equal(ropeStub.createdRopes.every(({ updateCount }) => updateCount === 0), true);
+  presenter.dispose();
+});
+
+test('unlock RNG is delayed to 0.05 seconds and consumes exactly 225 draws', () => {
+  ropeStub.resetRopes();
+  const harness = presenterInput(bladeInputHarness(), { totalCoins: 2500 });
+  const presenter = ModeSelectPresenter.create(harness.input as never);
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+  presenter.activate();
+  const gestures = presenter.root.children.find(({ name }) => name === 'gestures-layer');
+  assert.ok(gestures);
+  gestures.emit(MODE_SELECT_HORIZONTAL_FLICK_EVENT, -1);
+  ropeStub.createdRopes[1]?.requestUnlock();
+  assert.equal(harness.randomDraws.count, 0);
+  assert.equal(harness.data.totalCoins, 0);
+  assert.equal(presenter.state.model.cardLocks[1], false);
+
+  presenter.update(0.049);
+  assert.equal(harness.randomDraws.count, 0);
+  presenter.update(0.001);
+  assert.equal(harness.randomDraws.count, 225);
+  const container = presenter.root.children.find(
+    ({ name }) => name === 'unlock-particle-container',
+  );
+  assert.ok(container);
+  assert.equal(container.children.length, 45);
+  presenter.dispose();
+});
+
+test('completed insufficient-coins actions retire and stop rewriting label opacity', () => {
+  ropeStub.resetRopes();
+  const harness = presenterInput(bladeInputHarness(), { totalCoins: 0 });
+  const presenter = ModeSelectPresenter.create(harness.input as never);
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+  presenter.activate();
+  const gestures = presenter.root.children.find(({ name }) => name === 'gestures-layer');
+  assert.ok(gestures);
+  gestures.emit(MODE_SELECT_HORIZONTAL_FLICK_EVENT, -1);
+  ropeStub.createdRopes[1]?.requestUnlock();
+  const label = presenter.root.children.find(({ name }) => name === 'insufficient-coins-label');
+  assert.ok(label);
+  const opacity = label.getComponent(cc.UIOpacity);
+  assert.ok(opacity);
+  presenter.update(2);
+  assert.equal(opacity.opacity, 0);
+  opacity.opacity = 123;
+  presenter.update(0.1);
+  assert.equal(opacity.opacity, 123);
+  presenter.dispose();
+});
+
+test('immediate back callback carries the exact MainMenu transaction', () => {
+  ropeStub.resetRopes();
+  let observed: unknown = null;
+  const lifecycle = defaultLifecycle();
+  lifecycle.onMainMenuRequested = (transaction: unknown) => {
+    observed = transaction;
+    return false;
+  };
+  const presenter = ModeSelectPresenter.create(
+    presenterInput(bladeInputHarness(), { lifecycle }).input as never,
+  );
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+  presenter.activate();
+  const backMenu = presenter.root.children.find(({ name }) => name === 'back-menu');
+  const backItem = backMenu?.children[0];
+  assert.ok(backItem);
+  backItem.emit('touch-end');
+  assert.deepEqual(observed, {
+    destination: 'MainMenuLayer',
+    root: presenter.root,
+    timing: 'immediate',
+    zOrder: 1,
+  });
+  assert.equal(presenter.state.suspended, false);
+  presenter.dispose();
+});
+
+test('disposal aggregates a RopeButton failure after cleaning every owned node', () => {
+  ropeStub.resetRopes();
+  ropeStub.configureDisposeFailure(2);
+  const presenter = ModeSelectPresenter.create(
+    presenterInput(bladeInputHarness()).input as never,
+  );
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot'));
+  presenter.activate();
+  assert.throws(() => presenter.dispose(), /Mode Select disposal failed/);
+  assert.equal(presenter.root.destroyed, true);
+  assert.equal(ropeStub.createdRopes.every(({ disposed }) => disposed), true);
+  assert.equal(presenter.dispose(), false);
+});
+
+test('source keeps exact detached/lifecycle boundaries and no destination placeholder', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const source = await readFile(
+    new URL('../../../game/assets/scripts/creator/mode-select-presenter.ts', import.meta.url),
+    'utf8',
+  );
+  assert.match(source, /createDetachedScreenRoot\('ModeSelectRoot', input\.canvas\)/);
+  assert.match(source, /this\.inputLeaseHeld = true/);
+  assert.match(source, /this\.bladeInput\.deactivateForNonClassicScreen\(\)/);
+  assert.match(source, /onClassicRequested/);
+  assert.match(source, /onMainMenuRequested/);
+  assert.match(source, /onUnsupportedDestinationRequested/);
+  assert.match(source, /restoreAfterFailedNavigation/);
+  assert.doesNotMatch(source, /new Node\(['"](?:Crazy|GNStyle|ClassicBird|CrazyBird|ComboBird)Layer/);
+  assert.doesNotMatch(source, /total-coins-label/);
+});
+
+function presenterInput(
+  bladeInput: BladeInputHarness,
+  options: Readonly<{
+    audioFailurePath?: string;
+    failPersist?: boolean;
+    lifecycle?: ReturnType<typeof defaultLifecycle>;
+    totalCoins?: number;
+    unlocks?: readonly number[];
+  }> = {},
+) {
+  const data = {
+    effectsEnabled: true,
+    totalCoins: options.totalCoins ?? 0,
+  };
+  const coinDeltas: number[] = [];
+  const unlockReads: number[] = [];
+  const randomDraws = { count: 0 };
+  const settingsState = {
+    addTotalCoins(delta: number) {
+      const previousTotalCoins = data.totalCoins;
+      data.totalCoins += delta;
+      coinDeltas.push(delta);
+      return { delta, nextTotalCoins: data.totalCoins, previousTotalCoins };
+    },
+    get snapshot() { return Object.freeze({ ...data }); },
+  };
+  const input = {
+    audio: {
+      playOneShot(canonicalPath: string) {
+        if (canonicalPath === options.audioFailurePath) {
+          throw new Error('injected audio failure');
+        }
+      },
+    },
+    bladeInput,
+    canvas: new cc.Node('Canvas'),
+    classicResources: {
+      assetTree: '480x800' as const,
+      defaultBlade: Object.freeze({}),
+    },
+    lifecycle: options.lifecycle ?? defaultLifecycle(),
+    random: {
+      nextIntInclusive: (minimum: number) => {
+        randomDraws.count += 1;
+        return minimum;
+      },
+    },
+    raycast: {
+      callAfterStep: (mutation: () => void) => mutation(),
+      raycastAll: () => Object.freeze([]),
+    },
+    resources: {
+      assetTree: '480x800' as const,
+      font: Object.freeze({}),
+      rasterCount: 42 as const,
+      raster: (contract: Readonly<{
+        canonicalPath: string;
+        dimensions: Readonly<{ height: number; width: number }>;
+      }>) => Object.freeze({ ...contract, spriteFrame: Object.freeze({}) }),
+    },
+    settings: {
+      persistModeUnlock() {
+        if (options.failPersist === true) {
+          throw new Error('injected persist failure');
+        }
+      },
+      readModeUnlock(modeIndex: number) {
+        unlockReads.push(modeIndex);
+        return options.unlocks?.includes(modeIndex) ?? false;
+      },
+      state: settingsState,
+    },
+    viewport: Object.freeze({
+      logicalHeight: 800,
+      logicalWidth: 480,
+      visibleRect: Object.freeze({
+        bottom: Object.freeze({ x: 240, y: 0 }),
+        center: Object.freeze({ x: 240, y: 400 }),
+        left: Object.freeze({ x: 0, y: 400 }),
+        right: Object.freeze({ x: 480, y: 400 }),
+        top: Object.freeze({ x: 240, y: 800 }),
+      }),
+    }),
+  };
+  return { coinDeltas, data, input, randomDraws, unlockReads };
+}
+
+function bladeInputHarness(): BladeInputHarness {
+  const events: string[] = [];
+  return {
+    activateForClassicLayer: () => events.push('activate'),
+    deactivateForNonClassicScreen: () => events.push('deactivate'),
+    events,
+    node: new cc.Node('BladeInput'),
+    setCutEnabled: (enabled: boolean) => events.push(`cut:${String(enabled)}`),
+  };
+}
+
+function defaultLifecycle() {
+  return {
+    onClassicRequested(_transaction?: unknown) { return true; },
+    onMainMenuRequested(_transaction?: unknown) { return true; },
+    onUnsupportedDestinationRequested(
+      _destination?: unknown,
+      _transaction?: unknown,
+    ) { return false; },
+  };
+}
+
+function moduleUrl(source: string): string {
+  return `data:text/javascript,${encodeURIComponent(source)}`;
+}

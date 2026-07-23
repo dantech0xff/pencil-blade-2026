@@ -468,6 +468,7 @@ function transpileGameTypeScript(source: string, fileName: string): string {
 
 const cc = await import('cc') as unknown as CocosRuntime;
 const {
+  CLASSIC_RESULT_MENU_REQUESTED_EVENT,
   CLASSIC_RESULT_RETRY_FAILED_EVENT,
   ClassicGameplayController,
 } = await import('../../../game/assets/scripts/creator/classic-gameplay-controller.ts');
@@ -513,7 +514,7 @@ interface StubNode {
   readonly parent: StubNode | null;
   addComponent<T>(Type: new () => T): T;
   on(type: string, callback: (...args: unknown[]) => void, target?: unknown): void;
-  setParent(parent: StubNode | null): void;
+  setParent(parent: StubNode | null, keepWorldTransform?: boolean): void;
   setSiblingIndex(index: number): void;
 }
 
@@ -564,13 +565,13 @@ interface SettingsRuntimeProbe {
 
 interface ResultPresenterProbe {
   disposed: boolean;
-  navigation: 'none' | 'retry';
+  navigation: 'menu' | 'none' | 'retry';
   rearmCalls: number;
   successfulRearms: number;
   throwOnDispose: boolean;
-  readonly state: Readonly<{ navigation: 'none' | 'retry' }>;
+  readonly state: Readonly<{ navigation: 'menu' | 'none' | 'retry' }>;
   dispose(): boolean;
-  rearmNavigationAfterFailure(route: 'retry'): boolean;
+  rearmNavigationAfterFailure(route: 'menu' | 'retry'): boolean;
 }
 
 interface AudioProbe {
@@ -584,12 +585,21 @@ interface RetryFixture {
   readonly bladeInput: InstanceType<typeof BladeInputController>;
   readonly canvas: StubNode;
   readonly gameplay: InstanceType<typeof ClassicGameplayController>;
+  readonly placement: ScreenPlacementProbe;
   readonly persistence: PersistenceCounters;
   readonly random: CountingRandom;
   readonly resultPresenter: ResultPresenterProbe;
   readonly resultRoot: StubNode;
   readonly retryFailures: ReadonlyArray<Readonly<{ message: string; reason: string }>>;
   readonly scene: InstanceType<typeof ClassicSceneController>;
+  readonly sharedRoots: readonly [StubNode, StubNode, StubNode];
+}
+
+interface ResultMenuTransitionToken {
+  readonly completedRunScore: number;
+  readonly resultRoot: StubNode;
+  commit(previousRoot: StubNode): void;
+  rollback(): void;
 }
 
 interface RetryBaseline {
@@ -631,10 +641,143 @@ class CountingRandom {
   }
 }
 
+class ScreenPlacementProbe {
+  currentScreen: StubNode | null = null;
+  failNextAttachAfterParent = false;
+  private readonly parent: StubNode;
+  private readonly sharedRoots: readonly [StubNode, StubNode, StubNode];
+
+  constructor(
+    parent: StubNode,
+    sharedRoots: readonly [StubNode, StubNode, StubNode],
+  ) {
+    this.parent = parent;
+    this.sharedRoots = sharedRoots;
+    this.assertSharedOrder();
+  }
+
+  attachCurrentScreen(screen: StubNode): void {
+    if (this.currentScreen !== null) {
+      throw new Error('Current-screen host already owns a screen');
+    }
+    if (screen.parent !== null) {
+      throw new Error('Current screen must be detached before attachment');
+    }
+
+    try {
+      screen.setParent(this.parent, true);
+      if (this.failNextAttachAfterParent) {
+        this.failNextAttachAfterParent = false;
+        throw new Error('Injected current-screen attachment failure');
+      }
+      screen.setSiblingIndex(3);
+      if (this.parent.children[3] !== screen) {
+        throw new Error('Current screen did not occupy shared physical slot 3');
+      }
+      this.currentScreen = screen;
+      this.assertSharedOrder();
+    } catch (error) {
+      if (screen.parent === this.parent) {
+        screen.setParent(null, true);
+      }
+      this.currentScreen = null;
+      this.assertSharedOrder();
+      throw error;
+    }
+  }
+
+  detachCurrentScreen(expectedScreen?: StubNode): StubNode {
+    const current = this.currentScreen;
+    if (current === null) {
+      throw new Error('Current-screen host is already empty');
+    }
+    if (expectedScreen !== undefined && current !== expectedScreen) {
+      throw new Error('Current-screen identity did not match the expected screen');
+    }
+    current.setParent(null, true);
+    this.currentScreen = null;
+    this.assertSharedOrder();
+    return current;
+  }
+
+  replaceCurrentScreen(nextScreen: StubNode): StubNode {
+    const previous = this.detachCurrentScreen();
+    try {
+      this.attachCurrentScreen(nextScreen);
+      return previous;
+    } catch (error) {
+      this.attachCurrentScreen(previous);
+      throw error;
+    }
+  }
+
+  assertSharedOrder(): void {
+    assert.deepEqual(this.parent.children.slice(0, 3), this.sharedRoots);
+    for (const root of this.sharedRoots) {
+      assert.equal(root.parent, this.parent);
+    }
+    if (this.currentScreen !== null) {
+      assert.equal(this.parent.children[3], this.currentScreen);
+      assert.equal(this.currentScreen.parent, this.parent);
+    }
+  }
+}
+
+test('runtime preparation deduplicates concurrent callers and guards shared owners', async () => {
+  cc.resetRuntime();
+  const canvas = new cc.Node('Canvas');
+  addComponent(canvas, BladeInputController);
+  const scene = addComponent(canvas, ClassicSceneController);
+  scene.onLoad();
+  scene.prepareSceneResolution();
+  const gameplay = addComponent(canvas, ClassicGameplayController);
+  gameplay.onLoad();
+
+  assert.throws(() => gameplay.sharedAudioPresenter, /unavailable before preparation/);
+  assert.throws(() => gameplay.sharedResourceCatalog, /unavailable before preparation/);
+
+  const resources = createResourceCatalog();
+  const audio = {
+    played: [] as string[],
+    stopCalls: 0,
+    playOneShot(path: string) { this.played.push(path); },
+    stop() { this.stopCalls += 1; },
+  };
+  let releasePreparation: () => void = () => undefined;
+  const gate = new Promise<void>((resolve) => {
+    releasePreparation = resolve;
+  });
+  let initializationCalls = 0;
+  setPrivate(gameplay, 'initializeRecoveredResources', async () => {
+    initializationCalls += 1;
+    await gate;
+    setPrivate(gameplay, 'resourceCatalog', resources);
+    setPrivate(gameplay, 'audioPresenter', audio);
+  });
+
+  const first = gameplay.prepareRecoveredRuntime();
+  const second = gameplay.prepareRecoveredRuntime();
+  assert.equal(first, second);
+  assert.equal(initializationCalls, 1);
+  releasePreparation();
+  await first;
+
+  assert.equal(gameplay.sharedAudioPresenter, audio);
+  assert.equal(gameplay.sharedResourceCatalog, resources);
+  gameplay.onDestroy();
+  assert.equal(audio.stopCalls, 1);
+  assert.throws(() => gameplay.sharedAudioPresenter, /after teardown/);
+  assert.throws(() => gameplay.sharedResourceCatalog, /after teardown/);
+});
+
 test('blade ownership reconciles when resource loading finishes during an active touch', () => {
   cc.resetRuntime();
   const canvas = new cc.Node('Canvas');
   const gameplay = addComponent(canvas, ClassicGameplayController);
+  const classicRoot = new cc.Node('ClassicModeRoot');
+  classicRoot.setParent(canvas);
+  setPrivate(gameplay, 'classicModeRoot', classicRoot);
+  setPrivate(gameplay, 'screenPlacement', { currentScreen: classicRoot });
 
   invokePrivate<void>(gameplay, 'onBladeBegan', {
     point: { x: 1, y: 2 },
@@ -642,7 +785,7 @@ test('blade ownership reconciles when resource loading finishes during an active
     touchId: 41,
   });
 
-  const presenter = createAttachedBladePresenter(canvas);
+  const presenter = createAttachedBladePresenter(classicRoot as never);
   setPrivate(gameplay, 'bladePresenter', presenter);
   invokePrivate<void>(gameplay, 'onBladeMoved', {
     segment: {
@@ -665,6 +808,28 @@ test('blade ownership reconciles when resource loading finishes during an active
   });
   assert.equal(presenter.snapshot()[0]?.claimed, false);
   assert.equal(presenter.snapshot()[0]?.state, 4);
+});
+
+test('app-shell reentry rolls back scene and leaves the host empty when presentation reporting fails', () => {
+  const fixture = createRetryFixture();
+  fixture.placement.detachCurrentScreen(fixture.resultRoot);
+  fixture.resultPresenter.dispose();
+  setPrivate(fixture.gameplay, 'resultPresentationRoot', null);
+  setPrivate(fixture.gameplay, 'resultPresenter', null);
+  setPrivate(fixture.gameplay, 'updatePresentation', () => {
+    throw new Error('Injected presentation reporting failure');
+  });
+
+  assert.throws(
+    () => fixture.gameplay.activateClassicFromAppShell(fixture.placement),
+    /Injected presentation reporting failure/,
+  );
+
+  assert.equal(fixture.placement.currentScreen, null);
+  assert.equal(getPrivate(fixture.gameplay, 'screenPlacement'), fixture.placement);
+  assert.equal(getPrivate(fixture.gameplay, 'classicModeRoot'), null);
+  assert.equal(getPrivate(fixture.scene, 'pendingLayerRestartRollback'), null);
+  assert.equal(fixture.scene.sessionSnapshot().lifecycle, 'result-removed');
 });
 
 test('an end arriving after attachment for a pre-attachment gesture is safely ignored', () => {
@@ -742,7 +907,7 @@ test('a touch completed before resource attachment leaves no synthetic blade own
   });
 });
 
-test('successful Retry commits a fresh Classic root to the captured parent at z-order 1', () => {
+test('successful Retry commits a fresh Classic root through shared physical slot 3', () => {
   const fixture = createRetryFixture();
 
   invokePrivate<void>(fixture.gameplay, 'onResultRetry');
@@ -750,8 +915,10 @@ test('successful Retry commits a fresh Classic root to the captured parent at z-
   const classicRoot = getPrivate<StubNode | null>(fixture.gameplay, 'classicModeRoot');
   assert.ok(classicRoot);
   assert.equal(classicRoot.parent, fixture.canvas);
-  assert.equal(classicRoot.lastRequestedSiblingIndex, 1);
-  assert.equal(fixture.canvas.children[1], classicRoot);
+  assert.equal(classicRoot.lastRequestedSiblingIndex, 3);
+  assert.equal(fixture.canvas.children[3], classicRoot);
+  assert.equal(fixture.placement.currentScreen, classicRoot);
+  fixture.placement.assertSharedOrder();
   assert.equal(fixture.resultRoot.parent, null);
   assert.equal(fixture.resultRoot.destroyed, true);
   assert.equal(fixture.resultPresenter.disposed, true);
@@ -857,7 +1024,10 @@ test('post-commit Result disposal failure cannot tear down the fresh Classic tra
   const classicRoot = getPrivate<StubNode | null>(fixture.gameplay, 'classicModeRoot');
   assert.ok(classicRoot);
   assert.equal(classicRoot.parent, fixture.canvas);
-  assert.equal(classicRoot.lastRequestedSiblingIndex, 1);
+  assert.equal(classicRoot.lastRequestedSiblingIndex, 3);
+  assert.equal(fixture.canvas.children[3], classicRoot);
+  assert.equal(fixture.placement.currentScreen, classicRoot);
+  fixture.placement.assertSharedOrder();
   assert.equal(fixture.resultRoot.parent, null);
   assert.equal(fixture.resultRoot.destroyed, true);
   assert.equal(getPrivate(fixture.gameplay, 'resultPresentationRoot'), null);
@@ -872,16 +1042,107 @@ test('post-commit Result disposal failure cannot tear down the fresh Classic tra
   assertNoExtraLiveClassicRoots(classicRoot);
 });
 
+test('Result Menu construction rollback keeps the exact Result root and side effects', () => {
+  const fixture = createRetryFixture();
+  fixture.resultPresenter.navigation = 'menu';
+  const tokens: ResultMenuTransitionToken[] = [];
+  fixture.canvas.on(
+    CLASSIC_RESULT_MENU_REQUESTED_EVENT,
+    (payload: unknown) => tokens.push(payload as ResultMenuTransitionToken),
+  );
+
+  invokePrivate<void>(fixture.gameplay, 'onResultMenu');
+
+  assert.equal(tokens.length, 1);
+  const token = tokens[0];
+  assert.ok(token);
+  assert.equal(token.completedRunScore, 321);
+  assert.equal(token.resultRoot, fixture.resultRoot);
+  token.rollback();
+  token.rollback();
+
+  assertResultMenuRollbackRestored(fixture);
+});
+
+test('Result Menu replace failure rolls back the atomic host and rearms the exact Result', () => {
+  const fixture = createRetryFixture();
+  fixture.resultPresenter.navigation = 'menu';
+  const tokens: ResultMenuTransitionToken[] = [];
+  fixture.canvas.on(
+    CLASSIC_RESULT_MENU_REQUESTED_EVENT,
+    (payload: unknown) => tokens.push(payload as ResultMenuTransitionToken),
+  );
+  invokePrivate<void>(fixture.gameplay, 'onResultMenu');
+  const token = tokens[0];
+  assert.ok(token);
+
+  const menuRoot = new cc.Node('MainMenuScreenRoot');
+  fixture.placement.failNextAttachAfterParent = true;
+  assert.throws(
+    () => fixture.placement.replaceCurrentScreen(menuRoot),
+    /Injected current-screen attachment failure/,
+  );
+  token.rollback();
+
+  assert.equal(menuRoot.parent, null);
+  assertResultMenuRollbackRestored(fixture);
+});
+
+test('Result Menu commit cleans Result best-effort without tearing down the new Menu', () => {
+  const fixture = createRetryFixture();
+  fixture.resultPresenter.navigation = 'menu';
+  fixture.resultPresenter.throwOnDispose = true;
+  const tokens: ResultMenuTransitionToken[] = [];
+  fixture.canvas.on(
+    CLASSIC_RESULT_MENU_REQUESTED_EVENT,
+    (payload: unknown) => tokens.push(payload as ResultMenuTransitionToken),
+  );
+  invokePrivate<void>(fixture.gameplay, 'onResultMenu');
+  const token = tokens[0];
+  assert.ok(token);
+
+  const menuRoot = new cc.Node('MainMenuScreenRoot');
+  const previousRoot = fixture.placement.replaceCurrentScreen(menuRoot);
+  const errors = captureConsoleErrors(() => {
+    token.commit(previousRoot);
+    token.commit(previousRoot);
+  });
+
+  assert.equal(errors.length, 1);
+  assert.match(errors[0]?.message ?? '', /committed with cleanup failures/);
+  assert.equal(previousRoot, fixture.resultRoot);
+  assert.equal(fixture.resultRoot.parent, null);
+  assert.equal(fixture.resultRoot.destroyed, true);
+  assert.equal(menuRoot.parent, fixture.canvas);
+  assert.equal(menuRoot.destroyed, false);
+  assert.equal(menuRoot.lastRequestedSiblingIndex, 3);
+  assert.equal(fixture.placement.currentScreen, menuRoot);
+  fixture.placement.assertSharedOrder();
+  assert.equal(getPrivate(fixture.gameplay, 'resultPresentationRoot'), null);
+  assert.equal(getPrivate(fixture.gameplay, 'resultPresenter'), null);
+  assert.deepEqual(fixture.persistence, fixture.baseline.persistence);
+  assert.equal(fixture.random.draws, fixture.baseline.randomDraws);
+  assert.equal(fixture.audio.played.length, 1);
+});
+
 function createRetryFixture(): RetryFixture {
   cc.resetRuntime();
   const canvas = new cc.Node('Canvas');
-  const backdrop = new cc.Node('Backdrop');
-  backdrop.setParent(canvas);
-  backdrop.setSiblingIndex(0);
+  const background = new cc.Node('SharedBackground');
+  const leaf = new cc.Node('SharedLeafFrame');
+  const theme = new cc.Node('SharedThemeLayer');
+  const sharedRoots = [background, leaf, theme] as const;
+  sharedRoots.forEach((root, index) => {
+    root.setParent(canvas);
+    root.setSiblingIndex(index);
+  });
+  const placement = new ScreenPlacementProbe(canvas, sharedRoots);
 
   const bladeInput = addComponent(canvas, BladeInputController);
   const scene = addComponent(canvas, ClassicSceneController);
   scene.onLoad();
+  scene.prepareSceneResolution();
+  scene.activateInitialClassicLayer();
   scene.start();
   scene.completeIntro();
   scene.gameOverFromMiss();
@@ -937,9 +1198,10 @@ function createRetryFixture(): RetryFixture {
   setPrivate(gameplay, 'audioPresenter', audio);
 
   const resultRoot = new cc.Node('ClassicResultPresentationRoot');
-  resultRoot.setParent(canvas);
-  resultRoot.setSiblingIndex(1);
+  placement.attachCurrentScreen(resultRoot);
   const resultPresenter = createResultPresenterProbe();
+  setPrivate(gameplay, 'screenPlacement', placement);
+  setPrivate(gameplay, 'initialClassicRuntimeActivated', true);
   setPrivate(gameplay, 'resultPresentationRoot', resultRoot);
   setPrivate(gameplay, 'resultPresenter', resultPresenter);
   setPrivate(gameplay, 'resultConstructionRequested', true);
@@ -985,12 +1247,14 @@ function createRetryFixture(): RetryFixture {
     bladeInput,
     canvas,
     gameplay,
+    placement,
     persistence,
     random,
     resultPresenter,
     resultRoot,
     retryFailures,
     scene,
+    sharedRoots,
   };
 }
 
@@ -1092,7 +1356,7 @@ function createResultPresenterProbe(): ResultPresenterProbe {
     },
     rearmNavigationAfterFailure(route) {
       this.rearmCalls += 1;
-      if (this.disposed || route !== 'retry' || this.navigation !== route) return false;
+      if (this.disposed || this.navigation !== route) return false;
       this.navigation = 'none';
       this.successfulRearms += 1;
       return true;
@@ -1120,8 +1384,10 @@ function assertFailedRetryRestored(
 ): void {
   assert.equal(fixture.resultRoot.destroyed, false);
   assert.equal(fixture.resultRoot.parent, fixture.canvas);
-  assert.equal(fixture.resultRoot.lastRequestedSiblingIndex, 1);
-  assert.equal(fixture.canvas.children[1], fixture.resultRoot);
+  assert.equal(fixture.resultRoot.lastRequestedSiblingIndex, 3);
+  assert.equal(fixture.canvas.children[3], fixture.resultRoot);
+  assert.equal(fixture.placement.currentScreen, fixture.resultRoot);
+  fixture.placement.assertSharedOrder();
   assert.equal(fixture.resultPresenter.disposed, false);
   assert.equal(fixture.resultPresenter.navigation, 'none');
   assert.equal(fixture.resultPresenter.rearmCalls, 1);
@@ -1177,6 +1443,39 @@ function assertFailedRetryRestored(
   assert.equal(fixture.retryFailures[0]?.reason, 'restart-error');
   assert.match(fixture.retryFailures[0]?.message ?? '', expectedFailure);
   assertNoExtraLiveClassicRoots(null);
+}
+
+function assertResultMenuRollbackRestored(fixture: RetryFixture): void {
+  assert.equal(fixture.resultRoot.destroyed, false);
+  assert.equal(fixture.resultRoot.parent, fixture.canvas);
+  assert.equal(fixture.resultRoot.lastRequestedSiblingIndex, 3);
+  assert.equal(fixture.canvas.children[3], fixture.resultRoot);
+  assert.equal(fixture.placement.currentScreen, fixture.resultRoot);
+  fixture.placement.assertSharedOrder();
+  assert.equal(fixture.resultPresenter.disposed, false);
+  assert.equal(fixture.resultPresenter.navigation, 'none');
+  assert.equal(fixture.resultPresenter.rearmCalls, 1);
+  assert.equal(fixture.resultPresenter.successfulRearms, 1);
+  assert.equal(getPrivate(fixture.gameplay, 'resultPresentationRoot'), fixture.resultRoot);
+  assert.equal(getPrivate(fixture.gameplay, 'resultPresenter'), fixture.resultPresenter);
+  assert.deepEqual(fixture.persistence, fixture.baseline.persistence);
+  assert.equal(fixture.random.draws, fixture.baseline.randomDraws);
+  assert.equal(fixture.audio.played.length, 1);
+  assert.deepEqual(fixture.retryFailures, []);
+}
+
+function captureConsoleErrors(action: () => void): Error[] {
+  const errors: Error[] = [];
+  const originalConsoleError = console.error;
+  console.error = (value?: unknown) => {
+    errors.push(value instanceof Error ? value : new Error(String(value)));
+  };
+  try {
+    action();
+  } finally {
+    console.error = originalConsoleError;
+  }
+  return errors;
 }
 
 function assertNoExtraLiveClassicRoots(expected: StubNode | null): void {

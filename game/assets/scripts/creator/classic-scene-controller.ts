@@ -33,14 +33,15 @@ export interface ClassicPhysicsSteppedEvent {
 
 interface ClassicLayerRestartRollbackState {
   readonly classicLayerRemovedForResult: boolean;
+  readonly initialClassicActivated: boolean;
   readonly session: ClassicSession;
   readonly worldSpeed: ClassicWorldSpeed;
 }
 
 /**
- * Root bridge for resolved Classic session, resolution, and Physics2D behavior.
- * Scene-lifetime owner: keep this component enabled until node destruction; disabling it is
- * not a gameplay pause boundary.
+ * Root bridge for explicitly activated Classic session, resolution, and Physics2D behavior.
+ * The serialized component is passive until an app-shell prepares resolution and activates
+ * the initial Classic layer.
  */
 @ccclass('ClassicSceneController')
 @requireComponent(BladeInputController)
@@ -51,8 +52,11 @@ export class ClassicSceneController extends Component {
   private worldSpeed = new ClassicWorldSpeed();
   private bladeInput: BladeInputController | null = null;
   private appliedResolution: AppliedClassicResolution | null = null;
+  private initialClassicActivated = false;
+  private initialClassicActivationInProgress = false;
   private classicLayerRemovedForResult = false;
   private pendingLayerRestartRollback: ClassicLayerRestartRollbackState | null = null;
+  private destroyed = false;
 
   onLoad(): void {
     const bladeInput = this.getComponent(BladeInputController);
@@ -60,26 +64,86 @@ export class ClassicSceneController extends Component {
       throw new Error('ClassicSceneController requires BladeInputController');
     }
     this.bladeInput = bladeInput;
-    this.appliedResolution = this.resolution.apply();
-    this.physics.configureResolvedWorldProperties();
-    this.physics.startVariableSimulation(
-      (frameDeltaSeconds) => this.worldSpeed.physicsStepDelta(frameDeltaSeconds),
-      (variableDeltaSeconds) => this.afterPhysicsStep(variableDeltaSeconds),
-    );
+    bladeInput.deactivateForNonClassicScreen();
   }
 
   start(): void {
-    if (this.appliedResolution === null) {
-      throw new Error('Classic resolution must be applied before scene start');
-    }
-    this.applyWorldSpeedCommands(this.worldSpeed.enableClassicSpeedUp());
-    this.node.emit(CLASSIC_RESOLUTION_APPLIED_EVENT, this.appliedResolution);
-    this.emitSessionSnapshot();
+    // Intentionally passive. The app-shell owns preparation and Classic activation order.
   }
 
   onDestroy(): void {
+    this.destroyed = true;
     this.unschedule(this.onSpeedUpDelayComplete);
+    this.bladeInput?.deactivateForNonClassicScreen();
     this.physics.restorePreviousWorldProperties();
+  }
+
+  /** Applies and publishes the scene resolution exactly once for the persistent app-shell. */
+  prepareSceneResolution(): AppliedClassicResolution {
+    if (this.destroyed) {
+      throw new Error('Classic scene resolution cannot be prepared after destruction');
+    }
+    if (this.appliedResolution !== null) {
+      return this.appliedResolution;
+    }
+
+    const appliedResolution = this.resolution.apply();
+    this.appliedResolution = appliedResolution;
+    this.node.emit(CLASSIC_RESOLUTION_APPLIED_EVENT, appliedResolution);
+    return appliedResolution;
+  }
+
+  /** Creates and activates the first Classic layer after explicit resolution preparation. */
+  activateInitialClassicLayer(): void {
+    if (this.destroyed) {
+      throw new Error('Initial Classic layer cannot activate after scene destruction');
+    }
+    if (this.initialClassicActivated || this.initialClassicActivationInProgress) {
+      throw new Error('Initial Classic layer can activate only once');
+    }
+    if (this.appliedResolution === null) {
+      throw new Error('Classic resolution must be prepared before initial activation');
+    }
+    if (
+      this.classicLayerRemovedForResult
+      || this.pendingLayerRestartRollback !== null
+      || this.session.snapshot().lifecycle !== 'intro'
+    ) {
+      throw new Error('Initial Classic layer cannot activate from the current lifecycle');
+    }
+    const bladeInput = this.bladeInput;
+    if (bladeInput === null) {
+      throw new Error('Classic blade input must load before initial activation');
+    }
+
+    const previousSession = this.session;
+    const previousWorldSpeed = this.worldSpeed;
+    const freshSession = new ClassicSession();
+    const freshWorldSpeed = new ClassicWorldSpeed();
+    this.initialClassicActivationInProgress = true;
+    this.unschedule(this.onSpeedUpDelayComplete);
+    try {
+      this.physics.configureResolvedWorldProperties();
+      this.physics.startVariableSimulation(
+        (frameDeltaSeconds) => freshWorldSpeed.physicsStepDelta(frameDeltaSeconds),
+        (variableDeltaSeconds) => this.afterPhysicsStep(variableDeltaSeconds),
+      );
+      this.session = freshSession;
+      this.worldSpeed = freshWorldSpeed;
+      bladeInput.activateForClassicLayer();
+      this.applyWorldSpeedCommands(freshWorldSpeed.enableClassicSpeedUp());
+      this.emitSessionSnapshot();
+      this.initialClassicActivated = true;
+    } catch (error) {
+      this.unschedule(this.onSpeedUpDelayComplete);
+      bladeInput.deactivateForNonClassicScreen();
+      this.physics.restorePreviousWorldProperties();
+      this.session = previousSession;
+      this.worldSpeed = previousWorldSpeed;
+      throw error;
+    } finally {
+      this.initialClassicActivationInProgress = false;
+    }
   }
 
   resolutionSnapshot(): AppliedClassicResolution | null {
@@ -127,6 +191,9 @@ export class ClassicSceneController extends Component {
 
   /** Reattaches a fresh Classic layer under the existing scene parent after Result removal. */
   restartClassicLayer(): void {
+    if (this.destroyed) {
+      throw new Error('Classic layer cannot restart after scene destruction');
+    }
     if (
       this.session.snapshot().lifecycle !== 'result-removed'
       || !this.classicLayerRemovedForResult
@@ -143,6 +210,7 @@ export class ClassicSceneController extends Component {
     const freshWorldSpeed = new ClassicWorldSpeed();
     this.pendingLayerRestartRollback = Object.freeze({
       classicLayerRemovedForResult: this.classicLayerRemovedForResult,
+      initialClassicActivated: this.initialClassicActivated,
       session: this.session,
       worldSpeed: this.worldSpeed,
     });
@@ -157,7 +225,8 @@ export class ClassicSceneController extends Component {
       this.session = freshSession;
       this.worldSpeed = freshWorldSpeed;
       this.classicLayerRemovedForResult = false;
-      bladeInput.resetForFreshClassicLayer();
+      this.initialClassicActivated = true;
+      bladeInput.activateForClassicLayer();
       this.applyWorldSpeedCommands(freshWorldSpeed.enableClassicSpeedUp());
       this.emitSessionSnapshot();
     } catch (error) {
@@ -171,6 +240,7 @@ export class ClassicSceneController extends Component {
     if (
       this.pendingLayerRestartRollback === null
       || this.session.snapshot().lifecycle !== 'intro'
+      || !this.initialClassicActivated
       || this.classicLayerRemovedForResult
     ) {
       throw new Error('Classic layer restart can commit only after fresh activation');
@@ -200,8 +270,9 @@ export class ClassicSceneController extends Component {
     this.physics.restorePreviousWorldProperties();
     this.session = rollback.session;
     this.worldSpeed = rollback.worldSpeed;
+    this.initialClassicActivated = rollback.initialClassicActivated;
     this.classicLayerRemovedForResult = rollback.classicLayerRemovedForResult;
-    bladeInput.setCutEnabled(rollback.session.snapshot().cutEnabled);
+    bladeInput.deactivateForNonClassicScreen();
     this.pendingLayerRestartRollback = null;
   }
 
@@ -222,6 +293,7 @@ export class ClassicSceneController extends Component {
       // Native removes the PhysicsLayer node and its pending 30-second action callbacks.
       // Restore Creator's singleton immediately so the result layer owns no Classic stepping.
       this.unschedule(this.onSpeedUpDelayComplete);
+      this.bladeInput?.deactivateForNonClassicScreen();
       this.physics.restorePreviousWorldProperties();
       this.classicLayerRemovedForResult = true;
     }

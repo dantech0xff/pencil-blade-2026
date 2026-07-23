@@ -8,6 +8,7 @@ import {
   CLASSIC_ELECTRIC_BOMB_HIT_AUDIO_PATH,
   CLASSIC_ORDINARY_BOMB_AUDIO_PATHS,
   CLASSIC_TOSS_AUDIO_PATH,
+  MAIN_MENU_MUSIC_AUDIO_PATH,
 } from '../../../game/assets/scripts/domain/classic-audio-contract.ts';
 import { canonicalResourceToBundlePath } from '../../../game/assets/scripts/domain/classic-resource-contract.ts';
 
@@ -163,16 +164,18 @@ test('preload requests the exact recovered core batch and excludes electric-only
     cc.loadedBundlePaths,
     CLASSIC_CORE_AUDIO_PATHS.map(canonicalResourceToBundlePath),
   );
-  assert.equal(cc.loadedBundlePaths.length, 27);
+  assert.equal(cc.loadedBundlePaths.length, 28);
   assert.equal(
     cc.loadedBundlePaths.includes(
       canonicalResourceToBundlePath(CLASSIC_ELECTRIC_BOMB_HIT_AUDIO_PATH),
     ),
     false,
   );
-  assert.equal(cc.audioSources.length, 1);
+  assert.equal(cc.audioSources.length, 2);
   assert.equal(cc.audioSources[0]?.loop, false);
   assert.equal(cc.audioSources[0]?.volume, 1);
+  assert.equal(cc.audioSources[1]?.loop, true);
+  assert.equal(cc.audioSources[1]?.volume, 1);
   presenter.stop();
 });
 
@@ -186,12 +189,14 @@ test('retained voices stop and dispose independently from shared one-shots', asy
   presenter.playOneShot(CLASSIC_TOSS_AUDIO_PATH);
   const first = presenter.playRetained(CLASSIC_ORDINARY_BOMB_AUDIO_PATHS.entry);
   const second = presenter.playRetained(CLASSIC_ORDINARY_BOMB_AUDIO_PATHS.entry);
-  const firstVoice = cc.audioSources[1];
-  const secondVoice = cc.audioSources[2];
+  const background = cc.audioSources[1];
+  const firstVoice = cc.audioSources[2];
+  const secondVoice = cc.audioSources[3];
   assert.notEqual(firstVoice, undefined);
   assert.notEqual(secondVoice, undefined);
   assert.notEqual(firstVoice, secondVoice);
   assert.notEqual(firstVoice, shared);
+  assert.notEqual(firstVoice, background);
   assert.equal(firstVoice?.playCalls, 1);
   assert.equal(secondVoice?.playCalls, 1);
   assert.equal(firstVoice?.clip?.canonicalBundlePath, 'Sounds/boomsound');
@@ -204,6 +209,7 @@ test('retained voices stop and dispose independently from shared one-shots', asy
   assert.equal(firstVoice?.stopCalls, 1);
   assert.equal(secondVoice?.stopCalls, 0);
   assert.equal(shared?.stopCalls, 0);
+  assert.equal(background?.stopCalls, 0);
 
   presenter.playOneShot(CLASSIC_ORDINARY_BOMB_AUDIO_PATHS.explosion);
   assert.deepEqual(
@@ -225,21 +231,45 @@ test('retained voices stop and dispose independently from shared one-shots', asy
   assert.equal(secondVoice?.stopCalls, 1);
   assert.equal(secondVoice?.node.destroyed, true);
   assert.equal(shared?.stopCalls, 1);
+  assert.equal(background?.stopCalls, 1);
+});
+
+test('looping menu music and effects have independent stop boundaries', async () => {
+  cc.resetAudioStub();
+  const root = new cc.Node('Root');
+  const presenter = await ClassicAudioPresenter.load(root as never);
+  const effects = cc.audioSources[0];
+  const background = cc.audioSources[1];
+  assert.notEqual(effects, undefined);
+  assert.notEqual(background, undefined);
+
+  presenter.playLoopingBackground(MAIN_MENU_MUSIC_AUDIO_PATH);
+  presenter.playOneShot(CLASSIC_TOSS_AUDIO_PATH);
+  assert.equal(background?.clip?.canonicalBundlePath, 'Sounds/mainmenumusic');
+  assert.equal(background?.playCalls, 1);
+  assert.equal(effects?.oneShots.length, 1);
+
+  presenter.stopAllEffects();
+  assert.equal(effects?.stopCalls, 1);
+  assert.equal(background?.stopCalls, 0);
+
+  presenter.stopBackgroundMusic();
+  assert.equal(background?.stopCalls, 1);
 });
 
 test('retained playback rejects invalid and unloaded paths before creating a voice', async () => {
   cc.resetAudioStub();
   const root = new cc.Node('Root');
   const presenter = await ClassicAudioPresenter.load(root as never);
-  assert.equal(cc.audioSources.length, 1);
+  assert.equal(cc.audioSources.length, 2);
 
   assert.throws(() => presenter.playRetained(''), TypeError);
   assert.throws(
     () => presenter.playRetained(CLASSIC_ELECTRIC_BOMB_HIT_AUDIO_PATH),
     /Classic AudioClip was not loaded/,
   );
-  assert.equal(cc.audioSources.length, 1);
-  assert.equal(root.children.length, 0);
+  assert.equal(cc.audioSources.length, 2);
+  assert.equal(root.children.length, 1);
 
   root.destroy();
   assert.throws(

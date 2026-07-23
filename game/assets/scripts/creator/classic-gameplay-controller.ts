@@ -1,13 +1,11 @@
 import {
   _decorator,
   Component,
-  Game,
   Node,
   Sprite,
   Tween,
   UITransform,
   Vec3,
-  game,
   isValid,
   tween,
 } from 'cc';
@@ -44,7 +42,11 @@ import type { ComboCommand } from '../domain/combo-service';
 import { ComboService } from '../domain/combo-service';
 import type { FailCommand } from '../domain/fail-service';
 import { FailService } from '../domain/fail-service';
-import { ModuloGameplayRandom, SeededTargetRawSource } from '../domain/gameplay-random';
+import {
+  ModuloGameplayRandom,
+  SeededTargetRawSource,
+  type GameplayRandom,
+} from '../domain/gameplay-random';
 import type { ScoreCommand } from '../domain/score-service';
 import { ScoreService } from '../domain/score-service';
 import {
@@ -70,6 +72,7 @@ import { ClassicEntityRegistry } from './classic-entity-registry';
 import { ClassicFailPresenter } from './classic-fail-presenter';
 import { ClassicResultPresenter } from './classic-result-presenter';
 import { ClassicScoreHudPresenter } from './classic-score-hud-presenter';
+import { createDetachedScreenRoot } from './detached-screen-root';
 import {
   getClassicSettingsRuntime,
   type ClassicSettingsRuntime,
@@ -120,8 +123,18 @@ export interface ClassicGameplaySnapshot {
   readonly strikes: number;
 }
 
+export interface ClassicScreenPlacementPort {
+  readonly currentScreen: Node | null;
+  attachCurrentScreen(screen: Node): void;
+  detachCurrentScreen(expectedScreen?: Node): Node;
+  replaceCurrentScreen(nextScreen: Node): Node;
+}
+
 export interface ClassicResultMenuRequestedEvent {
   readonly completedRunScore: number;
+  readonly resultRoot: Node;
+  commit(previousRoot: Node): void;
+  rollback(): void;
 }
 
 export interface ClassicResultRewardReadyEvent {
@@ -143,6 +156,7 @@ interface ClassicRetryRestartContext {
   readonly resultRoot: Node;
   readonly score: number;
   readonly sceneController: ClassicSceneController;
+  readonly screenPlacement: ClassicScreenPlacementPort;
   readonly viewport: Readonly<{ x: number; y: number; width: number; height: number }>;
 }
 
@@ -157,7 +171,7 @@ interface ClassicRetryRunStateSnapshot {
 }
 
 interface ClassicRetryRestartState {
-  capturedParent: Node | null;
+  capturedResultRoot: Node | null;
   resultCleanupCommitted: boolean;
   resultDetached: boolean;
 }
@@ -167,12 +181,19 @@ interface ClassicRetryResultCleanupToken {
   readonly root: Node;
 }
 
+interface ClassicResultMenuTransactionState {
+  readonly presenter: ClassicResultPresenter;
+  readonly root: Node;
+  readonly screenPlacement: ClassicScreenPlacementPort;
+  status: 'committed' | 'pending' | 'rolled-back';
+}
+
 /**
  * Playable Classic slice: the recovered intro gate starts the normal-free timer, exact
  * recovered fruit use Creator Physics2D, post-step blade rays drive cut/score/combo, and the
  * terminal callback replaces Classic presentation with the recovered result-entry shell.
- * This and ClassicSceneController are scene-lifetime components; do not toggle either one
- * independently to model pause or resume.
+ * The serialized component is passive until the app-shell explicitly prepares and activates
+ * Classic through a shared current-screen placement port.
  */
 @ccclass('ClassicGameplayController')
 @requireComponent(ClassicSceneController)
@@ -194,7 +215,6 @@ export class ClassicGameplayController extends Component {
   private readonly criticalParticlePresenters = new Set<ClassicCriticalParticlePresenter>();
   private sceneController: ClassicSceneController | null = null;
   private audioPresenter: ClassicAudioPresenter | null = null;
-  private recoveredBackgroundNode: Node | null = null;
   private classicModeRoot: Node | null = null;
   private scoreHudRoot: Node | null = null;
   private worldPresentationRoot: Node | null = null;
@@ -217,6 +237,9 @@ export class ClassicGameplayController extends Component {
   private resultScore: number | null = null;
   private gameOver = false;
   private shuttingDown = false;
+  private recoveredRuntimePreparation: Promise<void> | null = null;
+  private screenPlacement: ClassicScreenPlacementPort | null = null;
+  private initialClassicRuntimeActivated = false;
 
   onLoad(): void {
     const sceneController = this.getComponent(ClassicSceneController);
@@ -237,44 +260,148 @@ export class ClassicGameplayController extends Component {
       0,
       this.settingsRuntime.state.snapshot.leaderboard.first,
     );
-    const viewport = this.requireViewport();
-    void this.initializeRecoveredResources(viewport).catch(
-      this.onRecoveredResourceInitializationFailed,
-    );
+  }
+
+  get sharedGameplayRandom(): GameplayRandom {
+    return this.random;
+  }
+
+  get sharedSettingsRuntime(): ClassicSettingsRuntime {
+    return this.requireSettingsRuntime();
+  }
+
+  get sharedAudioPresenter(): ClassicAudioPresenter {
+    if (this.shuttingDown || this.audioPresenter === null) {
+      throw new Error('Classic audio presenter is unavailable before preparation or after teardown');
+    }
+    return this.audioPresenter;
+  }
+
+  get sharedResourceCatalog(): ClassicSliceResourceCatalog {
+    if (this.shuttingDown || this.resourceCatalog === null) {
+      throw new Error('Classic resource catalog is unavailable before preparation or after teardown');
+    }
+    return this.resourceCatalog;
+  }
+
+  /** Loads the Classic catalog and audio once without constructing or attaching a screen. */
+  prepareRecoveredRuntime(): Promise<void> {
+    if (this.shuttingDown || !isValid(this.node, true)) {
+      throw new Error('Classic runtime cannot be prepared after destruction');
+    }
+    if (this.resourceCatalog !== null && this.audioPresenter !== null) {
+      return this.recoveredRuntimePreparation ?? Promise.resolve();
+    }
+    if (this.recoveredRuntimePreparation !== null) {
+      return this.recoveredRuntimePreparation;
+    }
+    const sceneController = this.sceneController;
+    if (sceneController === null) {
+      throw new Error('Classic scene controller must load before runtime preparation');
+    }
+    const assetTree = sceneController.resolutionSnapshot()?.profile.assetTree;
+    if (assetTree === undefined) {
+      throw new Error('Classic resolution must be prepared before runtime preparation');
+    }
+
+    const preparation = this.initializeRecoveredResources(assetTree);
+    this.recoveredRuntimePreparation = preparation;
+    void preparation.catch((error: unknown) => {
+      if (this.recoveredRuntimePreparation === preparation) {
+        this.recoveredRuntimePreparation = null;
+      }
+      this.onRecoveredResourceInitializationFailed(error);
+    });
+    return preparation;
   }
 
   private async initializeRecoveredResources(
-    viewport: Readonly<{ x: number; y: number; width: number; height: number }>,
+    assetTree: ClassicSliceResourceCatalog['assetTree'],
   ): Promise<void> {
     let loadedAudioPresenter: ClassicAudioPresenter | null = null;
     try {
-      const sceneController = this.sceneController;
-      if (sceneController === null) {
-        throw new Error('Classic scene controller must be available before resource loading');
-      }
-      const assetTree = sceneController.resolutionSnapshot()?.profile.assetTree;
-      if (assetTree === undefined) {
-        throw new Error('Classic resolution profile must be available before resource loading');
-      }
       // Load the bundle-backed visual catalog first so audio reuses the registered bundle.
       // This avoids issuing two first-load requests against Creator's bundle registry.
       const resources = await loadClassicSliceResourceCatalog(assetTree);
+      if (this.shuttingDown || !isValid(this.node, true)) {
+        throw new Error('Classic runtime preparation completed after destruction');
+      }
       loadedAudioPresenter = await ClassicAudioPresenter.load(this.node);
       if (
         this.shuttingDown
         || !isValid(this.node, true)
-        || !this.node.activeInHierarchy
       ) {
         loadedAudioPresenter.stop();
-        return;
+        throw new Error('Classic runtime preparation completed after destruction');
       }
 
-      const audioPresenter = loadedAudioPresenter;
-      this.audioPresenter = audioPresenter;
+      this.audioPresenter = loadedAudioPresenter;
       this.resourceCatalog = resources;
-      this.createRecoveredBackground(resources);
+    } catch (error) {
+      if (loadedAudioPresenter !== null && loadedAudioPresenter !== this.audioPresenter) {
+        loadedAudioPresenter.stop();
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * App-shell entry point for both the first Classic activation and later re-entry after
+   * Result has already been removed from the shared current-screen host.
+   */
+  activateClassicFromAppShell(screenPlacement: ClassicScreenPlacementPort): void {
+    assertScreenPlacementPort(screenPlacement);
+    if (this.shuttingDown) {
+      throw new Error('Classic runtime cannot activate after destruction');
+    }
+    const retainedScreenPlacement = this.screenPlacement;
+    if (
+      retainedScreenPlacement !== null
+      && retainedScreenPlacement !== screenPlacement
+    ) {
+      throw new Error('Classic runtime must reuse the retained screen placement');
+    }
+    if (screenPlacement.currentScreen !== null) {
+      throw new Error('Classic runtime requires an empty current-screen host');
+    }
+    const sceneController = this.sceneController;
+    const resources = this.resourceCatalog;
+    const audioPresenter = this.audioPresenter;
+    if (sceneController === null || resources === null || audioPresenter === null) {
+      throw new Error('Classic runtime must be prepared before activation');
+    }
+    const lifecycle = sceneController.sessionSnapshot().lifecycle;
+    const isReentry = this.initialClassicRuntimeActivated;
+    if (isReentry) {
+      if (lifecycle !== 'result-removed') {
+        throw new Error('Classic runtime can re-enter only after Result removal');
+      }
+    } else if (lifecycle !== 'intro') {
+      throw new Error('Classic runtime can activate only from intro');
+    }
+    if (
+      this.classicModeRoot !== null
+      || this.registry !== null
+      || this.normalFree !== null
+      || this.bladePresenter !== null
+      || this.scoreHudPresenter !== null
+      || this.failPresenter !== null
+      || this.resultPresenter !== null
+      || this.resultPresentationRoot !== null
+    ) {
+      throw new Error('Classic runtime requires a fully disposed presentation before activation');
+    }
+
+    this.screenPlacement = screenPlacement;
+    let restartPrepared = false;
+    try {
+      if (isReentry) {
+        sceneController.restartClassicLayer();
+        restartPrepared = true;
+      }
+      this.resetRecoveredClassicRunState();
       this.constructRecoveredClassicMode(
-        viewport,
+        this.requireViewport(),
         resources,
         sceneController,
         audioPresenter,
@@ -282,13 +409,29 @@ export class ClassicGameplayController extends Component {
       this.attachRecoveredClassicMode(1);
       this.updatePresentation();
       this.emitSnapshot();
-    } catch (error) {
-      if (loadedAudioPresenter !== null && loadedAudioPresenter !== this.audioPresenter) {
-        loadedAudioPresenter.stop();
+      if (isReentry) {
+        sceneController.commitClassicLayerRestart();
+        restartPrepared = false;
+      } else {
+        sceneController.activateInitialClassicLayer();
       }
-      this.disposeRecoveredRuntime();
+      this.initialClassicRuntimeActivated = true;
+    } catch (error) {
+      if (restartPrepared) {
+        sceneController.rollbackClassicLayerRestart();
+      }
+      try {
+        this.disposeClassicModePresentation();
+      } finally {
+        this.screenPlacement = retainedScreenPlacement;
+      }
       throw error;
     }
+  }
+
+  /** Preserves the original initial-launch API while routing through the shared shell path. */
+  activateInitialClassicRuntime(screenPlacement: ClassicScreenPlacementPort): void {
+    this.activateClassicFromAppShell(screenPlacement);
   }
 
   /** Native constructs the replacement layer before adding it back to the same parent. */
@@ -364,8 +507,11 @@ export class ClassicGameplayController extends Component {
     ) {
       throw new Error('Classic mode must attach once at recovered z-order 1');
     }
-    root.setParent(this.node, true);
-    root.setSiblingIndex(zOrder);
+    const screenPlacement = this.requireScreenPlacement();
+    screenPlacement.attachCurrentScreen(root);
+    if (screenPlacement.currentScreen !== root) {
+      throw new Error('Classic current-screen placement lost the attached mode root');
+    }
   }
 
   private readonly onRecoveredResourceInitializationFailed = (error: unknown): void => {
@@ -378,7 +524,6 @@ export class ClassicGameplayController extends Component {
   };
 
   onEnable(): void {
-    game.on(Game.EVENT_HIDE, this.onGameHidden, this);
     this.node.on(CLASSIC_BLADE_BEGAN_EVENT, this.onBladeBegan, this);
     this.node.on(CLASSIC_BLADE_MOVED_EVENT, this.onBladeMoved, this);
     this.node.on(CLASSIC_BLADE_ENDED_EVENT, this.onBladeEnded, this);
@@ -415,7 +560,6 @@ export class ClassicGameplayController extends Component {
   }
 
   onDisable(): void {
-    game.off(Game.EVENT_HIDE, this.onGameHidden, this);
     this.node.off(CLASSIC_BLADE_BEGAN_EVENT, this.onBladeBegan, this);
     this.node.off(CLASSIC_BLADE_MOVED_EVENT, this.onBladeMoved, this);
     this.node.off(CLASSIC_BLADE_ENDED_EVENT, this.onBladeEnded, this);
@@ -433,16 +577,11 @@ export class ClassicGameplayController extends Component {
   private disposeRecoveredRuntime(): void {
     this.disposeClassicModePresentation();
     this.disposeResultPresentation();
-    if (
-      this.recoveredBackgroundNode !== null
-      && isValid(this.recoveredBackgroundNode, true)
-    ) {
-      this.recoveredBackgroundNode.destroy();
-    }
-    this.recoveredBackgroundNode = null;
     this.audioPresenter?.stop();
     this.audioPresenter = null;
     this.resourceCatalog = null;
+    this.recoveredRuntimePreparation = null;
+    this.screenPlacement = null;
   }
 
   /** Removes only the native Classic layer's owned runtime and presentation. */
@@ -453,9 +592,7 @@ export class ClassicGameplayController extends Component {
       && isValid(classicModeRoot, true)
       && classicModeRoot.parent !== null
     ) {
-      // `destroy()` is deferred in Creator. Match native remove-with-cleanup by making the
-      // parent boundary synchronous before Result or a rollback can attach a replacement.
-      classicModeRoot.removeFromParent();
+      this.detachOwnedScreen(classicModeRoot, 'Classic mode');
     }
     for (const node of [
       this.introGoodNode,
@@ -511,9 +648,7 @@ export class ClassicGameplayController extends Component {
   private disposeResultPresentation(): void {
     const root = this.resultPresentationRoot;
     if (root !== null && isValid(root, true)) {
-      // Creator defers destroy until the end of the frame. Native Retry removes Result from
-      // the captured parent synchronously before constructing its replacement.
-      root.removeFromParent();
+      this.detachOwnedScreen(root, 'Classic Result');
     }
     this.resultPresenter?.dispose();
     this.resultPresenter = null;
@@ -536,6 +671,9 @@ export class ClassicGameplayController extends Component {
   }
 
   private readonly onBladeMoved = (event: BladeMoveResult): void => {
+    if (!this.isClassicGameplayActive()) {
+      return;
+    }
     const presenter = this.bladePresenter;
     if (presenter !== null) {
       // Creator loads the exact texture asynchronously. A gesture can begin before the
@@ -562,6 +700,9 @@ export class ClassicGameplayController extends Component {
   };
 
   private readonly onBladeBegan = (event: ClassicBladeBeganEvent): void => {
+    if (!this.isClassicGameplayActive()) {
+      return;
+    }
     const presenter = this.bladePresenter;
     if (presenter !== null && !presenter.isClaimed(event.slot)) {
       presenter.begin(event.slot);
@@ -569,21 +710,14 @@ export class ClassicGameplayController extends Component {
   };
 
   private readonly onBladeEnded = (event: ClassicBladeEndedEvent): void => {
+    if (!this.isClassicGameplayActive()) {
+      return;
+    }
     // Native cancellation is unresolved. Creator cancellation follows the bounded cleanup
     // inference documented by the BasicBlade contract so a slot cannot retain ownership.
     const presenter = this.bladePresenter;
     if (presenter !== null && presenter.isClaimed(event.slot)) {
       presenter.end(event.slot);
-    }
-  };
-
-  private readonly onGameHidden = (): void => {
-    try {
-      this.settingsRuntime?.save();
-    } catch (error) {
-      const failure = error instanceof Error ? error : new Error(String(error));
-      this.node.emit(CLASSIC_SETTINGS_SAVE_FAILED_EVENT, failure);
-      console.error(failure);
     }
   };
 
@@ -879,21 +1013,6 @@ export class ClassicGameplayController extends Component {
     this.settingsRuntime?.state.snapshot.effectsEnabled ?? true
   );
 
-  private createRecoveredBackground(resources: ClassicSliceResourceCatalog): void {
-    if (this.recoveredBackgroundNode !== null) {
-      throw new Error('Recovered Classic background can attach only once');
-    }
-    const background = createRecoveredSpriteNode(
-      this.node,
-      'ClassicRecoveredPaperBackground',
-      resources.presentation.background,
-    );
-    this.recoveredBackgroundNode = background;
-    background.setSiblingIndex(0);
-    // Legacy BackgroundLayer queues FadeIn before adding its sprite, but never calls its base
-    // onEnter. The action remains paused and the default-opaque texture is effective behavior.
-  }
-
   private createRecoveredPresentation(
     parent: Node,
     viewport: Readonly<{ width: number; height: number }>,
@@ -1097,11 +1216,17 @@ export class ClassicGameplayController extends Component {
       onRetry: this.onResultRetry,
       onTotalCoinsEntranceComplete: this.onResultTotalCoinsEntranceComplete,
     });
-    const root = createRecoveredPresenterRoot(this.node, 'ClassicResultPresentationRoot');
-    root.setSiblingIndex(zOrder);
+    const root = createDetachedScreenRoot(
+      'ClassicResultPresentationRoot',
+      this.node,
+    );
     try {
+      this.requireScreenPlacement().attachCurrentScreen(root);
       presenter.attach(root);
     } catch (error) {
+      if (root.parent !== null) {
+        this.detachOwnedScreen(root, 'Classic Result');
+      }
       presenter.dispose();
       root.destroy();
       throw error;
@@ -1123,7 +1248,7 @@ export class ClassicGameplayController extends Component {
   private restartRecoveredClassicRunSameParent(): void {
     const retryContext = this.createRetryRestartContext();
     const retryState: ClassicRetryRestartState = {
-      capturedParent: null,
+      capturedResultRoot: null,
       resultCleanupCommitted: false,
       resultDetached: false,
     };
@@ -1174,6 +1299,7 @@ export class ClassicGameplayController extends Component {
       resultRoot,
       score: configured.score,
       sceneController,
+      screenPlacement: this.requireScreenPlacement(),
       viewport: this.requireViewport(),
     };
   }
@@ -1188,7 +1314,10 @@ export class ClassicGameplayController extends Component {
         retryContext.audioPresenter.playOneShot(command.canonicalPath);
         return;
       case 'capture-result-parent':
-        retryState.capturedParent = retryContext.resultRoot.parent;
+        if (retryContext.screenPlacement.currentScreen !== retryContext.resultRoot) {
+          throw new Error('Classic Retry lost Result before capturing current-screen ownership');
+        }
+        retryState.capturedResultRoot = retryContext.resultRoot;
         return;
       case 'remove-result':
         this.removeResultForRetry(command, retryContext, retryState);
@@ -1210,18 +1339,23 @@ export class ClassicGameplayController extends Component {
     retryState: ClassicRetryRestartState,
   ): void {
     if (
-      retryState.capturedParent !== this.node
+      retryState.capturedResultRoot !== retryContext.resultRoot
       || command.cleanup !== true
       || retryContext.resultRoot !== this.resultPresentationRoot
       || this.resultPresenter === null
-      || retryContext.resultRoot.parent !== retryState.capturedParent
+      || retryContext.screenPlacement.currentScreen !== retryContext.resultRoot
     ) {
-      throw new Error('Classic Retry must capture the Result parent before cleanup');
+      throw new Error('Classic Retry must capture the Result screen before cleanup');
     }
     // Removal is synchronous; Creator cleanup remains a same-stack commit token until the
     // fresh layer attaches, allowing an exceptional constructor/physics failure to restore
     // the already-presented Result without replaying rank or coin side effects.
-    retryContext.resultRoot.removeFromParent();
+    const detached = retryContext.screenPlacement.detachCurrentScreen(
+      retryContext.resultRoot,
+    );
+    if (detached !== retryContext.resultRoot) {
+      throw new Error('Classic Retry detached an unexpected current screen');
+    }
     retryState.resultDetached = true;
   }
 
@@ -1240,8 +1374,11 @@ export class ClassicGameplayController extends Component {
     retryContext: ClassicRetryRestartContext,
     retryState: ClassicRetryRestartState,
   ): void {
-    if (retryState.capturedParent !== this.node) {
-      throw new Error('Classic Retry lost the captured Result parent boundary');
+    if (
+      retryState.capturedResultRoot !== retryContext.resultRoot
+      || retryContext.screenPlacement.currentScreen !== null
+    ) {
+      throw new Error('Classic Retry lost the captured Result screen boundary');
     }
     let restartPrepared = false;
     let resultCleanup: ClassicRetryResultCleanupToken;
@@ -1275,6 +1412,7 @@ export class ClassicGameplayController extends Component {
       || retryState.resultCleanupCommitted
       || retryContext.resultRoot.parent !== null
       || retryContext.resultRoot !== this.resultPresentationRoot
+      || retryContext.screenPlacement.currentScreen !== this.classicModeRoot
       || this.resultPresenter === null
     ) {
       throw new Error('Classic Retry Result cleanup can commit only after synchronous removal');
@@ -1327,10 +1465,8 @@ export class ClassicGameplayController extends Component {
     if (retryState.resultCleanupCommitted || !retryState.resultDetached) {
       return;
     }
-    const parent = retryState.capturedParent;
     if (
-      parent === null
-      || !isValid(parent, true)
+      retryState.capturedResultRoot !== retryContext.resultRoot
       || retryContext.resultRoot !== this.resultPresentationRoot
       || !isValid(retryContext.resultRoot, true)
       || retryContext.resultRoot.parent !== null
@@ -1353,8 +1489,10 @@ export class ClassicGameplayController extends Component {
     this.resultMode = retryContext.mode;
     this.resultScore = retryContext.score;
     this.gameOver = retryContext.previousRunState.gameOver;
-    parent.addChild(retryContext.resultRoot);
-    retryContext.resultRoot.setSiblingIndex(1);
+    if (retryContext.screenPlacement.currentScreen !== null) {
+      throw new Error('Classic Retry cannot restore Result over another current screen');
+    }
+    retryContext.screenPlacement.attachCurrentScreen(retryContext.resultRoot);
     this.resultPresenter.rearmNavigationAfterFailure('retry');
     retryState.resultDetached = false;
     this.emitSnapshot();
@@ -1398,12 +1536,119 @@ export class ClassicGameplayController extends Component {
       this.audioPresenter?.playOneShot(CLASSIC_MENU_BUTTON_AUDIO_PATH);
     }
     const { score } = this.requireConfiguredResultTransition();
+    const resultRoot = this.requireAttachedResultPresentationRoot();
+    const presenter = this.resultPresenter;
+    if (presenter === null) {
+      throw new Error('Classic Result menu requires its attached presenter');
+    }
+    const transaction: ClassicResultMenuTransactionState = {
+      presenter,
+      root: resultRoot,
+      screenPlacement: this.requireScreenPlacement(),
+      status: 'pending',
+    };
     const payload: ClassicResultMenuRequestedEvent = Object.freeze({
       completedRunScore: score,
+      resultRoot,
+      commit: (previousRoot: Node) => {
+        this.commitResultMenuTransition(transaction, previousRoot);
+      },
+      rollback: () => {
+        this.rollbackResultMenuTransition(transaction);
+      },
     });
-    // MainMenuLayer is not restored yet; retain the result while exposing the exact boundary.
     this.node.emit(CLASSIC_RESULT_MENU_REQUESTED_EVENT, payload);
   };
+
+  private commitResultMenuTransition(
+    transaction: ClassicResultMenuTransactionState,
+    previousRoot: Node,
+  ): void {
+    if (previousRoot !== transaction.root) {
+      throw new Error('Classic Result menu commit received an unexpected previous screen');
+    }
+    if (transaction.status === 'committed') {
+      return;
+    }
+    if (transaction.status === 'rolled-back') {
+      throw new Error('Rolled-back Classic Result menu transition cannot commit');
+    }
+    if (
+      this.resultPresentationRoot !== transaction.root
+      || this.resultPresenter !== transaction.presenter
+      || transaction.root.parent !== null
+      || transaction.screenPlacement.currentScreen === null
+      || transaction.screenPlacement.currentScreen === transaction.root
+    ) {
+      throw new Error('Classic Result menu commit requires a successful screen replacement');
+    }
+
+    // Publish logical ownership before best-effort cleanup. A disposal failure must not tear
+    // down the fresh Main Menu now owned by the app-shell.
+    this.resultPresentationRoot = null;
+    this.resultPresenter = null;
+    transaction.status = 'committed';
+
+    const cleanupFailures: unknown[] = [];
+    try {
+      transaction.presenter.dispose();
+    } catch (error) {
+      cleanupFailures.push(error);
+    }
+    try {
+      if (isValid(transaction.root, true)) {
+        transaction.root.destroy();
+      }
+    } catch (error) {
+      cleanupFailures.push(error);
+    }
+    if (cleanupFailures.length > 0) {
+      const details = cleanupFailures
+        .map((error) => error instanceof Error ? error.message : String(error))
+        .join('; ');
+      console.error(new Error(
+        `Classic Result menu committed with cleanup failures: ${details}`,
+      ));
+    }
+  }
+
+  private rollbackResultMenuTransition(
+    transaction: ClassicResultMenuTransactionState,
+  ): void {
+    if (transaction.status === 'rolled-back') {
+      return;
+    }
+    if (transaction.status === 'committed') {
+      throw new Error('Committed Classic Result menu transition cannot roll back');
+    }
+    if (
+      this.resultPresentationRoot !== transaction.root
+      || this.resultPresenter !== transaction.presenter
+      || !isValid(transaction.root, true)
+    ) {
+      throw new Error('Classic Result menu rollback lost the original Result identity');
+    }
+
+    const currentScreen = transaction.screenPlacement.currentScreen;
+    if (currentScreen !== transaction.root) {
+      if (transaction.root.parent !== null) {
+        throw new Error('Classic Result menu rollback found Result under an unknown owner');
+      }
+      if (currentScreen === null) {
+        transaction.screenPlacement.attachCurrentScreen(transaction.root);
+      } else {
+        transaction.screenPlacement.replaceCurrentScreen(transaction.root);
+      }
+    }
+    if (
+      transaction.screenPlacement.currentScreen !== transaction.root
+      || !transaction.presenter.rearmNavigationAfterFailure('menu')
+    ) {
+      throw new Error('Classic Result menu rollback could not restore and rearm Result');
+    }
+    transaction.status = 'rolled-back';
+    this.emitSnapshot();
+  }
 
   private readonly onResultTotalCoinsEntranceComplete = (): number => {
     const { score } = this.requireConfiguredResultTransition();
@@ -1427,6 +1672,31 @@ export class ClassicGameplayController extends Component {
     return runtime;
   }
 
+  private requireScreenPlacement(): ClassicScreenPlacementPort {
+    const screenPlacement = this.screenPlacement;
+    if (screenPlacement === null) {
+      throw new Error('Classic screen placement must be available for runtime ownership');
+    }
+    return screenPlacement;
+  }
+
+  private detachOwnedScreen(root: Node, label: string): void {
+    const screenPlacement = this.screenPlacement;
+    if (root.parent === null) {
+      if (screenPlacement?.currentScreen === root) {
+        throw new Error(`${label} is current but has no Creator parent`);
+      }
+      return;
+    }
+    if (screenPlacement === null || screenPlacement.currentScreen !== root) {
+      throw new Error(`${label} is attached outside Classic current-screen ownership`);
+    }
+    const detached = screenPlacement.detachCurrentScreen(root);
+    if (detached !== root || root.parent !== null) {
+      throw new Error(`${label} current-screen detachment lost node identity`);
+    }
+  }
+
   private updatePresentation(): void {
     this.scoreHudPresenter?.setDisplayedScore(this.score.displayedScore);
     this.scoreHudPresenter?.setBestScore(this.score.bestScore, this.score.bestScoreIsNew);
@@ -1446,9 +1716,11 @@ export class ClassicGameplayController extends Component {
     if (
       resultRoot === null
       || !isValid(resultRoot, true)
-      || resultRoot.parent !== this.node
+      || resultRoot.parent === null
+      || this.screenPlacement?.currentScreen !== resultRoot
+      || !resultRoot.activeInHierarchy
     ) {
-      throw new Error('Classic Retry requires Result attached to its recovered parent');
+      throw new Error('Classic operation requires Result as the active current screen');
     }
     return resultRoot;
   }
@@ -1458,12 +1730,24 @@ export class ClassicGameplayController extends Component {
     if (
       root === null
       || !isValid(root, true)
-      || root.parent !== this.node
+      || root.parent === null
+      || this.screenPlacement?.currentScreen !== root
       || !root.activeInHierarchy
     ) {
       throw new Error('Recovered Classic presentation requires its active mode root');
     }
     return root;
+  }
+
+  private isClassicGameplayActive(): boolean {
+    const root = this.classicModeRoot;
+    return (
+      root !== null
+      && isValid(root, true)
+      && root.parent !== null
+      && this.screenPlacement?.currentScreen === root
+      && root.activeInHierarchy
+    );
   }
 
   private requireWorldPresentationRoot(): Node {
@@ -1513,6 +1797,20 @@ function createRecoveredPresenterRoot(parent: Node, name: string): Node {
   node.layer = parent.layer;
   node.setParent(parent);
   return node;
+}
+
+function assertScreenPlacementPort(
+  screenPlacement: ClassicScreenPlacementPort,
+): void {
+  if (
+    screenPlacement === null
+    || typeof screenPlacement !== 'object'
+    || typeof screenPlacement.attachCurrentScreen !== 'function'
+    || typeof screenPlacement.detachCurrentScreen !== 'function'
+    || typeof screenPlacement.replaceCurrentScreen !== 'function'
+  ) {
+    throw new TypeError('Classic screen placement must implement the current-screen port');
+  }
 }
 
 function requireSpawnCommands(

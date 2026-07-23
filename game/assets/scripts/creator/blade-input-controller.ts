@@ -33,25 +33,49 @@ export interface ClassicBladeEndedEvent {
   readonly touchId: number;
 }
 
-/** Scene-wide input adapter for the recovered four-slot blade tracker. */
+/** Explicitly activated input adapter for the recovered four-slot Classic blade tracker. */
 @ccclass('BladeInputController')
 export class BladeInputController extends Component {
   private tracks = new BladeTracks();
-  private cutEnabled = true;
+  private cutEnabled = false;
+  private classicLayerActive = false;
 
-  onEnable(): void {
-    input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
-    input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
-    input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
-    input.on(Input.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
+  /** Starts one Classic layer's global touch ownership without duplicating subscriptions. */
+  activateForClassicLayer(): void {
+    if (this.classicLayerActive) {
+      return;
+    }
+
+    this.resetForFreshClassicLayer();
+    this.classicLayerActive = true;
+    try {
+      input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
+      input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+      input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
+      input.on(Input.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
+    } catch (error) {
+      this.deactivateForNonClassicScreen();
+      throw error;
+    }
   }
 
-  onDisable(): void {
+  /** Releases all Classic touch state before a menu, mode screen, Result, or teardown. */
+  deactivateForNonClassicScreen(): void {
+    this.classicLayerActive = false;
     input.off(Input.EventType.TOUCH_START, this.onTouchStart, this);
     input.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
     input.off(Input.EventType.TOUCH_END, this.onTouchEnd, this);
     input.off(Input.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
     this.tracks = new BladeTracks();
+    this.cutEnabled = false;
+  }
+
+  onDisable(): void {
+    this.deactivateForNonClassicScreen();
+  }
+
+  onDestroy(): void {
+    this.deactivateForNonClassicScreen();
   }
 
   setCutEnabled(enabled: boolean): void {
@@ -69,6 +93,9 @@ export class BladeInputController extends Component {
   }
 
   private readonly onTouchStart = (event: EventTouch): void => {
+    if (!this.classicLayerActive) {
+      return;
+    }
     const touchId = event.getID();
     if (touchId === null) {
       return;
@@ -84,6 +111,9 @@ export class BladeInputController extends Component {
   };
 
   private readonly onTouchMove = (event: EventTouch): void => {
+    if (!this.classicLayerActive) {
+      return;
+    }
     const touchId = event.getID();
     if (touchId === null) {
       return;
@@ -108,6 +138,9 @@ export class BladeInputController extends Component {
   };
 
   private finishTouch(event: EventTouch, cancelled: boolean): void {
+    if (!this.classicLayerActive) {
+      return;
+    }
     const touchId = event.getID();
     if (touchId === null) {
       return;
