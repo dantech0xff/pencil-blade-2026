@@ -155,8 +155,8 @@ Direct disassembly of `Settings::SaveData()` `0x00163094` and `Settings::LoadDat
 | Currency | `total_coins` | `2014` | `_total_coins` `0x00482474`; get/set `0x00163ea4`/`0x00163eb4` |
 | Selections | `selected_theme`, `selected_background`, `selected_blade` | `2`, `0`, `0` | `0x00482470`, `0x0048246c`, `0x00482420` |
 | Best scores | `classic_best_1..3`, `crazy_best_1..3`, `gnstyle_best_1..3`, `bird_classic_best_1..3`, `bird_crazy_best_1..3`, `bird_combo_best_1..3` | all `0` | 18 named objects in `0x00482424-0x00482468` |
-| Blade prices | `blade_price_0..17` | `[0,100,200,300,400,500,600,700,800,900,250,1500,2000,2500,2500,2500,2500,5000]` by index | `BladePrice_0` `0x0048241c` through `_17` `0x004823d8` |
-| Background prices | `background_price_0..7` | `[0,500,250,250,2000,2000,2500,4500]` by index | `BackgroundPrice_0` `0x004823d4` through `_7` `0x004823b8` |
+| Blade prices | `blade_price_0..17` | `[0,100,200,300,400,500,600,700,800,900,1000,1500,2000,2500,2500,2500,2500,5000]` by index | `BladePrice_0` `0x0048241c` through `_17` `0x004823d8` |
+| Background prices | `background_price_0..7` | `[0,500,1000,1000,2000,2000,2500,4500]` by index | `BackgroundPrice_0` `0x004823d4` through `_7` `0x004823b8` |
 | Objective progress | `current_objective`, `fruits_cut` | `0`, `0` | `CurrentObjective` `0x004823b4`; `FruitsCut` `0x004822b0` |
 | Options/status | `enable_music`, `enable_effect`, `network_available`, `rated` | `true`, `true`, `false`, `false` | `0x004822ac`, `0x004822ab`, `0x004822aa`, `0x004822a9` |
 
@@ -166,6 +166,60 @@ native `flush`. It deliberately writes `network_available = false`, while Java l
 writes it true only after a connected-network check. `Settings::RefreshNetworkConnection()`
 `0x00163c44` reloads that key with false as its default. This makes the preference a launch
 hand-off/sentinel, not proof of durable connectivity.
+
+### Cosmetic economy and purchase state
+
+The following key/default pairs are recovered directly from `Settings::LoadData`
+`0x00163620`. Key strings are present at native offsets `0x3d1cec-0x3d1e87`.
+
+| Index | Blade key | Blade default | Background key | Background default |
+|---:|---|---:|---|---:|
+| 0 | `blade_price_0` | `0` | `background_price_0` | `0` |
+| 1 | `blade_price_1` | `100` | `background_price_1` | `500` |
+| 2 | `blade_price_2` | `200` | `background_price_2` | `1000` |
+| 3 | `blade_price_3` | `300` | `background_price_3` | `1000` |
+| 4 | `blade_price_4` | `400` | `background_price_4` | `2000` |
+| 5 | `blade_price_5` | `500` | `background_price_5` | `2000` |
+| 6 | `blade_price_6` | `600` | `background_price_6` | `2500` |
+| 7 | `blade_price_7` | `700` | `background_price_7` | `4500` |
+| 8 | `blade_price_8` | `800` | — | — |
+| 9 | `blade_price_9` | `900` | — | — |
+| 10 | `blade_price_10` | `1000` | — | — |
+| 11 | `blade_price_11` | `1500` | — | — |
+| 12 | `blade_price_12` | `2000` | — | — |
+| 13 | `blade_price_13` | `2500` | — | — |
+| 14 | `blade_price_14` | `2500` | — | — |
+| 15 | `blade_price_15` | `2500` | — | — |
+| 16 | `blade_price_16` | `2500` | — | — |
+| 17 | `blade_price_17` | `5000` | — | — |
+
+GNU Binutils 2.27 and LLVM 19.0.1 Thumb disassembly agree on the correction from the
+previously recorded `250` values. At `0x00163636`, `movs r6, #250` is followed at
+`0x0016363a` by `lsls r6, r6, #2`, so `r6` is `1000`, not `250`. `LoadData` then supplies
+that register as the default for `blade_price_10` at `0x001638c4`,
+`background_price_2` at `0x00163aec`, and `background_price_3` at `0x00163b00`.
+
+Recovered purchase flow:
+
+- `OptionsLayer::BuyBladeCallback` `0x0015e9f0` and `BuyBackgroundCallback` `0x0015eb20`
+  obtain the selected item index, require `total_coins >= selected price`, subtract that
+  price, then call the matching `Settings::Purchase*` function.
+- `Settings::PurchaseBlade` `0x00163d98` formats `blade_price_%d`, writes the selected key
+  to integer `0` at `0x00163dc2-0x00163dca`, mirrors `0` into the matching in-memory slot
+  for indices `0..17`, and calls `CCUserDefault::flush` at `0x00163e36-0x00163e3a`.
+- `Settings::PurchaseBackground` `0x00163ce8` does the same for
+  `background_price_%d` at `0x00163d12-0x00163d1a`, mirrors the value for indices `0..7`,
+  and calls `flush` at `0x00163d54-0x00163d58`.
+- The Android integer setter commits each preference synchronously; the subsequent native
+  `flush()` is a no-op on this backend. A subsequent `SaveData` invocation writes the
+  in-memory coin and price state again.
+
+The interpretation of price `0` as the owned/selectable sentinel is inferred from the
+recovered purchase transition and `OptionsLayer::CheckPurchaseItems` `0x0015fc04`, which
+rejects a selected cosmetic when its price is greater than zero. Exact key names, defaults,
+comparisons, writes, and calls above are recovered. Actual purchase execution, lifecycle
+timing of the later bulk save, crash consistency between the immediate price-key commit and
+coin save, and reachability of out-of-range indices remain unknown from static evidence.
 
 Indexed persistence also survives outside the bulk save keys:
 

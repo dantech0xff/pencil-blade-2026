@@ -116,6 +116,38 @@ export const CLASSIC_INITIAL_SELECTED_BLADE = 0 as const;
 export const CLASSIC_MAX_SELECTED_THEME = 9 as const;
 export const CLASSIC_MAX_SELECTED_BACKGROUND = 8 as const;
 export const CLASSIC_MAX_SELECTED_BLADE = 17 as const;
+export const CLASSIC_BLADE_PRICE_COUNT = 18 as const;
+export const CLASSIC_BACKGROUND_PRICE_COUNT = 8 as const;
+export const CLASSIC_INITIAL_BLADE_PRICES = Object.freeze([
+  0,
+  100,
+  200,
+  300,
+  400,
+  500,
+  600,
+  700,
+  800,
+  900,
+  1000,
+  1500,
+  2000,
+  2500,
+  2500,
+  2500,
+  2500,
+  5000,
+] as const);
+export const CLASSIC_INITIAL_BACKGROUND_PRICES = Object.freeze([
+  0,
+  500,
+  1000,
+  1000,
+  2000,
+  2000,
+  2500,
+  4500,
+] as const);
 export const CLASSIC_MODE_UNLOCK_INDICES = Object.freeze([1, 2, 4, 5] as const);
 
 export type ClassicModeUnlockIndex = typeof CLASSIC_MODE_UNLOCK_INDICES[number];
@@ -149,14 +181,27 @@ export interface ClassicTotalCoinsAdjustment {
   readonly previousTotalCoins: number;
 }
 
+export interface ClassicCosmeticPurchase {
+  readonly changed: boolean;
+  readonly index: number;
+  readonly nextPrice: 0;
+  readonly previousPrice: number;
+}
+
+export interface ClassicSettingsLoadRecovery {
+  readonly failure: Error | null;
+  readonly state: ClassicSettingsState;
+}
+
 /**
- * Process-lifetime implemented subset of native Settings shared by shell, menus, and gameplay.
- * This is intentionally not the complete recovered 50-integer Settings schema.
+ * Process-lifetime native Settings state shared by shell, menus, and gameplay.
  */
 export class ClassicSettingsState {
+  private readonly backgroundPricesValue: number[];
   private birdClassicLeaderboardValue: ClassicBirdLeaderboard;
   private birdComboLeaderboardValue: ComboBirdLeaderboard;
   private birdCrazyLeaderboardValue: CrazyBirdLeaderboard;
+  private readonly bladePricesValue: number[];
   private crazyLeaderboardValue: CrazyLeaderboard;
   private gnStyleLeaderboardValue: GnStyleLeaderboard;
   private currentObjectiveValue: number;
@@ -177,15 +222,29 @@ export class ClassicSettingsState {
     birdClassicLeaderboard: ClassicBirdLeaderboard,
     birdCrazyLeaderboard: CrazyBirdLeaderboard,
     birdComboLeaderboard: ComboBirdLeaderboard,
+    bladePrices: readonly number[],
+    backgroundPrices: readonly number[],
   ) {
     assertSnapshot(snapshot);
     assertOrderedLeaderboard(gnStyleLeaderboard, 'gnStyleLeaderboard');
     assertOrderedLeaderboard(birdClassicLeaderboard, 'birdClassicLeaderboard');
     assertOrderedLeaderboard(birdCrazyLeaderboard, 'birdCrazyLeaderboard');
     assertOrderedLeaderboard(birdComboLeaderboard, 'birdComboLeaderboard');
+    assertCosmeticPrices(
+      bladePrices,
+      CLASSIC_BLADE_PRICE_COUNT,
+      'bladePrices',
+    );
+    assertCosmeticPrices(
+      backgroundPrices,
+      CLASSIC_BACKGROUND_PRICE_COUNT,
+      'backgroundPrices',
+    );
+    this.backgroundPricesValue = [...backgroundPrices];
     this.birdClassicLeaderboardValue = freezeLeaderboard(birdClassicLeaderboard);
     this.birdCrazyLeaderboardValue = freezeLeaderboard(birdCrazyLeaderboard);
     this.birdComboLeaderboardValue = freezeLeaderboard(birdComboLeaderboard);
+    this.bladePricesValue = [...bladePrices];
     this.crazyLeaderboardValue = freezeLeaderboard(snapshot.crazyLeaderboard);
     this.gnStyleLeaderboardValue = freezeLeaderboard(gnStyleLeaderboard);
     this.currentObjectiveValue = snapshot.currentObjective;
@@ -221,12 +280,14 @@ export class ClassicSettingsState {
       CLASSIC_BIRD_INITIAL_LEADERBOARD,
       CRAZY_BIRD_INITIAL_LEADERBOARD,
       COMBO_BIRD_INITIAL_LEADERBOARD,
+      CLASSIC_INITIAL_BLADE_PRICES,
+      CLASSIC_INITIAL_BACKGROUND_PRICES,
     );
   }
 
   static load(port: ClassicInt32PreferencePort): ClassicSettingsState {
     assertPort(port);
-    // Recovered relative order of this implemented subset; omitted Settings fields stay omitted.
+    // Exact recovered SaveData/LoadData order for all 50 integers and four booleans.
     const totalCoins = port.readInt32(
       CLASSIC_TOTAL_COINS_STORAGE_KEY,
       CLASSIC_INITIAL_TOTAL_COINS,
@@ -261,6 +322,12 @@ export class ClassicSettingsState {
     const birdComboFirst = port.readInt32(COMBO_BIRD_BEST_1_STORAGE_KEY, 0);
     const birdComboSecond = port.readInt32(COMBO_BIRD_BEST_2_STORAGE_KEY, 0);
     const birdComboThird = port.readInt32(COMBO_BIRD_BEST_3_STORAGE_KEY, 0);
+    const bladePrices = CLASSIC_INITIAL_BLADE_PRICES.map((defaultPrice, index) => (
+      port.readInt32(classicBladePriceStorageKey(index), defaultPrice)
+    ));
+    const backgroundPrices = CLASSIC_INITIAL_BACKGROUND_PRICES.map((defaultPrice, index) => (
+      port.readInt32(classicBackgroundPriceStorageKey(index), defaultPrice)
+    ));
     const currentObjective = port.readInt32(OBJECTIVES_CURRENT_STORAGE_KEY, 0);
     const fruitsCut = port.readInt32(OBJECTIVES_FRUITS_CUT_STORAGE_KEY, 0);
     const musicEnabled = port.readBoolean(CLASSIC_MUSIC_ENABLED_STORAGE_KEY, true);
@@ -306,7 +373,28 @@ export class ClassicSettingsState {
         second: birdComboSecond,
         third: birdComboThird,
       }),
+      bladePrices,
+      backgroundPrices,
     );
+  }
+
+  /**
+   * Loads every field in native order while recovering only invalid fields.
+   * Score entries recover in rank order so the retained table always remains ordered.
+   * The first recovery remains diagnostic so the runtime can disable writes for the process.
+   */
+  static loadRecovering(port: ClassicInt32PreferencePort): ClassicSettingsLoadRecovery {
+    assertPort(port);
+    let firstFailure: Error | null = null;
+    const recoveringPort = new RecoveringClassicPreferencePort(port, (failure) => {
+      firstFailure ??= failure;
+    });
+    const state = ClassicSettingsState.load(recoveringPort);
+    return Object.freeze({ failure: firstFailure, state });
+  }
+
+  get backgroundPrices(): readonly number[] {
+    return Object.freeze([...this.backgroundPricesValue]);
   }
 
   get birdClassicLeaderboard(): ClassicBirdLeaderboard {
@@ -319,6 +407,10 @@ export class ClassicSettingsState {
 
   get birdComboLeaderboard(): ComboBirdLeaderboard {
     return freezeLeaderboard(this.birdComboLeaderboardValue);
+  }
+
+  get bladePrices(): readonly number[] {
+    return Object.freeze([...this.bladePricesValue]);
   }
 
   get gnStyleLeaderboard(): GnStyleLeaderboard {
@@ -374,6 +466,26 @@ export class ClassicSettingsState {
   setSelectedBlade(selectedBlade: number): void {
     assertSelectionIndex(selectedBlade, CLASSIC_MAX_SELECTED_BLADE, 'selectedBlade');
     this.selectedBladeValue = selectedBlade;
+  }
+
+  bladePriceAt(index: number): number {
+    assertCosmeticIndex(index, CLASSIC_BLADE_PRICE_COUNT, 'blade price index');
+    return this.bladePricesValue[index];
+  }
+
+  backgroundPriceAt(index: number): number {
+    assertCosmeticIndex(index, CLASSIC_BACKGROUND_PRICE_COUNT, 'background price index');
+    return this.backgroundPricesValue[index];
+  }
+
+  markBladePurchased(index: number): ClassicCosmeticPurchase {
+    assertCosmeticIndex(index, CLASSIC_BLADE_PRICE_COUNT, 'blade price index');
+    return markCosmeticPurchased(this.bladePricesValue, index);
+  }
+
+  markBackgroundPurchased(index: number): ClassicCosmeticPurchase {
+    assertCosmeticIndex(index, CLASSIC_BACKGROUND_PRICE_COUNT, 'background price index');
+    return markCosmeticPurchased(this.backgroundPricesValue, index);
   }
 
   /** Adds a signed delta in memory and rejects overflow before mutating state. */
@@ -518,7 +630,7 @@ export class ClassicSettingsState {
     return award;
   }
 
-  /** Persists only the implemented subset in recovered relative SaveData order. */
+  /** Persists the complete recovered 50-integer Settings schema and four booleans. */
   save(port: ClassicInt32PreferencePort): void {
     assertPort(port);
     port.writeInt32(CLASSIC_TOTAL_COINS_STORAGE_KEY, this.totalCoinsValue);
@@ -579,6 +691,15 @@ export class ClassicSettingsState {
       COMBO_BIRD_BEST_3_STORAGE_KEY,
       this.birdComboLeaderboardValue.third,
     );
+    for (let index = 0; index < this.bladePricesValue.length; index += 1) {
+      port.writeInt32(classicBladePriceStorageKey(index), this.bladePricesValue[index]);
+    }
+    for (let index = 0; index < this.backgroundPricesValue.length; index += 1) {
+      port.writeInt32(
+        classicBackgroundPriceStorageKey(index),
+        this.backgroundPricesValue[index],
+      );
+    }
     port.writeInt32(OBJECTIVES_CURRENT_STORAGE_KEY, this.currentObjectiveValue);
     port.writeInt32(OBJECTIVES_FRUITS_CUT_STORAGE_KEY, this.fruitsCutValue);
     port.writeBoolean(CLASSIC_MUSIC_ENABLED_STORAGE_KEY, this.musicEnabledValue);
@@ -587,6 +708,109 @@ export class ClassicSettingsState {
     port.writeBoolean(CLASSIC_NETWORK_AVAILABLE_STORAGE_KEY, false);
     port.writeBoolean(CLASSIC_RATED_STORAGE_KEY, this.ratedValue);
   }
+}
+
+class RecoveringClassicPreferencePort implements ClassicInt32PreferencePort {
+  private readonly leaderboardPreviousValues = new Map<string, number>();
+  private readonly onFailure: (failure: Error) => void;
+  private readonly port: ClassicInt32PreferencePort;
+
+  constructor(
+    port: ClassicInt32PreferencePort,
+    onFailure: (failure: Error) => void,
+  ) {
+    this.onFailure = onFailure;
+    this.port = port;
+  }
+
+  readInt32(key: string, defaultValue: number): number {
+    try {
+      const value = this.port.readInt32(key, defaultValue);
+      assertSignedInt32(value, key);
+      this.validateAndTrackInt32(key, value);
+      return value;
+    } catch (error) {
+      this.onFailure(normalizeError(error, `Classic setting ${key} load failed`));
+      this.validateAndTrackInt32(key, defaultValue);
+      return defaultValue;
+    }
+  }
+
+  writeInt32(key: string, value: number): void {
+    this.port.writeInt32(key, value);
+  }
+
+  readBoolean(key: string, defaultValue: boolean): boolean {
+    try {
+      const value = this.port.readBoolean(key, defaultValue);
+      assertBoolean(value, key);
+      return value;
+    } catch (error) {
+      this.onFailure(normalizeError(error, `Classic setting ${key} load failed`));
+      return defaultValue;
+    }
+  }
+
+  writeBoolean(key: string, value: boolean): void {
+    this.port.writeBoolean(key, value);
+  }
+
+  private validateAndTrackInt32(key: string, value: number): void {
+    switch (key) {
+      case CLASSIC_SELECTED_THEME_STORAGE_KEY:
+        assertSelectionIndex(value, CLASSIC_MAX_SELECTED_THEME, 'selectedTheme');
+        return;
+      case CLASSIC_SELECTED_BACKGROUND_STORAGE_KEY:
+        assertSelectionIndex(
+          value,
+          CLASSIC_MAX_SELECTED_BACKGROUND,
+          'selectedBackground',
+        );
+        return;
+      case CLASSIC_SELECTED_BLADE_STORAGE_KEY:
+        assertSelectionIndex(value, CLASSIC_MAX_SELECTED_BLADE, 'selectedBlade');
+        return;
+      case OBJECTIVES_CURRENT_STORAGE_KEY:
+        assertCurrentObjective(value, false);
+        return;
+      default:
+        break;
+    }
+
+    if (
+      key.startsWith('blade_price_')
+      || key.startsWith('background_price_')
+    ) {
+      if (value < 0) {
+        throw new RangeError(`${key} must be a non-negative signed 32-bit integer`);
+      }
+      return;
+    }
+
+    const leaderboardMatch = /^(.*)_best_([123])$/.exec(key);
+    if (leaderboardMatch === null) {
+      return;
+    }
+    const group = leaderboardMatch[1];
+    const rank = Number(leaderboardMatch[2]);
+    const previous = rank === 1
+      ? Number.POSITIVE_INFINITY
+      : this.leaderboardPreviousValues.get(group);
+    if (previous === undefined || value > previous) {
+      throw new RangeError(`Classic settings ${group} leaderboard must remain ordered`);
+    }
+    this.leaderboardPreviousValues.set(group, value);
+  }
+}
+
+export function classicBladePriceStorageKey(index: number): string {
+  assertCosmeticIndex(index, CLASSIC_BLADE_PRICE_COUNT, 'blade price index');
+  return `blade_price_${index}`;
+}
+
+export function classicBackgroundPriceStorageKey(index: number): string {
+  assertCosmeticIndex(index, CLASSIC_BACKGROUND_PRICE_COUNT, 'background price index');
+  return `background_price_${index}`;
 }
 
 export function classicModeUnlockStorageKey(modeIndex: number): string {
@@ -656,6 +880,28 @@ function assertBoolean(value: unknown, label: string): asserts value is boolean 
   }
 }
 
+function assertCosmeticIndex(value: number, count: number, label: string): void {
+  if (!Number.isInteger(value) || value < 0 || value >= count) {
+    throw new RangeError(`${label} must be an integer index from 0 through ${count - 1}`);
+  }
+}
+
+function assertCosmeticPrices(
+  values: readonly number[],
+  count: number,
+  label: string,
+): void {
+  if (!Array.isArray(values) || values.length !== count) {
+    throw new RangeError(`${label} must contain exactly ${count} prices`);
+  }
+  for (const price of values) {
+    assertSignedInt32(price, `${label} price`);
+    if (price < 0) {
+      throw new RangeError(`${label} prices must be non-negative`);
+    }
+  }
+}
+
 function assertSelectionIndex(value: number, maximum: number, label: string): void {
   if (!Number.isInteger(value) || value < 0 || value > maximum) {
     throw new RangeError(`${label} must be an integer index from 0 through ${maximum}`);
@@ -685,6 +931,27 @@ function freezeLeaderboard<T extends ClassicLeaderboard>(value: T): T {
     second: value.second,
     third: value.third,
   }) as T;
+}
+
+function markCosmeticPurchased(
+  prices: number[],
+  index: number,
+): ClassicCosmeticPurchase {
+  const previousPrice = prices[index];
+  const changed = previousPrice !== 0;
+  if (changed) {
+    prices[index] = 0;
+  }
+  return Object.freeze({
+    changed,
+    index,
+    nextPrice: 0,
+    previousPrice,
+  });
+}
+
+function normalizeError(error: unknown, fallbackMessage: string): Error {
+  return error instanceof Error ? error : new Error(`${fallbackMessage}: ${String(error)}`);
 }
 
 function assertOrderedLeaderboard(

@@ -36,6 +36,10 @@ const {
   GN_STYLE_BEST_2_STORAGE_KEY,
   GN_STYLE_BEST_3_STORAGE_KEY,
   CLASSIC_EFFECTS_ENABLED_STORAGE_KEY,
+  CLASSIC_BACKGROUND_PRICE_COUNT,
+  CLASSIC_BLADE_PRICE_COUNT,
+  CLASSIC_INITIAL_BACKGROUND_PRICES,
+  CLASSIC_INITIAL_BLADE_PRICES,
   CLASSIC_MODE_UNLOCK_INDICES,
   CLASSIC_MUSIC_ENABLED_STORAGE_KEY,
   CLASSIC_NETWORK_AVAILABLE_STORAGE_KEY,
@@ -50,6 +54,8 @@ const {
   OBJECTIVES_CURRENT_STORAGE_KEY,
   OBJECTIVES_FRUITS_CUT_STORAGE_KEY,
   ClassicSettingsState,
+  classicBackgroundPriceStorageKey,
+  classicBladePriceStorageKey,
   classicModeUnlockStorageKey,
 } = await import('../../../game/assets/scripts/domain/classic-settings-state.ts');
 
@@ -106,6 +112,12 @@ const RESTORATION_READS = [
   [COMBO_BIRD_BEST_1_STORAGE_KEY, 0],
   [COMBO_BIRD_BEST_2_STORAGE_KEY, 0],
   [COMBO_BIRD_BEST_3_STORAGE_KEY, 0],
+  ...CLASSIC_INITIAL_BLADE_PRICES.map((defaultPrice, index) => (
+    [classicBladePriceStorageKey(index), defaultPrice] as const
+  )),
+  ...CLASSIC_INITIAL_BACKGROUND_PRICES.map((defaultPrice, index) => (
+    [classicBackgroundPriceStorageKey(index), defaultPrice] as const
+  )),
   [OBJECTIVES_CURRENT_STORAGE_KEY, 0],
   [OBJECTIVES_FRUITS_CUT_STORAGE_KEY, 0],
   [CLASSIC_MUSIC_ENABLED_STORAGE_KEY, true],
@@ -140,7 +152,20 @@ test('Classic settings load exact keys and restoration defaults in recovered rel
   assert.equal(GN_STYLE_BEST_1_STORAGE_KEY, 'gnstyle_best_1');
   assert.equal(GN_STYLE_BEST_2_STORAGE_KEY, 'gnstyle_best_2');
   assert.equal(GN_STYLE_BEST_3_STORAGE_KEY, 'gnstyle_best_3');
+  assert.equal(CLASSIC_BLADE_PRICE_COUNT, 18);
+  assert.equal(CLASSIC_BACKGROUND_PRICE_COUNT, 8);
+  assert.deepEqual(CLASSIC_INITIAL_BLADE_PRICES, [
+    0, 100, 200, 300, 400, 500, 600, 700, 800,
+    900, 1000, 1500, 2000, 2500, 2500, 2500, 2500, 5000,
+  ]);
+  assert.deepEqual(CLASSIC_INITIAL_BACKGROUND_PRICES, [
+    0, 500, 1000, 1000, 2000, 2000, 2500, 4500,
+  ]);
+  assert.equal(Object.isFrozen(CLASSIC_INITIAL_BLADE_PRICES), true);
+  assert.equal(Object.isFrozen(CLASSIC_INITIAL_BACKGROUND_PRICES), true);
   assert.deepEqual(port.reads, RESTORATION_READS);
+  assert.equal(port.reads.filter(([, defaultValue]) => typeof defaultValue === 'number').length, 50);
+  assert.equal(port.reads.filter(([, defaultValue]) => typeof defaultValue === 'boolean').length, 4);
   assert.deepEqual(state.snapshot, {
     crazyLeaderboard: { first: 0, second: 0, third: 0 },
     currentObjective: 0,
@@ -158,6 +183,10 @@ test('Classic settings load exact keys and restoration defaults in recovered rel
   assert.equal(Object.isFrozen(state.snapshot), true);
   assert.equal(Object.isFrozen(state.snapshot.crazyLeaderboard), true);
   assert.equal(Object.isFrozen(state.snapshot.leaderboard), true);
+  assert.deepEqual(state.bladePrices, CLASSIC_INITIAL_BLADE_PRICES);
+  assert.deepEqual(state.backgroundPrices, CLASSIC_INITIAL_BACKGROUND_PRICES);
+  assert.equal(Object.isFrozen(state.bladePrices), true);
+  assert.equal(Object.isFrozen(state.backgroundPrices), true);
   assert.deepEqual(state.birdClassicLeaderboard, {
     first: 0,
     second: 0,
@@ -184,6 +213,45 @@ test('Classic settings load exact keys and restoration defaults in recovered rel
   assert.equal(Object.isFrozen(state.gnStyleLeaderboard), true);
 });
 
+test('recovering load retains valid fields and defaults only invalid ordered values', () => {
+  const recovery = ClassicSettingsState.loadRecovering(new RecordingPort({
+    [CLASSIC_TOTAL_COINS_STORAGE_KEY]: 0,
+    [CLASSIC_BEST_1_STORAGE_KEY]: 10,
+    [CLASSIC_BEST_2_STORAGE_KEY]: 30,
+    [CLASSIC_BEST_3_STORAGE_KEY]: 20,
+    [classicBladePriceStorageKey(10)]: -1,
+    [classicBackgroundPriceStorageKey(7)]: 0,
+  }));
+
+  assert.equal(Object.isFrozen(recovery), true);
+  assert.match(recovery.failure?.message ?? '', /leaderboard must remain ordered/);
+  assert.equal(recovery.state.snapshot.totalCoins, 0);
+  assert.deepEqual(recovery.state.snapshot.leaderboard, {
+    first: 10,
+    second: 0,
+    third: 0,
+  });
+  assert.equal(recovery.state.bladePriceAt(10), 1000);
+  assert.equal(recovery.state.backgroundPriceAt(7), 0);
+});
+
+test('recovering load preserves ordered signed-int32 leaderboards', () => {
+  const recovery = ClassicSettingsState.loadRecovering(new RecordingPort({
+    [CLASSIC_TOTAL_COINS_STORAGE_KEY]: 0,
+    [CRAZY_BEST_1_STORAGE_KEY]: -1,
+    [CRAZY_BEST_2_STORAGE_KEY]: -2,
+    [CRAZY_BEST_3_STORAGE_KEY]: -3,
+  }));
+
+  assert.equal(recovery.failure, null);
+  assert.equal(recovery.state.snapshot.totalCoins, 0);
+  assert.deepEqual(recovery.state.snapshot.crazyLeaderboard, {
+    first: -1,
+    second: -2,
+    third: -3,
+  });
+});
+
 test('persisted total coins and rankings override the restoration defaults', () => {
   const state = ClassicSettingsState.load(new RecordingPort({
     [CLASSIC_TOTAL_COINS_STORAGE_KEY]: 900,
@@ -205,6 +273,10 @@ test('persisted total coins and rankings override the restoration defaults', () 
     [COMBO_BIRD_BEST_1_STORAGE_KEY]: 3_000_000,
     [COMBO_BIRD_BEST_2_STORAGE_KEY]: 2_000_000,
     [COMBO_BIRD_BEST_3_STORAGE_KEY]: 1_000_000,
+    [classicBladePriceStorageKey(1)]: 0,
+    [classicBladePriceStorageKey(17)]: 4321,
+    [classicBackgroundPriceStorageKey(1)]: 0,
+    [classicBackgroundPriceStorageKey(7)]: 3210,
     [OBJECTIVES_CURRENT_STORAGE_KEY]: 13,
     [OBJECTIVES_FRUITS_CUT_STORAGE_KEY]: 2468,
     [CLASSIC_EFFECTS_ENABLED_STORAGE_KEY]: false,
@@ -254,6 +326,10 @@ test('persisted total coins and rankings override the restoration defaults', () 
     achievedRank: 2,
     leaderboard: { first: 3_000_000, second: 2_500_000, third: 2_000_000 },
   });
+  assert.equal(state.bladePriceAt(1), 0);
+  assert.equal(state.bladePriceAt(17), 4321);
+  assert.equal(state.backgroundPriceAt(1), 0);
+  assert.equal(state.backgroundPriceAt(7), 3210);
 });
 
 test('result mutations remain memory-only until explicit save checkpoint', () => {
@@ -291,6 +367,12 @@ test('result mutations remain memory-only until explicit save checkpoint', () =>
     [COMBO_BIRD_BEST_1_STORAGE_KEY, 0],
     [COMBO_BIRD_BEST_2_STORAGE_KEY, 0],
     [COMBO_BIRD_BEST_3_STORAGE_KEY, 0],
+    ...CLASSIC_INITIAL_BLADE_PRICES.map((price, index) => (
+      [classicBladePriceStorageKey(index), price] as const
+    )),
+    ...CLASSIC_INITIAL_BACKGROUND_PRICES.map((price, index) => (
+      [classicBackgroundPriceStorageKey(index), price] as const
+    )),
     [OBJECTIVES_CURRENT_STORAGE_KEY, 0],
     [OBJECTIVES_FRUITS_CUT_STORAGE_KEY, 0],
     [CLASSIC_MUSIC_ENABLED_STORAGE_KEY, true],
@@ -298,6 +380,55 @@ test('result mutations remain memory-only until explicit save checkpoint', () =>
     [CLASSIC_NETWORK_AVAILABLE_STORAGE_KEY, false],
     [CLASSIC_RATED_STORAGE_KEY, false],
   ]);
+});
+
+test('cosmetic price keys, purchases, and outward tables are exact and bounded', () => {
+  assert.equal(classicBladePriceStorageKey(0), 'blade_price_0');
+  assert.equal(classicBladePriceStorageKey(17), 'blade_price_17');
+  assert.equal(classicBackgroundPriceStorageKey(0), 'background_price_0');
+  assert.equal(classicBackgroundPriceStorageKey(7), 'background_price_7');
+
+  for (const invalid of [-1, 18, 1.5, Number.NaN]) {
+    assert.throws(() => classicBladePriceStorageKey(invalid), /blade price index/);
+  }
+  for (const invalid of [-1, 8, 1.5, Number.NaN]) {
+    assert.throws(() => classicBackgroundPriceStorageKey(invalid), /background price index/);
+  }
+
+  const state = ClassicSettingsState.defaults();
+  const untouchedBackgrounds = state.backgroundPrices;
+  const untouchedBlades = state.bladePrices;
+  assert.deepEqual(state.markBladePurchased(10), {
+    changed: true,
+    index: 10,
+    nextPrice: 0,
+    previousPrice: 1000,
+  });
+  assert.equal(state.bladePriceAt(10), 0);
+  assert.equal(untouchedBlades[10], 1000);
+  assert.deepEqual(state.markBladePurchased(10), {
+    changed: false,
+    index: 10,
+    nextPrice: 0,
+    previousPrice: 0,
+  });
+  assert.deepEqual(state.markBackgroundPurchased(7), {
+    changed: true,
+    index: 7,
+    nextPrice: 0,
+    previousPrice: 4500,
+  });
+  assert.equal(state.backgroundPriceAt(7), 0);
+  assert.equal(untouchedBackgrounds[7], 4500);
+
+  const beforeInvalid = {
+    backgrounds: state.backgroundPrices,
+    blades: state.bladePrices,
+  };
+  assert.throws(() => state.markBladePurchased(18), /blade price index/);
+  assert.throws(() => state.markBackgroundPurchased(8), /background price index/);
+  assert.deepEqual(state.backgroundPrices, beforeInvalid.backgrounds);
+  assert.deepEqual(state.bladePrices, beforeInvalid.blades);
 });
 
 test('menu mutations and mode spend stay validated and memory-only until bulk save', () => {
@@ -601,6 +732,18 @@ test('settings reject invalid ports, values, and unordered persisted rankings', 
       message,
     );
   }
+  assert.throws(
+    () => ClassicSettingsState.load(new RecordingPort({
+      [classicBladePriceStorageKey(1)]: -1,
+    })),
+    /bladePrices prices must be non-negative/,
+  );
+  assert.throws(
+    () => ClassicSettingsState.load(new RecordingPort({
+      [classicBackgroundPriceStorageKey(1)]: 0x8000_0000,
+    })),
+    /backgroundPrices price must be a signed 32-bit integer/,
+  );
 
   const state = ClassicSettingsState.defaults();
   const before = state.snapshot;

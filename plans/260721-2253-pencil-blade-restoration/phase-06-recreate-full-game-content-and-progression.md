@@ -25,7 +25,11 @@ graph, objectives, pause, result ranking/reward, and transactional replay/retry/
 Its keys are `bird_combo_best_1..3` and its reward factor is float32 `0.8`. GN Style mode `2`
 owns the standard BasicBlade, `150`-second Free/Wave/Concurrent ordinary-fruit graph, exact
 `2.60`-second intro, dedicated non-looping music, 439-parent particle choreography, three-second
-late-cut tail, `gnstyle_best_1..3`, float32 `0.6` reward, and transactional navigation.
+late-cut tail, `gnstyle_best_1..3`, float32 `0.6` reward, and transactional navigation. The
+implemented Settings slice is now exact: 50 integers, 4 booleans, 18 blade prices, 8 background
+prices, price `0` ownership persistence, field-isolated totalCoins recovery, and write-disable
+on any load recovery. Main Menu exit-save and app-hide save are closed; first-launch `flag`
+bootstrap and the remaining cosmetic presentation consumers stay open.
 
 ## Context Links
 
@@ -40,6 +44,7 @@ late-cut tail, `gnstyle_best_1..3`, float32 `0.6` reward, and transactional navi
 - [Combo Bird production checkpoint](./reports/implementer-2026-07-24-combo-bird-runtime.md)
 - [Combo Bird final verification](./reports/tester-2026-07-24-combo-bird-final-checkpoint.md)
 - [GN Style native contract](./reports/researcher-2026-07-24-gn-style-native-contract.md)
+- [Cosmetic economy native contract](./reports/researcher-2026-07-24-cosmetic-economy-native-contract.md)
 - [GN Style resource map](./reports/researcher-2026-07-24-gn-style-resource-map.md)
 - [GN Style production checkpoint](./reports/implementer-2026-07-24-gn-style-runtime.md)
 - [GN Style final verification](./reports/tester-2026-07-24-gn-style-final-checkpoint.md)
@@ -106,7 +111,7 @@ save schema and include reproducible fixtures for progression states.
 
 Current certification checkpoint:
 
-- Full deterministic vertical slice: `1151/1151` final clean checkpoint
+- Full deterministic vertical slice: `1157/1157` final clean checkpoint
 - Resource/build/catalog tests: `43/43`
 - Static inventory/source/staging/archive workflow: `14/14` in `217s`
 - Reconstruction policy: positive checkpoint and `4/4` negative fixtures
@@ -118,7 +123,8 @@ Current certification checkpoint:
   intro -> live fruit cuts/score/particles -> Pause/Resume/Replay -> Pause Quit -> Main Menu ->
   repeated entry -> natural Time Up -> Result Retry -> Result Menu. DevTools records zero
   application/runtime errors; one unrelated Chrome extension error is outside the game.
-- Missing or corrupt save still falls back to `999999` coins; a valid persisted balance wins
+- Missing or corrupt coin storage still falls back to `999999` coins; a valid persisted balance
+  wins, including `0`
 
 ## Todo List
 

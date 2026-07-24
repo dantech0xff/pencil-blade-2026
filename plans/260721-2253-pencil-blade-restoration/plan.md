@@ -95,12 +95,15 @@ Verified starting point:
   The integrated continuation now adds the exact delayed 100-sprite result burst, rotating
   effect/coin/badge/bonus-label tree, signed-int32 coin accounting, and process-owned storage
   for `total_coins`, `classic_best_1/2/3`, and `enable_effect` in recovered order with default
-  effect `true`. App-hide saves are active; Retry mutations remain memory-only, and unreadable
-  target storage recovers to exact defaults with diagnostics while writes stay disabled for
-  that process to prevent progression loss. The current Preview attempt exercises the result boundary and a same-
-  parent Result->Retry cycle at the captured parent without a reload or error overlay. Result-to-
-  Main Menu replacement is now implemented transactionally. Main Menu exit-save and full first-
-  launch Settings initialization remain open rather than being approximated.
+  effect `true`. The settings runtime is now exact for the implemented slice: 50 integers and
+  4 booleans, 18 blade price keys/defaults, 8 background price keys/defaults, price `0`
+  sentinel ownership, and storage-first idempotent purchase writes. App-hide saves are active;
+  Retry mutations remain memory-only, and unreadable target storage recovers to exact defaults
+  with diagnostics while writes stay disabled for that process to prevent progression loss. The
+  current Preview attempt exercises the result boundary and a same-parent Result->Retry cycle at
+  the captured parent without a reload or error overlay. Result-to-Main Menu replacement is now
+  implemented transactionally. Main Menu exit-save is implemented; the first-launch `flag`
+  bootstrap remains open.
   Phase 5A now prioritizes fidelity gaps visible in the playable slice. The default selected
   BasicBlade has a statically recovered four-slot lifecycle, exact `blade0.png` resource,
   ten-point limit, frame-based disposal, and textured triangle-strip geometry; its exact default
@@ -140,7 +143,7 @@ Verified starting point:
   `2.60`-second intro, non-looping `GangnamStyle.mp3`, all 439 source-ordered particle parents,
   the three-second late-cut Time Up tail, objectives `6`/`2`, `gnstyle_best_1..3`, float32
   `0.6` reward, and transactional Replay/Retry/Quit/Menu lifecycles.
-  The current checkpoint reaches `1151/1151` full vertical-slice tests and `43/43`
+  The current checkpoint reaches `1157/1157` full vertical-slice tests and `43/43`
   resource/build/catalog tests. The unchanged
   source/staging/archive inventory remains `14/14` in `217s`; strict Creator TypeScript,
   reconstruction-policy positive plus `4/4` negative fixtures, native static analysis `7/7`,
@@ -152,7 +155,9 @@ Verified starting point:
 - Phase 6 continues after all six production gameplay routes reached their contract and fresh
   Creator Preview gates. The remaining scope is full cosmetics/content, progression and save
   coverage, menu/settings fidelity, global asset-consumer and scene/prefab reconciliation,
-  Android build validation, and release-rights clearance.
+  Android build validation, and release-rights clearance. Main Menu exit-save and app-hide save
+  are closed; first-launch `flag` bootstrap, full options UI, and blade IDs `1`-`17`
+  presentation remain open.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
 
@@ -207,6 +212,7 @@ Verified starting point:
 - [Combo Bird production checkpoint](./reports/implementer-2026-07-24-combo-bird-runtime.md)
 - [Combo Bird final verification](./reports/tester-2026-07-24-combo-bird-final-checkpoint.md)
 - [GN Style native contract](./reports/researcher-2026-07-24-gn-style-native-contract.md)
+- [Cosmetic economy native contract](./reports/researcher-2026-07-24-cosmetic-economy-native-contract.md)
 - [GN Style resource map](./reports/researcher-2026-07-24-gn-style-resource-map.md)
 - [GN Style production checkpoint](./reports/implementer-2026-07-24-gn-style-runtime.md)
 - [GN Style final verification](./reports/tester-2026-07-24-gn-style-final-checkpoint.md)

@@ -3,7 +3,10 @@ import { sys } from 'cc';
 import {
   CLASSIC_RATED_STORAGE_KEY,
   ClassicSettingsState,
+  classicBackgroundPriceStorageKey,
+  classicBladePriceStorageKey,
   classicModeUnlockStorageKey,
+  type ClassicCosmeticPurchase,
   type ClassicInt32PreferencePort,
 } from '../domain/classic-settings-state';
 import {
@@ -92,7 +95,9 @@ export class ClassicSettingsRuntime {
     assertPreferencePort(port);
     this.port = port;
     try {
-      this.state = ClassicSettingsState.load(port);
+      const recovery = ClassicSettingsState.loadRecovering(port);
+      this.state = recovery.state;
+      this.loadFailureValue = recovery.failure;
     } catch (error) {
       this.state = ClassicSettingsState.defaults();
       this.loadFailureValue = normalizeError(error, 'Classic settings load failed');
@@ -107,6 +112,26 @@ export class ClassicSettingsRuntime {
   save(): void {
     this.assertWritesEnabled('save');
     this.state.save(this.port);
+  }
+
+  purchaseBlade(index: number): ClassicCosmeticPurchase {
+    const currentPrice = this.state.bladePriceAt(index);
+    if (currentPrice === 0) {
+      return this.state.markBladePurchased(index);
+    }
+    this.assertWritesEnabled('blade purchase');
+    this.port.writeInt32(classicBladePriceStorageKey(index), 0);
+    return this.state.markBladePurchased(index);
+  }
+
+  purchaseBackground(index: number): ClassicCosmeticPurchase {
+    const currentPrice = this.state.backgroundPriceAt(index);
+    if (currentPrice === 0) {
+      return this.state.markBackgroundPurchased(index);
+    }
+    this.assertWritesEnabled('background purchase');
+    this.port.writeInt32(classicBackgroundPriceStorageKey(index), 0);
+    return this.state.markBackgroundPurchased(index);
   }
 
   createObjectivesManager(

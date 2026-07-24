@@ -26,6 +26,12 @@ const {
   ClassicCreatorInt32PreferencePort,
   ClassicSettingsRuntime,
 } = await import('../../../game/assets/scripts/creator/classic-settings-runtime.ts');
+const {
+  CLASSIC_INITIAL_BACKGROUND_PRICES,
+  CLASSIC_INITIAL_BLADE_PRICES,
+  classicBackgroundPriceStorageKey,
+  classicBladePriceStorageKey,
+} = await import('../../../game/assets/scripts/domain/classic-settings-state.ts');
 
 class MemoryStorage {
   readonly values = new Map<string, string>();
@@ -134,6 +140,18 @@ test('runtime keeps mutations in memory and writes only on save', () => {
   assert.equal(storage.values.get('bird_combo_best_1'), '300000');
   assert.equal(storage.values.get('bird_combo_best_2'), '250000');
   assert.equal(storage.values.get('bird_combo_best_3'), '200000');
+  assert.deepEqual(
+    storage.writes.slice(22, 40),
+    CLASSIC_INITIAL_BLADE_PRICES.map((price, index) => (
+      [classicBladePriceStorageKey(index), String(price)]
+    )),
+  );
+  assert.deepEqual(
+    storage.writes.slice(40, 48),
+    CLASSIC_INITIAL_BACKGROUND_PRICES.map((price, index) => (
+      [classicBackgroundPriceStorageKey(index), String(price)]
+    )),
+  );
   assert.equal(storage.values.get('current_objective'), '13');
   assert.equal(storage.values.get('fruits_cut'), '2468');
   assert.equal(storage.values.get('selected_theme'), '9');
@@ -144,6 +162,69 @@ test('runtime keeps mutations in memory and writes only on save', () => {
   assert.equal(storage.values.get('network_available'), 'false');
   assert.equal(storage.values.get('rated'), 'false');
   assert.equal(runtime.state.snapshot.networkAvailable, true);
+});
+
+test('runtime persists cosmetic ownership before mutating its in-memory price table', () => {
+  const storage = new MemoryStorage();
+  const runtime = new ClassicSettingsRuntime(
+    new ClassicCreatorInt32PreferencePort(storage),
+  );
+
+  assert.deepEqual(runtime.purchaseBlade(10), {
+    changed: true,
+    index: 10,
+    nextPrice: 0,
+    previousPrice: 1000,
+  });
+  assert.equal(storage.values.get('blade_price_10'), '0');
+  assert.equal(runtime.state.bladePriceAt(10), 0);
+  assert.deepEqual(runtime.purchaseBlade(10), {
+    changed: false,
+    index: 10,
+    nextPrice: 0,
+    previousPrice: 0,
+  });
+  assert.deepEqual(runtime.purchaseBackground(7), {
+    changed: true,
+    index: 7,
+    nextPrice: 0,
+    previousPrice: 4500,
+  });
+  assert.equal(storage.values.get('background_price_7'), '0');
+  assert.equal(runtime.state.backgroundPriceAt(7), 0);
+  assert.deepEqual(storage.writes, [
+    ['blade_price_10', '0'],
+    ['background_price_7', '0'],
+  ]);
+
+  const beforeInvalid = {
+    backgrounds: runtime.state.backgroundPrices,
+    blades: runtime.state.bladePrices,
+  };
+  assert.throws(() => runtime.purchaseBlade(18), /blade price index/);
+  assert.throws(() => runtime.purchaseBackground(8), /background price index/);
+  assert.deepEqual(runtime.state.backgroundPrices, beforeInvalid.backgrounds);
+  assert.deepEqual(runtime.state.bladePrices, beforeInvalid.blades);
+  assert.equal(storage.writes.length, 2);
+});
+
+test('failed cosmetic ownership persistence leaves the in-memory price unchanged', () => {
+  const writeFailure = new Error('storage write unavailable');
+  const storage = new MemoryStorage();
+  const port = new ClassicCreatorInt32PreferencePort(storage);
+  const runtime = new ClassicSettingsRuntime({
+    readInt32: port.readInt32.bind(port),
+    readBoolean: port.readBoolean.bind(port),
+    writeBoolean: port.writeBoolean.bind(port),
+    writeInt32() {
+      throw writeFailure;
+    },
+  });
+
+  assert.equal(runtime.state.bladePriceAt(10), 1000);
+  assert.throws(() => runtime.purchaseBlade(10), writeFailure);
+  assert.equal(runtime.state.bladePriceAt(10), 1000);
+  assert.equal(runtime.loadFailure, null);
 });
 
 test('runtime preserves immediate rated and indexed unlock writes while coin changes stay in memory', () => {
@@ -305,7 +386,7 @@ test('Creator preference adapter fails closed on malformed or out-of-range data'
   );
 });
 
-test('runtime recovers corrupt or unreadable target storage to exact defaults', () => {
+test('runtime recovers corrupt fields independently and disables writes', () => {
   const corruptStorage = new MemoryStorage();
   corruptStorage.values.set('total_coins', '3000');
   corruptStorage.values.set('classic_best_1', '30');
@@ -322,15 +403,20 @@ test('runtime recovers corrupt or unreadable target storage to exact defaults', 
     currentObjective: 0,
     effectsEnabled: true,
     fruitsCut: 0,
-    leaderboard: { first: 0, second: 0, third: 0 },
+    leaderboard: { first: 30, second: 20, third: 10 },
     musicEnabled: true,
     networkAvailable: false,
     rated: false,
     selectedBackground: 0,
     selectedBlade: 0,
     selectedTheme: 2,
-    totalCoins: 999_999,
+    totalCoins: 3000,
   });
+  assert.deepEqual(corruptRuntime.state.bladePrices, CLASSIC_INITIAL_BLADE_PRICES);
+  assert.deepEqual(
+    corruptRuntime.state.backgroundPrices,
+    CLASSIC_INITIAL_BACKGROUND_PRICES,
+  );
   assert.deepEqual(corruptRuntime.state.gnStyleLeaderboard, {
     first: 0,
     second: 0,
@@ -397,4 +483,36 @@ test('runtime recovers corrupt or unreadable target storage to exact defaults', 
   assert.match(invalidSelectionRuntime.loadFailure?.message ?? '', /selectedTheme/);
   assert.equal(invalidSelectionRuntime.state.snapshot.selectedTheme, 2);
   assert.throws(() => invalidSelectionRuntime.save(), /save is disabled after load recovery/);
+});
+
+test('valid zero coins survive unrelated corruption while a corrupt coin uses 999999', () => {
+  const unrelatedCorruption = new MemoryStorage();
+  unrelatedCorruption.values.set('total_coins', '0');
+  unrelatedCorruption.values.set('blade_price_10', '01');
+  unrelatedCorruption.values.set('background_price_7', '0');
+  const zeroRuntime = new ClassicSettingsRuntime(
+    new ClassicCreatorInt32PreferencePort(unrelatedCorruption),
+  );
+
+  assert.equal(zeroRuntime.state.snapshot.totalCoins, 0);
+  assert.equal(zeroRuntime.state.bladePriceAt(10), 1000);
+  assert.equal(zeroRuntime.state.backgroundPriceAt(7), 0);
+  assert.match(zeroRuntime.loadFailure?.message ?? '', /canonical decimal int32/);
+  assert.throws(() => zeroRuntime.save(), /disabled after load recovery/);
+  assert.deepEqual(unrelatedCorruption.writes, []);
+
+  const corruptCoin = new MemoryStorage();
+  corruptCoin.values.set('total_coins', '01');
+  const recoveredCoinRuntime = new ClassicSettingsRuntime(
+    new ClassicCreatorInt32PreferencePort(corruptCoin),
+  );
+  assert.equal(recoveredCoinRuntime.state.snapshot.totalCoins, 999_999);
+  assert.match(recoveredCoinRuntime.loadFailure?.message ?? '', /canonical decimal int32/);
+  assert.deepEqual(corruptCoin.writes, []);
+
+  const missingCoinRuntime = new ClassicSettingsRuntime(
+    new ClassicCreatorInt32PreferencePort(new MemoryStorage()),
+  );
+  assert.equal(missingCoinRuntime.state.snapshot.totalCoins, 999_999);
+  assert.equal(missingCoinRuntime.loadFailure, null);
 });

@@ -1,6 +1,6 @@
 # Cocos Creator Architecture Decision
 
-Status: in progress; all six recovered production gameplay routes integrated
+Status: in progress; all six recovered production gameplay routes integrated, settings checkpoint updated
 Date: 2026-07-22
 Updated: 2026-07-24
 
@@ -86,7 +86,12 @@ must not.
   The current route subsets use exact rasters and audio, but global consumer/UUID coverage is
   not complete and the canonical sample-project root remains unresolved. Release rights are
   tracked separately.
-- `tests/reconstruction/vertical-slice/` contains the current `1151/1151`
+- `game/assets/scripts/domain/classic-settings-state.ts` and
+  `game/assets/scripts/creator/classic-settings-runtime.ts` own the recovered bulk Settings
+  shape: 50 integers, 4 booleans, 18 blade prices, 8 background prices, storage-first
+  price-0 purchase transitions, and recovery behavior that disables writes after any load
+  failure.
+- `tests/reconstruction/vertical-slice/` contains the current `1157/1157`
   all-route/menu regression suite.
 - `scripts/audit-creator-build.mjs` contains the post-build archive audit.
 - `game/library/` is generated Creator cache and is not hand-authored gameplay source.
@@ -211,10 +216,15 @@ legacy keys, but no JNI/native compatibility layer is permitted.
 
 The current runtime reads and writes the expanded implemented subset for coins, selections,
 all six route leaderboards, objective state, music/effect flags, network sentinel, and rated
-state in recovered relative order. Indexed Mode Select unlocks use their separate immediate
-keys. Missing or corrupt storage falls back to `999999` coins while a valid persisted balance
-wins. Result mutations remain memory-only until the app-hide save checkpoint. Full
-first-launch Settings and Main Menu exit-save remain open.
+state in recovered relative order. The bulk schema is exact: 50 integers and 4 booleans,
+including 18 blade price keys/defaults and 8 background price keys/defaults. Indexed Mode
+Select unlocks use their separate immediate keys. Price `0` remains the ownership sentinel; the
+storage-first purchase transition is idempotent, writes the selected price key to `0`, and does
+not yet include affordability/coin debit or the Options UI. Field-isolated recovery preserves
+any valid `totalCoins`, including `0`; only missing, corrupt, or unreadable coin storage falls
+back to `999999`, and any recovery disables writes. Result mutations remain memory-only until
+the app-hide save checkpoint. Main Menu exit-save and app-hide save are implemented; the
+first-launch `flag` bootstrap remains open.
 
 ## Verification Gates
 
@@ -233,7 +243,7 @@ first-launch Settings and Main Menu exit-save remain open.
    archive entry, parses exact ZIP records, recurses through bounded nested archives, and
    permits ELF only at the pinned Creator 3.8.8 `libcocos.so` boundary.
 
-Current checkpoint: full vertical slice `1151/1151`, `tests/*.mjs` `43/43`,
+Current checkpoint: full vertical slice `1157/1157`, `tests/*.mjs` `43/43`,
 inventory/source/staging/archive workflow `14/14` in `217s`, reconstruction policy positive
 plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and
 clean diff hygiene. Metadata reports zero structural errors and zero duplicate UUIDs; fidelity
@@ -267,6 +277,8 @@ errors; one unrelated Chrome extension error remains outside the game.
   ranking/objective commit, and cleanup.
 - The canonical sample-project resource manifest/root remains unresolved; presentation
   completion and the `99%` metric both stay blocked on that source.
+- The remaining Settings gap is the first-launch `flag` bootstrap plus the broader options UI;
+  Main Menu exit-save and app-hide save are already closed.
 - BombElectric runs through the memory-safe target adapter, but exact pinned-backend
   contact-count/direction equivalence remains unresolved.
 - Original content rights remain unknown.
@@ -285,5 +297,6 @@ errors; one unrelated Chrome extension error remains outside the game.
 - `../../plans/260721-2253-pencil-blade-restoration/reports/creator-readiness-2026-07-22.md`
 - `../../plans/260721-2253-pencil-blade-restoration/reports/implementer-2026-07-23-crazy-mode-runtime.md`
 - `../../plans/260721-2253-pencil-blade-restoration/reports/implementer-2026-07-24-gn-style-runtime.md`
+- `../../plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-cosmetic-economy-native-contract.md`
 - `../../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-gn-style-final-checkpoint.md`
 - `../../plans/260721-2253-pencil-blade-restoration/reports/reviewer-2026-07-24-gn-style-gameplay-shell.md`
