@@ -31,6 +31,14 @@ import {
 import {
   ComboBirdLifecycleRollbackError,
 } from './combo-bird-scene-controller';
+import {
+  GN_STYLE_PAUSE_QUIT_REQUESTED_EVENT,
+  GN_STYLE_RESULT_MENU_REQUESTED_EVENT,
+  GnStyleGameplayController,
+} from './gn-style-gameplay-controller';
+import {
+  GnStyleLifecycleRollbackError,
+} from './gn-style-scene-controller';
 import { ClassicSceneController } from './classic-scene-controller';
 import {
   CRAZY_BIRD_PAUSE_QUIT_REQUESTED_EVENT,
@@ -86,6 +94,7 @@ export type RecoveredAppShellState =
   | 'crazy'
   | 'destroyed'
   | 'failed'
+  | 'gn-style'
   | 'main-menu'
   | 'mode-select';
 
@@ -138,6 +147,7 @@ interface CapturedCrazyMainMenuNavigationRequest {
  * Every top-level screen swap is transactional; unsupported recovered destinations fail closed.
  */
 @ccclass('RecoveredAppShellController')
+@requireComponent(GnStyleGameplayController)
 @requireComponent(ComboBirdGameplayController)
 @requireComponent(ClassicBirdGameplayController)
 @requireComponent(CrazyGameplayController)
@@ -152,6 +162,7 @@ export class RecoveredAppShellController extends Component {
   private crazyGameplayController: CrazyGameplayController | null = null;
   private destroyedValue = false;
   private gameplayController: ClassicGameplayController | null = null;
+  private gnStyleGameplayController: GnStyleGameplayController | null = null;
   private nonClassicPhysics: NonClassicPhysicsAdapter | null = null;
   private resources: RecoveredAppResources | null = null;
   private sceneController: ClassicSceneController | null = null;
@@ -190,6 +201,11 @@ export class RecoveredAppShellController extends Component {
       this.node,
       ComboBirdGameplayController,
       'ComboBirdGameplayController',
+    );
+    this.gnStyleGameplayController = requireComponentFromNode(
+      this.node,
+      GnStyleGameplayController,
+      'GnStyleGameplayController',
     );
     this.crazyGameplayController = requireComponentFromNode(
       this.node,
@@ -242,6 +258,16 @@ export class RecoveredAppShellController extends Component {
     this.node.on(
       COMBO_BIRD_PAUSE_QUIT_REQUESTED_EVENT,
       this.onComboBirdPauseQuitRequested,
+      this,
+    );
+    this.node.on(
+      GN_STYLE_RESULT_MENU_REQUESTED_EVENT,
+      this.onGnStyleResultMenuRequested,
+      this,
+    );
+    this.node.on(
+      GN_STYLE_PAUSE_QUIT_REQUESTED_EVENT,
+      this.onGnStylePauseQuitRequested,
       this,
     );
     game.on(Game.EVENT_HIDE, this.onApplicationHidden, this);
@@ -308,6 +334,16 @@ export class RecoveredAppShellController extends Component {
       this.onComboBirdPauseQuitRequested,
       this,
     );
+    this.node.off(
+      GN_STYLE_RESULT_MENU_REQUESTED_EVENT,
+      this.onGnStyleResultMenuRequested,
+      this,
+    );
+    this.node.off(
+      GN_STYLE_PAUSE_QUIT_REQUESTED_EVENT,
+      this.onGnStylePauseQuitRequested,
+      this,
+    );
     game.off(Game.EVENT_HIDE, this.onApplicationHidden, this);
   }
 
@@ -357,7 +393,7 @@ export class RecoveredAppShellController extends Component {
     const appliedResolution = sceneController.prepareSceneResolution();
     const viewport = createRecoveredAppViewport(appliedResolution);
 
-    // Classic performs the first bundle load. The three foreground loaders then reuse the
+    // Classic performs the first bundle load. Optional foreground loaders then reuse the
     // registered bundle instead of racing multiple Creator first-load requests.
     await gameplayController.prepareRecoveredRuntime();
     this.assertBootStillCurrent();
@@ -402,6 +438,17 @@ export class RecoveredAppShellController extends Component {
       }
       this.assertBootStillCurrent();
     });
+    // GN Style is the final optional destination. It waits for every preceding supplemental
+    // load to settle before loading its exact resources, TimeManager audio, and dedicated track.
+    const gnStylePreparation = comboBirdPreparation.then(async () => {
+      this.assertBootStillCurrent();
+      try {
+        await this.requireGnStyleGameplayController().prepareGnStyleRuntime();
+      } catch {
+        // All previously prepared destinations remain available when only GN Style fails.
+      }
+      this.assertBootStillCurrent();
+    });
     const [sharedResources, mainMenuResources, modeSelectResources] = await Promise.all([
       loadSharedGameSceneResources(assetTree),
       loadMainMenuResources(assetTree),
@@ -412,6 +459,7 @@ export class RecoveredAppShellController extends Component {
       classicBirdPreparation,
       crazyBirdPreparation,
       comboBirdPreparation,
+      gnStylePreparation,
     ]);
     this.assertBootStillCurrent();
 
@@ -521,6 +569,9 @@ export class RecoveredAppShellController extends Component {
         ),
         onComboBirdRequested: (transaction) => (
           this.transitionModeSelectToComboBird(transaction)
+        ),
+        onGnStyleRequested: (transaction) => (
+          this.transitionModeSelectToGnStyle(transaction)
         ),
         onMainMenuRequested: (transaction) => (
           this.transitionModeSelectToMainMenu(transaction)
@@ -895,6 +946,84 @@ export class RecoveredAppShellController extends Component {
     });
   }
 
+  private transitionModeSelectToGnStyle(
+    transaction: ModeSelectNavigationTransaction,
+  ): boolean {
+    const oldPresenter = this.activeModeSelect;
+    const gnStyle = this.requireGnStyleGameplayController();
+    if (
+      oldPresenter === null
+      || transaction.root !== oldPresenter.root
+      || transaction.destination !== 'GNStyleLayer'
+      || !gnStyle.prepared
+    ) {
+      return false;
+    }
+    return this.runTransition('mode-select', 'gn-style', () => {
+      const sharedScene = this.requireSharedScene();
+      const nonClassicPhysics = this.requireNonClassicPhysics();
+      try {
+        const previous = sharedScene.detachCurrentScreen(oldPresenter.root);
+        if (previous !== oldPresenter.root || !oldPresenter.suspendForTransition()) {
+          throw new Error('Mode Select did not surrender the shared input lease');
+        }
+        nonClassicPhysics.restorePreviousCollisionFilter();
+        gnStyle.activateGnStyleFromAppShell(sharedScene);
+      } catch (error) {
+        const rollbackFailures: unknown[] = [];
+        try {
+          this.restoreModeSelectAfterFailedGnStyleActivation(oldPresenter.root);
+        } catch (rollbackError) {
+          rollbackFailures.push(rollbackError);
+        }
+        try {
+          nonClassicPhysics.activateCollisionFilter();
+          if (!nonClassicPhysics.collisionFilterActive) {
+            throw new Error(
+              'GN Style activation rollback could not reacquire the collision filter',
+            );
+          }
+        } catch (rollbackError) {
+          rollbackFailures.push(rollbackError);
+        }
+        if (rollbackFailures.length === 0) {
+          try {
+            if (!oldPresenter.rearmNavigationAfterFailure()) {
+              throw new Error(
+                'GN Style activation rollback could not reacquire Mode Select input',
+              );
+            }
+          } catch (rollbackError) {
+            rollbackFailures.push(rollbackError);
+          }
+        }
+        if (rollbackFailures.length > 0) {
+          throw new ModeSelectFatalNavigationError(
+            'Mode Select to GN Style rollback is incomplete',
+            aggregateWithPrimaryError(
+              'Mode Select to GN Style rollback failed',
+              error,
+              rollbackFailures,
+            ),
+            this.captureModeSelectFatalScreenRelease(oldPresenter.root),
+          );
+        }
+        if (error instanceof GnStyleLifecycleRollbackError) {
+          throw new ModeSelectFatalNavigationError(
+            'Mode Select to GN Style retained poisoned runtime ownership',
+            error,
+            this.captureModeSelectFatalScreenRelease(oldPresenter.root),
+          );
+        }
+        throw error;
+      }
+      this.activeModeSelect = null;
+      this.stateValue = 'gn-style';
+      disposeCommittedPresenter(oldPresenter, 'Mode Select');
+      return true;
+    });
+  }
+
   private readonly onClassicResultMenuRequested = (
     request: ClassicResultMenuRequestedEvent,
   ): void => {
@@ -1061,6 +1190,34 @@ export class RecoveredAppShellController extends Component {
       return;
     }
     this.transitionComboBirdToMainMenu(captured.request, 'Combo Bird Pause Quit');
+  };
+
+  private readonly onGnStyleResultMenuRequested = (
+    request: unknown,
+  ): void => {
+    const captured = captureGnStyleResultMenuNavigationRequest(request);
+    if (captured.request === null) {
+      this.rejectGnStyleNavigationRequest(
+        captured.rollback,
+        'GN Style Result',
+      );
+      return;
+    }
+    this.transitionGnStyleToMainMenu(captured.request, 'GN Style Result');
+  };
+
+  private readonly onGnStylePauseQuitRequested = (
+    request: unknown,
+  ): void => {
+    const captured = captureGnStylePauseQuitNavigationRequest(request);
+    if (captured.request === null) {
+      this.rejectGnStyleNavigationRequest(
+        captured.rollback,
+        'GN Style Pause Quit',
+      );
+      return;
+    }
+    this.transitionGnStyleToMainMenu(captured.request, 'GN Style Pause Quit');
   };
 
   private transitionCrazyToMainMenu(
@@ -1275,6 +1432,96 @@ export class RecoveredAppShellController extends Component {
     }
   }
 
+  private transitionGnStyleToMainMenu(
+    request: ClassicBirdMainMenuNavigationRequest,
+    source: 'GN Style Pause Quit' | 'GN Style Result',
+  ): void {
+    if (
+      this.destroyedValue
+      || this.stateValue !== 'gn-style'
+      || this.transitioning
+    ) {
+      this.rejectStaleGnStyleNavigationRequest(request.rollback, source);
+      return;
+    }
+    const from = this.stateValue;
+    let sourceOwnershipConfirmed = false;
+    let sharedScene: SharedGameScenePresenter;
+    try {
+      sharedScene = this.requireSharedScene();
+    } catch (error) {
+      const rollbackFailures = rollbackRejectedClassicBirdNavigationRequest(
+        request.rollback,
+        source,
+      );
+      this.retainGnStyleShellFailure(
+        from,
+        aggregateWithPrimaryError(
+          `${source} source validation failed`,
+          error,
+          rollbackFailures,
+        ),
+      );
+      return;
+    }
+    if (sharedScene.currentScreen !== request.root) {
+      this.rejectStaleGnStyleNavigationRequest(request.rollback, source);
+      return;
+    }
+    sourceOwnershipConfirmed = true;
+    this.transitioning = true;
+    let nextPresenter: MainMenuPresenter | null = null;
+    let collisionFilterActivated = false;
+    try {
+      collisionFilterActivated = this.requireNonClassicPhysics()
+        .activateCollisionFilter();
+      nextPresenter = this.createMainMenuPresenter();
+      const previous = sharedScene.replaceCurrentScreen(nextPresenter.root);
+      nextPresenter.activate();
+      commitClassicBirdMainMenuNavigationRequest(request, previous, source);
+      this.activeMainMenu = nextPresenter;
+      this.stateValue = 'main-menu';
+    } catch (error) {
+      const rollbackFailures = runBestEffortCleanup(
+        `${source} to Main Menu rollback`,
+        [
+          () => {
+            if (sourceOwnershipConfirmed) {
+              this.restoreGnStyleNavigationRootBeforeRollback(request.root);
+            }
+          },
+          () => nextPresenter?.dispose(),
+          () => this.requireGameplayController().sharedAudioPresenter.stopBackgroundMusic(),
+          () => {
+            if (collisionFilterActivated) {
+              this.requireNonClassicPhysics().restorePreviousCollisionFilter();
+            }
+          },
+          () => request.rollback(),
+          () => {
+            if (sourceOwnershipConfirmed) {
+              this.assertGnStyleNavigationRollbackRestored(request.root);
+            }
+          },
+        ],
+      );
+      if (rollbackFailures.length > 0) {
+        this.retainGnStyleShellFailure(
+          from,
+          aggregateWithPrimaryError(
+            `${source} to Main Menu rollback failed`,
+            error,
+            rollbackFailures,
+          ),
+        );
+      } else {
+        this.emitTransitionFailure(from, 'main-menu', error);
+      }
+    } finally {
+      this.transitioning = false;
+    }
+  }
+
   private rejectClassicBirdNavigationRequest(
     rollback: (() => void) | null,
     source: 'Classic Bird Pause Quit' | 'Classic Bird Result',
@@ -1339,6 +1586,36 @@ export class RecoveredAppShellController extends Component {
         rollbackFailures,
       ),
     );
+  }
+
+  private rejectGnStyleNavigationRequest(
+    rollback: (() => void) | null,
+    source: 'GN Style Pause Quit' | 'GN Style Result',
+  ): void {
+    const from = this.stateValue;
+    const rollbackFailures = rollbackRejectedClassicBirdNavigationRequest(
+      rollback,
+      source,
+    );
+    if (rollbackFailures.length === 0) {
+      return;
+    }
+    this.retainGnStyleShellFailure(
+      from,
+      aggregateWithPrimaryError(
+        `Rejected ${source} navigation rollback failed`,
+        new Error(`Recovered app shell rejected ${source} navigation`),
+        rollbackFailures,
+      ),
+    );
+  }
+
+  private rejectStaleGnStyleNavigationRequest(
+    _rollback: (() => void) | null,
+    _source: 'GN Style Pause Quit' | 'GN Style Result',
+  ): void {
+    // Without a matching current root or generation token, producer callbacks are unowned.
+    // Calling either settlement path could mutate the fresh run that superseded this request.
   }
 
   private retainClassicBirdShellFailure(
@@ -1407,6 +1684,30 @@ export class RecoveredAppShellController extends Component {
     } catch (reportingError) {
       console.error(aggregateWithPrimaryError(
         'Recovered fatal Combo Bird transition reporting failed',
+        failure,
+        [reportingError],
+      ));
+    }
+  }
+
+  private retainGnStyleShellFailure(
+    from: RecoveredAppShellState,
+    error: unknown,
+  ): void {
+    const failure = normalizeError(
+      error,
+      'Recovered GN Style navigation rollback failed',
+    );
+    if (this.destroyedValue) {
+      console.error(failure);
+      return;
+    }
+    this.stateValue = 'failed';
+    try {
+      this.emitTransitionFailure(from, 'main-menu', failure);
+    } catch (reportingError) {
+      console.error(aggregateWithPrimaryError(
+        'Recovered fatal GN Style transition reporting failed',
         failure,
         [reportingError],
       ));
@@ -1537,6 +1838,48 @@ export class RecoveredAppShellController extends Component {
     }
   }
 
+  private restoreGnStyleNavigationRootBeforeRollback(root: Node): void {
+    const sharedScene = this.requireSharedScene();
+    const current = sharedScene.currentScreen;
+    if (current === root) {
+      return;
+    }
+    if (!isValid(root, true) || root.parent !== null) {
+      throw new Error('GN Style navigation rollback lost its detached source screen');
+    }
+    if (current === null) {
+      sharedScene.attachCurrentScreen(root);
+    } else {
+      const displaced = sharedScene.replaceCurrentScreen(root);
+      if (displaced !== current) {
+        throw new Error(
+          'GN Style navigation rollback displaced an unexpected destination',
+        );
+      }
+    }
+    if (sharedScene.currentScreen !== root) {
+      throw new Error('GN Style navigation rollback could not restore its source screen');
+    }
+  }
+
+  private assertGnStyleNavigationRollbackRestored(root: Node): void {
+    const sharedScene = this.requireSharedScene();
+    if (
+      sharedScene.currentScreen !== root
+      || !isValid(root, true)
+      || root.parent === null
+    ) {
+      throw new Error(
+        'GN Style navigation rollback did not retain its source screen',
+      );
+    }
+    if (this.requireNonClassicPhysics().collisionFilterActive) {
+      throw new Error(
+        'GN Style navigation rollback retained the non-Classic collision filter',
+      );
+    }
+  }
+
   private restoreModeSelectAfterFailedCrazyActivation(previous: Node): void {
     const sharedScene = this.requireSharedScene();
     const current = sharedScene.currentScreen;
@@ -1661,6 +2004,34 @@ export class RecoveredAppShellController extends Component {
     if (sharedScene.currentScreen !== previous) {
       throw new Error(
         'Combo Bird activation rollback could not restore Mode Select ownership',
+      );
+    }
+  }
+
+  private restoreModeSelectAfterFailedGnStyleActivation(previous: Node): void {
+    const sharedScene = this.requireSharedScene();
+    const current = sharedScene.currentScreen;
+    if (current === previous) {
+      return;
+    }
+    if (!isValid(previous, true) || previous.parent !== null) {
+      throw new Error(
+        'GN Style activation rollback lost the detached Mode Select root',
+      );
+    }
+    if (current === null) {
+      sharedScene.attachCurrentScreen(previous);
+    } else {
+      const displaced = sharedScene.replaceCurrentScreen(previous);
+      if (displaced !== current) {
+        throw new Error(
+          'GN Style activation rollback displaced an unexpected current screen',
+        );
+      }
+    }
+    if (sharedScene.currentScreen !== previous) {
+      throw new Error(
+        'GN Style activation rollback could not restore Mode Select ownership',
       );
     }
   }
@@ -1890,6 +2261,13 @@ export class RecoveredAppShellController extends Component {
       throw new Error('Recovered app shell requires ComboBirdGameplayController');
     }
     return this.comboBirdGameplayController;
+  }
+
+  private requireGnStyleGameplayController(): GnStyleGameplayController {
+    if (this.gnStyleGameplayController === null) {
+      throw new Error('Recovered app shell requires GnStyleGameplayController');
+    }
+    return this.gnStyleGameplayController;
   }
 
   private requireSceneController(): ClassicSceneController {
@@ -2305,6 +2683,61 @@ function captureComboBirdPauseQuitNavigationRequest(
   }
 }
 
+function captureGnStyleResultMenuNavigationRequest(
+  request: unknown,
+): CapturedClassicBirdMainMenuNavigationRequest {
+  return captureCrazyResultMenuNavigationRequest(request);
+}
+
+function captureGnStylePauseQuitNavigationRequest(
+  request: unknown,
+): CapturedClassicBirdMainMenuNavigationRequest {
+  if (request === null || typeof request !== 'object') {
+    return Object.freeze({
+      request: null,
+      rollback: null,
+    });
+  }
+  let capturedRollback: (() => void) | null = null;
+  try {
+    const candidate = request as Readonly<{
+      commit?: unknown;
+      gnStyleRoot?: unknown;
+      rollback?: unknown;
+    }>;
+    const rollback = candidate.rollback;
+    if (typeof rollback === 'function') {
+      capturedRollback = () => rollback.call(request);
+    }
+    const gnStyleRoot = candidate.gnStyleRoot;
+    const commit = candidate.commit;
+    if (
+      !(gnStyleRoot instanceof Node)
+      || !isValid(gnStyleRoot, true)
+      || typeof commit !== 'function'
+      || capturedRollback === null
+    ) {
+      return Object.freeze({
+        request: null,
+        rollback: capturedRollback,
+      });
+    }
+    return Object.freeze({
+      request: Object.freeze({
+        commit: (previousRoot: Node) => commit.call(request, previousRoot),
+        rollback: capturedRollback,
+        root: gnStyleRoot,
+      }),
+      rollback: capturedRollback,
+    });
+  } catch {
+    return Object.freeze({
+      request: null,
+      rollback: capturedRollback,
+    });
+  }
+}
+
 function rollbackRejectedCrazyNavigationRequest(
   request: unknown,
   source: 'Crazy Pause Quit' | 'Crazy Result',
@@ -2328,7 +2761,9 @@ function rollbackRejectedClassicBirdNavigationRequest(
     | 'Classic Bird Pause Quit'
     | 'Classic Bird Result'
     | 'Combo Bird Pause Quit'
-    | 'Combo Bird Result',
+    | 'Combo Bird Result'
+    | 'GN Style Pause Quit'
+    | 'GN Style Result',
 ): readonly Error[] {
   if (rollback === null) {
     return Object.freeze([]);
@@ -2389,7 +2824,9 @@ function commitClassicBirdMainMenuNavigationRequest(
     | 'Classic Bird Pause Quit'
     | 'Classic Bird Result'
     | 'Combo Bird Pause Quit'
-    | 'Combo Bird Result',
+    | 'Combo Bird Result'
+    | 'GN Style Pause Quit'
+    | 'GN Style Result',
 ): void {
   try {
     request.commit(previousRoot);

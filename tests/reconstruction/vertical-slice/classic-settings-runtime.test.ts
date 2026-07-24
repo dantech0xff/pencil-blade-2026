@@ -77,6 +77,9 @@ test('runtime keeps mutations in memory and writes only on save', () => {
   storage.values.set('crazy_best_1', '300');
   storage.values.set('crazy_best_2', '200');
   storage.values.set('crazy_best_3', '100');
+  storage.values.set('gnstyle_best_1', '3000');
+  storage.values.set('gnstyle_best_2', '2000');
+  storage.values.set('gnstyle_best_3', '1000');
   storage.values.set('bird_classic_best_1', '3000');
   storage.values.set('bird_classic_best_2', '2000');
   storage.values.set('bird_classic_best_3', '1000');
@@ -103,6 +106,7 @@ test('runtime keeps mutations in memory and writes only on save', () => {
 
   runtime.state.recordClassicResultScore(40);
   runtime.state.recordCrazyResultScore(250);
+  runtime.state.recordGnStyleResultScore(2500);
   runtime.state.recordClassicBirdResultScore(2500);
   runtime.state.recordCrazyBirdResultScore(25_000);
   runtime.state.recordComboBirdResultScore(250_000);
@@ -118,6 +122,9 @@ test('runtime keeps mutations in memory and writes only on save', () => {
   assert.equal(storage.values.get('crazy_best_1'), '300');
   assert.equal(storage.values.get('crazy_best_2'), '250');
   assert.equal(storage.values.get('crazy_best_3'), '200');
+  assert.equal(storage.values.get('gnstyle_best_1'), '3000');
+  assert.equal(storage.values.get('gnstyle_best_2'), '2500');
+  assert.equal(storage.values.get('gnstyle_best_3'), '2000');
   assert.equal(storage.values.get('bird_classic_best_1'), '3000');
   assert.equal(storage.values.get('bird_classic_best_2'), '2500');
   assert.equal(storage.values.get('bird_classic_best_3'), '2000');
@@ -324,6 +331,11 @@ test('runtime recovers corrupt or unreadable target storage to exact defaults', 
     selectedTheme: 2,
     totalCoins: 999_999,
   });
+  assert.deepEqual(corruptRuntime.state.gnStyleLeaderboard, {
+    first: 0,
+    second: 0,
+    third: 0,
+  });
   assert.throws(() => corruptRuntime.save(), /save is disabled after load recovery/);
   assert.throws(
     () => corruptRuntime.persistModeUnlock(1),
@@ -365,6 +377,11 @@ test('runtime recovers corrupt or unreadable target storage to exact defaults', 
   });
   assert.equal(unavailableRuntime.loadFailure, readFailure);
   assert.equal(unavailableRuntime.state.snapshot.totalCoins, 999_999);
+  assert.deepEqual(unavailableRuntime.state.gnStyleLeaderboard, {
+    first: 0,
+    second: 0,
+    third: 0,
+  });
   assert.throws(() => unavailableRuntime.save(), /save is disabled after load recovery/);
   assert.equal(unavailableWrites, 0);
   assert.throws(

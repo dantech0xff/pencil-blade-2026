@@ -20,9 +20,13 @@ objectives, pause, result ranking/reward, `bird_combo_best_1..3`, and transactio
 Replay/Retry/Main Menu ownership. Its recovered reward factor is float32 `0.8`. The mode-0
 result includes its exact rank order, delayed particle burst, rotating reward tree, and the
 Classic-relevant `total_coins` plus `classic_best_1/2/3` persistence subset. Missing or corrupt
-save restores `999999` coins while a valid persisted balance wins. This is a bounded production
-checkpoint, not presentation completion: most resource consumers and the full scene/prefab map
-remain open, and only GN Style mode `2` still fails closed.
+save restores `999999` coins while a valid persisted balance wins. GN Style mode `2` now owns
+the standard BasicBlade, exact `150`-second ordinary-fruit graph and `2.60`-second intro,
+non-looping `GangnamStyle.mp3`, 439 source-ordered particle parents, three-second late-cut
+Time Up tail, `gnstyle_best_1..3`, float32 `0.6` reward, and transactional
+Replay/Retry/Quit/Menu ownership. This is a bounded six-route production checkpoint, not
+presentation completion: most resource consumers, full progression, and the full
+scene/prefab map remain open.
 
 ## Authority and evidence
 
@@ -57,19 +61,22 @@ replay, and device comparison are unavailable and are not project gates.
 - The Classic score HUD now uses the exact recovered score icon, best-score cup,
   double-score panel, and `Fonts/Linds.ttf`. Best-score display follows the authoritative
   score service seeded from persisted `classic_best_1`; app hide saves the expanded
-  implemented Settings subset, including all five route leaderboards and objective state.
+  implemented Settings subset, including all six route leaderboards and objective state.
   Missing or corrupt save falls back to `999999` coins while a valid persisted balance wins.
   Full first-launch/Main Menu Settings behavior remains open.
-- The current implementation checkpoint covers five of six production routes: `0`, `1`, `3`,
-  `4`, and `5`. GN Style mode `2` is the next and only fail-closed route.
-- The Combo Bird checkpoint passes `70/70` focused tests, `1030/1030` deterministic
-  vertical-slice tests, and `38/38` resource/build/catalog tests. The unchanged
+- The current implementation checkpoint covers all six production gameplay routes: `0`, `1`,
+  `2`, `3`, `4`, and `5`.
+- The GN Style checkpoint passes `1151/1151` deterministic vertical-slice tests and `43/43`
+  resource/build/catalog tests. The unchanged
   inventory/evidence workflow remains `14/14` in `217s`; reconstruction policy positive plus
   `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and diff
   hygiene are clean.
-- Fresh Creator Preview reaches Main Menu → Mode Select → Combo Bird → live Bird/type-3
-  gameplay → Pause/Resume/Replay → Pause Quit → Main Menu with final Cocos console counters
-  `0/0/0/0`.
+- Creator metadata has zero structural errors and zero duplicate UUIDs; the audit remains
+  `fidelity-blocked` only by preserved unsupported `Fonts/CooperBlackStd.otf`.
+- Fresh Creator Preview reaches Main Menu → Mode Select → GN Style → exact intro → live cuts,
+  score, music, and particles → Pause/Resume/Replay → Pause Quit → Main Menu → repeated entry →
+  natural Time Up → Result Retry → Result Menu. DevTools reports zero application/runtime
+  errors; one unrelated Chrome extension error remains outside the game.
 - Presentation restoration is complete only when the canonical user-supplied sample project
   has 100% inventory, staging, and consumer coverage for every resource actually present.
 - No canonical graphics, animation frame, sound, music, font, shader/material, level/layout,
@@ -140,9 +147,11 @@ replay, and device comparison are unavailable and are not project gates.
 
 ## Checkpoint evidence
 
-- [Combo Bird architecture map](../plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-combo-bird-architecture-map.md)
-- [Combo Bird production checkpoint](../plans/260721-2253-pencil-blade-restoration/reports/implementer-2026-07-24-combo-bird-runtime.md)
-- [Combo Bird final verification](../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-combo-bird-final-checkpoint.md)
+- [GN Style native contract](../plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-gn-style-native-contract.md)
+- [GN Style resource map](../plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-gn-style-resource-map.md)
+- [GN Style production checkpoint](../plans/260721-2253-pencil-blade-restoration/reports/implementer-2026-07-24-gn-style-runtime.md)
+- [GN Style final verification](../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-gn-style-final-checkpoint.md)
+- [GN Style runtime review](../plans/260721-2253-pencil-blade-restoration/reports/reviewer-2026-07-24-gn-style-gameplay-shell.md)
 
 ## Phase 1 acceptance
 

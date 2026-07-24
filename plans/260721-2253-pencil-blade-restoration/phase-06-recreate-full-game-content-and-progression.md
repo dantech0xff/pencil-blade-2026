@@ -14,7 +14,7 @@ effort: "2-4 months"
 Expand the proven slice to all statically identified modes, cosmetics, objectives,
 progression, settings, audio, and lifecycle behavior without weakening contract tests.
 
-Classic, Crazy, Classic Bird, Crazy Bird, and Combo Bird now have production Creator routes.
+Classic, Crazy, GN Style, Classic Bird, Crazy Bird, and Combo Bird now have production Creator routes.
 Classic Bird adds the shared BaseBird/BirdBlade substrate and the mode-3 checkpoint on top of
 the recovered Classic lifecycle. Crazy includes its recovered timed controller graph, standard
 and electric bombs, specials, magnet, Dragon, objectives, pause, result, audio, and
@@ -23,7 +23,9 @@ graph with BirdBlade type `2`. Combo Bird mode `5` remains independent from Craz
 BirdBlade type `3`, exact type-3 resources, a recovered `90`-second timer, an ordinary-only toss
 graph, objectives, pause, result ranking/reward, and transactional replay/retry/menu ownership.
 Its keys are `bird_combo_best_1..3` and its reward factor is float32 `0.8`. GN Style mode `2`
-is the only remaining route.
+owns the standard BasicBlade, `150`-second Free/Wave/Concurrent ordinary-fruit graph, exact
+`2.60`-second intro, dedicated non-looping music, 439-parent particle choreography, three-second
+late-cut tail, `gnstyle_best_1..3`, float32 `0.6` reward, and transactional navigation.
 
 ## Context Links
 
@@ -37,6 +39,11 @@ is the only remaining route.
 - [Combo Bird architecture map](./reports/explorer-2026-07-24-combo-bird-architecture-map.md)
 - [Combo Bird production checkpoint](./reports/implementer-2026-07-24-combo-bird-runtime.md)
 - [Combo Bird final verification](./reports/tester-2026-07-24-combo-bird-final-checkpoint.md)
+- [GN Style native contract](./reports/researcher-2026-07-24-gn-style-native-contract.md)
+- [GN Style resource map](./reports/researcher-2026-07-24-gn-style-resource-map.md)
+- [GN Style production checkpoint](./reports/implementer-2026-07-24-gn-style-runtime.md)
+- [GN Style final verification](./reports/tester-2026-07-24-gn-style-final-checkpoint.md)
+- [GN Style runtime review](./reports/reviewer-2026-07-24-gn-style-gameplay-shell.md)
 - [Remaining mode order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 
 ## Requirements
@@ -89,33 +96,38 @@ save schema and include reproducible fixtures for progression states.
   objectives, pause, result/ranking/reward, `bird_combo_best_1..3`, float32 `0.8` reward,
   and transactional Replay/Retry/Main Menu ownership. Its resource contract preserves the
   resolution-specific `text-juscombo.png` / `text-justcombo.png` mismatch explicitly.
-- **Next:** GN Style mode `2`, whose recovered `150`-second shell,
-  `GangnamStyle.mp3`, and direct 439-call particle choreography must be materialized from
-  evidence instead of approximated.
-- Five of six production routes are complete; only mode `2` remains fail closed.
+- **Complete:** GN Style mode `2` with the standard BasicBlade, exact `150`-second
+  Free/Wave/Concurrent ordinary-fruit shell, `2.60`-second intro,
+  `GangnamStyle.mp3`, direct 439-call particle choreography, Time Up late-cut tail,
+  objectives `6`/`2`, `gnstyle_best_1..3`, float32 `0.6` reward, and transactional
+  Replay/Retry/Quit/Menu ownership.
+- All six production gameplay routes are complete. Phase 6 remains in progress for full
+  content/cosmetics, progression, menu/settings fidelity, and global resource reconciliation.
 
 Current certification checkpoint:
 
-- Focused Combo Bird suite: `70/70`
-- Full deterministic vertical slice: `1030/1030` final clean checkpoint
-- Resource/build/catalog tests: `38/38`
+- Full deterministic vertical slice: `1151/1151` final clean checkpoint
+- Resource/build/catalog tests: `43/43`
 - Static inventory/source/staging/archive workflow: `14/14` in `217s`
 - Reconstruction policy: positive checkpoint and `4/4` negative fixtures
 - Native static analysis: `7/7`
 - Cocos Creator 3.8.8 strict TypeScript: observed
-- Fresh Creator-served Browser Preview reaches Main Menu -> Mode Select -> Combo Bird ->
-  live type-3 gameplay, Pause/Resume/Replay, and Pause Quit -> Main Menu; final Cocos
-  console counters are `0/0/0/0`
+- Creator metadata audit: zero structural errors and zero duplicate UUIDs; still
+  `fidelity-blocked` only by the preserved unsupported `Fonts/CooperBlackStd.otf`
+- Fresh Creator-served Browser Preview reaches Main Menu -> Mode Select -> GN Style -> exact
+  intro -> live fruit cuts/score/particles -> Pause/Resume/Replay -> Pause Quit -> Main Menu ->
+  repeated entry -> natural Time Up -> Result Retry -> Result Menu. DevTools records zero
+  application/runtime errors; one unrelated Chrome extension error is outside the game.
 - Missing or corrupt save still falls back to `999999` coins; a valid persisted balance wins
 
 ## Todo List
 
 - [x] Shared Classic/Crazy systems required by the first two production modes
 - [x] Shared BaseBird/BirdBlade systems
-- [ ] Six modes (`5/6` production routes complete)
+- [x] Six modes (`6/6` production routes complete)
 - [ ] Full content/cosmetics
 - [ ] Progression and saves
-- [ ] Menus/settings/results/objectives
+- [ ] Full menus/settings/results/objectives fidelity
 - [ ] Offline behavior for retired services
 
 ## Success Criteria
@@ -143,5 +155,7 @@ leaderboards, if retained, require new approved implementations.
 
 ## Next Steps
 
-Implement GN Style mode `2`. Freeze content and enter Phase 7 only when all identified
-states/contracts are reconciled and remaining unknowns are disclosed with impact.
+Reconcile the remaining cosmetics/content, progression/save schema, menu/settings fidelity,
+scene/prefab map, and global asset-consumer coverage. Freeze content and enter Phase 7 only
+when all identified states/contracts are reconciled and remaining unknowns are disclosed
+with impact.

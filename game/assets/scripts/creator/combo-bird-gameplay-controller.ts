@@ -1,13 +1,9 @@
 import {
   _decorator,
-  AudioClip,
-  AudioSource,
   Component,
   Node,
   isValid,
 } from 'cc';
-
-import type { AssetManager } from 'cc';
 
 import {
   createCutDispatchCommands,
@@ -80,9 +76,6 @@ import type {
   ComboBirdTossRuntimeCommand,
 } from '../domain/combo-bird-toss-coordinator';
 import type { GameplayRandom } from '../domain/gameplay-random';
-import {
-  canonicalResourceToBundlePath,
-} from '../domain/game-resource-contract';
 import type {
   ObjectiveAchievementPopupEvent,
   ObjectivesManagerState,
@@ -165,23 +158,16 @@ import {
   createDetachedScreenRoot,
 } from './detached-screen-root';
 import {
-  loadGameResourceBundle,
-} from './game-resource-loader';
-import {
   ObjectiveAchievementPresenter,
 } from './objective-achievement-presenter';
 import {
   TimeManagerPresenter,
-  type TimeManagerAudioPath,
-  type TimeManagerAudioPort,
 } from './time-manager-presenter';
+import {
+  TimeManagerAudioPresenter,
+} from './time-manager-audio-presenter';
 
 const { ccclass, requireComponent } = _decorator;
-
-const COMBO_BIRD_TIMER_AUDIO_PATHS = Object.freeze([
-  'Sounds/timetick.wav',
-  'Sounds/timeup.wav',
-] as const satisfies readonly TimeManagerAudioPath[]);
 
 export const COMBO_BIRD_GAMEPLAY_COMMAND_EVENT
   = 'combo-bird-gameplay-command';
@@ -321,7 +307,7 @@ interface ComboBirdPreparationProducts {
   readonly baseGameplayResources: LoadedBaseGameplayResources;
   readonly birdResources: LoadedBirdResources;
   readonly resources: LoadedComboBirdResources;
-  readonly timerAudio: ComboBirdTimerAudioPresenter;
+  readonly timerAudio: TimeManagerAudioPresenter;
 }
 
 interface ComboBirdRunOwnership {
@@ -407,7 +393,7 @@ export class ComboBirdGameplayController extends Component {
   private standbySceneController: ComboBirdSceneController | null = null;
   private swishAudio: ClassicSwishAudioGate | null = null;
   private timeManagerPresenter: TimeManagerPresenter | null = null;
-  private timerAudio: ComboBirdTimerAudioPresenter | null = null;
+  private timerAudio: TimeManagerAudioPresenter | null = null;
   private worldPresentationRoot: Node | null = null;
 
   onLoad(): void {
@@ -663,7 +649,7 @@ export class ComboBirdGameplayController extends Component {
       loadBaseGameplayResources(assetTree),
     ]);
     this.assertPreparationStillUsable();
-    const timerAudio = await ComboBirdTimerAudioPresenter.load(this.node);
+    const timerAudio = await TimeManagerAudioPresenter.load(this.node);
     let committed = false;
     try {
       this.assertPreparationStillUsable();
@@ -3546,7 +3532,7 @@ export class ComboBirdGameplayController extends Component {
     return this.comboBirdResources;
   }
 
-  private requireTimerAudio(): ComboBirdTimerAudioPresenter {
+  private requireTimerAudio(): TimeManagerAudioPresenter {
     if (this.timerAudio === null) {
       throw new Error(
         'Combo Bird timer audio is unavailable before preparation',
@@ -3756,239 +3742,6 @@ export class ComboBirdGameplayController extends Component {
   }
 }
 
-/** Narrow process-owned audio owner for the two shared TimeManager effects. */
-class ComboBirdTimerAudioPresenter implements TimeManagerAudioPort {
-  private disposedValue = false;
-  private pauseLeaseActive = false;
-  private readonly clips: ReadonlyMap<TimeManagerAudioPath, AudioClip>;
-  private readonly parent: Node;
-  private readonly root: Node;
-  private readonly voices = new Set<ComboBirdTimerAudioVoice>();
-
-  private constructor(
-    parent: Node,
-    root: Node,
-    clips: ReadonlyMap<TimeManagerAudioPath, AudioClip>,
-  ) {
-    this.parent = parent;
-    this.root = root;
-    this.clips = clips;
-  }
-
-  static async load(parent: Node): Promise<ComboBirdTimerAudioPresenter> {
-    if (!isValid(parent, true)) {
-      throw new Error(
-        'Combo Bird timer audio parent must be a valid Creator node',
-      );
-    }
-    const bundle = await loadGameResourceBundle();
-    const loaded = await loadTimerAudioClips(bundle);
-    if (!isValid(parent, true)) {
-      throw new Error(
-        'Combo Bird timer audio parent was destroyed while loading',
-      );
-    }
-    const clips = new Map<TimeManagerAudioPath, AudioClip>();
-    COMBO_BIRD_TIMER_AUDIO_PATHS.forEach((path, index) => {
-      const clip = loaded[index];
-      if (clip === undefined) {
-        throw new Error(
-          'Creator returned an incomplete Combo Bird timer audio batch',
-        );
-      }
-      clips.set(path, clip);
-    });
-    if (clips.size !== COMBO_BIRD_TIMER_AUDIO_PATHS.length) {
-      throw new Error('Combo Bird timer audio catalog contains duplicates');
-    }
-
-    const root = new Node('ComboBirdTimerAudioRoot');
-    try {
-      root.layer = parent.layer;
-      root.setParent(parent);
-      if (root.parent !== parent || !isValid(root, true)) {
-        throw new Error('Combo Bird timer audio root failed to attach');
-      }
-      return new ComboBirdTimerAudioPresenter(parent, root, clips);
-    } catch (error) {
-      if (isValid(root, true)) {
-        root.destroy();
-      }
-      throw error;
-    }
-  }
-
-  playOneShot(canonicalPath: TimeManagerAudioPath): void {
-    this.assertUsable();
-    const clip = this.clips.get(canonicalPath);
-    if (clip === undefined) {
-      throw new Error(
-        `Combo Bird timer AudioClip was not loaded: ${canonicalPath}`,
-      );
-    }
-    const voiceNode = new Node('ComboBirdTimerOneShotAudio');
-    let owner: ComboBirdTimerAudioVoice | null = null;
-    try {
-      voiceNode.setParent(this.root);
-      const source = voiceNode.addComponent(AudioSource);
-      source.playOnAwake = false;
-      source.loop = false;
-      source.volume = 1;
-      owner = new ComboBirdTimerAudioVoice(
-        voiceNode,
-        source,
-        (disposed) => this.voices.delete(disposed),
-      );
-      this.voices.add(owner);
-      const retainedOwner = owner;
-      voiceNode.once(AudioSource.EventType.ENDED, () => retainedOwner.dispose());
-      source.clip = clip;
-      source.play();
-      if (this.pauseLeaseActive) {
-        owner.pause();
-      }
-    } catch (error) {
-      if (owner !== null) {
-        owner.dispose();
-      } else if (isValid(voiceNode, true)) {
-        voiceNode.destroy();
-      }
-      throw error;
-    }
-  }
-
-  pauseAllEffects(): void {
-    this.assertUsable();
-    this.pauseLeaseActive = true;
-    const failures: unknown[] = [];
-    for (const voice of [...this.voices]) {
-      collectCleanupFailure(failures, () => voice.pause());
-    }
-    if (failures.length > 0) {
-      throw cleanupError('Combo Bird timer audio pause', failures);
-    }
-  }
-
-  resumeAllEffects(): void {
-    this.assertUsable();
-    if (!this.pauseLeaseActive) {
-      return;
-    }
-    const failures: unknown[] = [];
-    for (const voice of [...this.voices]) {
-      collectCleanupFailure(failures, () => voice.resume());
-    }
-    if (![...this.voices].some((voice) => voice.paused)) {
-      this.pauseLeaseActive = false;
-    }
-    if (failures.length > 0) {
-      throw cleanupError('Combo Bird timer audio resume', failures);
-    }
-  }
-
-  stopAllEffects(): void {
-    if (this.disposedValue) {
-      return;
-    }
-    this.pauseLeaseActive = false;
-    const failures: unknown[] = [];
-    for (const voice of [...this.voices]) {
-      collectCleanupFailure(failures, () => voice.dispose());
-    }
-    if (failures.length > 0) {
-      throw cleanupError('Combo Bird timer audio stop', failures);
-    }
-  }
-
-  dispose(): boolean {
-    if (this.disposedValue) {
-      return false;
-    }
-    const failures: unknown[] = [];
-    collectCleanupFailure(failures, () => this.stopAllEffects());
-    collectCleanupFailure(failures, () => {
-      if (isValid(this.root, true)) {
-        this.root.destroy();
-      }
-    });
-    if (failures.length > 0) {
-      throw cleanupError('Combo Bird timer audio disposal', failures);
-    }
-    this.disposedValue = true;
-    return true;
-  }
-
-  private assertUsable(): void {
-    if (
-      this.disposedValue
-      || !isValid(this.parent, true)
-      || !isValid(this.root, true)
-    ) {
-      throw new Error('Combo Bird timer audio owner is unavailable');
-    }
-  }
-}
-
-class ComboBirdTimerAudioVoice {
-  private disposedValue = false;
-  private pausedValue = false;
-  private readonly onDisposed: (voice: ComboBirdTimerAudioVoice) => void;
-  private readonly source: AudioSource;
-  private readonly voiceNode: Node;
-
-  constructor(
-    voiceNode: Node,
-    source: AudioSource,
-    onDisposed: (voice: ComboBirdTimerAudioVoice) => void,
-  ) {
-    this.voiceNode = voiceNode;
-    this.source = source;
-    this.onDisposed = onDisposed;
-  }
-
-  get paused(): boolean {
-    return this.pausedValue;
-  }
-
-  pause(): void {
-    if (
-      this.disposedValue
-      || this.pausedValue
-      || !isValid(this.voiceNode, true)
-    ) {
-      return;
-    }
-    this.source.pause();
-    this.pausedValue = true;
-  }
-
-  resume(): void {
-    if (
-      this.disposedValue
-      || !this.pausedValue
-      || !isValid(this.voiceNode, true)
-    ) {
-      return;
-    }
-    this.source.play();
-    this.pausedValue = false;
-  }
-
-  dispose(): void {
-    if (this.disposedValue) {
-      return;
-    }
-    if (isValid(this.voiceNode, true)) {
-      this.source.stop();
-      this.source.clip = null;
-      this.voiceNode.destroy();
-    }
-    this.pausedValue = false;
-    this.disposedValue = true;
-    this.onDisposed(this);
-  }
-}
-
 function createPresenterRoot(parent: Node, name: string): Node {
   const root = new Node(name);
   root.layer = parent.layer;
@@ -4052,31 +3805,6 @@ function assertScreenPlacementPort(
       'Combo Bird screen placement must implement the current-screen port',
     );
   }
-}
-
-function loadTimerAudioClips(
-  bundle: AssetManager.Bundle,
-): Promise<readonly AudioClip[]> {
-  const paths = COMBO_BIRD_TIMER_AUDIO_PATHS.map(
-    canonicalResourceToBundlePath,
-  );
-  return new Promise((resolve, reject) => {
-    bundle.load(paths, AudioClip, (error, clips) => {
-      if (error !== null && error !== undefined) {
-        reject(new Error(
-          `Failed to load Combo Bird timer AudioClips: ${error.message}`,
-        ));
-        return;
-      }
-      if (clips === null || clips === undefined) {
-        reject(new Error(
-          'Creator returned no Combo Bird timer AudioClips',
-        ));
-        return;
-      }
-      resolve(Object.freeze([...clips]));
-    });
-  });
 }
 
 function containsLifecycleRollbackError(error: unknown): boolean {

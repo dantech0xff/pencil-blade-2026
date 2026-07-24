@@ -116,6 +116,7 @@ export type ModeSelectUnsupportedDestination = Exclude<
   | 'ClassicBirdLayer'
   | 'CrazyBirdLayer'
   | 'ComboBirdLayer'
+  | 'GNStyleLayer'
 >;
 
 export interface ModeSelectNavigationTransaction {
@@ -139,6 +140,9 @@ export interface ModeSelectPresenterLifecycle {
     transaction: ModeSelectNavigationTransaction,
   ) => boolean | void;
   readonly onComboBirdRequested: (
+    transaction: ModeSelectNavigationTransaction,
+  ) => boolean | void;
+  readonly onGnStyleRequested: (
     transaction: ModeSelectNavigationTransaction,
   ) => boolean | void;
   readonly onMainMenuRequested: (
@@ -1638,6 +1642,7 @@ function assertInput(input: ModeSelectPresenterInput): void {
     'onClassicBirdRequested',
     'onCrazyBirdRequested',
     'onComboBirdRequested',
+    'onGnStyleRequested',
     'onMainMenuRequested',
     'onUnsupportedDestinationRequested',
   ], 'lifecycle');
@@ -1667,6 +1672,9 @@ function dispatchModeNavigation(
   }
   if (destination === 'ComboBirdLayer') {
     return lifecycle.onComboBirdRequested(transaction);
+  }
+  if (destination === 'GNStyleLayer') {
+    return lifecycle.onGnStyleRequested(transaction);
   }
   return lifecycle.onUnsupportedDestinationRequested(destination, transaction);
 }

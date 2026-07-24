@@ -113,11 +113,12 @@ Verified starting point:
   with `Step(dt,5,5)` isolated behind a real physics adapter boundary and ordered same-frame
   respawn commands. The persistent app shell, Main Menu, shared Background/Leaf/Theme, Mode Select
   rail, and RopeButton/FruitButton physics presenters are now implemented. Their lifecycle
-  transactions, input/physics leases, rollback paths, exact resources, and fail-closed unrecovered
-  destinations currently hold the checkpoint. Fresh Creator-served Browser Preview runs reach
-  the Combo Bird checkpoint, including Main Menu -> Mode Select -> Combo Bird -> live
-  Bird/type-3 ordinary-only gameplay -> Pause/Resume/Replay -> Pause Quit -> Main Menu. The
-  final Cocos console counters are `0/0/0/0`. No placeholder destination screen is authorized.
+  transactions, input/physics leases, rollback paths, and exact resources currently hold the
+  checkpoint. Fresh Creator-served Browser Preview now reaches GN Style, including Main Menu ->
+  Mode Select -> GN Style -> exact intro -> live ordinary-fruit gameplay -> Pause/Resume/Replay
+  -> Pause Quit -> Main Menu -> repeated entry -> natural Time Up -> Result Retry -> Result
+  Menu. DevTools reports zero application/runtime errors; one unrelated Chrome extension error
+  is outside the game. No placeholder destination screen is authorized.
   The exact standard-bomb raster/audio/entity foundation and Concurrent batch partition are
   contract-tested. Crazy mode now owns its recovered 60-second session, controller graph,
   standard-bomb explosion/fuse-smoke path, special/electric/magnet/Dragon entities, audio,
@@ -134,18 +135,24 @@ Verified starting point:
   and reward, and transactional replay/retry/menu lifecycles. Its leaderboard keys are
   `bird_combo_best_1..3` and its recovered reward factor is float32 `0.8`. Missing or corrupt
   storage still falls back to `999999` coins while a valid persisted balance wins.
-  The current checkpoint reaches `70/70` focused Combo Bird tests, `1030/1030` full
-  vertical-slice tests, and `38/38` resource/build/catalog tests. The unchanged
+  GN Style mode `2` is an independent ordinary-fruit timed owner using the standard four-slot
+  BasicBlade path. It preserves the recovered `150`-second Free/Wave/Concurrent graph, exact
+  `2.60`-second intro, non-looping `GangnamStyle.mp3`, all 439 source-ordered particle parents,
+  the three-second late-cut Time Up tail, objectives `6`/`2`, `gnstyle_best_1..3`, float32
+  `0.6` reward, and transactional Replay/Retry/Quit/Menu lifecycles.
+  The current checkpoint reaches `1151/1151` full vertical-slice tests and `43/43`
+  resource/build/catalog tests. The unchanged
   source/staging/archive inventory remains `14/14` in `217s`; strict Creator TypeScript,
   reconstruction-policy positive plus `4/4` negative fixtures, native static analysis `7/7`,
-  and diff hygiene are clean.
+  and diff hygiene are clean. Creator metadata has zero structural errors and zero duplicate
+  UUIDs; the audit remains `fidelity-blocked` only because the preserved
+  `Fonts/CooperBlackStd.otf` is unsupported as a Creator Font consumer.
   Project completion still requires the remaining resource consumers and scene/prefab map,
   a pinned integration/toolchain policy, and build validation.
-- Phase 6 continues because the Cocos Creator vertical slice and production Combo Bird
-  checkpoint reached their contract gates and a fresh Creator-served Browser Preview. Five of
-  six production routes are complete. GN Style mode `2` is the only remaining fail-closed
-  destination, so the next work preserves its dedicated particle choreography and
-  mode-specific contracts.
+- Phase 6 continues after all six production gameplay routes reached their contract and fresh
+  Creator Preview gates. The remaining scope is full cosmetics/content, progression and save
+  coverage, menu/settings fidelity, global asset-consumer and scene/prefab reconciliation,
+  Android build validation, and release-rights clearance.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
 
@@ -199,6 +206,11 @@ Verified starting point:
 - [Combo Bird architecture map](./reports/explorer-2026-07-24-combo-bird-architecture-map.md)
 - [Combo Bird production checkpoint](./reports/implementer-2026-07-24-combo-bird-runtime.md)
 - [Combo Bird final verification](./reports/tester-2026-07-24-combo-bird-final-checkpoint.md)
+- [GN Style native contract](./reports/researcher-2026-07-24-gn-style-native-contract.md)
+- [GN Style resource map](./reports/researcher-2026-07-24-gn-style-resource-map.md)
+- [GN Style production checkpoint](./reports/implementer-2026-07-24-gn-style-runtime.md)
+- [GN Style final verification](./reports/tester-2026-07-24-gn-style-final-checkpoint.md)
+- [GN Style runtime review](./reports/reviewer-2026-07-24-gn-style-gameplay-shell.md)
 - [Remaining mode implementation order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 - [Creator readiness audit](./reports/creator-readiness-2026-07-22.md)
 - [Android toolchain readiness audit](./reports/android-toolchain-readiness-2026-07-22.md)

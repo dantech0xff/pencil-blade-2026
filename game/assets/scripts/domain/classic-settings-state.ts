@@ -52,6 +52,17 @@ import {
   type CrazyResultCoinAward,
 } from './crazy-result-ranking';
 import {
+  GN_STYLE_BEST_1_STORAGE_KEY,
+  GN_STYLE_BEST_2_STORAGE_KEY,
+  GN_STYLE_BEST_3_STORAGE_KEY,
+  GN_STYLE_INITIAL_LEADERBOARD,
+  awardGnStyleResultCoins,
+  insertGnStyleResultScore,
+  type GnStyleLeaderboard,
+  type GnStyleLeaderboardUpdate,
+  type GnStyleResultCoinAward,
+} from './gn-style-result-ranking';
+import {
   OBJECTIVES_COUNT,
   OBJECTIVES_CURRENT_STORAGE_KEY,
   OBJECTIVES_FRUITS_CUT_STORAGE_KEY,
@@ -77,6 +88,11 @@ export {
   CRAZY_BEST_2_STORAGE_KEY,
   CRAZY_BEST_3_STORAGE_KEY,
 } from './crazy-result-ranking';
+export {
+  GN_STYLE_BEST_1_STORAGE_KEY,
+  GN_STYLE_BEST_2_STORAGE_KEY,
+  GN_STYLE_BEST_3_STORAGE_KEY,
+} from './gn-style-result-ranking';
 export {
   OBJECTIVES_CURRENT_STORAGE_KEY,
   OBJECTIVES_FRUITS_CUT_STORAGE_KEY,
@@ -142,6 +158,7 @@ export class ClassicSettingsState {
   private birdComboLeaderboardValue: ComboBirdLeaderboard;
   private birdCrazyLeaderboardValue: CrazyBirdLeaderboard;
   private crazyLeaderboardValue: CrazyLeaderboard;
+  private gnStyleLeaderboardValue: GnStyleLeaderboard;
   private currentObjectiveValue: number;
   private effectsEnabledValue: boolean;
   private fruitsCutValue: number;
@@ -156,11 +173,13 @@ export class ClassicSettingsState {
 
   private constructor(
     snapshot: ClassicSettingsSnapshot,
+    gnStyleLeaderboard: GnStyleLeaderboard,
     birdClassicLeaderboard: ClassicBirdLeaderboard,
     birdCrazyLeaderboard: CrazyBirdLeaderboard,
     birdComboLeaderboard: ComboBirdLeaderboard,
   ) {
     assertSnapshot(snapshot);
+    assertOrderedLeaderboard(gnStyleLeaderboard, 'gnStyleLeaderboard');
     assertOrderedLeaderboard(birdClassicLeaderboard, 'birdClassicLeaderboard');
     assertOrderedLeaderboard(birdCrazyLeaderboard, 'birdCrazyLeaderboard');
     assertOrderedLeaderboard(birdComboLeaderboard, 'birdComboLeaderboard');
@@ -168,6 +187,7 @@ export class ClassicSettingsState {
     this.birdCrazyLeaderboardValue = freezeLeaderboard(birdCrazyLeaderboard);
     this.birdComboLeaderboardValue = freezeLeaderboard(birdComboLeaderboard);
     this.crazyLeaderboardValue = freezeLeaderboard(snapshot.crazyLeaderboard);
+    this.gnStyleLeaderboardValue = freezeLeaderboard(gnStyleLeaderboard);
     this.currentObjectiveValue = snapshot.currentObjective;
     this.effectsEnabledValue = snapshot.effectsEnabled;
     this.fruitsCutValue = snapshot.fruitsCut;
@@ -197,6 +217,7 @@ export class ClassicSettingsState {
         selectedTheme: CLASSIC_INITIAL_SELECTED_THEME,
         totalCoins: CLASSIC_INITIAL_TOTAL_COINS,
       }),
+      GN_STYLE_INITIAL_LEADERBOARD,
       CLASSIC_BIRD_INITIAL_LEADERBOARD,
       CRAZY_BIRD_INITIAL_LEADERBOARD,
       COMBO_BIRD_INITIAL_LEADERBOARD,
@@ -228,6 +249,9 @@ export class ClassicSettingsState {
     const crazyFirst = port.readInt32(CRAZY_BEST_1_STORAGE_KEY, 0);
     const crazySecond = port.readInt32(CRAZY_BEST_2_STORAGE_KEY, 0);
     const crazyThird = port.readInt32(CRAZY_BEST_3_STORAGE_KEY, 0);
+    const gnStyleFirst = port.readInt32(GN_STYLE_BEST_1_STORAGE_KEY, 0);
+    const gnStyleSecond = port.readInt32(GN_STYLE_BEST_2_STORAGE_KEY, 0);
+    const gnStyleThird = port.readInt32(GN_STYLE_BEST_3_STORAGE_KEY, 0);
     const birdClassicFirst = port.readInt32(CLASSIC_BIRD_BEST_1_STORAGE_KEY, 0);
     const birdClassicSecond = port.readInt32(CLASSIC_BIRD_BEST_2_STORAGE_KEY, 0);
     const birdClassicThird = port.readInt32(CLASSIC_BIRD_BEST_3_STORAGE_KEY, 0);
@@ -263,6 +287,11 @@ export class ClassicSettingsState {
         totalCoins,
       }),
       Object.freeze({
+        first: gnStyleFirst,
+        second: gnStyleSecond,
+        third: gnStyleThird,
+      }),
+      Object.freeze({
         first: birdClassicFirst,
         second: birdClassicSecond,
         third: birdClassicThird,
@@ -290,6 +319,10 @@ export class ClassicSettingsState {
 
   get birdComboLeaderboard(): ComboBirdLeaderboard {
     return freezeLeaderboard(this.birdComboLeaderboardValue);
+  }
+
+  get gnStyleLeaderboard(): GnStyleLeaderboard {
+    return freezeLeaderboard(this.gnStyleLeaderboardValue);
   }
 
   get snapshot(): ClassicSettingsSnapshot {
@@ -394,6 +427,17 @@ export class ClassicSettingsState {
     return update;
   }
 
+  recordGnStyleResultScore(
+    completedScore: number,
+  ): GnStyleLeaderboardUpdate {
+    const update = insertGnStyleResultScore(
+      completedScore,
+      this.gnStyleLeaderboardValue,
+    );
+    this.gnStyleLeaderboardValue = update.leaderboard;
+    return update;
+  }
+
   recordClassicBirdResultScore(
     completedScore: number,
   ): ClassicBirdLeaderboardUpdate {
@@ -439,6 +483,17 @@ export class ClassicSettingsState {
     return award;
   }
 
+  awardGnStyleResultCoins(
+    completedScore: number,
+  ): GnStyleResultCoinAward {
+    const award = awardGnStyleResultCoins(
+      this.totalCoinsValue,
+      completedScore,
+    );
+    this.totalCoinsValue = award.totalCoins;
+    return award;
+  }
+
   awardClassicBirdResultCoins(
     completedScore: number,
   ): ClassicBirdResultCoinAward {
@@ -476,6 +531,18 @@ export class ClassicSettingsState {
     port.writeInt32(CRAZY_BEST_1_STORAGE_KEY, this.crazyLeaderboardValue.first);
     port.writeInt32(CRAZY_BEST_2_STORAGE_KEY, this.crazyLeaderboardValue.second);
     port.writeInt32(CRAZY_BEST_3_STORAGE_KEY, this.crazyLeaderboardValue.third);
+    port.writeInt32(
+      GN_STYLE_BEST_1_STORAGE_KEY,
+      this.gnStyleLeaderboardValue.first,
+    );
+    port.writeInt32(
+      GN_STYLE_BEST_2_STORAGE_KEY,
+      this.gnStyleLeaderboardValue.second,
+    );
+    port.writeInt32(
+      GN_STYLE_BEST_3_STORAGE_KEY,
+      this.gnStyleLeaderboardValue.third,
+    );
     port.writeInt32(
       CLASSIC_BIRD_BEST_1_STORAGE_KEY,
       this.birdClassicLeaderboardValue.first,
@@ -626,7 +693,8 @@ function assertOrderedLeaderboard(
     | ClassicLeaderboard
     | ComboBirdLeaderboard
     | CrazyBirdLeaderboard
-    | CrazyLeaderboard,
+    | CrazyLeaderboard
+    | GnStyleLeaderboard,
   label: string,
 ): void {
   if (value === null || typeof value !== 'object') {

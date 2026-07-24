@@ -27,9 +27,13 @@ test('app shell boots the shared scene into Main Menu before any Classic activat
     'const comboBirdPreparation = crazyBirdPreparation',
     'this.requireComboBirdGameplayController()',
     '.prepareComboBirdRuntime()',
+    'const gnStylePreparation = comboBirdPreparation',
+    'this.requireGnStyleGameplayController()',
+    '.prepareGnStyleRuntime()',
     'await Promise.all([',
     'crazyBirdPreparation,',
     'comboBirdPreparation,',
+    'gnStylePreparation,',
     'SharedLeafPresenter.create({',
     'SharedGameScenePresenter.create({',
     'nonClassicPhysics.activateCollisionFilter()',
@@ -101,7 +105,7 @@ test('destroyed shell never starts delayed Classic Bird preparation', async () =
   assert.equal(classicBirdPreparationCount, 0);
 });
 
-test('serialized shell binds every Crazy and Bird navigation event and owner', () => {
+test('serialized shell binds every recovered gameplay navigation event and owner', () => {
   const onLoad = extractMethod(SOURCE, 'onLoad');
   const onEnable = extractMethod(SOURCE, 'onEnable');
   const onDisable = extractMethod(SOURCE, 'onDisable');
@@ -109,6 +113,7 @@ test('serialized shell binds every Crazy and Bird navigation event and owner', (
   assert.match(SOURCE, /@requireComponent\(CrazyGameplayController\)/);
   assert.match(SOURCE, /@requireComponent\(ClassicBirdGameplayController\)/);
   assert.match(SOURCE, /@requireComponent\(ComboBirdGameplayController\)/);
+  assert.match(SOURCE, /@requireComponent\(GnStyleGameplayController\)/);
   assert.match(onLoad, /CrazyGameplayController,[\s\S]*?'CrazyGameplayController'/);
   assert.match(
     onLoad,
@@ -117,6 +122,10 @@ test('serialized shell binds every Crazy and Bird navigation event and owner', (
   assert.match(
     onLoad,
     /ComboBirdGameplayController,[\s\S]*?'ComboBirdGameplayController'/,
+  );
+  assert.match(
+    onLoad,
+    /GnStyleGameplayController,[\s\S]*?'GnStyleGameplayController'/,
   );
   for (const event of [
     'CRAZY_RESULT_MENU_REQUESTED_EVENT',
@@ -127,6 +136,8 @@ test('serialized shell binds every Crazy and Bird navigation event and owner', (
     'CLASSIC_BIRD_PAUSE_QUIT_REQUESTED_EVENT',
     'COMBO_BIRD_RESULT_MENU_REQUESTED_EVENT',
     'COMBO_BIRD_PAUSE_QUIT_REQUESTED_EVENT',
+    'GN_STYLE_RESULT_MENU_REQUESTED_EVENT',
+    'GN_STYLE_PAUSE_QUIT_REQUESTED_EVENT',
   ]) {
     assert.match(onEnable, new RegExp(`this\\.node\\.on\\([\\s\\S]*?${event}`));
     assert.match(onDisable, new RegExp(`this\\.node\\.off\\([\\s\\S]*?${event}`));
@@ -377,6 +388,56 @@ test('Mode Select enters prepared Combo Bird through its isolated mode-5 owner',
   assert.doesNotMatch(rollback, /previous\.setParent\(|previous\.parent\s*=/);
 });
 
+test('Mode Select enters prepared GN Style through its isolated mode-2 owner', () => {
+  const createModeSelect = extractMethod(SOURCE, 'createModeSelectPresenter');
+  const transition = extractMethod(SOURCE, 'transitionModeSelectToGnStyle');
+
+  assert.match(
+    createModeSelect,
+    /onGnStyleRequested: \(transaction\) => \([\s\S]*?this\.transitionModeSelectToGnStyle\(transaction\)/,
+  );
+  assertOrderedSubstrings(transition, [
+    "transaction.destination !== 'GNStyleLayer'",
+    '!gnStyle.prepared',
+    "this.runTransition('mode-select', 'gn-style'",
+    'sharedScene.detachCurrentScreen(oldPresenter.root)',
+    'oldPresenter.suspendForTransition()',
+    'nonClassicPhysics.restorePreviousCollisionFilter()',
+    'gnStyle.activateGnStyleFromAppShell(sharedScene)',
+    "this.stateValue = 'gn-style'",
+    "disposeCommittedPresenter(oldPresenter, 'Mode Select')",
+  ]);
+  const rollbackStart = transition.indexOf('} catch (error) {');
+  assert.ok(rollbackStart > -1);
+  assertOrderedSubstrings(transition.slice(rollbackStart), [
+    'const rollbackFailures: unknown[] = []',
+    'this.restoreModeSelectAfterFailedGnStyleActivation(oldPresenter.root)',
+    'nonClassicPhysics.activateCollisionFilter()',
+    'oldPresenter.rearmNavigationAfterFailure()',
+    'if (rollbackFailures.length > 0)',
+    'new ModeSelectFatalNavigationError(',
+    'aggregateWithPrimaryError(',
+    "'Mode Select to GN Style rollback failed'",
+    'error instanceof GnStyleLifecycleRollbackError',
+    "'Mode Select to GN Style retained poisoned runtime ownership'",
+  ]);
+
+  const rollback = extractMethod(
+    SOURCE,
+    'restoreModeSelectAfterFailedGnStyleActivation',
+  );
+  assertOrderedSubstrings(rollback, [
+    'const current = sharedScene.currentScreen',
+    'if (current === previous)',
+    'if (!isValid(previous, true) || previous.parent !== null)',
+    'if (current === null)',
+    'sharedScene.attachCurrentScreen(previous)',
+    'sharedScene.replaceCurrentScreen(previous)',
+    'sharedScene.currentScreen !== previous',
+  ]);
+  assert.doesNotMatch(rollback, /previous\.setParent\(|previous\.parent\s*=/);
+});
+
 test('Classic Result to Main Menu commits only after attach and activation, with rollback first', () => {
   const transition = extractMemberBlock(
     SOURCE,
@@ -597,6 +658,57 @@ test('Combo Bird Result and Pause Quit share one commit-after-activation transac
   ]);
 });
 
+test('GN Style Result and Pause Quit share one commit-after-activation transaction', () => {
+  const result = extractMemberBlock(
+    SOURCE,
+    '  private readonly onGnStyleResultMenuRequested = (',
+  );
+  const quit = extractMemberBlock(
+    SOURCE,
+    '  private readonly onGnStylePauseQuitRequested = (',
+  );
+  const transition = extractMethod(SOURCE, 'transitionGnStyleToMainMenu');
+
+  assertOrderedSubstrings(result, [
+    'captureGnStyleResultMenuNavigationRequest(request)',
+    'if (captured.request === null)',
+    'this.rejectGnStyleNavigationRequest(',
+    "'GN Style Result'",
+    'this.transitionGnStyleToMainMenu(captured.request',
+  ]);
+  assertOrderedSubstrings(quit, [
+    'captureGnStylePauseQuitNavigationRequest(request)',
+    'if (captured.request === null)',
+    'this.rejectGnStyleNavigationRequest(',
+    "'GN Style Pause Quit'",
+    'this.transitionGnStyleToMainMenu(captured.request',
+  ]);
+  assertOrderedSubstrings(transition, [
+    "this.stateValue !== 'gn-style'",
+    'this.requireNonClassicPhysics()',
+    '.activateCollisionFilter()',
+    'sharedScene.replaceCurrentScreen(nextPresenter.root)',
+    'nextPresenter.activate()',
+    'commitClassicBirdMainMenuNavigationRequest(request, previous, source)',
+    'this.activeMainMenu = nextPresenter',
+    "this.stateValue = 'main-menu'",
+  ]);
+  const rollbackStart = transition.indexOf(
+    'this.restoreGnStyleNavigationRootBeforeRollback(request.root)',
+  );
+  assert.ok(rollbackStart > -1);
+  const catchIndex = transition.lastIndexOf('} catch (error) {', rollbackStart);
+  assert.ok(catchIndex > -1);
+  assertOrderedSubstrings(transition.slice(catchIndex), [
+    'this.restoreGnStyleNavigationRootBeforeRollback(request.root)',
+    'nextPresenter?.dispose()',
+    'this.requireNonClassicPhysics().restorePreviousCollisionFilter()',
+    'request.rollback()',
+    'this.assertGnStyleNavigationRollbackRestored(request.root)',
+    'this.retainGnStyleShellFailure(',
+  ]);
+});
+
 test('Crazy shell payload guards reject malformed events before dereferencing navigation fields', () => {
   const resultGuard = extractMemberBlock(
     SOURCE,
@@ -718,6 +830,36 @@ test('Combo Bird payload captures use the exact result and pause roots once', ()
   assert.equal((resultCapture.match(/candidate\.completedRunScore/g) ?? []).length, 1);
   assert.equal((resultCapture.match(/candidate\.commit/g) ?? []).length, 1);
   assert.equal((resultCapture.match(/candidate\.rollback/g) ?? []).length, 1);
+});
+
+test('GN Style payload captures accept the full signed result range and exact pause root', () => {
+  const resultCapture = extractMemberBlock(
+    SOURCE,
+    'function captureGnStyleResultMenuNavigationRequest(',
+  );
+  const quitCapture = extractMemberBlock(
+    SOURCE,
+    'function captureGnStylePauseQuitNavigationRequest(',
+  );
+
+  assert.match(
+    resultCapture,
+    /return captureCrazyResultMenuNavigationRequest\(request\)/,
+  );
+  assertOrderedSubstrings(quitCapture, [
+    "request === null || typeof request !== 'object'",
+    'const rollback = candidate.rollback',
+    'capturedRollback = () => rollback.call(request)',
+    'const gnStyleRoot = candidate.gnStyleRoot',
+    'const commit = candidate.commit',
+    'gnStyleRoot instanceof Node',
+    'isValid(gnStyleRoot, true)',
+    "typeof commit !== 'function'",
+    'root: gnStyleRoot',
+  ]);
+  assert.equal((quitCapture.match(/candidate\.gnStyleRoot/g) ?? []).length, 1);
+  assert.equal((quitCapture.match(/candidate\.commit/g) ?? []).length, 1);
+  assert.equal((quitCapture.match(/candidate\.rollback/g) ?? []).length, 1);
 });
 
 test('Crazy Bird payload captures every effectful navigation field once', () => {
@@ -2580,6 +2722,8 @@ class ExecutableScreenNode {
 
 class ExecutableCrazyLifecycleRollbackError extends Error {}
 
+class ExecutableGnStyleLifecycleRollbackError extends Error {}
+
 class ExecutableModeSelectFatalNavigationError extends Error {
   readonly cause: unknown;
 
@@ -3014,3 +3158,402 @@ function compileTypeScriptFunction<T extends (...args: any[]) => unknown>(
     `"use strict";\n${javascript}\nreturn ${functionName};`,
   )(...values) as T;
 }
+
+function executeGnStyleMainMenuRequest(
+  source: 'GN Style Pause Quit' | 'GN Style Result',
+  state: 'gn-style' | 'main-menu',
+  rollbackThrows: boolean,
+  activateThrows = false,
+): Readonly<{
+  readonly commitCount: number;
+  readonly currentRoot: ExecutableScreenNode;
+  readonly currentScreen: ExecutableScreenNode | null;
+  readonly filterActive: boolean;
+  readonly mainMenuRoot: ExecutableScreenNode;
+  readonly retainFailureCount: number;
+  readonly rollbackCount: number;
+  readonly transitionFailureCount: number;
+  readonly state: unknown;
+}> {
+  const errorMessage = compileSourceFunction<(error: unknown) => string>('errorMessage');
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const aggregateWithPrimaryError = compileSourceFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  const runBestEffortCleanup = compileSourceFunction<
+    (label: string, operations: readonly (() => void)[]) => readonly Error[]
+  >('runBestEffortCleanup', {
+    console: { error() {} },
+    normalizeError,
+  });
+  const rollbackRejectedClassicBirdNavigationRequest = compileSourceFunction<
+    (
+      rollback: (() => void) | null,
+      source:
+        | 'Classic Bird Pause Quit'
+        | 'Classic Bird Result'
+        | 'Combo Bird Pause Quit'
+        | 'Combo Bird Result'
+        | 'GN Style Pause Quit'
+        | 'GN Style Result',
+    ) => readonly Error[]
+  >('rollbackRejectedClassicBirdNavigationRequest', { runBestEffortCleanup });
+  const rejectGnStyleNavigationRequest = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      rollback: (() => void) | null,
+      source: 'GN Style Pause Quit' | 'GN Style Result',
+    ) => void
+  >('rejectGnStyleNavigationRequest', {
+    aggregateWithPrimaryError,
+    rollbackRejectedClassicBirdNavigationRequest,
+  });
+  const commitClassicBirdMainMenuNavigationRequest = compileSourceFunction<
+    (
+      request: Readonly<{
+        commit(previousRoot: ExecutableScreenNode): void;
+      }>,
+      previousRoot: ExecutableScreenNode,
+      source: 'GN Style Pause Quit' | 'GN Style Result',
+    ) => void
+  >('commitClassicBirdMainMenuNavigationRequest', { normalizeError });
+  const restoreGnStyleNavigationRootBeforeRollback = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >('restoreGnStyleNavigationRootBeforeRollback', { isValid: (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  ) });
+  const assertGnStyleNavigationRollbackRestored = compileSourceMethod<
+    (
+      this: Readonly<{
+        requireNonClassicPhysics(): Readonly<{ collisionFilterActive: boolean }>;
+        requireSharedScene(): ExecutableSharedScene;
+      }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >('assertGnStyleNavigationRollbackRestored', { isValid: (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  ) });
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      request: Readonly<{
+        root: ExecutableScreenNode;
+        commit(previousRoot: ExecutableScreenNode): void;
+      rollback(): void;
+      }>,
+      source: 'GN Style Pause Quit' | 'GN Style Result',
+    ) => void
+  >('transitionGnStyleToMainMenu', {
+    commitClassicBirdMainMenuNavigationRequest,
+    aggregateWithPrimaryError,
+    runBestEffortCleanup,
+  });
+
+  const currentRoot = new ExecutableScreenNode();
+  const requestRoot = state === 'gn-style' ? currentRoot : new ExecutableScreenNode();
+  const mainMenuRoot = new ExecutableScreenNode();
+  const sharedScene = new ExecutableSharedScene(currentRoot);
+  let commitCount = 0;
+  let filterActive = true;
+  let retainFailureCount = 0;
+  let rollbackCount = 0;
+  let transitionFailureCount = 0;
+  const shell: Record<string, unknown> = {
+    activeMainMenu: null,
+    createMainMenuPresenter: () => ({
+      activate() {
+        if (activateThrows) {
+          throw new Error('injected GN Style main-menu activation failure');
+        }
+      },
+      dispose() {},
+      root: mainMenuRoot,
+    }),
+    destroyedValue: false,
+    emitTransitionFailure() {
+      transitionFailureCount += 1;
+    },
+    requireGameplayController: () => ({
+      sharedAudioPresenter: {
+        stopBackgroundMusic() {},
+      },
+    }),
+    requireNonClassicPhysics: () => ({
+      activateCollisionFilter() {
+        filterActive = true;
+        return true;
+      },
+      get collisionFilterActive() {
+        return filterActive;
+      },
+      restorePreviousCollisionFilter() {
+        filterActive = false;
+        return true;
+      },
+    }),
+    requireSharedScene: () => sharedScene,
+    restoreGnStyleNavigationRootBeforeRollback(root: ExecutableScreenNode) {
+      return restoreGnStyleNavigationRootBeforeRollback.call(this as never, root);
+    },
+    rejectStaleGnStyleNavigationRequest() {
+      return undefined;
+    },
+    retainGnStyleShellFailure() {
+      retainFailureCount += 1;
+      shell.stateValue = 'failed';
+    },
+    assertGnStyleNavigationRollbackRestored(root: ExecutableScreenNode) {
+      return assertGnStyleNavigationRollbackRestored.call(this as never, root);
+    },
+    stateValue: state,
+    transitioning: false,
+  };
+  const request = {
+    commit(previousRoot: ExecutableScreenNode) {
+      assert.equal(previousRoot, currentRoot);
+      commitCount += 1;
+    },
+    rollback() {
+      rollbackCount += 1;
+      if (rollbackThrows) {
+        throw new Error('injected GN Style rollback failure');
+      }
+    },
+    root: requestRoot,
+  };
+
+  transition.call(shell, request, source);
+
+  return Object.freeze({
+    commitCount,
+    currentRoot,
+    currentScreen: sharedScene.currentScreen,
+    filterActive,
+    mainMenuRoot,
+    retainFailureCount,
+    rollbackCount,
+    transitionFailureCount,
+    state: shell.stateValue,
+  });
+}
+
+function executeGnStyleActivationFailure(
+  activationError: unknown,
+): Readonly<{
+  readonly currentScreen: ExecutableScreenNode | null;
+  readonly filterActive: boolean;
+  readonly inputLeaseHeld: boolean;
+  readonly inputRearmCount: number;
+  readonly modeSelectRoot: ExecutableScreenNode;
+  readonly result: boolean | null;
+  readonly state: unknown;
+  readonly thrown: unknown;
+  readonly transitionFailureCount: number;
+}> {
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      transaction: Readonly<{
+        destination: string;
+        root: ExecutableScreenNode;
+      }>,
+    ) => boolean
+  >('transitionModeSelectToGnStyle', {
+    GnStyleLifecycleRollbackError: ExecutableGnStyleLifecycleRollbackError,
+    ModeSelectFatalNavigationError: ExecutableModeSelectFatalNavigationError,
+  });
+  const runTransition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      from: string,
+      to: string,
+      operation: () => boolean,
+    ) => boolean
+  >('runTransition', {
+    ModeSelectFatalNavigationError: ExecutableModeSelectFatalNavigationError,
+  });
+  const restore = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >('restoreModeSelectAfterFailedGnStyleActivation', { isValid });
+
+  const modeSelectRoot = new ExecutableScreenNode();
+  const sharedScene = new ExecutableSharedScene(modeSelectRoot);
+  const partialGnStyleRoot = new ExecutableScreenNode();
+  let filterActive = true;
+  let filterReactivationCount = 0;
+  let inputLeaseHeld = true;
+  let inputRearmCount = 0;
+  let transitionFailureCount = 0;
+  const oldPresenter = {
+    dispose: () => true,
+    root: modeSelectRoot,
+    rearmNavigationAfterFailure() {
+      inputRearmCount += 1;
+      inputLeaseHeld = true;
+      return true;
+    },
+    suspendForTransition() {
+      inputLeaseHeld = false;
+      return true;
+    },
+  };
+  const shell: Record<string, unknown> = {
+    activeModeSelect: oldPresenter,
+    captureModeSelectFatalScreenRelease: () => () => {},
+    destroyedValue: false,
+    emitTransitionFailure() {
+      transitionFailureCount += 1;
+    },
+    requireGnStyleGameplayController: () => ({
+      activateGnStyleFromAppShell() {
+        sharedScene.attachCurrentScreen(partialGnStyleRoot);
+        throw activationError;
+      },
+      prepared: true,
+    }),
+    requireNonClassicPhysics: () => ({
+      activateCollisionFilter() {
+        filterReactivationCount += 1;
+        filterActive = true;
+        return true;
+      },
+      get collisionFilterActive() {
+        return filterActive;
+      },
+      restorePreviousCollisionFilter() {
+        filterActive = false;
+        return true;
+      },
+    }),
+    requireSharedScene: () => sharedScene,
+    restoreModeSelectAfterFailedGnStyleActivation(root: ExecutableScreenNode) {
+      restore.call(this as never, root);
+    },
+    runTransition(from: string, to: string, operation: () => boolean) {
+      return runTransition.call(this, from, to, operation);
+    },
+    stateValue: 'mode-select',
+    transitioning: false,
+  };
+
+  let result: boolean | null = null;
+  let thrown: unknown = null;
+  try {
+    result = transition.call(shell, {
+      destination: 'GNStyleLayer',
+      root: modeSelectRoot,
+    });
+  } catch (error) {
+    thrown = error;
+  }
+
+  return Object.freeze({
+    currentScreen: sharedScene.currentScreen,
+    filterActive,
+    inputLeaseHeld,
+    inputRearmCount,
+    modeSelectRoot,
+    result,
+    state: shell.stateValue,
+    thrown,
+    transitionFailureCount,
+  });
+}
+
+test('GN Style result and pause quit commit after activation and stale rollback leaves the fresh shell usable', () => {
+  for (const source of ['GN Style Result', 'GN Style Pause Quit'] as const) {
+    const committed = executeGnStyleMainMenuRequest(source, 'gn-style', false);
+
+    assert.equal(committed.commitCount, 1);
+    assert.equal(committed.rollbackCount, 0);
+    assert.equal(committed.currentScreen, committed.mainMenuRoot);
+    assert.equal(committed.state, 'main-menu');
+    assert.equal(committed.filterActive, true);
+    assert.equal(committed.retainFailureCount, 0);
+    assert.equal(committed.transitionFailureCount, 0);
+
+    const stale = executeGnStyleMainMenuRequest(source, 'main-menu', true);
+
+    assert.equal(stale.commitCount, 0);
+    assert.equal(stale.rollbackCount, 0);
+    assert.equal(stale.currentScreen, stale.currentRoot);
+    assert.equal(stale.state, 'main-menu');
+    assert.equal(stale.filterActive, true);
+    assert.equal(stale.retainFailureCount, 0);
+    assert.equal(stale.transitionFailureCount, 0);
+  }
+});
+
+test('GN Style main-menu activation failure restores the GN root and only poisons when rollback fails', () => {
+  for (const source of ['GN Style Result', 'GN Style Pause Quit'] as const) {
+    const recovered = executeGnStyleMainMenuRequest(
+      source,
+      'gn-style',
+      false,
+      true,
+    );
+    assert.equal(recovered.commitCount, 0);
+    assert.equal(recovered.rollbackCount, 1);
+    assert.equal(recovered.currentScreen, recovered.currentRoot);
+    assert.equal(recovered.state, 'gn-style');
+    assert.equal(recovered.filterActive, false);
+    assert.equal(recovered.retainFailureCount, 0);
+    assert.equal(recovered.transitionFailureCount, 1);
+
+    const poisoned = executeGnStyleMainMenuRequest(
+      source,
+      'gn-style',
+      true,
+      true,
+    );
+    assert.equal(poisoned.commitCount, 0);
+    assert.equal(poisoned.rollbackCount, 1);
+    assert.equal(poisoned.currentScreen, poisoned.currentRoot);
+    assert.equal(poisoned.state, 'failed');
+    assert.equal(poisoned.filterActive, false);
+    assert.equal(poisoned.retainFailureCount, 1);
+    assert.equal(poisoned.transitionFailureCount, 0);
+  }
+});
+
+test('GN Style entry activation failure restores Mode Select and fails closed on poisoned ownership', () => {
+  const generic = executeGnStyleActivationFailure(
+    new Error('injected GN Style activation failure'),
+  );
+  assert.equal(generic.result, false);
+  assert.equal(generic.thrown, null);
+  assert.equal(generic.state, 'mode-select');
+  assert.equal(generic.currentScreen, generic.modeSelectRoot);
+  assert.equal(generic.filterActive, true);
+  assert.equal(generic.inputLeaseHeld, true);
+  assert.equal(generic.inputRearmCount, 1);
+  assert.equal(generic.transitionFailureCount, 1);
+
+  const poisonedActivationError = new ExecutableGnStyleLifecycleRollbackError(
+    'injected poisoned GN Style ownership',
+  );
+  const poisoned = executeGnStyleActivationFailure(poisonedActivationError);
+  assert.equal(poisoned.result, null);
+  assert.ok(poisoned.thrown instanceof ExecutableModeSelectFatalNavigationError);
+  assert.equal(
+    (poisoned.thrown as ExecutableModeSelectFatalNavigationError).cause,
+    poisonedActivationError,
+  );
+  assert.equal(poisoned.state, 'failed');
+  assert.equal(poisoned.currentScreen, poisoned.modeSelectRoot);
+  assert.equal(poisoned.filterActive, true);
+  assert.equal(poisoned.inputLeaseHeld, true);
+  assert.equal(poisoned.inputRearmCount, 1);
+  assert.equal(poisoned.transitionFailureCount, 1);
+});

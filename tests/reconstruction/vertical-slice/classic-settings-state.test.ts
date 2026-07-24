@@ -32,6 +32,9 @@ const {
   CRAZY_BIRD_BEST_1_STORAGE_KEY,
   CRAZY_BIRD_BEST_2_STORAGE_KEY,
   CRAZY_BIRD_BEST_3_STORAGE_KEY,
+  GN_STYLE_BEST_1_STORAGE_KEY,
+  GN_STYLE_BEST_2_STORAGE_KEY,
+  GN_STYLE_BEST_3_STORAGE_KEY,
   CLASSIC_EFFECTS_ENABLED_STORAGE_KEY,
   CLASSIC_MODE_UNLOCK_INDICES,
   CLASSIC_MUSIC_ENABLED_STORAGE_KEY,
@@ -91,6 +94,9 @@ const RESTORATION_READS = [
   [CRAZY_BEST_1_STORAGE_KEY, 0],
   [CRAZY_BEST_2_STORAGE_KEY, 0],
   [CRAZY_BEST_3_STORAGE_KEY, 0],
+  [GN_STYLE_BEST_1_STORAGE_KEY, 0],
+  [GN_STYLE_BEST_2_STORAGE_KEY, 0],
+  [GN_STYLE_BEST_3_STORAGE_KEY, 0],
   [CLASSIC_BIRD_BEST_1_STORAGE_KEY, 0],
   [CLASSIC_BIRD_BEST_2_STORAGE_KEY, 0],
   [CLASSIC_BIRD_BEST_3_STORAGE_KEY, 0],
@@ -131,6 +137,9 @@ test('Classic settings load exact keys and restoration defaults in recovered rel
   assert.equal(COMBO_BIRD_BEST_1_STORAGE_KEY, 'bird_combo_best_1');
   assert.equal(COMBO_BIRD_BEST_2_STORAGE_KEY, 'bird_combo_best_2');
   assert.equal(COMBO_BIRD_BEST_3_STORAGE_KEY, 'bird_combo_best_3');
+  assert.equal(GN_STYLE_BEST_1_STORAGE_KEY, 'gnstyle_best_1');
+  assert.equal(GN_STYLE_BEST_2_STORAGE_KEY, 'gnstyle_best_2');
+  assert.equal(GN_STYLE_BEST_3_STORAGE_KEY, 'gnstyle_best_3');
   assert.deepEqual(port.reads, RESTORATION_READS);
   assert.deepEqual(state.snapshot, {
     crazyLeaderboard: { first: 0, second: 0, third: 0 },
@@ -167,6 +176,12 @@ test('Classic settings load exact keys and restoration defaults in recovered rel
     third: 0,
   });
   assert.equal(Object.isFrozen(state.birdComboLeaderboard), true);
+  assert.deepEqual(state.gnStyleLeaderboard, {
+    first: 0,
+    second: 0,
+    third: 0,
+  });
+  assert.equal(Object.isFrozen(state.gnStyleLeaderboard), true);
 });
 
 test('persisted total coins and rankings override the restoration defaults', () => {
@@ -178,6 +193,9 @@ test('persisted total coins and rankings override the restoration defaults', () 
     [CRAZY_BEST_1_STORAGE_KEY]: 300,
     [CRAZY_BEST_2_STORAGE_KEY]: 200,
     [CRAZY_BEST_3_STORAGE_KEY]: 100,
+    [GN_STYLE_BEST_1_STORAGE_KEY]: 3000,
+    [GN_STYLE_BEST_2_STORAGE_KEY]: 2000,
+    [GN_STYLE_BEST_3_STORAGE_KEY]: 1000,
     [CLASSIC_BIRD_BEST_1_STORAGE_KEY]: 30_000,
     [CLASSIC_BIRD_BEST_2_STORAGE_KEY]: 20_000,
     [CLASSIC_BIRD_BEST_3_STORAGE_KEY]: 10_000,
@@ -220,6 +238,10 @@ test('persisted total coins and rankings override the restoration defaults', () 
     achievedRank: 2,
     leaderboard: { first: 300, second: 250, third: 200 },
   });
+  assert.deepEqual(state.recordGnStyleResultScore(2500), {
+    achievedRank: 2,
+    leaderboard: { first: 3000, second: 2500, third: 2000 },
+  });
   assert.deepEqual(state.recordClassicBirdResultScore(25_000), {
     achievedRank: 2,
     leaderboard: { first: 30_000, second: 25_000, third: 20_000 },
@@ -257,6 +279,9 @@ test('result mutations remain memory-only until explicit save checkpoint', () =>
     [CRAZY_BEST_1_STORAGE_KEY, 0],
     [CRAZY_BEST_2_STORAGE_KEY, 0],
     [CRAZY_BEST_3_STORAGE_KEY, 0],
+    [GN_STYLE_BEST_1_STORAGE_KEY, 0],
+    [GN_STYLE_BEST_2_STORAGE_KEY, 0],
+    [GN_STYLE_BEST_3_STORAGE_KEY, 0],
     [CLASSIC_BIRD_BEST_1_STORAGE_KEY, 0],
     [CLASSIC_BIRD_BEST_2_STORAGE_KEY, 0],
     [CLASSIC_BIRD_BEST_3_STORAGE_KEY, 0],
@@ -385,6 +410,35 @@ test('Crazy result uses a distinct leaderboard and the shared recovered coin bal
   ]);
 });
 
+test('GN Style result uses its own ranking and float32 0.6 coin balance', () => {
+  const port = new RecordingPort({
+    [GN_STYLE_BEST_1_STORAGE_KEY]: 300,
+    [GN_STYLE_BEST_2_STORAGE_KEY]: 200,
+    [GN_STYLE_BEST_3_STORAGE_KEY]: 100,
+  });
+  const state = ClassicSettingsState.load(port);
+
+  assert.deepEqual(state.recordGnStyleResultScore(250), {
+    achievedRank: 2,
+    leaderboard: { first: 300, second: 250, third: 200 },
+  });
+  assert.deepEqual(state.gnStyleLeaderboard, {
+    first: 300,
+    second: 250,
+    third: 200,
+  });
+  assert.deepEqual(state.awardGnStyleResultCoins(25), {
+    bonusCoins: 15,
+    totalCoins: 1_000_014,
+  });
+  state.save(port);
+  assert.deepEqual(port.writes.slice(10, 13), [
+    [GN_STYLE_BEST_1_STORAGE_KEY, 300],
+    [GN_STYLE_BEST_2_STORAGE_KEY, 250],
+    [GN_STYLE_BEST_3_STORAGE_KEY, 200],
+  ]);
+});
+
 test('Classic Bird result uses its own ranking and float32 0.8 coin balance', () => {
   const port = new RecordingPort({
     [CLASSIC_BIRD_BEST_1_STORAGE_KEY]: 300,
@@ -407,7 +461,7 @@ test('Classic Bird result uses its own ranking and float32 0.8 coin balance', ()
     totalCoins: 1_000_019,
   });
   state.save(port);
-  assert.deepEqual(port.writes.slice(10, 13), [
+  assert.deepEqual(port.writes.slice(13, 16), [
     [CLASSIC_BIRD_BEST_1_STORAGE_KEY, 300],
     [CLASSIC_BIRD_BEST_2_STORAGE_KEY, 250],
     [CLASSIC_BIRD_BEST_3_STORAGE_KEY, 200],
@@ -436,7 +490,7 @@ test('Crazy Bird result uses its own ranking and float32 0.8 coin balance', () =
     totalCoins: 1_000_019,
   });
   state.save(port);
-  assert.deepEqual(port.writes.slice(13, 16), [
+  assert.deepEqual(port.writes.slice(16, 19), [
     [CRAZY_BIRD_BEST_1_STORAGE_KEY, 300],
     [CRAZY_BIRD_BEST_2_STORAGE_KEY, 250],
     [CRAZY_BIRD_BEST_3_STORAGE_KEY, 200],
@@ -465,7 +519,7 @@ test('Combo Bird result uses its own ranking and float32 0.8 coin balance', () =
     totalCoins: 1_000_019,
   });
   state.save(port);
-  assert.deepEqual(port.writes.slice(16, 19), [
+  assert.deepEqual(port.writes.slice(19, 22), [
     [COMBO_BIRD_BEST_1_STORAGE_KEY, 300],
     [COMBO_BIRD_BEST_2_STORAGE_KEY, 250],
     [COMBO_BIRD_BEST_3_STORAGE_KEY, 200],
@@ -498,6 +552,14 @@ test('settings reject invalid ports, values, and unordered persisted rankings', 
       [CRAZY_BEST_3_STORAGE_KEY]: 2,
     })),
     /crazyLeaderboard must remain ordered/,
+  );
+  assert.throws(
+    () => ClassicSettingsState.load(new RecordingPort({
+      [GN_STYLE_BEST_1_STORAGE_KEY]: 1,
+      [GN_STYLE_BEST_2_STORAGE_KEY]: 3,
+      [GN_STYLE_BEST_3_STORAGE_KEY]: 2,
+    })),
+    /gnStyleLeaderboard must remain ordered/,
   );
   assert.throws(
     () => ClassicSettingsState.load(new RecordingPort({

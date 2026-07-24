@@ -55,6 +55,15 @@ test('Editor-authored Classic scene resolves all Canvas script components throug
   }>(
     'game/assets/scripts/creator/combo-bird-gameplay-controller.ts.meta',
   );
+  const gnStyleSceneControllerMeta = readJson<{ imported: boolean; uuid: string }>(
+    'game/assets/scripts/creator/gn-style-scene-controller.ts.meta',
+  );
+  const gnStyleGameplayControllerMeta = readJson<{
+    imported: boolean;
+    uuid: string;
+  }>(
+    'game/assets/scripts/creator/gn-style-gameplay-controller.ts.meta',
+  );
   const appShellControllerMeta = readJson<{ imported: boolean; uuid: string }>(
     'game/assets/scripts/creator/recovered-app-shell-controller.ts.meta',
   );
@@ -76,6 +85,8 @@ test('Editor-authored Classic scene resolves all Canvas script components throug
   assert.equal(classicBirdGameplayControllerMeta.imported, true);
   assert.equal(comboBirdSceneControllerMeta.imported, true);
   assert.equal(comboBirdGameplayControllerMeta.imported, true);
+  assert.equal(gnStyleSceneControllerMeta.imported, true);
+  assert.equal(gnStyleGameplayControllerMeta.imported, true);
   assert.equal(appShellControllerMeta.imported, true);
   assert.deepEqual(scriptTypes.map(decodeCreatorUuid), [
     bladeMeta.uuid,
@@ -88,6 +99,8 @@ test('Editor-authored Classic scene resolves all Canvas script components throug
     classicBirdGameplayControllerMeta.uuid,
     comboBirdSceneControllerMeta.uuid,
     comboBirdGameplayControllerMeta.uuid,
+    gnStyleSceneControllerMeta.uuid,
+    gnStyleGameplayControllerMeta.uuid,
     appShellControllerMeta.uuid,
   ]);
 });

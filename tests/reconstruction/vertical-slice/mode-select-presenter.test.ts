@@ -505,9 +505,10 @@ test('partial RopeButton activation rolls back the input lease and permits retry
   presenter.dispose();
 });
 
-test('rejected Crazy, all Bird routes, and unsupported routes restore every cut card', () => {
+test('rejected Crazy, GN Style, and all Bird routes restore every cut card', () => {
   ropeStub.resetRopes();
   let crazyCalls = 0;
+  let gnStyleCalls = 0;
   let classicBirdCalls = 0;
   let crazyBirdCalls = 0;
   let comboBirdCalls = 0;
@@ -515,6 +516,10 @@ test('rejected Crazy, all Bird routes, and unsupported routes restore every cut 
   const lifecycle = defaultLifecycle();
   lifecycle.onCrazyRequested = () => {
     crazyCalls += 1;
+    return false;
+  };
+  lifecycle.onGnStyleRequested = () => {
+    gnStyleCalls += 1;
     return false;
   };
   lifecycle.onClassicBirdRequested = () => {
@@ -588,7 +593,8 @@ test('rejected Crazy, all Bird routes, and unsupported routes restore every cut 
   assert.equal(gnStyle.cut(segment, true), true);
   assert.equal(presenter.state.navigationPendingCount, 1);
   presenter.update(0.75);
-  assert.equal(unsupportedCalls, 1);
+  assert.equal(gnStyleCalls, 1);
+  assert.equal(unsupportedCalls, 0);
   assert.equal(presenter.state.navigationPendingCount, 0);
   assert.equal(gnStyle.restoreCount, 1);
   assert.equal(gnStyle.cutAccepted, false);
@@ -956,6 +962,7 @@ test('source keeps exact detached/lifecycle boundaries and no destination placeh
   assert.match(source, /onClassicBirdRequested/);
   assert.match(source, /onCrazyBirdRequested/);
   assert.match(source, /onComboBirdRequested/);
+  assert.match(source, /onGnStyleRequested/);
   assert.match(source, /onMainMenuRequested/);
   assert.match(source, /onUnsupportedDestinationRequested/);
   assert.match(source, /restoreAfterFailedNavigation/);
@@ -1572,6 +1579,7 @@ function defaultLifecycle() {
     onClassicBirdRequested(_transaction?: unknown) { return true; },
     onCrazyBirdRequested(_transaction?: unknown) { return true; },
     onComboBirdRequested(_transaction?: unknown) { return true; },
+    onGnStyleRequested(_transaction?: unknown) { return true; },
     onMainMenuRequested(_transaction?: unknown) { return true; },
     onUnsupportedDestinationRequested(
       _destination?: unknown,

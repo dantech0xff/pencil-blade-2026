@@ -8,6 +8,10 @@ const SOURCE = readFileSync(
   `${REPOSITORY_ROOT}/game/assets/scripts/creator/combo-bird-gameplay-controller.ts`,
   'utf8',
 );
+const TIME_MANAGER_AUDIO_SOURCE = readFileSync(
+  `${REPOSITORY_ROOT}/game/assets/scripts/creator/time-manager-audio-presenter.ts`,
+  'utf8',
+);
 
 test('Combo Bird gameplay is a passive mode-5 owner with no Crazy dependency', () => {
   assert.match(SOURCE, /@ccclass\('ComboBirdGameplayController'\)/);
@@ -64,7 +68,7 @@ test('preparation is independent, retryable, and loads only the required supplem
     'loadComboBirdResources(assetTree)',
     'loadBirdResources(assetTree, COMBO_BIRD_BLADE_TYPE)',
     'loadBaseGameplayResources(assetTree)',
-    'ComboBirdTimerAudioPresenter.load(this.node)',
+    'TimeManagerAudioPresenter.load(this.node)',
     'this.commitPreparation({',
   ]);
   assert.doesNotMatch(initialize, /prepareCrazyRuntime|sharedCrazy/);
@@ -545,22 +549,33 @@ test('result ranking, reward, Retry, and Menu reuse the recovered shared contrac
 
 test('timer audio owns exactly timetick and timeup while all other effects stay Classic-owned', () => {
   const audioPaths = extractConstBlock(
-    SOURCE,
-    'const COMBO_BIRD_TIMER_AUDIO_PATHS',
+    TIME_MANAGER_AUDIO_SOURCE,
+    'const TIME_MANAGER_AUDIO_PATHS',
   );
   assert.match(audioPaths, /'Sounds\/timetick\.wav'/);
   assert.match(audioPaths, /'Sounds\/timeup\.wav'/);
   assert.equal(occurrences(audioPaths, "'Sounds/"), 2);
 
-  const loader = extractMethod(SOURCE, 'loadTimerAudioClips');
-  assert.match(loader, /COMBO_BIRD_TIMER_AUDIO_PATHS\.map/);
+  const loader = extractMethod(
+    TIME_MANAGER_AUDIO_SOURCE,
+    'loadTimerAudioClips',
+  );
+  assert.match(loader, /TIME_MANAGER_AUDIO_PATHS\.map/);
   assert.match(loader, /canonicalResourceToBundlePath/);
   assert.match(loader, /bundle\.load\(paths, AudioClip/);
 
-  const timerPlay = extractMethod(SOURCE, 'playOneShot');
+  const timerPlay = extractMethod(TIME_MANAGER_AUDIO_SOURCE, 'playOneShot');
   assert.match(timerPlay, /this\.clips\.get\(canonicalPath\)/);
-  assert.match(timerPlay, /new Node\('ComboBirdTimerOneShotAudio'\)/);
+  assert.match(timerPlay, /new Node\('TimeManagerOneShotAudio'\)/);
   assert.match(timerPlay, /source\.play\(\)/);
+  assert.match(
+    SOURCE,
+    /from '\.\/time-manager-audio-presenter'/,
+  );
+  assert.doesNotMatch(
+    SOURCE,
+    /class ComboBirdTimerAudioPresenter|class ComboBirdTimerAudioVoice|loadTimerAudioClips/,
+  );
 
   for (const [method, sharedClassicPath] of [
     ['onPauseRequested', 'CLASSIC_MENU_BUTTON_AUDIO_PATH'],

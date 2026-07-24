@@ -1,6 +1,6 @@
 # Cocos Creator Architecture Decision
 
-Status: in progress; recovered-resource Classic, Crazy, Classic Bird, and Crazy Bird checkpoints integrated
+Status: in progress; all six recovered production gameplay routes integrated
 Date: 2026-07-22
 Updated: 2026-07-24
 
@@ -12,19 +12,21 @@ domain modules with explicit clock, RNG, input, persistence, and command ports. 
 components, prefabs, tweens, audio, and Physics2D calls are adapters rather than owners of
 gameplay state.
 
-The workspace now contains the Creator foundation, Classic, Crazy, Classic Bird, and Crazy
-Bird contract/test baselines, all 862 exact recovered APK game assets in a Creator bundle,
-and a persistent app shell that routes Main Menu -> Mode Select -> production modes `0`, `1`,
-`3`, and `4`. Classic owns the recovered normal-fruit, blade, HUD, fail, result, and core-audio
-path. Crazy adds its 60-second controller graph, standard/electric bombs, specials, magnet,
-Dragon, objectives, pause, audio, and transactional Result lifecycle. Classic Bird adds the
-shared BaseBird/BirdBlade substrate and mode-3 result/retry chain. Crazy Bird profiles the
-shared Crazy controllers with BirdBlade type `2`, the exact 17-raster type-2 closure,
-mode-4 objectives, `bird_crazy_best_1..3`, and the float32 `0.8` result reward.
-Process-owned persistence covers the eleven implemented Settings fields plus immediate
-mode-unlock keys and the `999999`-coin missing/corrupt-save fallback; valid persisted balances
-still win. The remaining scene/prefab map, modes `2` and `5`, most presentation consumers,
-and runtime physics-equivalence gate keep the architecture decision in progress.
+The workspace now contains the Creator foundation and all six production route contract/test
+baselines, all 862 exact recovered APK game assets in a Creator bundle, and a persistent app
+shell that routes Main Menu -> Mode Select -> production modes `0` through `5`. Classic owns
+the recovered normal-fruit, blade, HUD, fail, result, and core-audio path. Crazy adds its
+60-second controller graph, standard/electric bombs, specials, magnet, Dragon, objectives,
+pause, audio, and transactional Result lifecycle. Classic Bird adds the shared
+BaseBird/BirdBlade substrate and mode-3 result/retry chain. Crazy Bird profiles the shared
+Crazy controllers with BirdBlade type `2`; Combo Bird owns an independent mode-5 ordinary
+graph with BirdBlade type `3`. GN Style owns an independent mode-2 `150`-second ordinary
+graph with the standard blade, exact intro, dedicated non-looping music, 439-parent particle
+choreography, late-cut tail, and result lifecycle. Process-owned persistence covers the
+expanded implemented Settings subset including all six route leaderboards, immediate
+mode-unlock keys, and the `999999`-coin missing/corrupt-save fallback; valid persisted balances
+still win. The remaining scene/prefab map, full presentation/progression consumers, Android
+build, and runtime physics-equivalence gates keep the architecture decision in progress.
 
 ## Dependency Direction
 
@@ -73,19 +75,19 @@ must not.
 
 ## Current Workspace Boundary
 
-- `game/assets/scripts/domain/` contains the pure Classic, Crazy, Bird, menu/shared-scene,
-  timer/bonus/objective/result, and presentation contracts.
+- `game/assets/scripts/domain/` contains the pure Classic, Crazy, Bird, GN Style,
+  menu/shared-scene, timer/bonus/objective/result, and presentation contracts.
 - `game/assets/scripts/creator/` contains the Physics2D, resolution, blade-input, bird-input,
-  app-shell, Classic/shared-Crazy/Bird scene, generated-entity, resource, audio/effect, pause,
-  and gameplay bridges.
+  app-shell, all route scene/gameplay owners, generated-entity, resource, audio/effect, pause,
+  particle, and gameplay bridges.
 - `game/assets/scenes/classic.scene` is Editor-authored and attaches the persistent app shell
-  plus passive Classic and Crazy runtime owners to Canvas.
+  plus passive Classic, Crazy, GN Style, Classic Bird, Crazy Bird, and Combo Bird owners to Canvas.
 - `game/assets/game/` contains byte-identical copies of all 862 recovered APK game assets.
-  The current Classic, Crazy, and Bird subsets use exact rasters and audio, but consumer/UUID
-  coverage is not complete and the canonical sample-project root remains unresolved. Release
-  rights are tracked separately.
-- `tests/reconstruction/vertical-slice/` contains the current `952/952`
-  Classic/Crazy/Classic-Bird/Crazy-Bird/menu regression suite.
+  The current route subsets use exact rasters and audio, but global consumer/UUID coverage is
+  not complete and the canonical sample-project root remains unresolved. Release rights are
+  tracked separately.
+- `tests/reconstruction/vertical-slice/` contains the current `1151/1151`
+  all-route/menu regression suite.
 - `scripts/audit-creator-build.mjs` contains the post-build archive audit.
 - `game/library/` is generated Creator cache and is not hand-authored gameplay source.
 
@@ -119,6 +121,12 @@ must not.
   enlists the gameplay Result owner as a two-phase participant: pre-commit failure restores the
   exact Crazy/TimeManager owner; post-commit cleanup cannot roll back the domain or rearm a
   disposed TimeManager.
+- `GnStyleSession` and `GnStyleTossCoordinator` own the independent mode-2 `150`-second
+  Free/Wave/Concurrent lifecycle. Only outer schedulers stop at Time Up; an armed Wave child,
+  input, physics, entities, score, and combo remain live through the three-second late-cut
+  window. Result samples afterward, commits ranking once, then dispatches the final objective
+  once. Dedicated music and the generated 439-parent choreography remain run-owned and
+  transactionally quiescent on pause, replay, quit, result, failed activation, and teardown.
 - Terminal guard, pending fail callbacks, active bomb presentations, and the physics-stop
   Boolean are orthogonal. A same-query multi-bomb case can attach independent explosions;
   the first finish may resume physics while another remains pending.
@@ -201,12 +209,12 @@ Map the recovered SharedPreferences keys/defaults into a versioned TypeScript sa
 Legacy ads, review, social, and network bridges are excluded. Migration reads may recognize
 legacy keys, but no JNI/native compatibility layer is permitted.
 
-The current runtime reads and writes the eleven implemented values for coins, selected
-theme/background/blade, Classic and Crazy leaderboards, music/effect flags, network sentinel,
-and rated state in recovered relative order. Indexed Mode Select unlocks use their separate
-immediate keys. Missing or corrupt storage falls back to `999999` coins while a valid
-persisted balance wins. Result mutations remain memory-only until the app-hide save checkpoint.
-Full first-launch Settings and Main Menu exit-save remain open.
+The current runtime reads and writes the expanded implemented subset for coins, selections,
+all six route leaderboards, objective state, music/effect flags, network sentinel, and rated
+state in recovered relative order. Indexed Mode Select unlocks use their separate immediate
+keys. Missing or corrupt storage falls back to `999999` coins while a valid persisted balance
+wins. Result mutations remain memory-only until the app-hide save checkpoint. Full
+first-launch Settings and Main Menu exit-save remain open.
 
 ## Verification Gates
 
@@ -216,27 +224,29 @@ Full first-launch Settings and Main Menu exit-save remain open.
 3. Creator integration tests for the selected public manual variable-step policy, dynamic
    trajectories, post-step synchronization, deferred lifecycle behavior, and rendered rotation.
 4. Presentation/resource tests against registered hashes, geometry, and command order.
-5. Executable controller tests for same-parent Retry success, pre-commit rollback, and
-   post-commit Result-cleanup isolation in both Classic and Crazy. Crazy additionally proves
-   ordered Time-Up tail dispatch, exact-owner rollback, single leaderboard commit, retired
-   cleanup drain, and post-commit observer isolation.
+5. Executable controller tests for Retry/Replay success, pre-commit rollback, stale navigation,
+   poisoned ownership, and post-commit cleanup isolation across all production routes. GN
+   additionally proves detached construction, shell activation/result rollback, exact-once
+   objectives/ranking, late-tail activity, music exclusion, and particle teardown.
 6. Build-content audit rejecting APKs, `libgame.so`, extracted native/decompiler output,
    old Cocos2d-x code/runtime, secrets, and obsolete platform SDKs. The audit hashes every
    archive entry, parses exact ZIP records, recurses through bounded nested archives, and
    permits ELF only at the pinned Creator 3.8.8 `libcocos.so` boundary.
 
-Current checkpoint: full vertical slice `952/952`, `tests/*.mjs` `38/38`,
+Current checkpoint: full vertical slice `1151/1151`, `tests/*.mjs` `43/43`,
 inventory/source/staging/archive workflow `14/14` in `217s`, reconstruction policy positive
-plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and an
-approved independent runtime review with no P0/P1/P2 finding. A fresh Creator-served Browser
-Preview confirms Main Menu → Mode Select → Crazy Bird → live Bird/type-2 gameplay →
-Pause/Resume/Replay → Pause Quit → Main Menu; the final post-gesture DevTools check reports
-`0` messages.
+plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and
+clean diff hygiene. Metadata reports zero structural errors and zero duplicate UUIDs; fidelity
+remains blocked only by preserved unsupported `Fonts/CooperBlackStd.otf`. A fresh
+Creator-served Browser Preview confirms Main Menu → Mode Select → GN Style → intro → live
+cuts/score/music/particles → Pause/Resume/Replay → Pause Quit → Main Menu → repeated entry →
+natural Time Up → Result Retry → Result Menu. DevTools reports zero application/runtime
+errors; one unrelated Chrome extension error remains outside the game.
 
 ## Current Blockers
 
-- The persistent Canvas map is authoritative for the app shell and current Classic/Crazy/Bird
-  owners, but remaining mode presenters, prefabs, and consumers are not authored yet.
+- The persistent Canvas map is authoritative for the app shell and all six gameplay owners,
+  but the remaining non-mode scene/prefab map and global consumers are not authored yet.
 - Creator Preview has exercised exact ordinary-fruit presentation, trajectories, cut halves,
   core audio, cut/score, three-miss game over, and two same-parent Result->Retry cycles without
   a reload or game/Cocos console error. The executable Retry harness covers construction,
@@ -250,12 +260,15 @@ Pause/Resume/Replay → Pause Quit → Main Menu; the final post-gesture DevTool
 - Crazy Bird Preview has exercised the profiled mode-4 runtime, BirdBlade type `2`, live
   spawning, Pause/Resume/Replay, and Pause Quit back to Main Menu. Its transaction harness
   covers fatal navigation ownership release, result rollback, retry, menu, and observer errors.
+- GN Style Preview has exercised exact intro/resources, live ordinary cuts and score, the
+  439-parent effect, Pause/Resume, Replay, Pause Quit, repeated entry, natural Time Up,
+  Result Retry, and Result Menu. Its transaction harness covers detached construction,
+  activation/result rollback, stale requests, fatal ownership, late-tail callbacks, music,
+  ranking/objective commit, and cleanup.
 - The canonical sample-project resource manifest/root remains unresolved; presentation
   completion and the `99%` metric both stay blocked on that source.
 - BombElectric runs through the memory-safe target adapter, but exact pinned-backend
   contact-count/direction equivalence remains unresolved.
-- Modes `2` and `5` remain fail closed. Shared BaseBird/BirdBlade, Classic Bird, and Crazy Bird
-  are complete; Combo Bird is the next architecture boundary, followed by GN Style.
 - Original content rights remain unknown.
 
 ## References
@@ -267,6 +280,10 @@ Pause/Resume/Replay → Pause Quit → Main Menu; the final post-gesture DevTool
 - `../../forensics/contracts/classic-time-state-contract.md`
 - `../../forensics/contracts/classic-presentation-contract.md`
 - `../../forensics/contracts/crazy-mode-contract.md`
+- `../../forensics/contracts/gn-style-mode-contract.md`
 - `../../reference/reconstruction-policy.yaml`
 - `../../plans/260721-2253-pencil-blade-restoration/reports/creator-readiness-2026-07-22.md`
 - `../../plans/260721-2253-pencil-blade-restoration/reports/implementer-2026-07-23-crazy-mode-runtime.md`
+- `../../plans/260721-2253-pencil-blade-restoration/reports/implementer-2026-07-24-gn-style-runtime.md`
+- `../../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-gn-style-final-checkpoint.md`
+- `../../plans/260721-2253-pencil-blade-restoration/reports/reviewer-2026-07-24-gn-style-gameplay-shell.md`
