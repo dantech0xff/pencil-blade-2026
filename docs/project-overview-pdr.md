@@ -28,8 +28,12 @@ Replay/Retry/Quit/Menu ownership. The standard-blade runtime checkpoint is also 
 IDs `0`-`17` now route transactionally through Main Menu, Mode Select, Classic, the Crazy
 standard branch, and GN Style with exact Basic textures, particle plans, Dragon multipart
 behavior, and Centipede multipart behavior. This is a bounded six-route production checkpoint,
-not presentation completion: every packaged resource now has a reviewed recovered-runtime
-disposition, while the full scene/prefab/composition map remains open.
+not final release completion: every packaged resource now has a reviewed recovered-runtime
+disposition, and the exact one-scene/13-controller bridge plus all code-built production
+surfaces are composition-reconciled. Standard Classic now owns the recovered shared
+Pause/Resume/Replay/Quit surface and rollback-safe session/Physics2D/input handoffs. Android
+build validation, release rights, and the external sample-project completeness denominator
+remain separate gates.
 
 ## Authority and evidence
 
@@ -78,8 +82,10 @@ replay, and device comparison are unavailable and are not project gates.
   unpaid-selection reconciliation. First-launch Settings behavior is resolved as a static
   contract and does not require a production migration.
 - The standard-blade runtime is complete across Main Menu, Mode Select, Classic, the Crazy
-  standard branch, and GN Style. Leaderboard and progression wiring are also complete; the
-  remaining Phase 6 integration surface is scene/prefab/composition reconciliation.
+  standard branch, and GN Style. Leaderboard, progression, resource disposition, and dynamic
+  composition are also complete. Phase 6 closes with standard Classic Pause/Resume, fresh
+  Replay, Quit, and repeated entry passing compact physical `360x800` (logical/resource tree
+  `480x800`) plus high `720x1280`.
 - The current implementation checkpoint covers all six production gameplay routes: `0`, `1`,
   `2`, `3`, `4`, and `5`.
 - The standard-blade checkpoint passes `1285/1285` deterministic vertical-slice tests and `43/43`
@@ -95,9 +101,11 @@ replay, and device comparison are unavailable and are not project gates.
   errors; one unrelated Chrome extension error remains outside the game.
 - Compact `360x800` and high `720x1280` Creator Preview profiles also pass Main Menu →
   Options selection/purchase/Back with an empty Cocos Editor console.
-- The Loading checkpoint passes `1520/1520` full vertical-slice tests, `61/61` top-level
-  resource/build/catalog/tooling tests, Creator 3.8.8 strict TypeScript with zero diagnostics,
-  and compact logical `480x800` plus high `720x1280` Preview with zero Cocos console counters.
+- The current composition/Classic-Pause checkpoint passes `218/218` focused tests,
+  `1547/1547` full vertical-slice tests, `61/61` top-level resource/build/catalog/tooling
+  tests, and Creator 3.8.8 strict TypeScript with zero diagnostics. Recovered Loading remains
+  Preview-clean in compact logical `480x800` plus high `720x1280`. The final Cocos counters
+  are `0/0/0`; DevTools has no project error, and its only error comes from a Chrome extension.
 - Presentation restoration is complete only when the canonical user-supplied sample project
   has 100% inventory, staging, and reconciliation classification for every resource actually
   present. That is separate from the current `761/862` runtime consumer coverage target.

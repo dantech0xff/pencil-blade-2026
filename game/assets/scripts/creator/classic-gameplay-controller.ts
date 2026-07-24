@@ -6,6 +6,7 @@ import {
   Tween,
   UITransform,
   Vec3,
+  director,
   isValid,
   tween,
 } from 'cc';
@@ -23,7 +24,14 @@ import {
   getClassicFruitCutAudioSequence,
   getClassicResultRankAudioPath,
 } from '../domain/classic-audio-contract';
-import { ClassicSwishAudioGate } from '../domain/classic-swish-audio-gate';
+import {
+  CLASSIC_SWISH_COOLDOWN_ACTION_SECONDS,
+  ClassicSwishAudioGate,
+} from '../domain/classic-swish-audio-gate';
+import {
+  BASE_GAMEPLAY_PAUSE_ACTION_SECONDS,
+  type BaseGameplayPauseObjectiveCard,
+} from '../domain/base-gameplay-pause-state';
 import { createClassicCriticalParticleUpdateCommands } from '../domain/classic-critical-particle-plan';
 import {
   createClassicFruitCutCommands,
@@ -80,6 +88,7 @@ import {
   loadBaseGameplayResources,
   type LoadedBaseGameplayResources,
 } from './base-gameplay-resource-loader';
+import { BaseGameplayPausePresenter } from './base-gameplay-pause-presenter';
 import { ComboItemPresenter } from './combo-item-presenter';
 import { ClassicCriticalParticlePresenter } from './classic-critical-particle-presenter';
 import { ClassicCutHalfPresenter } from './classic-cut-half-presenter';
@@ -100,6 +109,7 @@ import type {
 import {
   CLASSIC_PHYSICS_STEPPED_EVENT,
   CLASSIC_SESSION_COMMAND_EVENT,
+  ClassicLifecycleRollbackError,
   ClassicSceneController,
   type ClassicPhysicsSteppedEvent,
 } from './classic-scene-controller';
@@ -120,6 +130,8 @@ export const CLASSIC_GAMEPLAY_COMMAND_EVENT = 'classic-gameplay-command';
 export const CLASSIC_GAMEPLAY_SNAPSHOT_EVENT = 'classic-gameplay-snapshot';
 export const CLASSIC_DEFERRED_TOSS_CONTROLLER_EVENT = 'classic-deferred-toss-controller';
 export const CLASSIC_RESOURCE_LOAD_FAILED_EVENT = 'classic-resource-load-failed';
+export const CLASSIC_PAUSE_QUIT_REQUESTED_EVENT = 'classic-pause-quit-requested';
+export const CLASSIC_PAUSE_REPLAY_FAILED_EVENT = 'classic-pause-replay-failed';
 export const CLASSIC_RESULT_MENU_REQUESTED_EVENT = 'classic-result-menu-requested';
 export const CLASSIC_RESULT_REWARD_READY_EVENT = 'classic-result-reward-ready';
 export const CLASSIC_RESULT_RETRY_FAILED_EVENT = 'classic-result-retry-failed';
@@ -156,6 +168,17 @@ export interface ClassicResultMenuRequestedEvent {
   readonly resultRoot: Node;
   commit(previousRoot: Node): void;
   rollback(): void;
+}
+
+export interface ClassicPauseQuitRequestedEvent {
+  readonly classicRoot: Node;
+  commit(previousRoot: Node): void;
+  rollback(): void;
+}
+
+export interface ClassicPauseReplayFailedEvent {
+  readonly message: string;
+  readonly reason: 'restart-error';
 }
 
 export interface ClassicResultRewardReadyEvent {
@@ -209,6 +232,48 @@ interface ClassicResultMenuTransactionState {
   status: 'committed' | 'pending' | 'rolled-back';
 }
 
+interface ClassicPauseQuitTransactionState {
+  readonly directorPauseOwned: boolean;
+  readonly effectsPauseLeaseRequired: boolean;
+  readonly musicPauseLeaseRequired: boolean;
+  readonly presenter: BaseGameplayPausePresenter;
+  readonly root: Node;
+  readonly screenPlacement: ClassicScreenPlacementPort;
+  status: 'committed' | 'fatal' | 'pending' | 'rolled-back';
+}
+
+interface ClassicRunOwnership {
+  readonly bladePresenter: StandardBladePresenter | null;
+  readonly classicModeRoot: Node | null;
+  readonly combo: ComboService;
+  readonly comboItemPresenters: Set<ComboItemPresenter>;
+  readonly criticalCutHalfPresenters: Set<ClassicCutHalfPresenter>;
+  readonly criticalParticlePresenters: Set<ClassicCriticalParticlePresenter>;
+  readonly cutHalfPresenters: Set<ClassicCutHalfPresenter>;
+  readonly deferredControllers: Set<ClassicTossControllerId>;
+  readonly fail: FailService;
+  readonly failPresentationRoot: Node | null;
+  readonly failPresenter: ClassicFailPresenter | null;
+  readonly gameOver: boolean;
+  readonly introGoodNode: Node | null;
+  readonly introLuckNode: Node | null;
+  readonly normalFree: ClassicFreeTossStrategy | null;
+  readonly pausePresenter: BaseGameplayPausePresenter | null;
+  readonly planner: ClassicSpawnPlanner;
+  readonly registry: ClassicEntityRegistry | null;
+  readonly resultConstructionRequested: boolean;
+  readonly resultMode: 0 | null;
+  readonly resultObjectiveTailAttempted: boolean;
+  readonly resultScore: number | null;
+  readonly score: ScoreService;
+  readonly scoreHudPresenter: ClassicScoreHudPresenter | null;
+  readonly scoreHudRoot: Node | null;
+  readonly swishAudio: ClassicSwishAudioGate;
+  readonly terminalGameNode: Node | null;
+  readonly terminalOverNode: Node | null;
+  readonly worldPresentationRoot: Node | null;
+}
+
 /**
  * Playable Classic slice: the recovered intro gate starts the normal-free timer, exact
  * recovered fruit use Creator Physics2D, post-step blade rays drive cut/score/combo, and the
@@ -230,11 +295,11 @@ export class ClassicGameplayController extends Component {
   private combo = new ComboService(this.random);
   private fail = new FailService();
   private score = new ScoreService();
-  private readonly deferredControllers = new Set<ClassicTossControllerId>();
-  private readonly cutHalfPresenters = new Set<ClassicCutHalfPresenter>();
-  private readonly criticalCutHalfPresenters = new Set<ClassicCutHalfPresenter>();
-  private readonly criticalParticlePresenters = new Set<ClassicCriticalParticlePresenter>();
-  private readonly comboItemPresenters = new Set<ComboItemPresenter>();
+  private deferredControllers = new Set<ClassicTossControllerId>();
+  private cutHalfPresenters = new Set<ClassicCutHalfPresenter>();
+  private criticalCutHalfPresenters = new Set<ClassicCutHalfPresenter>();
+  private criticalParticlePresenters = new Set<ClassicCriticalParticlePresenter>();
+  private comboItemPresenters = new Set<ComboItemPresenter>();
   private readonly objectiveAchievementPresenters = new Set<
     ObjectiveAchievementPresenter
   >();
@@ -249,6 +314,7 @@ export class ClassicGameplayController extends Component {
   private registry: ClassicEntityRegistry | null = null;
   private failPresenter: ClassicFailPresenter | null = null;
   private bladePresenter: StandardBladePresenter | null = null;
+  private pausePresenter: BaseGameplayPausePresenter | null = null;
   private resultPresenter: ClassicResultPresenter | null = null;
   private scoreHudPresenter: ClassicScoreHudPresenter | null = null;
   private resourceCatalog: ClassicSliceResourceCatalog | null = null;
@@ -269,6 +335,11 @@ export class ClassicGameplayController extends Component {
   private recoveredRuntimePreparation: Promise<void> | null = null;
   private screenPlacement: ClassicScreenPlacementPort | null = null;
   private initialClassicRuntimeActivated = false;
+  private lifecycleFatalError: ClassicLifecycleRollbackError | null = null;
+  private readonly pendingPauseDirectorResumes = new Set<
+    BaseGameplayPausePresenter
+  >();
+  private readonly retiredClassicRuns: ClassicRunOwnership[] = [];
 
   onLoad(): void {
     const sceneController = this.getComponent(ClassicSceneController);
@@ -401,6 +472,10 @@ export class ClassicGameplayController extends Component {
     if (this.shuttingDown) {
       throw new Error('Classic runtime cannot activate after destruction');
     }
+    if (this.lifecycleFatalError !== null || this.sceneController?.fatalLifecycle) {
+      throw new Error('Classic runtime cannot activate after a fatal lifecycle rollback');
+    }
+    this.drainRetiredClassicRunOwnership();
     const retainedScreenPlacement = this.screenPlacement;
     if (
       retainedScreenPlacement !== null
@@ -423,8 +498,10 @@ export class ClassicGameplayController extends Component {
     const lifecycle = sceneController.sessionSnapshot().lifecycle;
     const isReentry = this.initialClassicRuntimeActivated;
     if (isReentry) {
-      if (lifecycle !== 'result-removed') {
-        throw new Error('Classic runtime can re-enter only after Result removal');
+      if (lifecycle !== 'result-removed' && lifecycle !== 'navigation-removed') {
+        throw new Error(
+          'Classic runtime can re-enter only after Result removal or Pause Quit',
+        );
       }
     } else if (lifecycle !== 'intro') {
       throw new Error('Classic runtime can activate only from intro');
@@ -436,6 +513,7 @@ export class ClassicGameplayController extends Component {
       || this.bladePresenter !== null
       || this.scoreHudPresenter !== null
       || this.failPresenter !== null
+      || this.pausePresenter !== null
       || this.resultPresenter !== null
       || this.resultPresentationRoot !== null
     ) {
@@ -467,13 +545,62 @@ export class ClassicGameplayController extends Component {
       }
       this.initialClassicRuntimeActivated = true;
     } catch (error) {
+      const rollbackFailures: unknown[] = [];
       if (restartPrepared) {
-        sceneController.rollbackClassicLayerRestart();
+        collectClassicCleanupFailure(
+          rollbackFailures,
+          () => sceneController.rollbackClassicLayerRestart(),
+        );
       }
+      const cleanupFailures: unknown[] = [];
       try {
-        this.disposeClassicModePresentation();
+        try {
+          this.disposeClassicModePresentation();
+        } catch (cleanupError) {
+          cleanupFailures.push(cleanupError);
+          this.retainCurrentClassicRunForCleanup();
+          this.installClassicRunOwnership(this.createFreshClassicRunOwnership());
+        }
       } finally {
         this.screenPlacement = retainedScreenPlacement;
+      }
+      reportClassicCleanupFailures(
+        'Rolled-back Classic activation presentation cleanup',
+        cleanupFailures,
+      );
+      let typedLifecycleFailure: ClassicLifecycleRollbackError | null = (
+        error instanceof ClassicLifecycleRollbackError ? error : null
+      );
+      if (typedLifecycleFailure === null) {
+        for (const failure of rollbackFailures) {
+          if (failure instanceof ClassicLifecycleRollbackError) {
+            typedLifecycleFailure = failure;
+            break;
+          }
+        }
+      }
+      if (typedLifecycleFailure !== null || sceneController.fatalLifecycle) {
+        const fatalError = typedLifecycleFailure
+          ?? sceneController.failClosedAfterLifecycleRollback(
+            'Classic activation entered an unknown fatal scene state',
+            error,
+            rollbackFailures,
+          );
+        this.quiesceClassicAfterFatalLifecycle(fatalError);
+        throw fatalError;
+      }
+      if (rollbackFailures.length > 0) {
+        const rollbackError = aggregateClassicFailure(
+          'Classic activation rollback failed',
+          error,
+          rollbackFailures,
+        );
+        const fatalError = sceneController.failClosedAfterLifecycleRollback(
+          'Classic activation rollback is incomplete',
+          rollbackError,
+        );
+        this.quiesceClassicAfterFatalLifecycle(fatalError);
+        throw fatalError;
       }
       throw error;
     }
@@ -562,6 +689,7 @@ export class ClassicGameplayController extends Component {
     if (screenPlacement.currentScreen !== root) {
       throw new Error('Classic current-screen placement lost the attached mode root');
     }
+    this.initializePausePresentation();
   }
 
   private readonly onRecoveredResourceInitializationFailed = (error: unknown): void => {
@@ -608,6 +736,7 @@ export class ClassicGameplayController extends Component {
     for (const presenter of this.criticalParticlePresenters) {
       presenter.updateAction(deltaSeconds);
     }
+    this.pausePresenter?.updateAction(deltaSeconds);
     this.resultPresenter?.updateAction(deltaSeconds);
     if (lifecycle !== 'result-removed') {
       this.failPresenter?.updateAction(deltaSeconds);
@@ -641,6 +770,14 @@ export class ClassicGameplayController extends Component {
       );
       collectClassicCleanupFailure(
         cleanupFailures,
+        () => this.drainRetiredClassicRunOwnership(),
+      );
+      collectClassicCleanupFailure(
+        cleanupFailures,
+        () => this.sceneController?.retryPendingPhysicsRestore(),
+      );
+      collectClassicCleanupFailure(
+        cleanupFailures,
         () => this.disposeResultPresentation(),
       );
       collectClassicCleanupFailure(
@@ -668,67 +805,278 @@ export class ClassicGameplayController extends Component {
 
   /** Removes only the native Classic layer's owned runtime and presentation. */
   private disposeClassicModePresentation(): void {
+    const failures: unknown[] = [];
     const classicModeRoot = this.classicModeRoot;
+    const pausePresenter = this.pausePresenter;
+    if (pausePresenter !== null) {
+      // Dispose the director-pause lease before any fallible child cleanup. The presenter
+      // resumes only a pause it actually acquired.
+      attemptClassicOwnedCleanup(
+        failures,
+        () => this.disposePausePresenterForRetry(pausePresenter),
+        () => {
+          if (this.pausePresenter === pausePresenter) {
+            this.pausePresenter = null;
+          }
+        },
+      );
+    }
+    let classicRootDetached = (
+      classicModeRoot === null
+      || !isValid(classicModeRoot, true)
+      || classicModeRoot.parent === null
+    );
     if (
       classicModeRoot !== null
       && isValid(classicModeRoot, true)
       && classicModeRoot.parent !== null
     ) {
-      this.detachOwnedScreen(classicModeRoot, 'Classic mode');
+      attemptClassicOwnedCleanup(
+        failures,
+        () => this.detachOwnedScreen(classicModeRoot, 'Classic mode'),
+        () => {
+          classicRootDetached = true;
+        },
+      );
     }
-    for (const node of [
+    this.disposeClassicOwnedActionNode(
       this.introGoodNode,
+      () => {
+        this.introGoodNode = null;
+      },
+      failures,
+    );
+    this.disposeClassicOwnedActionNode(
       this.introLuckNode,
+      () => {
+        this.introLuckNode = null;
+      },
+      failures,
+    );
+    this.disposeClassicOwnedActionNode(
       this.terminalGameNode,
+      () => {
+        this.terminalGameNode = null;
+      },
+      failures,
+    );
+    this.disposeClassicOwnedActionNode(
       this.terminalOverNode,
-    ]) {
-      if (node !== null && isValid(node, true)) {
-        Tween.stopAllByTarget(node);
-        node.destroy();
-      }
+      () => {
+        this.terminalOverNode = null;
+      },
+      failures,
+    );
+    const normalFree = this.normalFree;
+    if (normalFree !== null) {
+      attemptClassicOwnedCleanup(
+        failures,
+        () => normalFree.stop(),
+        () => {
+          if (this.normalFree === normalFree) {
+            this.normalFree = null;
+          }
+        },
+      );
     }
-    this.introGoodNode = null;
-    this.introLuckNode = null;
-    this.terminalGameNode = null;
-    this.terminalOverNode = null;
-    this.normalFree?.stop();
-    this.normalFree = null;
     this.deferredControllers.clear();
-    this.disposeCutHalfPresenters();
-    this.cutHalfPresenters.clear();
-    this.criticalCutHalfPresenters.clear();
-    for (const presenter of this.criticalParticlePresenters) {
-      presenter.dispose();
+    collectClassicCleanupFailure(failures, () => this.disposeCutHalfPresenters());
+    for (const presenter of [...this.criticalParticlePresenters]) {
+      attemptClassicOwnedCleanup(
+        failures,
+        () => presenter.dispose(),
+        () => this.criticalParticlePresenters.delete(presenter),
+      );
     }
-    this.criticalParticlePresenters.clear();
     for (const presenter of [...this.comboItemPresenters]) {
-      presenter.dispose();
+      attemptClassicOwnedCleanup(
+        failures,
+        () => presenter.dispose(),
+        () => this.comboItemPresenters.delete(presenter),
+      );
     }
-    this.comboItemPresenters.clear();
-    this.bladePresenter?.dispose();
-    this.bladePresenter = null;
-    this.failPresenter?.dispose();
-    this.failPresenter = null;
-    this.scoreHudPresenter?.dispose();
-    this.scoreHudPresenter = null;
-    this.registry?.disposeAll();
-    this.registry = null;
-    for (const root of [
+    const bladePresenter = this.bladePresenter;
+    if (bladePresenter !== null) {
+      attemptClassicOwnedCleanup(
+        failures,
+        () => bladePresenter.dispose(),
+        () => {
+          if (this.bladePresenter === bladePresenter) {
+            this.bladePresenter = null;
+          }
+        },
+      );
+    }
+    const failPresenter = this.failPresenter;
+    if (failPresenter !== null) {
+      attemptClassicOwnedCleanup(
+        failures,
+        () => failPresenter.dispose(),
+        () => {
+          if (this.failPresenter === failPresenter) {
+            this.failPresenter = null;
+          }
+        },
+      );
+    }
+    const scoreHudPresenter = this.scoreHudPresenter;
+    if (scoreHudPresenter !== null) {
+      attemptClassicOwnedCleanup(
+        failures,
+        () => scoreHudPresenter.dispose(),
+        () => {
+          if (this.scoreHudPresenter === scoreHudPresenter) {
+            this.scoreHudPresenter = null;
+          }
+        },
+      );
+    }
+    const registry = this.registry;
+    if (registry !== null) {
+      attemptClassicOwnedCleanup(
+        failures,
+        () => registry.disposeAll(),
+        () => {
+          if (this.registry === registry) {
+            this.registry = null;
+          }
+        },
+      );
+    }
+    this.disposeClassicOwnedNode(
       this.scoreHudRoot,
+      () => {
+        this.scoreHudRoot = null;
+      },
+      failures,
+    );
+    this.disposeClassicOwnedNode(
       this.worldPresentationRoot,
+      () => {
+        this.worldPresentationRoot = null;
+      },
+      failures,
+    );
+    this.disposeClassicOwnedNode(
       this.failPresentationRoot,
-    ]) {
-      if (root !== null && isValid(root, true)) {
-        root.destroy();
+      () => {
+        this.failPresentationRoot = null;
+      },
+      failures,
+    );
+    if (
+      classicModeRoot === null
+      || !isValid(classicModeRoot, true)
+    ) {
+      this.classicModeRoot = null;
+    } else if (classicRootDetached) {
+      attemptClassicOwnedCleanup(
+        failures,
+        () => classicModeRoot.destroy(),
+        () => {
+          if (this.classicModeRoot === classicModeRoot) {
+            this.classicModeRoot = null;
+          }
+        },
+      );
+      if (!isValid(classicModeRoot, true)) {
+        this.classicModeRoot = null;
       }
     }
-    this.scoreHudRoot = null;
-    this.worldPresentationRoot = null;
-    this.failPresentationRoot = null;
-    if (classicModeRoot !== null && isValid(classicModeRoot, true)) {
-      classicModeRoot.destroy();
+    throwClassicCleanupFailures('Classic mode presentation teardown', failures);
+  }
+
+  private disposeClassicOwnedActionNode(
+    node: Node | null,
+    release: () => void,
+    failures: unknown[],
+  ): void {
+    if (node === null || !isValid(node, true)) {
+      release();
+      return;
     }
-    this.classicModeRoot = null;
+    collectClassicCleanupFailure(failures, () => Tween.stopAllByTarget(node));
+    this.disposeClassicOwnedNode(node, release, failures);
+  }
+
+  private disposePausePresenterForRetry(
+    presenter: BaseGameplayPausePresenter,
+  ): void {
+    if (!presenter.isDisposed) {
+      const directorPauseOwned = presenter.snapshot.directorPauseOwned;
+      if (directorPauseOwned) {
+        this.pendingPauseDirectorResumes.add(presenter);
+      }
+      try {
+        presenter.dispose();
+        this.pendingPauseDirectorResumes.delete(presenter);
+        return;
+      } catch (error) {
+        // BaseGameplay clears its pure ownership bit before invoking director.resume(). If the
+        // command itself succeeded and a later root cleanup failed, do not resume a second time.
+        if (directorPauseOwned && !director.isPaused()) {
+          this.pendingPauseDirectorResumes.delete(presenter);
+        }
+        if (!presenter.isDisposed) {
+          throw error;
+        }
+        try {
+          this.disposeDisposedPausePresenter(presenter);
+          return;
+        } catch (retryError) {
+          throw aggregateClassicFailure(
+            'Classic pause presenter disposal retry failed',
+            error,
+            [retryError],
+          );
+        }
+      }
+    }
+    this.disposeDisposedPausePresenter(presenter);
+  }
+
+  private disposeDisposedPausePresenter(
+    presenter: BaseGameplayPausePresenter,
+  ): void {
+    const failures: unknown[] = [];
+    if (this.pendingPauseDirectorResumes.has(presenter)) {
+      collectClassicCleanupFailure(failures, () => {
+        director.resume();
+        this.pendingPauseDirectorResumes.delete(presenter);
+      });
+    }
+    for (const root of [
+      presenter.objectiveOverlay.node,
+      presenter.optionsMenu.node,
+      presenter.pauseMenu.node,
+    ]) {
+      if (isValid(root, true)) {
+        collectClassicCleanupFailure(failures, () => root.destroy());
+      }
+    }
+    throwClassicCleanupFailures(
+      'Disposed Classic pause presentation retry',
+      failures,
+    );
+  }
+
+  private disposeClassicOwnedNode(
+    node: Node | null,
+    release: () => void,
+    failures: unknown[],
+  ): void {
+    if (node === null || !isValid(node, true)) {
+      release();
+      return;
+    }
+    attemptClassicOwnedCleanup(
+      failures,
+      () => node.destroy(),
+      release,
+    );
+    if (!isValid(node, true)) {
+      release();
+    }
   }
 
   private disposeResultPresentation(): void {
@@ -1009,9 +1357,18 @@ export class ClassicGameplayController extends Component {
   }
 
   private disposeCutHalfPresenters(): void {
-    for (const presenter of this.cutHalfPresenters) {
-      presenter.disposeAll();
+    const failures: unknown[] = [];
+    for (const presenter of [...this.cutHalfPresenters]) {
+      attemptClassicOwnedCleanup(
+        failures,
+        () => presenter.disposeAll(),
+        () => {
+          this.cutHalfPresenters.delete(presenter);
+          this.criticalCutHalfPresenters.delete(presenter);
+        },
+      );
     }
+    throwClassicCleanupFailures('Classic cut-half presentation teardown', failures);
   }
 
   private onFruitMiss(event: ClassicGeneratedFruitMissEvent): void {
@@ -1171,6 +1528,613 @@ export class ClassicGameplayController extends Component {
   private readonly effectsEnabled = (): boolean => (
     this.settingsRuntime?.state.snapshot.effectsEnabled ?? true
   );
+
+  private initializePausePresentation(): void {
+    if (this.pausePresenter !== null) {
+      throw new Error('Classic pause presentation can initialize only once per run');
+    }
+    const resolution = this.sceneController?.resolutionSnapshot();
+    if (resolution === null || resolution === undefined) {
+      throw new Error('Classic pause presentation requires applied resolution');
+    }
+    const presenter = BaseGameplayPausePresenter.create({
+      contentScaleFactor: resolution.profile.contentScaleFactor,
+      initialCard: this.currentPauseCard(),
+      resources: this.requireBaseGameplayResources(),
+      viewport: {
+        height: resolution.visibleRect.height,
+        width: resolution.visibleRect.width,
+      },
+    }, {
+      onPauseRequested: this.onPauseRequested,
+      onQuitRequested: this.onPauseQuitRequested,
+      onReplayRequested: this.onPauseReplayRequested,
+      onResumeRequested: this.onResumeRequested,
+    });
+    // Publish ownership before the fallible attachment boundary. BaseGameplay can fail after
+    // partially attaching roots; retaining the presenter lets the enclosing run teardown retry
+    // every pause-owned node and director lease instead of losing the local owner.
+    this.pausePresenter = presenter;
+    try {
+      presenter.attach(this.requireClassicModeRoot());
+    } catch (error) {
+      const failures: unknown[] = [];
+      attemptClassicOwnedCleanup(
+        failures,
+        () => this.disposePausePresenterForRetry(presenter),
+        () => {
+          if (this.pausePresenter === presenter) {
+            this.pausePresenter = null;
+          }
+        },
+      );
+      if (failures.length > 0) {
+        throw aggregateClassicFailure(
+          'Classic pause initialization rollback failed',
+          error,
+          failures,
+        );
+      }
+      throw error;
+    }
+  }
+
+  private currentPauseCard(): BaseGameplayPauseObjectiveCard {
+    const card = this.requireObjectivesManager().pauseCard();
+    if (card === null) {
+      throw new Error('Classic pause UI requires one active objective');
+    }
+    return Object.freeze({
+      description: card.objective.description,
+      progress: card.progressText,
+      reward: card.rewardText,
+    });
+  }
+
+  private readonly onPauseRequested = (): void => {
+    if (this.lifecycleFatalError !== null) {
+      return;
+    }
+    this.requirePausePresenter().pauseIngress(this.currentPauseCard());
+    const settings = this.requireSettingsRuntime().state.snapshot;
+    const failures: unknown[] = [];
+    if (settings.effectsEnabled) {
+      collectClassicCleanupFailure(
+        failures,
+        () => this.sharedAudioPresenter.playOneShot(CLASSIC_MENU_BUTTON_AUDIO_PATH),
+      );
+      collectClassicCleanupFailure(
+        failures,
+        () => this.sharedAudioPresenter.pauseAllEffects(),
+      );
+    }
+    if (settings.musicEnabled) {
+      collectClassicCleanupFailure(
+        failures,
+        () => this.sharedAudioPresenter.pauseBackgroundMusic(),
+      );
+    }
+    throwClassicCleanupFailures('Classic Pause audio', failures);
+  };
+
+  private readonly onResumeRequested = (): void => {
+    if (this.lifecycleFatalError !== null) {
+      return;
+    }
+    this.requirePausePresenter().resumeEgress();
+    if (!this.effectsEnabled()) {
+      return;
+    }
+    const failures: unknown[] = [];
+    collectClassicCleanupFailure(
+      failures,
+      () => this.sharedAudioPresenter.playOneShot(CLASSIC_MENU_BUTTON_AUDIO_PATH),
+    );
+    collectClassicCleanupFailure(
+      failures,
+      () => this.sharedAudioPresenter.resumeAllEffects(),
+    );
+    // Standard Classic is recovered mode 0 and never resumes background music here.
+    throwClassicCleanupFailures('Classic Resume audio', failures);
+  };
+
+  private readonly onPauseReplayRequested = (): void => {
+    try {
+      this.restartClassicFromPause();
+    } catch (error) {
+      const failure = error instanceof Error
+        ? error
+        : new Error(`Classic Pause Replay failed: ${String(error)}`);
+      const payload: ClassicPauseReplayFailedEvent = Object.freeze({
+        message: failure.message,
+        reason: 'restart-error',
+      });
+      this.node.emit(CLASSIC_PAUSE_REPLAY_FAILED_EVENT, payload);
+      console.error(failure);
+    }
+  };
+
+  private restartClassicFromPause(): void {
+    if (this.lifecycleFatalError !== null) {
+      throw this.lifecycleFatalError;
+    }
+    this.drainRetiredClassicRunOwnership();
+    const pauseAudioSettings = this.requireSettingsRuntime().state.snapshot;
+    const effectsEnabled = pauseAudioSettings.effectsEnabled;
+    const placement = this.requireScreenPlacement();
+    const oldRoot = this.requireClassicModeRoot();
+    const oldPause = this.requirePausePresenter();
+    const oldDirectorPauseOwned = oldPause.snapshot.directorPauseOwned;
+    const sceneController = this.requireSceneController();
+    const resources = this.sharedResourceCatalog;
+    const audio = this.sharedAudioPresenter;
+    const viewport = this.requireViewport();
+    const oldOwnership = this.captureClassicRunOwnership();
+    let freshRoot: Node | null = null;
+    let destructiveAudioMutationStarted = false;
+    let pauseEgressStarted = false;
+    let sceneRestartPrepared = false;
+    let sceneSuspended = false;
+
+    this.unschedule(this.onSwishCooldownComplete);
+    try {
+      this.installClassicRunOwnership(this.createFreshClassicRunOwnership());
+      this.constructRecoveredClassicMode(
+        viewport,
+        resources,
+        sceneController,
+        audio,
+      );
+      freshRoot = this.requireDetachedClassicModeRoot();
+
+      // Recovered Replay audio order precedes PauseOut and old action cancellation.
+      destructiveAudioMutationStarted = true;
+      audio.stopBackgroundMusic();
+      audio.stopAllEffects();
+      oldPause.resumeEgress();
+      pauseEgressStarted = true;
+      oldPause.stopAllActions();
+
+      sceneController.suspendClassicLayerForNavigation();
+      sceneSuspended = true;
+      const previous = placement.replaceCurrentScreen(freshRoot);
+      if (
+        previous !== oldRoot
+        || oldRoot.parent !== null
+        || placement.currentScreen !== freshRoot
+      ) {
+        throw new Error('Classic Pause Replay replaced an unexpected gameplay screen');
+      }
+      this.initializePausePresentation();
+      try {
+        sceneController.restartSuspendedClassicLayer();
+      } catch (error) {
+        sceneSuspended = sceneController.suspended;
+        throw error;
+      }
+      sceneSuspended = false;
+      sceneRestartPrepared = true;
+      if (sceneController.sessionSnapshot().lifecycle !== 'intro') {
+        throw new Error('Classic Pause Replay did not activate a fresh intro session');
+      }
+      sceneController.commitClassicLayerRestart();
+      sceneRestartPrepared = false;
+    } catch (error) {
+      const rollbackFailures: unknown[] = [];
+      const rollbackCleanupFailures: unknown[] = [];
+      if (sceneRestartPrepared) {
+        collectClassicCleanupFailure(
+          rollbackFailures,
+          () => sceneController.rollbackClassicLayerRestart(),
+        );
+      }
+      collectClassicCleanupFailure(rollbackFailures, () => {
+        const current = placement.currentScreen;
+        if (current !== oldRoot) {
+          if (!isValid(oldRoot, true) || oldRoot.parent !== null) {
+            throw new Error('Classic Pause Replay rollback lost old gameplay');
+          }
+          if (current === null) {
+            placement.attachCurrentScreen(oldRoot);
+          } else {
+            const displaced = placement.replaceCurrentScreen(oldRoot);
+            if (
+              freshRoot !== null
+              && displaced !== freshRoot
+            ) {
+              throw new Error(
+                'Classic Pause Replay rollback displaced an unexpected screen',
+              );
+            }
+          }
+        }
+      });
+      try {
+        this.disposeClassicModePresentation();
+      } catch (cleanupError) {
+        rollbackCleanupFailures.push(cleanupError);
+        this.retainCurrentClassicRunForCleanup();
+      }
+      this.installClassicRunOwnership(oldOwnership);
+      if (sceneSuspended || sceneController.suspended) {
+        collectClassicCleanupFailure(
+          rollbackFailures,
+          () => sceneController.resumeSuspendedClassicLayer(),
+        );
+      }
+      if (pauseEgressStarted) {
+        collectClassicCleanupFailure(
+          rollbackFailures,
+          () => this.restorePausedPresenter(oldPause, oldDirectorPauseOwned),
+        );
+      }
+      collectClassicCleanupFailure(
+        rollbackFailures,
+        () => this.restoreClassicPauseAudioLeases(
+          audio,
+          effectsEnabled,
+          pauseAudioSettings.musicEnabled,
+        ),
+      );
+      collectClassicCleanupFailure(
+        rollbackFailures,
+        () => this.restoreRetainedSwishCooldown(oldOwnership),
+      );
+      reportClassicCleanupFailures(
+        'Rolled-back Classic Pause Replay fresh-run cleanup',
+        rollbackCleanupFailures,
+      );
+      if (
+        error instanceof ClassicLifecycleRollbackError
+        || destructiveAudioMutationStarted
+        || sceneController.fatalLifecycle
+      ) {
+        const fatalError = error instanceof ClassicLifecycleRollbackError
+          ? error
+          : sceneController.failClosedAfterLifecycleRollback(
+              destructiveAudioMutationStarted
+                ? 'Classic Pause Replay failed after destructive audio retirement'
+                : 'Classic Pause Replay entered an unknown fatal scene state',
+              error,
+              rollbackFailures,
+            );
+        this.quiesceClassicAfterFatalLifecycle(fatalError);
+        throw fatalError;
+      }
+      if (rollbackFailures.length > 0) {
+        const rollbackError = aggregateClassicFailure(
+          'Classic Pause Replay rollback failed',
+          error,
+          rollbackFailures,
+        );
+        const fatalError = sceneController.failClosedAfterLifecycleRollback(
+          'Classic Pause Replay rollback is incomplete',
+          rollbackError,
+        );
+        this.quiesceClassicAfterFatalLifecycle(fatalError);
+        throw fatalError;
+      }
+      throw error;
+    }
+
+    const freshOwnership = this.captureClassicRunOwnership();
+    const committedCleanupFailures: unknown[] = [];
+    try {
+      this.installClassicRunOwnership(oldOwnership);
+      try {
+        this.disposeClassicModePresentation();
+      } catch (error) {
+        committedCleanupFailures.push(error);
+        this.retainCurrentClassicRunForCleanup();
+      }
+    } finally {
+      this.installClassicRunOwnership(freshOwnership);
+    }
+    if (effectsEnabled) {
+      collectClassicCleanupFailure(
+        committedCleanupFailures,
+        () => audio.playOneShot(CLASSIC_MENU_BUTTON_AUDIO_PATH),
+      );
+    }
+    collectClassicCleanupFailure(committedCleanupFailures, () => {
+      this.updatePresentation();
+      this.emitSnapshot();
+    });
+    reportClassicCleanupFailures(
+      'Committed Classic Pause Replay cleanup',
+      committedCleanupFailures,
+    );
+  }
+
+  private readonly onPauseQuitRequested = (): void => {
+    if (this.lifecycleFatalError !== null) {
+      return;
+    }
+    const pause = this.requirePausePresenter();
+    const directorPauseOwned = pause.snapshot.directorPauseOwned;
+    const pauseAudioSettings = this.requireSettingsRuntime().state.snapshot;
+    let root: Node;
+    let pauseEgressStarted = false;
+    try {
+      // Treat PauseOut as started before invoking the fallible director boundary: the pure
+      // presenter state advances first, so even a thrown resume still requires re-ingress.
+      pauseEgressStarted = true;
+      pause.resumeEgress();
+      pause.stopAllActions();
+      root = this.requireClassicModeRoot();
+      this.requireSceneController().suspendClassicLayerForNavigation();
+    } catch (error) {
+      const rollbackFailures: unknown[] = [];
+      if (pauseEgressStarted) {
+        collectClassicCleanupFailure(
+          rollbackFailures,
+          () => pause.stopAllActions(),
+        );
+        collectClassicCleanupFailure(
+          rollbackFailures,
+          () => this.restorePausedPresenter(pause, directorPauseOwned),
+        );
+      }
+      if (
+        error instanceof ClassicLifecycleRollbackError
+        || rollbackFailures.length > 0
+        || this.requireSceneController().fatalLifecycle
+      ) {
+        const rollbackError = error instanceof ClassicLifecycleRollbackError
+          ? error
+          : aggregateClassicFailure(
+              'Classic Pause Quit suspension rollback failed',
+              error,
+              rollbackFailures,
+            );
+        const fatalError = rollbackError instanceof ClassicLifecycleRollbackError
+          ? rollbackError
+          : this.requireSceneController().failClosedAfterLifecycleRollback(
+              'Classic Pause Quit suspension rollback is incomplete',
+              rollbackError,
+            );
+        this.quiesceClassicAfterFatalLifecycle(fatalError);
+        throw fatalError;
+      }
+      throw error;
+    }
+    const transaction: ClassicPauseQuitTransactionState = {
+      directorPauseOwned,
+      effectsPauseLeaseRequired: pauseAudioSettings.effectsEnabled,
+      musicPauseLeaseRequired: pauseAudioSettings.musicEnabled,
+      presenter: pause,
+      root,
+      screenPlacement: this.requireScreenPlacement(),
+      status: 'pending',
+    };
+    const payload: ClassicPauseQuitRequestedEvent = Object.freeze({
+      classicRoot: root,
+      commit: (previousRoot: Node) => this.commitPauseQuit(
+        transaction,
+        previousRoot,
+      ),
+      rollback: () => this.rollbackPauseQuit(transaction),
+    });
+    try {
+      this.node.emit(CLASSIC_PAUSE_QUIT_REQUESTED_EVENT, payload);
+    } finally {
+      // Creator Node events are synchronous. Missing or rejecting shell ownership rolls back
+      // before this callback returns to the options menu.
+      if (transaction.status === 'pending') {
+        this.rollbackPauseQuit(transaction);
+      }
+    }
+  };
+
+  private commitPauseQuit(
+    transaction: ClassicPauseQuitTransactionState,
+    previousRoot: Node,
+  ): void {
+    if (previousRoot !== transaction.root) {
+      throw new Error('Classic Pause Quit commit received an unexpected previous screen');
+    }
+    if (transaction.status === 'committed') {
+      return;
+    }
+    if (transaction.status === 'rolled-back') {
+      throw new Error('Rolled-back Classic Pause Quit transaction cannot commit');
+    }
+    if (transaction.status === 'fatal') {
+      throw this.lifecycleFatalError
+        ?? new Error('Fatal Classic Pause Quit transaction cannot commit');
+    }
+    if (
+      this.classicModeRoot !== transaction.root
+      || this.pausePresenter !== transaction.presenter
+      || transaction.root.parent !== null
+      || transaction.screenPlacement.currentScreen === null
+      || transaction.screenPlacement.currentScreen === transaction.root
+    ) {
+      throw new Error('Classic Pause Quit commit requires a successful screen replacement');
+    }
+
+    // Stage the replacement ownership before retiring the suspended session. Its score service
+    // reads shared settings and can reject; keeping that fallible boundary pre-commit lets the
+    // shell restore the exact paused run instead of accepting a committed but uncleared owner.
+    const retiredOwnership = this.captureClassicRunOwnership();
+    const emptyOwnership = this.createFreshClassicRunOwnership();
+    this.requireSceneController().finalizeSuspendedClassicLayerRelease();
+    transaction.status = 'committed';
+    const failures: unknown[] = [];
+    try {
+      this.installClassicRunOwnership(retiredOwnership);
+      try {
+        this.disposeClassicModePresentation();
+      } catch (error) {
+        failures.push(error);
+        this.retainCurrentClassicRunForCleanup();
+      }
+    } finally {
+      // The shell now owns Main Menu. Publish no retained gameplay identity even if cleanup
+      // reports a detached-node failure, allowing later Classic entry to construct afresh.
+      this.installClassicRunOwnership(emptyOwnership);
+    }
+    if (transaction.effectsPauseLeaseRequired) {
+      // Main Menu is already active and the Quit transaction is committed. Retire only the
+      // old run's paused voices and its persistent effects-pause lease before the final click.
+      retryClassicCleanupOperation(
+        failures,
+        () => this.sharedAudioPresenter.stopAllEffects(),
+      );
+    }
+    if (transaction.musicPauseLeaseRequired) {
+      // Main Menu requested its own music while Classic's pause lease was still active, so the
+      // shared source currently contains the new clip in a paused state. Release that lease
+      // only after commit; standard Classic Resume itself still never resumes background music.
+      retryClassicCleanupOperation(
+        failures,
+        () => this.sharedAudioPresenter.resumeBackgroundMusic(),
+      );
+    }
+    if (this.effectsEnabled()) {
+      collectClassicCleanupFailure(
+        failures,
+        () => this.sharedAudioPresenter.playOneShot(CLASSIC_MENU_BUTTON_AUDIO_PATH),
+      );
+    }
+    collectClassicCleanupFailure(failures, () => this.emitSnapshot());
+    reportClassicCleanupFailures('Committed Classic Pause Quit cleanup', failures);
+  }
+
+  private rollbackPauseQuit(
+    transaction: ClassicPauseQuitTransactionState,
+  ): void {
+    if (transaction.status === 'rolled-back') {
+      return;
+    }
+    if (transaction.status === 'committed') {
+      throw new Error('Committed Classic Pause Quit transaction cannot roll back');
+    }
+    if (transaction.status === 'fatal') {
+      throw this.lifecycleFatalError
+        ?? new Error('Fatal Classic Pause Quit transaction cannot roll back');
+    }
+    try {
+      if (
+        this.classicModeRoot !== transaction.root
+        || this.pausePresenter !== transaction.presenter
+        || !isValid(transaction.root, true)
+      ) {
+        throw new Error('Classic Pause Quit rollback lost gameplay ownership');
+      }
+      const current = transaction.screenPlacement.currentScreen;
+      if (current !== transaction.root) {
+        if (transaction.root.parent !== null) {
+          throw new Error('Classic Pause Quit rollback found gameplay under an unknown owner');
+        }
+        if (current === null) {
+          transaction.screenPlacement.attachCurrentScreen(transaction.root);
+        } else {
+          transaction.screenPlacement.replaceCurrentScreen(transaction.root);
+        }
+      }
+      if (transaction.screenPlacement.currentScreen !== transaction.root) {
+        throw new Error('Classic Pause Quit rollback could not restore gameplay');
+      }
+      this.requireSceneController().resumeSuspendedClassicLayer();
+      this.restorePausedPresenter(
+        transaction.presenter,
+        transaction.directorPauseOwned,
+      );
+      this.restoreClassicPauseAudioLeases(
+        this.sharedAudioPresenter,
+        transaction.effectsPauseLeaseRequired,
+        transaction.musicPauseLeaseRequired,
+      );
+      transaction.status = 'rolled-back';
+      this.emitSnapshotReportOnly(
+        'Rolled-back Classic Pause Quit snapshot observer failed',
+      );
+    } catch (error) {
+      const sceneController = this.requireSceneController();
+      const fatalError = error instanceof ClassicLifecycleRollbackError
+        ? error
+        : sceneController.failClosedAfterLifecycleRollback(
+            'Classic Pause Quit rollback is incomplete',
+            error,
+          );
+      transaction.status = 'fatal';
+      this.quiesceClassicAfterFatalLifecycle(fatalError);
+      throw fatalError;
+    }
+  }
+
+  private restorePausedPresenter(
+    presenter: BaseGameplayPausePresenter,
+    directorPauseOwned: boolean,
+  ): void {
+    presenter.pauseIngress(this.currentPauseCard());
+    if (directorPauseOwned) {
+      presenter.updateAction(BASE_GAMEPLAY_PAUSE_ACTION_SECONDS);
+    }
+  }
+
+  private restoreRetainedSwishCooldown(ownership: ClassicRunOwnership): void {
+    if (ownership.swishAudio.locked) {
+      this.scheduleOnce(
+        this.onSwishCooldownComplete,
+        CLASSIC_SWISH_COOLDOWN_ACTION_SECONDS,
+      );
+    }
+  }
+
+  private quiesceClassicAfterFatalLifecycle(
+    error: ClassicLifecycleRollbackError,
+  ): void {
+    this.lifecycleFatalError = error;
+    this.gameOver = true;
+    this.unschedule(this.onSwishCooldownComplete);
+    this.swishAudio.unlock();
+    const failures: unknown[] = [];
+    const normalFree = this.normalFree;
+    if (normalFree !== null) {
+      attemptClassicOwnedCleanup(
+        failures,
+        () => normalFree.stop(),
+        () => {
+          if (this.normalFree === normalFree) {
+            this.normalFree = null;
+          }
+        },
+      );
+    }
+    const pause = this.pausePresenter;
+    if (pause !== null) {
+      attemptClassicOwnedCleanup(
+        failures,
+        () => this.disposePausePresenterForRetry(pause),
+        () => {
+          if (this.pausePresenter === pause) {
+            this.pausePresenter = null;
+          }
+        },
+      );
+    }
+    reportClassicCleanupFailures(
+      'Fatal Classic lifecycle presentation quiesce',
+      failures,
+    );
+  }
+
+  private restoreClassicPauseAudioLeases(
+    audio: ClassicAudioPresenter,
+    effectsPauseLeaseRequired: boolean,
+    musicPauseLeaseRequired: boolean,
+  ): void {
+    const failures: unknown[] = [];
+    if (effectsPauseLeaseRequired) {
+      collectClassicCleanupFailure(failures, () => audio.pauseAllEffects());
+    }
+    if (musicPauseLeaseRequired) {
+      collectClassicCleanupFailure(failures, () => audio.pauseBackgroundMusic());
+    }
+    throwClassicCleanupFailures('Classic paused-audio lease restoration', failures);
+  }
 
   private createRecoveredPresentation(
     parent: Node,
@@ -1708,6 +2672,143 @@ export class ClassicGameplayController extends Component {
     this.gameOver = false;
   }
 
+  private captureClassicRunOwnership(): ClassicRunOwnership {
+    return Object.freeze({
+      bladePresenter: this.bladePresenter,
+      classicModeRoot: this.classicModeRoot,
+      combo: this.combo,
+      comboItemPresenters: this.comboItemPresenters,
+      criticalCutHalfPresenters: this.criticalCutHalfPresenters,
+      criticalParticlePresenters: this.criticalParticlePresenters,
+      cutHalfPresenters: this.cutHalfPresenters,
+      deferredControllers: this.deferredControllers,
+      fail: this.fail,
+      failPresentationRoot: this.failPresentationRoot,
+      failPresenter: this.failPresenter,
+      gameOver: this.gameOver,
+      introGoodNode: this.introGoodNode,
+      introLuckNode: this.introLuckNode,
+      normalFree: this.normalFree,
+      pausePresenter: this.pausePresenter,
+      planner: this.planner,
+      registry: this.registry,
+      resultConstructionRequested: this.resultConstructionRequested,
+      resultMode: this.resultMode,
+      resultObjectiveTailAttempted: this.resultObjectiveTailAttempted,
+      resultScore: this.resultScore,
+      score: this.score,
+      scoreHudPresenter: this.scoreHudPresenter,
+      scoreHudRoot: this.scoreHudRoot,
+      swishAudio: this.swishAudio,
+      terminalGameNode: this.terminalGameNode,
+      terminalOverNode: this.terminalOverNode,
+      worldPresentationRoot: this.worldPresentationRoot,
+    });
+  }
+
+  private createFreshClassicRunOwnership(): ClassicRunOwnership {
+    return Object.freeze({
+      bladePresenter: null,
+      classicModeRoot: null,
+      combo: new ComboService(this.random),
+      comboItemPresenters: new Set<ComboItemPresenter>(),
+      criticalCutHalfPresenters: new Set<ClassicCutHalfPresenter>(),
+      criticalParticlePresenters: new Set<ClassicCriticalParticlePresenter>(),
+      cutHalfPresenters: new Set<ClassicCutHalfPresenter>(),
+      deferredControllers: new Set<ClassicTossControllerId>(),
+      fail: new FailService(),
+      failPresentationRoot: null,
+      failPresenter: null,
+      gameOver: false,
+      introGoodNode: null,
+      introLuckNode: null,
+      normalFree: null,
+      pausePresenter: null,
+      planner: new ClassicSpawnPlanner({
+        random: this.random,
+        sampleKinematics: sampleSpawnKinematics,
+      }),
+      registry: null,
+      resultConstructionRequested: false,
+      resultMode: null,
+      resultObjectiveTailAttempted: false,
+      resultScore: null,
+      score: new ScoreService(
+        0,
+        0,
+        this.requireSettingsRuntime().state.snapshot.leaderboard.first,
+      ),
+      scoreHudPresenter: null,
+      scoreHudRoot: null,
+      swishAudio: new ClassicSwishAudioGate(this.random),
+      terminalGameNode: null,
+      terminalOverNode: null,
+      worldPresentationRoot: null,
+    });
+  }
+
+  private installClassicRunOwnership(ownership: ClassicRunOwnership): void {
+    this.bladePresenter = ownership.bladePresenter;
+    this.classicModeRoot = ownership.classicModeRoot;
+    this.combo = ownership.combo;
+    this.comboItemPresenters = ownership.comboItemPresenters;
+    this.criticalCutHalfPresenters = ownership.criticalCutHalfPresenters;
+    this.criticalParticlePresenters = ownership.criticalParticlePresenters;
+    this.cutHalfPresenters = ownership.cutHalfPresenters;
+    this.deferredControllers = ownership.deferredControllers;
+    this.fail = ownership.fail;
+    this.failPresentationRoot = ownership.failPresentationRoot;
+    this.failPresenter = ownership.failPresenter;
+    this.gameOver = ownership.gameOver;
+    this.introGoodNode = ownership.introGoodNode;
+    this.introLuckNode = ownership.introLuckNode;
+    this.normalFree = ownership.normalFree;
+    this.pausePresenter = ownership.pausePresenter;
+    this.planner = ownership.planner;
+    this.registry = ownership.registry;
+    this.resultConstructionRequested = ownership.resultConstructionRequested;
+    this.resultMode = ownership.resultMode;
+    this.resultObjectiveTailAttempted = ownership.resultObjectiveTailAttempted;
+    this.resultScore = ownership.resultScore;
+    this.score = ownership.score;
+    this.scoreHudPresenter = ownership.scoreHudPresenter;
+    this.scoreHudRoot = ownership.scoreHudRoot;
+    this.swishAudio = ownership.swishAudio;
+    this.terminalGameNode = ownership.terminalGameNode;
+    this.terminalOverNode = ownership.terminalOverNode;
+    this.worldPresentationRoot = ownership.worldPresentationRoot;
+  }
+
+  private drainRetiredClassicRunOwnership(): void {
+    if (this.retiredClassicRuns.length === 0) {
+      return;
+    }
+    const activeOwnership = this.captureClassicRunOwnership();
+    const pending = [...this.retiredClassicRuns];
+    const retained: ClassicRunOwnership[] = [];
+    const failures: unknown[] = [];
+    this.retiredClassicRuns.length = 0;
+    try {
+      for (const ownership of pending) {
+        this.installClassicRunOwnership(ownership);
+        try {
+          this.disposeClassicModePresentation();
+        } catch (error) {
+          failures.push(error);
+          retained.push(this.captureClassicRunOwnership());
+        }
+      }
+    } finally {
+      this.installClassicRunOwnership(activeOwnership);
+      this.retiredClassicRuns.push(...retained);
+    }
+    throwClassicCleanupFailures('Retired Classic run cleanup', failures);
+  }
+
+  private retainCurrentClassicRunForCleanup(): void {
+    this.retiredClassicRuns.push(this.captureClassicRunOwnership());
+  }
+
   private reportFailedResultRetry(message: string): void {
     // Context/audio validation can fail before the transactional removal token exists.
     if (this.resultPresenter?.state.navigation === 'retry') {
@@ -1910,6 +3011,20 @@ export class ClassicGameplayController extends Component {
     return this.baseGameplayResources;
   }
 
+  private requirePausePresenter(): BaseGameplayPausePresenter {
+    if (this.pausePresenter === null) {
+      throw new Error('Classic pause presenter is unavailable outside an active run');
+    }
+    return this.pausePresenter;
+  }
+
+  private requireSceneController(): ClassicSceneController {
+    if (this.sceneController === null) {
+      throw new Error('Classic scene controller is unavailable before component load');
+    }
+    return this.sceneController;
+  }
+
   private requireObjectivesManager(): ObjectivesManagerState {
     if (this.objectivesManager === null) {
       throw new Error('Classic objectives manager is unavailable before preparation');
@@ -2004,6 +3119,19 @@ export class ClassicGameplayController extends Component {
     return root;
   }
 
+  private requireDetachedClassicModeRoot(): Node {
+    const root = this.classicModeRoot;
+    if (
+      root === null
+      || !isValid(root, true)
+      || root.parent !== null
+      || this.screenPlacement?.currentScreen === root
+    ) {
+      throw new Error('Classic construction requires one detached fresh mode root');
+    }
+    return root;
+  }
+
   private isClassicGameplayActive(): boolean {
     const root = this.classicModeRoot;
     return (
@@ -2036,6 +3164,20 @@ export class ClassicGameplayController extends Component {
   private emitSnapshot(): void {
     if (!this.shuttingDown) {
       this.node.emit(CLASSIC_GAMEPLAY_SNAPSHOT_EVENT, this.snapshot());
+    }
+  }
+
+  private emitSnapshotReportOnly(label: string): void {
+    try {
+      this.emitSnapshot();
+    } catch (error) {
+      try {
+        console.error(new Error(
+          `${label}: ${error instanceof Error ? error.message : String(error)}`,
+        ));
+      } catch {
+        // Snapshot diagnostics cannot reopen an already settled navigation transaction.
+      }
     }
   }
 }
@@ -2075,6 +3217,38 @@ function collectClassicCleanupFailure(
   }
 }
 
+function attemptClassicOwnedCleanup(
+  failures: unknown[],
+  cleanup: () => void,
+  releaseOwnership: () => void,
+): void {
+  try {
+    cleanup();
+    releaseOwnership();
+  } catch (error) {
+    failures.push(error);
+  }
+}
+
+function retryClassicCleanupOperation(
+  failures: unknown[],
+  operation: () => void,
+): void {
+  try {
+    operation();
+  } catch (firstError) {
+    try {
+      operation();
+    } catch (retryError) {
+      failures.push(aggregateClassicFailure(
+        'Classic committed cleanup retry failed',
+        firstError,
+        [retryError],
+      ));
+    }
+  }
+}
+
 function throwClassicCleanupFailures(
   operation: string,
   failures: readonly unknown[],
@@ -2086,6 +3260,44 @@ function throwClassicCleanupFailures(
     .map((error) => error instanceof Error ? error.message : String(error))
     .join('; ');
   throw new Error(`${operation} failed: ${details}`);
+}
+
+function reportClassicCleanupFailures(
+  operation: string,
+  failures: readonly unknown[],
+): void {
+  if (failures.length === 0) {
+    return;
+  }
+  const details = failures
+    .map((error) => error instanceof Error ? error.message : String(error))
+    .join('; ');
+  console.error(new Error(`${operation} failed: ${details}`));
+}
+
+function aggregateClassicFailure(
+  operation: string,
+  primary: unknown,
+  rollbackFailures: readonly unknown[],
+): Error {
+  const primaryMessage = primary instanceof Error ? primary.message : String(primary);
+  const rollbackMessage = rollbackFailures
+    .map((error) => error instanceof Error ? error.message : String(error))
+    .join('; ');
+  const error = new Error(
+    `${operation}: ${primaryMessage}; rollback: ${rollbackMessage}`,
+  );
+  Object.defineProperties(error, {
+    cause: {
+      enumerable: false,
+      value: primary,
+    },
+    rollbackErrors: {
+      enumerable: false,
+      value: Object.freeze([...rollbackFailures]),
+    },
+  });
+  return error;
 }
 
 function assertScreenPlacementPort(

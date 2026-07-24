@@ -16,9 +16,11 @@ import type {
 } from '../domain/objectives-manager-state';
 import { BladeInputController } from './blade-input-controller';
 import {
+  CLASSIC_PAUSE_QUIT_REQUESTED_EVENT,
   CLASSIC_RESULT_MENU_REQUESTED_EVENT,
   CLASSIC_SETTINGS_SAVE_FAILED_EVENT,
   ClassicGameplayController,
+  type ClassicPauseQuitRequestedEvent,
   type ClassicResultMenuRequestedEvent,
 } from './classic-gameplay-controller';
 import {
@@ -45,7 +47,10 @@ import {
 import {
   GnStyleLifecycleRollbackError,
 } from './gn-style-scene-controller';
-import { ClassicSceneController } from './classic-scene-controller';
+import {
+  ClassicLifecycleRollbackError,
+  ClassicSceneController,
+} from './classic-scene-controller';
 import {
   CRAZY_BIRD_PAUSE_QUIT_REQUESTED_EVENT,
   CRAZY_BIRD_RESULT_MENU_REQUESTED_EVENT,
@@ -296,6 +301,11 @@ export class RecoveredAppShellController extends Component {
 
   onEnable(): void {
     this.node.on(
+      CLASSIC_PAUSE_QUIT_REQUESTED_EVENT,
+      this.onClassicPauseQuitRequested,
+      this,
+    );
+    this.node.on(
       CLASSIC_RESULT_MENU_REQUESTED_EVENT,
       this.onClassicResultMenuRequested,
       this,
@@ -375,6 +385,11 @@ export class RecoveredAppShellController extends Component {
   }
 
   onDisable(): void {
+    this.node.off(
+      CLASSIC_PAUSE_QUIT_REQUESTED_EVENT,
+      this.onClassicPauseQuitRequested,
+      this,
+    );
     this.node.off(
       CLASSIC_RESULT_MENU_REQUESTED_EVENT,
       this.onClassicResultMenuRequested,
@@ -1446,6 +1461,17 @@ export class RecoveredAppShellController extends Component {
         } catch (rollbackError) {
           rollbackFailures.push(rollbackError);
         }
+        if (rollbackFailures.length === 0) {
+          try {
+            if (!oldPresenter.rearmNavigationAfterFailure()) {
+              throw new Error(
+                'Classic activation rollback could not reacquire Mode Select input',
+              );
+            }
+          } catch (rollbackError) {
+            rollbackFailures.push(rollbackError);
+          }
+        }
         if (rollbackFailures.length > 0) {
           throw new ModeSelectFatalNavigationError(
             'Mode Select to Classic rollback is incomplete',
@@ -1454,6 +1480,13 @@ export class RecoveredAppShellController extends Component {
               error,
               rollbackFailures,
             ),
+            this.captureModeSelectFatalScreenRelease(oldPresenter.root),
+          );
+        }
+        if (error instanceof ClassicLifecycleRollbackError) {
+          throw new ModeSelectFatalNavigationError(
+            'Mode Select to Classic retained poisoned runtime ownership',
+            error,
             this.captureModeSelectFatalScreenRelease(oldPresenter.root),
           );
         }
@@ -1774,6 +1807,109 @@ export class RecoveredAppShellController extends Component {
       disposeCommittedPresenter(oldPresenter, 'Mode Select');
       return true;
     });
+  }
+
+  private readonly onClassicPauseQuitRequested = (
+    request: unknown,
+  ): void => {
+    const captured = captureClassicPauseQuitNavigationRequest(request);
+    if (captured.request === null) {
+      this.rejectClassicPauseQuitRequest(
+        captured.rollback,
+      );
+      return;
+    }
+    this.transitionClassicPauseQuitToMainMenu(captured.request);
+  };
+
+  private transitionClassicPauseQuitToMainMenu(
+    request: ClassicBirdMainMenuNavigationRequest,
+  ): void {
+    if (
+      this.destroyedValue
+      || this.stateValue !== 'classic'
+      || this.transitioning
+    ) {
+      this.rejectClassicPauseQuitRequest(
+        request.rollback,
+      );
+      return;
+    }
+    const from = this.stateValue;
+    this.transitioning = true;
+    let nextPresenter: MainMenuPresenter | null = null;
+    let collisionFilterActivated = false;
+    let mainMenuActivationAttempted = false;
+    try {
+      const sharedScene = this.requireSharedScene();
+      if (sharedScene.currentScreen !== request.root) {
+        throw new Error('Classic Pause Quit request does not own the current screen');
+      }
+      collisionFilterActivated = this.requireNonClassicPhysics()
+        .activateCollisionFilter();
+      nextPresenter = this.createMainMenuPresenter();
+      const previous = sharedScene.replaceCurrentScreen(nextPresenter.root);
+      mainMenuActivationAttempted = true;
+      nextPresenter.activate();
+      commitClassicBirdMainMenuNavigationRequest(
+        request,
+        previous,
+        'Classic Pause Quit',
+      );
+      this.activeMainMenu = nextPresenter;
+      this.stateValue = 'main-menu';
+    } catch (error) {
+      const rollbackFailures = runBestEffortCleanup(
+        'Classic Pause Quit to Main Menu rollback',
+        [
+          () => this.restoreClassicNavigationRootBeforeRollback(request.root),
+          () => nextPresenter?.dispose(),
+          () => {
+            if (mainMenuActivationAttempted) {
+              this.requireGameplayController().sharedAudioPresenter
+                .stopBackgroundMusic();
+            }
+          },
+          () => {
+            if (collisionFilterActivated) {
+              this.requireNonClassicPhysics().restorePreviousCollisionFilter();
+            }
+          },
+          () => request.rollback(),
+          () => this.assertClassicNavigationRollbackRestored(request.root),
+        ],
+      );
+      const failure = rollbackFailures.length === 0
+        ? error
+        : aggregateWithPrimaryError(
+            'Classic Pause Quit to Main Menu rollback failed',
+            error,
+            rollbackFailures,
+          );
+      if (rollbackFailures.length > 0) {
+        this.retainClassicShellFailure(from, failure);
+      } else {
+        this.emitTransitionFailure(from, 'main-menu', failure);
+      }
+    } finally {
+      this.transitioning = false;
+    }
+  }
+
+  private rejectClassicPauseQuitRequest(
+    rollback: (() => void) | null,
+  ): void {
+    if (rollback === null) {
+      return;
+    }
+    try {
+      rollback();
+    } catch (error) {
+      this.retainClassicShellFailure(
+        this.stateValue,
+        normalizeError(error, 'Rejected Classic Pause Quit rollback failed'),
+      );
+    }
   }
 
   private readonly onClassicResultMenuRequested = (
@@ -2394,6 +2530,30 @@ export class RecoveredAppShellController extends Component {
     }
   }
 
+  private retainClassicShellFailure(
+    from: RecoveredAppShellState,
+    error: unknown,
+  ): void {
+    const failure = normalizeError(
+      error,
+      'Recovered Classic navigation rollback failed',
+    );
+    if (this.destroyedValue) {
+      console.error(failure);
+      return;
+    }
+    this.stateValue = 'failed';
+    try {
+      this.emitTransitionFailure(from, 'main-menu', failure);
+    } catch (reportingError) {
+      console.error(aggregateWithPrimaryError(
+        'Recovered fatal Classic transition reporting failed',
+        failure,
+        [reportingError],
+      ));
+    }
+  }
+
   private retainCrazyBirdShellFailure(
     from: RecoveredAppShellState,
     error: unknown,
@@ -2503,6 +2663,42 @@ export class RecoveredAppShellController extends Component {
       throw new Error(
         'Crazy Bird navigation rollback retained the non-Classic collision filter',
       );
+    }
+  }
+
+  private restoreClassicNavigationRootBeforeRollback(root: Node): void {
+    const sharedScene = this.requireSharedScene();
+    const current = sharedScene.currentScreen;
+    if (current === root) {
+      return;
+    }
+    if (!isValid(root, true) || root.parent !== null) {
+      throw new Error('Classic navigation rollback lost its detached source screen');
+    }
+    if (current === null) {
+      sharedScene.attachCurrentScreen(root);
+    } else {
+      const displaced = sharedScene.replaceCurrentScreen(root);
+      if (displaced !== current) {
+        throw new Error('Classic navigation rollback displaced an unexpected destination');
+      }
+    }
+    if (sharedScene.currentScreen !== root) {
+      throw new Error('Classic navigation rollback could not restore its source screen');
+    }
+  }
+
+  private assertClassicNavigationRollbackRestored(root: Node): void {
+    const sharedScene = this.requireSharedScene();
+    if (
+      sharedScene.currentScreen !== root
+      || !isValid(root, true)
+      || root.parent === null
+    ) {
+      throw new Error('Classic navigation rollback did not retain its source screen');
+    }
+    if (this.requireNonClassicPhysics().collisionFilterActive) {
+      throw new Error('Classic navigation rollback retained the non-Classic collision filter');
     }
   }
 
@@ -3426,6 +3622,51 @@ function captureCrazyPauseQuitNavigationRequest(
   }
 }
 
+function captureClassicPauseQuitNavigationRequest(
+  request: unknown,
+): CapturedClassicBirdMainMenuNavigationRequest {
+  if (request === null || typeof request !== 'object') {
+    return Object.freeze({
+      request: null,
+      rollback: null,
+    });
+  }
+  let capturedRollback: (() => void) | null = null;
+  try {
+    const candidate = request as Partial<ClassicPauseQuitRequestedEvent>;
+    const rollback = candidate.rollback;
+    if (typeof rollback === 'function') {
+      capturedRollback = () => rollback.call(request);
+    }
+    const classicRoot = candidate.classicRoot;
+    const commit = candidate.commit;
+    if (
+      !(classicRoot instanceof Node)
+      || !isValid(classicRoot, true)
+      || typeof commit !== 'function'
+      || capturedRollback === null
+    ) {
+      return Object.freeze({
+        request: null,
+        rollback: capturedRollback,
+      });
+    }
+    return Object.freeze({
+      request: Object.freeze({
+        commit: (previousRoot: Node) => commit.call(request, previousRoot),
+        rollback: capturedRollback,
+        root: classicRoot,
+      }),
+      rollback: capturedRollback,
+    });
+  } catch {
+    return Object.freeze({
+      request: null,
+      rollback: capturedRollback,
+    });
+  }
+}
+
 function captureClassicBirdResultMenuNavigationRequest(
   request: unknown,
 ): CapturedClassicBirdMainMenuNavigationRequest {
@@ -3706,6 +3947,7 @@ function rollbackRejectedCrazyNavigationRequest(
 function rollbackRejectedClassicBirdNavigationRequest(
   rollback: (() => void) | null,
   source:
+    | 'Classic Pause Quit'
     | 'Classic Bird Pause Quit'
     | 'Classic Bird Result'
     | 'Combo Bird Pause Quit'
@@ -3769,6 +4011,7 @@ function commitClassicBirdMainMenuNavigationRequest(
   request: ClassicBirdMainMenuNavigationRequest,
   previousRoot: Node,
   source:
+    | 'Classic Pause Quit'
     | 'Classic Bird Pause Quit'
     | 'Classic Bird Result'
     | 'Combo Bird Pause Quit'

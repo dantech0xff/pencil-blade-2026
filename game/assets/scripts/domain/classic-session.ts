@@ -20,7 +20,11 @@ export const CLASSIC_SESSION_TOSS_ORDER = Object.freeze([
 ] as const);
 
 export type ClassicTossControllerId = (typeof CLASSIC_SESSION_TOSS_ORDER)[number];
-export type ClassicLifecycle = 'intro' | 'running' | 'result-removed';
+export type ClassicLifecycle =
+  | 'intro'
+  | 'navigation-removed'
+  | 'result-removed'
+  | 'running';
 
 export type ClassicSessionCommand =
   | Readonly<{ type: 'set-cut-enabled'; enabled: boolean }>
@@ -125,6 +129,19 @@ export class ClassicSession {
       Object.freeze({ type: 'remove-classic', cleanup: true }),
       Object.freeze({ type: 'attach-result', zOrder: 1 }),
     ]);
+  }
+
+  /**
+   * Pause Quit removes the gameplay layer without constructing Result or replaying any
+   * score/objective side effect. The shell may start a genuinely fresh session later.
+   */
+  retireForPauseQuit(): void {
+    if (this.lifecycle === 'navigation-removed' || this.lifecycle === 'result-removed') {
+      throw new Error('Removed Classic session cannot retire twice');
+    }
+    this.lifecycle = 'navigation-removed';
+    this.cutEnabled = false;
+    this.worldStopped = false;
   }
 
   private shutdownGameplay(): ClassicSessionCommand[] {

@@ -72,7 +72,7 @@ Verified starting point:
 | 3 | [Catalog Resources and Reconstruct Presentation](./phase-03-catalog-resources-and-reconstruct-presentation.md) | In progress |
 | 4 | [Recover Gameplay, Physics, and Progression Contracts](./phase-04-reverse-engineer-native-gameplay-contracts.md) | In progress |
 | 5 | [Build Cocos Creator Architecture and Vertical Slice](./phase-05-build-cocos-creator-architecture-and-vertical-slice.md) | In progress |
-| 6 | [Recreate Full Game Content and Progression](./phase-06-recreate-full-game-content-and-progression.md) | In progress |
+| 6 | [Recreate Full Game Content and Progression](./phase-06-recreate-full-game-content-and-progression.md) | Complete |
 | 7 | [Validate Static Reconstruction and Prepare Release](./phase-07-validate-fidelity-and-prepare-release.md) | Pending |
 
 ## Dependencies
@@ -170,13 +170,18 @@ Verified starting point:
   classifies all `862/862` assets as `761` consumed, `0` unknown, `100` excluded, or `1`
   unsupported. Every exact source file remains staged; exclusions record static unreachability
   in the recovered Android runtime, while historical intent and release rights remain separate.
-  Project completion still requires the scene/prefab/composition map, a pinned
-  integration/toolchain policy, and build validation.
-- Phase 6 continues after all six production gameplay routes, Loading, Options, Leaderboard,
-  Objectives, About/offline, first-launch behavior, and global resource classification reached
-  their contract gates. The remaining scope is scene/prefab/composition reconciliation and
-  final Phase 6 verification.
-  Android build validation and release-rights clearance remain Phase 7 gates.
+  The serialized/dynamic composition map is now reconciled as one exact 30-record scene bridge
+  plus evidence-backed code composition; no prefab/material/effect/animation/atlas artifact is
+  invented. Project completion still requires the pinned integration/toolchain policy and
+  build validation.
+- Phase 6 is complete after all six production gameplay routes, Loading, Options, Leaderboard,
+  Objectives, About/offline, first-launch behavior, global resource classification, the recovered
+  standard Classic Pause/Resume/Replay/Quit surface, and serialized/dynamic composition reached
+  their contract gates. Final standard Classic Preview passes high `720x1280` and compact physical
+  `360x800` (logical/resource tree `480x800`) for Resume, fresh Replay, Quit, and repeated entry,
+  with Cocos counters `0/0/0` and no project DevTools error. Android build validation,
+  pinned Physics2D equivalence, canonical external-corpus closure, and release-rights clearance
+  remain Phase 7 gates.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
 
@@ -212,6 +217,7 @@ Verified starting point:
 - [Validation](./reports/validator-2026-07-21-restoration-plan.md)
 - [Static-only revision](./reports/planner-2026-07-22-static-only-revision.md)
 - [Static-only validation](./reports/validator-2026-07-22-static-only-revision.md)
+- [Phase 6 final verification](./reports/tester-2026-07-24-phase6-final-checkpoint.md)
 - [Phase 2 static corpus progress](./reports/phase-02-2026-07-22-static-corpus-progress.md)
 - [Phase 3 Classic presentation progress](./reports/phase-03-2026-07-22-classic-presentation-progress.md)
 - [Phase 4 Classic contract progress](./reports/phase-04-2026-07-22-classic-contract-progress.md)
@@ -260,6 +266,8 @@ Verified starting point:
 - [Advanced blade architecture map](./reports/explorer-2026-07-24-advanced-blade-architecture-map.md)
 - [Nonblade unused-resource contract](./reports/researcher-2026-07-24-nonblade-unused-resource-contract.md)
 - [Zero-unknown resource verification](./reports/tester-2026-07-24-zero-unknown-resource-closure.md)
+- [Scene and dynamic-composition reconciliation](./reports/explorer-2026-07-24-scene-composition-reconciliation-map.md)
+- [Phase 6 final gate command map](./reports/explorer-2026-07-24-phase6-final-gates.md)
 - [Remaining mode implementation order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 - [Creator readiness audit](./reports/creator-readiness-2026-07-22.md)
 - [Android toolchain readiness audit](./reports/android-toolchain-readiness-2026-07-22.md)

@@ -515,7 +515,10 @@ test('terminal completion replaces Classic with the recovered result shell and e
     gameplaySource,
     /presenter\?\.presentMovedSegment\(event\.segment\)/,
   );
-  assert.match(gameplaySource, /this\.bladePresenter\?\.dispose\(\)/);
+  assert.match(
+    gameplaySource,
+    /const bladePresenter = this\.bladePresenter;[\s\S]*?attemptClassicOwnedCleanup\([\s\S]*?\(\) => bladePresenter\.dispose\(\)/,
+  );
   assert.match(
     terminalSource,
     /displayScoreComplete\(this\.score\.authoritativeScore\)/,
@@ -647,7 +650,8 @@ test('terminal completion replaces Classic with the recovered result shell and e
   ]);
   assertOrderedSubstrings(modeDisposalSource, [
     "this.detachOwnedScreen(classicModeRoot, 'Classic mode')",
-    'this.failPresenter?.dispose()',
+    'const failPresenter = this.failPresenter',
+    '() => failPresenter.dispose()',
     'classicModeRoot.destroy()',
   ]);
   assertOrderedSubstrings(retryAttachmentSource, [

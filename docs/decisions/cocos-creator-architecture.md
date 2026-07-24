@@ -1,6 +1,6 @@
 # Cocos Creator Architecture Decision
 
-Status: in progress; all six recovered production gameplay routes integrated, settings checkpoint updated
+Status: in progress; Phase 6 content/progression checkpoint complete, Phase 7 gates open
 Date: 2026-07-22
 Updated: 2026-07-24
 
@@ -25,8 +25,9 @@ graph with the standard blade, exact intro, dedicated non-looping music, 439-par
 choreography, late-cut tail, and result lifecycle. Process-owned persistence covers the
 expanded implemented Settings subset including all six route leaderboards, immediate
 mode-unlock keys, and the `999999`-coin missing/corrupt-save fallback; valid persisted balances
-still win. The remaining scene/prefab map, full presentation/progression consumers, Android
-build, and runtime physics-equivalence gates keep the architecture decision in progress.
+still win. The serialized/dynamic composition map and all recovered APK resource dispositions
+are complete. Android build, runtime physics-equivalence, canonical external-corpus
+completeness, and release-rights gates keep the architecture decision in progress.
 
 ## Dependency Direction
 
@@ -81,18 +82,21 @@ must not.
   app-shell, all route scene/gameplay owners, generated-entity, resource, audio/effect, pause,
   particle, and gameplay bridges.
 - `game/assets/scenes/classic.scene` is Editor-authored and attaches the persistent app shell
-  plus passive Classic, Crazy, GN Style, Classic Bird, Crazy Bird, and Combo Bird owners to Canvas.
+  plus passive Classic, Crazy, GN Style, Classic Bird, Crazy Bird, and Combo Bird owners to
+  Canvas. Its 30 records, active/enabled state, node/global ownership, prefab sentinels,
+  49 references, component order, and 13 custom UUIDs are regression-locked. Every screen
+  descendant is intentionally code-built from recovered composition evidence.
 - `game/assets/game/` contains byte-identical copies of all 862 recovered APK game assets.
-  The current route subsets use exact rasters and audio, but global consumer/UUID coverage is
-  not complete and the canonical sample-project root remains unresolved. Release rights are
-  tracked separately.
+  Exact live consumers account for 761 paths; reviewed static reachability classifies the other
+  100 as excluded and 1 as unsupported, leaving 0 unknown. The canonical sample-project root
+  and release rights remain unresolved separately.
 - `game/assets/scripts/domain/classic-settings-state.ts` and
   `game/assets/scripts/creator/classic-settings-runtime.ts` own the recovered bulk Settings
   shape: 50 integers, 4 booleans, 18 blade prices, 8 background prices, storage-first
   price-0 purchase transitions, and recovery behavior that disables writes after any load
   failure.
-- `tests/reconstruction/vertical-slice/` contains the current `1212/1212`
-  all-route/menu regression suite.
+- `tests/reconstruction/vertical-slice/` contains the current `1547/1547`
+  all-route/menu/composition regression suite.
 - `scripts/audit-creator-build.mjs` contains the post-build archive audit.
 - `game/library/` is generated Creator cache and is not hand-authored gameplay source.
 
@@ -224,8 +228,9 @@ in-memory debit, and stays idempotent for owned items. Back and app-hide reconci
 background/blade previews before persistence. Field-isolated recovery preserves
 any valid `totalCoins`, including `0`; only missing, corrupt, or unreadable coin storage falls
 back to `999999`, and any recovery disables writes. Result mutations remain memory-only until
-the app-hide save checkpoint. Main Menu exit-save and app-hide save are implemented; the
-first-launch `flag` bootstrap remains open.
+the app-hide save checkpoint. Main Menu exit-save and app-hide save are implemented.
+`network_available` is the recovered persisted launch sentinel; first activation is an
+in-memory shell gate, so no additional persisted `flag` or migration is justified.
 
 ## Verification Gates
 
@@ -244,7 +249,8 @@ first-launch `flag` bootstrap remains open.
    archive entry, parses exact ZIP records, recurses through bounded nested archives, and
    permits ELF only at the pinned Creator 3.8.8 `libcocos.so` boundary.
 
-Current checkpoint: full vertical slice `1212/1212`, `tests/*.mjs` `43/43`,
+Current checkpoint: full vertical slice `1547/1547`, focused pause/composition `218/218`,
+`tests/*.mjs` `61/61`,
 inventory/source/staging/archive workflow `14/14` in `217s`, reconstruction policy positive
 plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and
 clean diff hygiene. Metadata reports zero structural errors and zero duplicate UUIDs; fidelity
@@ -257,10 +263,13 @@ and high `720x1280` Preview profiles also confirm Main Menu → Options selectio
 with an empty Cocos Editor console. App-hide ordering is certified by executable tests because
 browser focus changes did not reliably deliver the Cocos lifecycle event.
 
+Standard Classic also passes Pause/Resume, fresh Replay, Quit to Main Menu, and repeated entry
+in high `720x1280` plus compact physical `360x800` (logical/resource tree `480x800`). Cocos
+counters remain `0/0/0`; DevTools contains no project error. Its only error comes from an
+unrelated Chrome extension.
+
 ## Current Blockers
 
-- The persistent Canvas map is authoritative for the app shell and all six gameplay owners,
-  but the remaining non-mode scene/prefab map and global consumers are not authored yet.
 - Creator Preview has exercised exact ordinary-fruit presentation, trajectories, cut halves,
   core audio, cut/score, three-miss game over, and two same-parent Result->Retry cycles without
   a reload or game/Cocos console error. The executable Retry harness covers construction,
@@ -281,8 +290,6 @@ browser focus changes did not reliably deliver the Cocos lifecycle event.
   ranking/objective commit, and cleanup.
 - The canonical sample-project resource manifest/root remains unresolved; presentation
   completion and the `99%` metric both stay blocked on that source.
-- The remaining Settings gap is the first-launch `flag` bootstrap plus the broader options UI;
-  Main Menu exit-save and app-hide save are already closed.
 - BombElectric runs through the memory-safe target adapter, but exact pinned-backend
   contact-count/direction equivalence remains unresolved.
 - Original content rights remain unknown.

@@ -133,6 +133,15 @@ export class Label {
   }
 }
 
+export class Graphics {
+  constructor() {
+    this.fillColor = new Color();
+    this.rects = [];
+  }
+  rect(x, y, width, height) { this.rects.push({ x, y, width, height }); }
+  fill() {}
+}
+
 export class Mask {
   constructor() { this.inverted = false; this.type = 0; }
 }
@@ -371,6 +380,7 @@ const systems = new Map();
 export const director = {
   emit() {},
   getSystem(id) { return systems.get(id) ?? null; },
+  pause() {},
   registerSystem(id, system) {
     if (runtimeFaults.failPhysicsRegistration) {
       throw new Error('Injected physics registration failure');
@@ -382,6 +392,7 @@ export const director = {
       if (registered === system) systems.delete(id);
     }
   },
+  resume() {},
 };
 
 export const physicsRuntime = {
@@ -486,6 +497,10 @@ const {
   getClassicDefaultBladeResource,
   getClassicPresentationResources,
 } = await import('../../../game/assets/scripts/domain/classic-resource-contract.ts');
+const {
+  BASE_GAMEPLAY_ARIAL_FONT_RESOURCE,
+  getBaseGameplayResourceProfile,
+} = await import('../../../game/assets/scripts/domain/base-gameplay-resource-contract.ts');
 const { ClassicSpawnPlanner } = await import(
   '../../../game/assets/scripts/domain/classic-spawn-planner.ts'
 );
@@ -1280,10 +1295,17 @@ function createRetryFixture(): RetryFixture {
   setPrivate(gameplay, 'gameOver', true);
   setPrivate(gameplay, 'sceneController', scene);
   setPrivate(gameplay, 'resourceCatalog', createResourceCatalog());
-  setPrivate(gameplay, 'baseGameplayResources', Object.freeze({
-    assetTree: '720x1280',
-  }));
+  setPrivate(gameplay, 'baseGameplayResources', createBaseGameplayResources());
   setPrivate(gameplay, 'objectivesManager', Object.freeze({
+    pauseCard() {
+      return Object.freeze({
+        objective: Object.freeze({
+          description: '15 times combo 3',
+        }),
+        progressText: '(15 times to go)',
+        rewardText: 'reward: 100 coins',
+      });
+    },
     processGameEvent() { return null; },
   }));
 
@@ -1399,6 +1421,41 @@ function createResourceCatalog(): object {
         });
       },
     }),
+  });
+}
+
+function createBaseGameplayResources(): object {
+  const profile = getBaseGameplayResourceProfile('720x1280');
+  const loadRaster = (
+    resource: Readonly<{
+      readonly canonicalPath: string;
+      readonly dimensions: Readonly<{ height: number; width: number }>;
+    }>,
+  ) => Object.freeze({
+    ...resource,
+    spriteFrame: new cc.SpriteFrame(
+      resource.dimensions.width,
+      resource.dimensions.height,
+    ),
+  });
+  return Object.freeze({
+    arialFont: Object.freeze({
+      ...BASE_GAMEPLAY_ARIAL_FONT_RESOURCE,
+      font: new cc.Font(),
+    }),
+    assetTree: '720x1280',
+    objectiveAchievement: Object.freeze(
+      Object.fromEntries(
+        Object.entries(profile.objectiveAchievement)
+          .map(([key, resource]) => [key, loadRaster(resource)]),
+      ),
+    ),
+    pause: Object.freeze(
+      Object.fromEntries(
+        Object.entries(profile.pause)
+          .map(([key, resource]) => [key, loadRaster(resource)]),
+      ),
+    ),
   });
 }
 

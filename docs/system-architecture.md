@@ -27,8 +27,16 @@ GN Style owns the standard BasicBlade, `150`-second Free/Wave/Concurrent graph, 
 `2.60`-second intro, dedicated non-looping music, 439 source-ordered particle parents,
 three-second late-cut Time Up tail, objectives `6`/`2`, `gnstyle_best_1..3`, and a
 float32 `0.6` result reward.
+The serialized content boundary is now fully reconciled: `classic.scene` contains one exact
+30-record persistent Canvas/Camera bridge with 13 custom controller UUIDs; active/enabled
+state, node ownership, prefab sentinels, and all 49 serialized references are regression-locked.
+The recursively checked 56-file metric is only the direct Node/detached-root construction
+census. Separate lifecycle/composite mappings cover every recovered screen, gameplay, result,
+pause, blade, particle, audio, and generated-entity surface. Static evidence requires no
+additional prefab, authored material/effect, animation clip, or atlas.
 
-Automated verification reaches `1520/1520` full vertical-slice tests and `61/61`
+Automated verification reaches `1547/1547` full vertical-slice tests, `218/218` focused
+Classic pause/composition tests, and `61/61`
 resource/build/catalog tests. The unchanged
 inventory/evidence workflow remains `14/14` in `217s`; reconstruction policy positive plus
 `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and diff
@@ -44,8 +52,11 @@ labels/scores, drag/flick board selection, and Back in the internal compact `480
 and high `720x1280` profile. Recovered Loading also passes both branches and hands off to a
 stable Main Menu with zero Cocos console counters. Resource reconciliation now has zero
 recovered Android-runtime unknowns: `761` live consumers, `100` reviewed exclusions, and
-`1` unsupported path. The full product remains incomplete because the
-scene/prefab/composition map and a real Android build remain open.
+`1` unsupported path. Standard Classic's shared Pause/Resume/Replay/Quit runtime passes fresh
+compact/high Preview for Resume, fresh Replay, Quit, and repeated entry; Cocos counters remain
+`0/0/0` and DevTools has no project error. Phase 6 is complete. The full product still requires
+a real Android build, pinned Physics2D equivalence, canonical external-corpus closure, and
+release-rights review.
 
 ## Dependency Direction
 
@@ -85,7 +96,7 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 | Pure gameplay domain | `game/assets/scripts/domain/` | Loading state/presentation/resources plus session, physics, score, combo, fail, toss, random, input, bird, GN choreography/music/result, and shared result logic. |
 | Creator boundary | `game/assets/scripts/creator/` | Loading, unit conversion, manual variable-step lifecycle, standard/Bird input and ray handling, per-route scene/gameplay/resource/audio presenters, Options presenters, and Creator-specific integration. |
 | Creator resource bundle | `game/assets/game/` | Exact staged bytes for all 862 recovered APK game assets: `761` have live production consumers, `100` are statically unreachable in the recovered Android runtime, and `1` remains unsupported. Historical intent and release rights remain separate from runtime disposition. |
-| Initial scene bridge | `game/assets/scenes/classic.scene` | Editor-serialized Canvas with blade input, passive Classic, shared Crazy modes `1`/`4`, Classic Bird, Combo Bird, and GN Style runtime components, and the persistent recovered app shell. |
+| Initial scene bridge | `game/assets/scenes/classic.scene` | Exact 30-record Editor-serialized Canvas/Camera bridge with four built-ins and 13 imported custom UUIDs: blade input, passive Classic, shared Crazy modes `1`/`4`, Classic Bird, Combo Bird, GN Style, and the persistent recovered app shell. All screen descendants are intentionally code-built and regression-inventoried. |
 | Verification | `tests/reconstruction/vertical-slice/` | Deterministic contract tests, executable controller lifecycle/fault tests, and boundary audits. |
 | Build audit | `scripts/audit-creator-build.mjs` | Post-build APK/AAB inspection for prohibited payloads. |
 
@@ -97,9 +108,10 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 | Physics2D | Recovered gravity, body and fixture values, ray-order behavior, and variable `frameDt * worldSpeed` stepping are encoded in pure modules. Automatic simulation stays off during Classic; a project-owned `System.postUpdate` performs one synchronized manual step and flushes project lifecycle mutations only after Box2D unlocks. Result replacement idempotently unregisters that system and restores the prior automatic-simulation, gravity, and fruit/bomb collision-matrix state. |
 | Spawn and toss | Spawn ordering, intervals, fruit selection, and controller sequencing live in pure modules. Flattened Concurrent output is accepted only as ordered, contiguous, complete per-entity plans. |
 | Score HUD, combo, fail | Score, combo window, double-score behavior, best-score updates/state, the shared `ComboItem` banner, and the three-miss state are pure. Dedicated Creator presenters own the exact score icon, best-score cup, double-score panel, `Fonts/Linds.ttf`, the shared `ComboItem` label via `Fonts/GroBold.ttf`, recovered entry fade, score-icon pulse, overlapping double-score actions, and the normal/filled marker rasters with their action timings and completion callbacks. The HUD baseline loads from `classic_best_1`. |
+| Standard Classic pause | `BaseGameplayPausePresenter` owns the exact shared overlay, objective card, and Pause/Resume/Replay/Quit controls. `ClassicSceneController` explicitly suspends and restores the current session/Physics2D/input/speed-delay leases. Replay stages one fresh mode-0 run, then commits before retiring the old presentation; Quit stages and activates Main Menu before retiring Classic. Failure paths restore the exact old root and pause state or enter a typed quiesced/fatal boundary rather than mixing owners. Resume intentionally does not resume mode-0 background music, preserving the recovered asymmetry. |
 | Result entry | Pure modules own mode-0 layout, completed-run score formatting, `>=` leaderboard insertion, the recovered `[first, second, third]` panel order, signed-int32 Settings mutations, float32 `score * 0.6` truncation, the delayed 100-particle plan, and the reward tree. Creator presenters own the exact shell/reward rasters and fonts, selected button frames, equal-z order, independent `0.75 / 1.0 / 1.75`-second actions, the `1.65`-second five-draw-per-particle burst, `1.75`-second effect → coin → badge → accounting → label boundary, `2.5`-second rotating effect, and `11.15`-second emitter cleanup. Rank audio is emitted at the recovered mid-construction boundary. Retry synchronously detaches Result, constructs fresh run-owned state, restarts the Classic session/physics boundary, and attaches the new mode to the captured parent at z-order `1`. Creator retains Result cleanup only within that callback until attachment commits; a pre-commit exception rolls back physics/run state and rearms the identical Result without replaying ranking, coins, or RNG work. Post-commit engine cleanup is best-effort and cannot tear down the fresh Classic state. |
 | Leaderboard shell | `leaderboard-state.ts`, `leaderboard-presentation.ts`, `leaderboard-resource-contract.ts`, `game/assets/scripts/creator/leaderboard-presenter.ts`, `game/assets/scripts/creator/leaderboard-resource-loader.ts`, `game/assets/scripts/creator/main-menu-presenter.ts`, `game/assets/scripts/creator/recovered-app-shell-controller.ts` | `leaderboard-presenter.test.ts`, `leaderboard-resource-contract.test.ts`, `main-menu-presenter.test.ts`, `recovered-app-shell-controller.test.ts`, `creator-scene-integration.test.ts`, Creator bundled strict TypeScript | Exact six-board local/offline read-only snapshot integrated | Snapshots process-owned Settings once in native order Classic, Crazy, Gangnam Style, Classic Bird, Crazy Bird, Combo Bird; performs no ranking, mutation, load/save, network, JNI/platform, particles, or RNG. The constrained subset uses 10 profile rasters plus `Fonts/Andyb.ttf`, `Fonts/Century.ttf`, and `Sounds/menubuttonclick.wav`. Main Menu target ID `13` waits `0.75s`, Back returns immediately to a fresh Main Menu, and the effects-gated Back click runs only after successful commit. |
-| Classic Settings | A process-owned runtime loads and saves the implemented subset for coins, selections, all six production-route leaderboards, objective state, music/effect flags, network sentinel, and rated state in recovered relative order. The bulk schema is exact: 50 integers and 4 booleans, with 18 blade price keys/defaults and 8 background price keys/defaults. Indexed Mode Select unlocks use their separate immediate persistence keys. Price `0` is the ownership sentinel. Options purchases atomically persist ownership before committing the single in-memory coin debit, accept exact affordability, and leave insufficient/already-owned/storage-failure paths inert. Field-isolated recovery preserves any valid `totalCoins`, including `0`; only missing, corrupt, or unreadable coin storage falls back to `999999`, and any recovery disables writes for that process. Main Menu exit-save and app-hide save are implemented; the first-launch `flag` bootstrap remains open. |
+| Classic Settings | A process-owned runtime loads and saves coins, selections, all six production-route leaderboards, objective state, music/effect flags, the recovered `network_available` launch sentinel, and rated state in recovered relative order. The bulk schema is exact: 50 integers and 4 booleans, with 18 blade price keys/defaults and 8 background price keys/defaults. Indexed Mode Select unlocks use their separate immediate persistence keys. Price `0` is the ownership sentinel. Options purchases atomically persist ownership before committing the single in-memory coin debit, accept exact affordability, and leave insufficient/already-owned/storage-failure paths inert. Field-isolated recovery preserves any valid `totalCoins`, including `0`; only missing, corrupt, or unreadable coin storage falls back to `999999`, and any recovery disables writes for that process. Main Menu exit-save and app-hide save are implemented; no additional persisted `flag` or migration is justified. |
 | Options | `OptionsState` and presentation/resource contracts own eight backgrounds, eighteen blades, ten themes, selector state, exact Buy visibility/prices, affordability, exit rollback, and the 45-particle purchase plan. Creator presenters own the one-screen `1.25 / 1.50 / 1.75`-second row reveal, exact 51-raster per-tree profile, `SlabThing`, `menubuttonclick`, `mono1`, `mono2`, live shared background/theme preview, transactional Main Menu handoff, and `xmasfive` burst. Back and app-hide reconcile unpaid background/blade previews to index `0`; theme, owned choices, and persisted background index `8` follow their recovered compatibility rules. A reconciliation failure suppresses app-hide save and remains retryable. |
 | Bird substrate and mode `3` | `bird-blade-state.ts`, `bird-blade-particle-plan.ts`, `bird-resource-contract.ts`, and the Bird Creator adapters own the single touch-directed blade, always-updating particle trail, cached ray path, and exact Bird resources. Classic Bird adds its untimed intro/fail/result/retry lifecycle through `classic-bird-*`. |
 | Crazy Bird mode `4` | `crazy-timed-mode-profile.ts`, `crazy-bird-result-ranking.ts`, and `crazy-bird-result-navigation.ts` profile the shared `CrazySession`, `CrazySceneController`, and `CrazyGameplayController`. Mode `4` composes the recovered 60-second Crazy graph with BirdBlade type `2`, exact type-2 resources, objective events `9`/`5`, `bird_crazy_best_1..3`, float32 `0.8` reward, and fresh mode-4 replay/retry/menu ownership. The exact native `ActionGoCallback` operand/order remains a disclosed static inference gap. |
@@ -114,7 +126,7 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 | Audio | Creator adapters preload the reviewed Classic/menu, Options, Bird, Crazy, Combo, and GN clip sets and interpret toss, swish, cut, critical, combo, timer, result-rank, bonus/electric, objective, pause, selector-row, and menu-button commands without moving draw/order rules out of the domain. Independent retained voices model ordinary-bomb and Crazy effect ownership; the electric-only `boomhit` path remains separate from ordinary-bomb audio. GN's dedicated non-looping source is mutually exclusive with shared background music and pauses/resumes/stops with its transactional owner; TimeManager effects use the shared exact presenter. |
 | Resource import | Staging and metadata validators prove exact bytes and current Creator raster/audio import geometry for the recovered APK corpus. The generated registry/ledger assigns exact live ownership to `761/862` paths (`88.28%`), including Loading's 70-path closure, while all `862/862` paths are classified as `761` consumed, `0` unknown, `100` excluded, and `1` unsupported. UUID extraction remains separate from consumer accounting. |
 | Resolution and input | The recovered `720` physical-width profile branch is pure; Creator applies its Show All policy and routes scene-wide touch input into four blade slots or the single Bird blade. |
-| Build boundary | Source-boundary tests reject trackable legacy integration. The separate fail-closed archive audit hashes every entry, parses ZIP records exactly, recurses through bounded nested archives, and inspects ELF payloads; the unchanged inventory/source/staging/archive workflow is `14/14`, `tests/*.mjs` are `61/61`, the full vertical slice is `1520/1520`, and strict Creator TypeScript is green. |
+| Build boundary | Source-boundary tests reject trackable legacy integration. The separate fail-closed archive audit hashes every entry, parses ZIP records exactly, recurses through bounded nested archives, and inspects ELF payloads; the unchanged inventory/source/staging/archive workflow is `14/14`, `tests/*.mjs` are `61/61`, the full vertical slice is `1547/1547`, focused pause/composition is `218/218`, and strict Creator TypeScript is green. |
 
 ## Checkpoint Evidence
 
@@ -133,12 +145,6 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 
 ## Open Architectural Gaps
 
-- Scene and serialized component ownership is established for the first Canvas bridge; the
-  remaining scene/prefab/presenter map is open.
-- The persistent shell now preserves the recovered equal-z append order Background → Leaf →
-  Theme → current screen, and all seven visible routes stay transactional. The current GN Style
-  checkpoint is confirmed across entry, gameplay, pause, replay, quit, natural Result, Retry,
-  Menu, and repeated entry in fresh Creator-served Browser Preview.
 - Main Menu ↔ Options, all selector families, purchase/rollback behavior, and both resource
   profiles are integrated. App-hide reconciliation is certified by executable lifecycle tests
   and source review because browser focus changes did not reliably emit Cocos app-hide.
@@ -147,22 +153,16 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
   four-slot reuse plus asynchronous attachment, but controller-confirmed Preview/device
   rendering, legacy numeric blend factors, sampler behavior, and pixel output remain unresolved
   at the adapter boundary.
-- Exact recovered APK resources are imported and the Classic, Crazy, GN Style, Classic Bird,
-  Crazy Bird, and Combo Bird consumers are integrated; most of the 862 assets still need consumer mapping. The
-  canonical sample-project root remains unresolved, so corpus completeness and the final
-  fidelity denominator are still open.
+- Exact recovered APK resources are imported and all `862/862` paths have reviewed
+  consumed/excluded/unsupported dispositions. The canonical sample-project root remains
+  unresolved, so external corpus completeness and the final fidelity denominator are still open.
 - Standard-bomb entry/cut state, fuse smoke, procedural full-quad/triangle explosion, completion,
   and Crazy registry/controller activation are implemented. Classic scheduling and any distinct
   native lower-bound bomb side effect remain open; the entity does not reuse Fruit's miss
   callback as a substitute.
-- The shell persists the implemented Settings subset plus separate indexed mode-unlock keys
-  and the recovered Options purchases/selections. The remaining native Settings fields and
-  first-launch `flag` bootstrap are open.
 - Exact result-entry layout/ranking/actions, reward visuals, app-hide persistence, Result-to-Main
   replacement, same-parent Retry reconstruction, and Bird modes `3`/`4`/`5` are integrated
   behind transactional rollback boundaries.
-- Standard-blade ownership is complete for IDs `0`-`17`; Objectives and progression wiring
-  is the next shared surface to finish.
 - The electric-field memory-safe adapter runs in automated validation without a crash, but exact
   contact-count/direction equivalence still needs a targeted pinned-backend validation.
 - Rights for legacy art, music, fonts, name, and trademarks are still unknown.

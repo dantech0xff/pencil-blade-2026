@@ -1576,10 +1576,13 @@ test('Mode Select enters Classic only through an empty shared current-screen hos
     'const rollbackFailures: unknown[] = []',
     'this.restoreModeSelectAfterFailedClassicActivation(oldPresenter.root)',
     'nonClassicPhysics.activateCollisionFilter()',
+    'oldPresenter.rearmNavigationAfterFailure()',
     'if (rollbackFailures.length > 0)',
     'new ModeSelectFatalNavigationError(',
     'aggregateWithPrimaryError(',
     "'Mode Select to Classic rollback failed'",
+    'error instanceof ClassicLifecycleRollbackError',
+    "'Mode Select to Classic retained poisoned runtime ownership'",
   ]);
 });
 
@@ -1855,6 +1858,234 @@ test('Classic Result to Main Menu commits only after attach and activation, with
   const disposeIndex = transition.indexOf('nextPresenter?.dispose()', catchIndex);
   assert.ok(rollbackIndex > catchIndex);
   assert.ok(disposeIndex > rollbackIndex);
+});
+
+test('Classic Pause Quit replaces gameplay with fresh Main Menu and restores before rollback', () => {
+  const enable = extractMethod(SOURCE, 'onEnable');
+  const disable = extractMethod(SOURCE, 'onDisable');
+  const handler = extractMemberBlock(
+    SOURCE,
+    '  private readonly onClassicPauseQuitRequested = (',
+  );
+  const transition = extractMethod(SOURCE, 'transitionClassicPauseQuitToMainMenu');
+  const capture = extractMemberBlock(
+    SOURCE,
+    'function captureClassicPauseQuitNavigationRequest(',
+  );
+
+  assert.match(enable, /CLASSIC_PAUSE_QUIT_REQUESTED_EVENT/);
+  assert.match(disable, /CLASSIC_PAUSE_QUIT_REQUESTED_EVENT/);
+  assertOrderedSubstrings(handler, [
+    'captureClassicPauseQuitNavigationRequest(request)',
+    "captured.request === null",
+    'this.rejectClassicPauseQuitRequest(',
+    'this.transitionClassicPauseQuitToMainMenu(captured.request)',
+  ]);
+  assertOrderedSubstrings(transition, [
+    "this.stateValue !== 'classic'",
+    'this.requireNonClassicPhysics()',
+    '.activateCollisionFilter()',
+    'this.createMainMenuPresenter()',
+    'sharedScene.replaceCurrentScreen(nextPresenter.root)',
+    'nextPresenter.activate()',
+    'commitClassicBirdMainMenuNavigationRequest(',
+    "'Classic Pause Quit'",
+    'this.activeMainMenu = nextPresenter',
+    "this.stateValue = 'main-menu'",
+  ]);
+  const catchIndex = transition.indexOf('} catch (error) {');
+  assert.ok(catchIndex > -1);
+  assertOrderedSubstrings(transition.slice(catchIndex), [
+    'this.restoreClassicNavigationRootBeforeRollback(request.root)',
+    'nextPresenter?.dispose()',
+    '.stopBackgroundMusic()',
+    'restorePreviousCollisionFilter()',
+    'request.rollback()',
+    'this.assertClassicNavigationRollbackRestored(request.root)',
+  ]);
+  assertOrderedSubstrings(capture, [
+    'const rollback = candidate.rollback',
+    'const classicRoot = candidate.classicRoot',
+    'const commit = candidate.commit',
+    'classicRoot instanceof Node',
+    'commit: (previousRoot: Node)',
+    'root: classicRoot',
+  ]);
+});
+
+test('Classic Pause Quit shell rollback failures retain a fatal state', () => {
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const errorMessage = compileSourceFunction<(error: unknown) => string>(
+    'errorMessage',
+  );
+  const aggregateWithPrimaryError = compileSourceFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  const runBestEffortCleanup = compileSourceFunction<
+    (label: string, operations: readonly (() => void)[]) => readonly Error[]
+  >('runBestEffortCleanup', {
+    console: { error() {} },
+    normalizeError,
+  });
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      request: Readonly<{
+        root: ExecutableScreenNode;
+        commit(previousRoot: ExecutableScreenNode): void;
+        rollback(): void;
+      }>,
+    ) => void
+  >('transitionClassicPauseQuitToMainMenu', {
+    aggregateWithPrimaryError,
+    commitClassicBirdMainMenuNavigationRequest() {
+      throw new Error('failed activation must not reach producer commit');
+    },
+    runBestEffortCleanup,
+  });
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const restore = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >('restoreClassicNavigationRootBeforeRollback', { isValid });
+
+  const timeline: string[] = [];
+  const classicRoot = new ExecutableScreenNode();
+  const menuRoot = new ExecutableScreenNode();
+  const sharedScene = new ExecutableSharedScene(classicRoot);
+  let collisionFilterActive = false;
+  const reported: Error[] = [];
+  const controller: Record<string, unknown> = {
+    activeMainMenu: null,
+    assertClassicNavigationRollbackRestored(root: ExecutableScreenNode) {
+      assert.equal(sharedScene.currentScreen, root);
+      assert.equal(collisionFilterActive, false);
+      timeline.push('rollback:verified');
+    },
+    createMainMenuPresenter: () => ({
+      activate() {
+        timeline.push('menu:activate');
+        throw new Error('injected Main Menu activation failure');
+      },
+      dispose() {
+        timeline.push('menu:dispose');
+      },
+      root: menuRoot,
+    }),
+    destroyedValue: false,
+    emitTransitionFailure(
+      _from: string,
+      _to: string,
+      error: unknown,
+    ) {
+      reported.push(
+        error instanceof Error ? error : new Error(String(error)),
+      );
+    },
+    requireGameplayController: () => ({
+      sharedAudioPresenter: {
+        stopBackgroundMusic() {
+          timeline.push('audio:stop-background');
+        },
+      },
+    }),
+    requireNonClassicPhysics: () => ({
+      activateCollisionFilter() {
+        collisionFilterActive = true;
+        timeline.push('filter:activate');
+        return true;
+      },
+      restorePreviousCollisionFilter() {
+        collisionFilterActive = false;
+        timeline.push('filter:restore');
+      },
+    }),
+    requireSharedScene: () => sharedScene,
+    restoreClassicNavigationRootBeforeRollback(root: ExecutableScreenNode) {
+      restore.call(this as never, root);
+      timeline.push('screen:restore-classic');
+    },
+    retainClassicShellFailure(
+      from: string,
+      error: unknown,
+    ) {
+      this.stateValue = 'failed';
+      this.emitTransitionFailure(from, 'main-menu', error);
+    },
+    stateValue: 'classic',
+    transitioning: false,
+  };
+
+  transition.call(controller, {
+    commit() {},
+    rollback() {
+      timeline.push('producer:rollback');
+      throw new Error('injected producer rollback failure');
+    },
+    root: classicRoot,
+  });
+
+  assert.equal(controller.stateValue, 'failed');
+  assert.equal(controller.transitioning, false);
+  assert.equal(sharedScene.currentScreen, classicRoot);
+  assert.equal(reported.length, 1);
+  assert.match(
+    reported[0]?.message ?? '',
+    /injected Main Menu activation failure[\s\S]*injected producer rollback failure/,
+  );
+  assert.deepEqual(timeline, [
+    'filter:activate',
+    'menu:activate',
+    'screen:restore-classic',
+    'menu:dispose',
+    'audio:stop-background',
+    'filter:restore',
+    'producer:rollback',
+    'rollback:verified',
+  ]);
+});
+
+test('rejected Classic Pause Quit rollback failures also retain a fatal shell state', () => {
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const rejectClassicPauseQuitRequest = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      rollback: (() => void) | null,
+    ) => void
+  >('rejectClassicPauseQuitRequest', { normalizeError });
+
+  const reported: Error[] = [];
+  const controller: Record<string, unknown> = {
+    retainClassicShellFailure(
+      _from: string,
+      error: unknown,
+    ) {
+      this.stateValue = 'failed';
+      reported.push(
+        error instanceof Error ? error : new Error(String(error)),
+      );
+    },
+    stateValue: 'classic',
+  };
+
+  rejectClassicPauseQuitRequest.call(controller, () => {
+    throw new Error('injected rejected Quit rollback failure');
+  });
+
+  assert.equal(controller.stateValue, 'failed');
+  assert.equal(reported.length, 1);
+  assert.match(
+    reported[0]?.message ?? '',
+    /injected rejected Quit rollback failure/,
+  );
 });
 
 test('Crazy Result and Pause Quit share one commit-after-activation Main Menu transaction', () => {
@@ -3254,6 +3485,130 @@ test('incomplete Classic activation rollback fails the shell and never returns r
   assert.equal(partialClassicRoot.parent, null);
   assert.equal(suspended, true);
   assert.equal(filterReacquireCount, 1);
+  assert.equal(transitionFailureCount, 1);
+});
+
+test('poisoned Standard Classic re-entry fails the shell after exact Mode Select restoration', () => {
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const errorMessage = compileSourceFunction<(error: unknown) => string>(
+    'errorMessage',
+  );
+  const aggregateWithPrimaryError = compileSourceFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  class TestClassicLifecycleRollbackError extends Error {}
+  class TestFatalNavigationError extends Error {
+    readonly cause: unknown;
+    readonly releaseScreenOwnership: () => void;
+
+    constructor(
+      message: string,
+      cause: unknown,
+      releaseScreenOwnership: () => void = () => {},
+    ) {
+      super(`${message}: ${String(cause)}`);
+      this.cause = cause;
+      this.releaseScreenOwnership = releaseScreenOwnership;
+    }
+  }
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      transaction: Readonly<{
+        destination: string;
+        root: ExecutableScreenNode;
+      }>,
+    ) => boolean
+  >('transitionModeSelectToClassic', {
+    aggregateWithPrimaryError,
+    ClassicLifecycleRollbackError: TestClassicLifecycleRollbackError,
+    ModeSelectFatalNavigationError: TestFatalNavigationError,
+  });
+  const runTransition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      from: string,
+      to: string,
+      operation: () => boolean,
+    ) => boolean
+  >('runTransition', {
+    ModeSelectFatalNavigationError: TestFatalNavigationError,
+  });
+  const restore = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      root: ExecutableScreenNode,
+    ) => void
+  >('restoreModeSelectAfterFailedClassicActivation', { isValid });
+
+  const modeSelectRoot = new ExecutableScreenNode();
+  const partialClassicRoot = new ExecutableScreenNode();
+  const sharedScene = new ExecutableSharedScene(modeSelectRoot);
+  const poison = new TestClassicLifecycleRollbackError(
+    'injected Standard Classic lifecycle poison',
+  );
+  let filterActive = true;
+  let inputRearmCount = 0;
+  let transitionFailureCount = 0;
+  const shell: Record<string, unknown> = {
+    activeModeSelect: {
+      dispose: () => true,
+      rearmNavigationAfterFailure() {
+        inputRearmCount += 1;
+        return true;
+      },
+      root: modeSelectRoot,
+      suspendForTransition: () => true,
+    },
+    captureModeSelectFatalScreenRelease: () => () => {},
+    destroyedValue: false,
+    emitTransitionFailure() {
+      transitionFailureCount += 1;
+    },
+    requireGameplayController: () => ({
+      activateClassicFromAppShell() {
+        sharedScene.attachCurrentScreen(partialClassicRoot);
+        throw poison;
+      },
+    }),
+    requireNonClassicPhysics: () => ({
+      activateCollisionFilter() {
+        filterActive = true;
+        return true;
+      },
+      get collisionFilterActive() {
+        return filterActive;
+      },
+      restorePreviousCollisionFilter() {
+        filterActive = false;
+        return true;
+      },
+    }),
+    requireSharedScene: () => sharedScene,
+    restoreModeSelectAfterFailedClassicActivation(root: ExecutableScreenNode) {
+      restore.call(this as never, root);
+    },
+    runTransition(from: string, to: string, operation: () => boolean) {
+      return runTransition.call(this, from, to, operation);
+    },
+    stateValue: 'mode-select',
+    transitioning: false,
+  };
+
+  assert.throws(
+    () => transition.call(shell, {
+      destination: 'ClassicModeLayer',
+      root: modeSelectRoot,
+    }),
+    /Mode Select to Classic retained poisoned runtime ownership/,
+  );
+  assert.equal(shell.stateValue, 'failed');
+  assert.equal(sharedScene.currentScreen, modeSelectRoot);
+  assert.equal(partialClassicRoot.parent, null);
+  assert.equal(filterActive, true);
+  assert.equal(inputRearmCount, 1);
   assert.equal(transitionFailureCount, 1);
 });
 

@@ -184,3 +184,19 @@ test('result replacement commands preserve terminal navigation order', () => {
   assert.equal(session.snapshot().lifecycle, 'result-removed');
   assert.throws(() => session.displayScoreComplete(1.5), RangeError);
 });
+
+test('Pause Quit retires Classic without constructing Result or emitting side effects', () => {
+  const session = new ClassicSession();
+  session.completeIntro();
+
+  assert.equal(session.retireForPauseQuit(), undefined);
+  assert.deepEqual(session.snapshot(), {
+    cutEnabled: false,
+    hasTimeManager: false,
+    lifecycle: 'navigation-removed',
+    mode: CLASSIC_MODE_ID,
+    terminalPresentationGuard: false,
+    worldStopped: false,
+  });
+  assert.throws(() => session.retireForPauseQuit(), /cannot retire twice/);
+});

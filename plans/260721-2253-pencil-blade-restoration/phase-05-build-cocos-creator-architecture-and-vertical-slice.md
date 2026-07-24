@@ -39,10 +39,11 @@ Pause/Resume/Replay/Quit with zero runtime or console errors.
 Checkpoint report: [Blade and navigation foundations](reports/journal-2026-07-23-blade-navigation-foundations.md).
 The exact standard-bomb raster/audio/entity, fuse-smoke, procedural explosion, and completion
 boundaries are implemented and tested; Crazy uses them in its production entity registry while
-Classic scheduling remains separate. Full first-launch Settings initialization and the Main Menu
-exit-save path remain open. The
-remaining scene/prefab map, consumer coverage, and full Classic scope still need to be
-completed before this phase can close.
+Classic scheduling remains separate. First-launch Settings behavior, Main Menu exit-save,
+resource disposition coverage, and the scene/dynamic-composition map are now reconciled.
+`classic.scene` is the one required persistent bridge; all screen descendants are intentionally
+code-built from recovered constructor/add-child evidence, so no prefab is required. Android
+toolchain/build validation and pinned-backend Physics2D equivalence remain open Phase 5/7 gates.
 
 ## Context Links
 
@@ -191,8 +192,8 @@ Status: in progress. Continue this phase rather than creating a second restorati
 - Create: ../../docs/system-architecture.md
 - Update: ../../docs/cocos-creator-contract-map.md
 - Create via pinned editor: ../../game/
-- Create: ../../game/assets/scenes/
-- Create: ../../game/assets/prefabs/
+- Maintain via pinned editor: ../../game/assets/scenes/classic.scene
+- No prefab creation: recovered composition is code-built and the corpus contains no prefab evidence
 - Create: ../../game/assets/scripts/core/
 - Create: ../../game/assets/scripts/domain/
 - Create: ../../game/assets/scripts/creator/
@@ -207,7 +208,8 @@ Status: in progress. Continue this phase rather than creating a second restorati
 2. Scaffold `game/` with the pinned Creator editor and commit only source/configuration
    files intended by the project boundary; never hand-copy legacy engine project files.
 3. Record the one-way mapping from recovered C++ classes/functions to new TypeScript
-   domain services, Creator components, scenes/prefabs, events, and validation cases.
+   domain services, Creator components, serialized/dynamic composition, events, and
+   validation cases.
 4. Stage only the vertical-slice resource subset through the Phase 3 manifest; verify
    source hashes, Creator import metadata, dimensions, alpha, audio, and font metrics.
 5. Implement `GameClock`, deterministic random, reconstruction input fixtures, and
@@ -227,7 +229,7 @@ Status: in progress. Continue this phase rather than creating a second restorati
 - [x] Cocos Creator 3.8.8 editor and engine identity recorded
 - [ ] Android SDK, NDK, JDK, Gradle, and ABI pin completed
 - [x] Proposed Creator architecture and C++-to-TypeScript ownership map
-- [ ] Editor-generated project structure and final serialized-component map
+- [x] Editor-generated project structure and final serialized/dynamic-component map
 - [x] Deterministic time/random/input seams
 - [x] Lossless Creator resource import for the slice
 - [x] Complete Classic vertical slice
@@ -244,16 +246,20 @@ Current Editor integration:
 
 - Project default design resolution is `720x1280`; runtime resolution selection preserves the
   recovered physical-width `720` branch and the `480x800` fallback through `SHOW_ALL`.
-- `assets/scenes/classic.scene` is Editor-serialized and attaches `BladeInputController`,
-  `ClassicSceneController`, `ClassicGameplayController`, and `RecoveredAppShellController` to
-  Canvas. The two Classic controllers remain passive until the app shell commits mode `0` entry.
+- `assets/scenes/classic.scene` is the exact 30-record Editor-serialized Canvas/Camera bridge.
+  It attaches four built-ins and 13 imported custom controllers for input, all six gameplay
+  routes, and the recovered app shell. Active/enabled state, node ownership, prefab sentinels,
+  all 49 references, component order, and custom UUIDs are regression-locked. Route controllers
+  remain passive until the app shell commits their entry.
 - Resolved gravity/sleep/solver properties are configured. Automatic Physics2D simulation stays
   off; a custom post-update system performs the recovered one-per-frame variable step with
   explicit synchronization and a project-owned deferred-mutation boundary. Removing Classic
   for results unregisters that system and restores the prior Physics2D singleton properties.
 - All 862 recovered APK game assets (784 PNG, 59 WAV, 3 MP3, and 16 fonts) are staged
-  byte-for-byte under the Creator bundle. The current import validator covers 934 generated
-  metadata sidecars; the manifest's per-asset consumer and UUID fields still require backfill.
+  byte-for-byte under the Creator bundle. The pinned import validator covers all generated
+  metadata sidecars, structural validity, and duplicate UUID detection. The staging manifest's
+  metadata/UUID fields intentionally remain pre-import `pending`; post-import metadata authority
+  belongs to the separate validator.
 - The exact standard Bomb ID `0` raster is cataloged; a tested Creator entity owns its recovered
   `(0.5, 0.4)` anchor, dynamic circle fixture/filter, spawn mutations, first-cut guard, motion
   freeze, audio-before-freeze hook, callback-failure cleanup, and deferred completion seam.
@@ -299,25 +305,22 @@ Current Editor integration:
   Result Retry. The fixture was then restored to the exact prior `2199`-coin/locked state.
   Creator Console remained at zero errors. Controller confirmation for the latest Crazy
   checkpoint remains pending.
-- The current playable slice is not presentation-complete; the exact staging gate is complete
-  for the recovered APK corpus, but 100% consumer coverage and canonical sample-project
-  completeness remain open. Release rights are a separate review.
-- The deterministic vertical-slice suite passes `739/739`, including the focused
+- The recovered APK corpus is presentation-disposition complete: all `862/862` assets are
+  classified as `761` live consumers, `100` reviewed exclusions, and `1` unsupported path.
+  Canonical external sample-project completeness and release rights remain separate gates.
+- The historical Phase 5 deterministic baseline passes `739/739`, including the focused
   Crazy/TimeManager regressions; the complete inventory workflow passes `14/14`; reconstruction policy
   positive and `4/4` negative fixtures pass; Creator 3.8.8's bundled strict TypeScript compiler
   passes; and independent review reports no P0/P1 finding.
 
 ## Current Blockers
 
-- Completion of the remaining scene, prefab, and serialized component ownership map.
 - Deterministic trajectory, contact, exact ray-order, and deferred lifecycle validation on
   the custom variable-step boundary.
 - Canonical sample-project resource manifest/root resolution so the presentation coverage gate
   and `99%` metric can be finalized.
 - Classic controller scheduling for the now-recovered standard-bomb presentation and the
   unresolved native lower-bound side effect; no Fruit-miss substitution is accepted.
-- Full Settings coverage beyond the eleven implemented fields, including the recovered
-  first-launch initialization and Main Menu exit-save checkpoint.
 - Electric-field compatibility decisions.
 - Android build validation and real APK/AAB post-build audit.
 - Rights review for original assets and product identity.
@@ -351,7 +354,8 @@ ad SDKs, or executable code from the APK.
 
 ## Next Steps
 
-Phase 6 has started after the Creator vertical-slice and production Crazy gates passed.
-Continue the existing plan with the shared BaseBird/BirdBlade substrate and Classic Bird,
-then Crazy Bird, Combo Bird, and GN Style while Phase 4 static analysis closes each mode's
-remaining evidence gaps.
+Phase 6 has integrated all six routes, save/economy, Options, Leaderboard, Objectives,
+About/offline, Loading, resource dispositions, and the final serialized/dynamic composition
+map. Its fresh compact/high Classic Pause/Replay/Quit/re-entry Preview and final review gate
+pass, so Phase 6 is complete. Continue to Phase 7 Android build validation, pinned Physics2D
+equivalence, canonical external-corpus closure, and release-rights clearance.

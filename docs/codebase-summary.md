@@ -1,8 +1,8 @@
 # Codebase Summary
 
 Snapshot metrics were generated from `repomix-output.xml` on 2026-07-24. Current workspace
-status is maintained manually and is updated through the 2026-07-24 recovered Loading
-checkpoint.
+status is maintained manually and is updated through the completed 2026-07-24 Phase 6
+content/progression checkpoint.
 
 ## Snapshot
 
@@ -45,8 +45,8 @@ checkpoint.
 | `game/assets/scripts/creator/recovered-app-shell-controller.ts` | Persistent app shell and transactional Main Menu / Options / Leaderboard / Objectives / Mode Select / gameplay screen replacement. |
 | `game/assets/scripts/creator/classic-scene-controller.ts`, `classic-gameplay-controller.ts`, `crazy-scene-controller.ts`, `crazy-gameplay-controller.ts` | Creator lifecycles for the bounded Classic route and the production Crazy routes. |
 | `game/assets/scripts/creator/combo-bird-*.ts`, `game/assets/scripts/creator/gn-style-*.ts` | Production Combo Bird and GN Style owners, including pause/result/retry/menu transactions. |
-| `game/assets/scenes/classic.scene` | Editor-authored persistent Canvas with the app shell and passive route owners. |
-| `tests/reconstruction/vertical-slice/*.test.ts` | `1520/1520` deterministic regressions through the Loading/resource-reconciliation checkpoint and executable lifecycle faults across all routes. |
+| `game/assets/scenes/classic.scene` | Exact 30-record Editor-authored Canvas/Camera bridge with four built-ins, 13 custom route/shell controllers, and regression-locked active/enabled state, node/global ownership, prefab sentinels, references, order, and UUIDs. Runtime descendants are intentionally code-built; no prefab is required by recovered evidence. |
+| `tests/reconstruction/vertical-slice/*.test.ts` | `1547/1547` deterministic regressions through the composition/Classic-Pause checkpoint and executable lifecycle faults across all routes. |
 | `scripts/audit-creator-build.mjs` | Post-build archive audit for APK/AAB outputs. |
 | `tests/audit-creator-build-test.mjs` | Synthetic coverage for the build-audit script. |
 
@@ -84,8 +84,8 @@ checkpoint.
   verification](../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-about-offline-final-checkpoint.md).
 - The Objectives checkpoint remains historically certified at `196/196` focused and
   `1444/1444` full vertical-slice tests. About/offline remains certified at `169/169`
-  focused. The current Loading/resource-reconciliation checkpoint is `1520/1520` full
-  vertical-slice and `61/61` top-level resource/build/catalog/tooling tests, with
+  focused. The current composition/Classic-Pause checkpoint is `218/218` focused,
+  `1547/1547` full vertical-slice, and `61/61` top-level resource/build/catalog/tooling tests, with
   Creator 3.8.8 bundled strict TypeScript zero diagnostics and clean diff hygiene.
 - The standard-blade checkpoint is `1285/1285` full vertical-slice tests, `43/43` resource/build/catalog tests, the unchanged `14/14` inventory/evidence workflow in `217s`, reconstruction policy positive plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and clean diff hygiene.
 - The resource consumer registry is exact at `761/862` runtime paths, while the reconciliation
@@ -104,6 +104,9 @@ checkpoint.
 - Fresh Creator Preview also renders Loading and reaches a stable Main Menu in the compact
   physical `360x800` profile (logical/resource tree `480x800`) and high `720x1280` profile;
   the final Cocos Editor counters remain zero.
+- Standard Classic passes Pause/Resume, fresh Replay, Quit to Main Menu, and repeated entry in
+  both profiles. Cocos counters are `0/0/0`; DevTools has no project error, with one unrelated
+  `chrome-extension://.../share-modal.js` error classified outside the game.
 
 ## Checkpoint Evidence
 
@@ -126,10 +129,10 @@ checkpoint.
 - [Advanced blade native contract](../plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md)
 - [Nonblade unused-resource contract](../plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md)
 - [Zero-unknown resource verification](../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-zero-unknown-resource-closure.md)
+- [Phase 6 final verification](../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-phase6-final-checkpoint.md)
 
 ## Current Open Gates
 
-- Scene, prefab, and serialized component map completion beyond the first Canvas bridge.
 - Creator Physics2D runtime-equivalence validation and electric-field compatibility.
 - Technical fidelity is separate from release rights; rights review can still block release even when the technical coverage target is met.
 - Rights review for original assets and product identity.

@@ -1,7 +1,7 @@
 ---
 phase: 6
 title: "Recreate Full Game Content and Progression"
-status: in-progress
+status: completed
 priority: P2
 dependencies: [4, 5]
 effort: "2-4 months"
@@ -43,7 +43,9 @@ The global resource ledger now classifies all 862 recovered assets without treat
 files as live consumers. The recovered Loading surface now owns its exact four selected-profile
 rasters, 62-step audio preload sequence, `/61` clamped progress, and half-second handoff to
 Main Menu. Static reachability review closes the final 90 asset dispositions without inventing
-consumers; only scene/prefab/composition reconciliation and final Phase 6 verification stay open.
+consumers. The one-scene/code-built composition map is reconciled, the missing standard Classic
+pause surface is integrated, and the compact/high Preview plus final Phase 6 verification are
+green.
 
 ## Context Links
 
@@ -97,6 +99,9 @@ consumers; only scene/prefab/composition reconciliation and final Phase 6 verifi
 - [Advanced blade architecture map](./reports/explorer-2026-07-24-advanced-blade-architecture-map.md)
 - [Nonblade unused-resource contract](./reports/researcher-2026-07-24-nonblade-unused-resource-contract.md)
 - [Zero-unknown resource verification](./reports/tester-2026-07-24-zero-unknown-resource-closure.md)
+- [Scene and dynamic-composition reconciliation](./reports/explorer-2026-07-24-scene-composition-reconciliation-map.md)
+- [Phase 6 final gate command map](./reports/explorer-2026-07-24-phase6-final-gates.md)
+- [Phase 6 final verification](./reports/tester-2026-07-24-phase6-final-checkpoint.md)
 - [Remaining mode order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 
 ## Requirements
@@ -117,8 +122,8 @@ save schema and include reproducible fixtures for progression states.
 ## Related Code Files
 
 - Modify: ../../game/assets/scripts/
-- Modify: ../../game/assets/scenes/
-- Modify: ../../game/assets/prefabs/
+- Maintain via pinned editor: ../../game/assets/scenes/classic.scene
+- No prefab creation: recovered composition is code-built and the corpus contains no prefab evidence
 - Create: ../../game/assets/game/data/
 - Create: ../../tests/fixtures/progression/
 - Create: ../../tests/contracts/
@@ -179,15 +184,23 @@ save schema and include reproducible fixtures for progression states.
   assets (`88.28%` runtime consumption); reviewed dispositions close classification to
   `862/862` with `0` unknown, `100` excluded, and `1` unsupported. All source bytes remain
   staged; classification does not promote statically unreachable files into runtime consumers.
+- **Complete:** serialized/dynamic composition reconciliation. The one `classic.scene` bridge
+  retains its exact 30 records, four built-ins, 13 custom UUIDs, component order, active/enabled
+  state, node/global ownership, prefab sentinels, and 49 references. Runtime surfaces remain
+  evidence-backed code composition; no prefab/material/effect/animation/atlas is invented.
+- **Complete:** standard Classic shared Pause/Resume/Replay/Quit integration with the exact
+  objective overlay, recovered audio asymmetry, fresh-run Replay, Main Menu Quit, retained
+  cleanup retry, and exact-rollback-or-quiesced-fatal ownership.
 - All six production gameplay routes, Leaderboard, Options, standard blades, save/economy,
   Objectives, About/offline, first-launch behavior, and global resource classification are
-  complete. Phase 6 remains in progress only for the scene/prefab/composition map and final
-  checkpoint verification.
+  complete. The final compact/high standard Classic Preview and checkpoint verification pass,
+  so Phase 6 is complete.
 
 Current certification checkpoint:
 
+- Focused Classic pause/composition suite: `218/218`
 - Focused About/Main Menu/shell integration suite: `169/169`
-- Full deterministic vertical slice: `1520/1520`
+- Full deterministic vertical slice: `1547/1547`
 - Top-level resource/build/catalog/tooling tests: `61/61`
 - Resource-ledger generator/registry focused tests: `18/18`
 - Staging/metadata focused tests: `33/33`
@@ -215,8 +228,13 @@ Current certification checkpoint:
 - The same profile pair renders recovered Loading and reaches a stable Main Menu. Compact
   physical `360x800` selects logical/resource tree `480x800`; high selects `720x1280`.
   Cocos Editor log, warning, and error counters remain zero.
+- Standard Classic passes Pause -> Resume, Pause -> fresh-run Replay, Pause -> Quit to Main
+  Menu, and repeated entry in high `720x1280` plus compact physical `360x800` (logical/resource
+  tree `480x800`). Cocos Editor counters remain `0/0/0`; Chrome DevTools contains no project
+  error. Its sole error is the unrelated `chrome-extension://.../share-modal.js` TypeError.
 - Missing or corrupt coin storage still falls back to `999999` coins; a valid persisted balance
-  wins, including `0`
+  wins, including `0`. The final coin/save checkpoint passes `35/35`; the valid local Preview
+  balance `976295` is intentionally preserved rather than reset.
 
 ## Todo List
 
@@ -228,16 +246,17 @@ Current certification checkpoint:
 - [x] Full recovered-runtime content/cosmetics and exact source-resource retention
 - [x] First-launch persisted-sentinel and in-memory activation-gate reconciliation
 - [x] Global `862`-asset consumer/disposition ledger and schema-v2 staging manifest
-- [ ] Scene/prefab/composition reconciliation and final Phase 6 verification
+- [x] Scene and dynamic-composition reconciliation; explicit zero-prefab decision
+- [x] Fresh compact/high Preview and final Phase 6 verification
 - [x] About screen fidelity and offline behavior for retired services
 
 ## Success Criteria
 
-- [ ] Every statically identified state is implemented, explicitly excluded, or recorded unknown
-- [ ] Recovered and inferred coverage are reported separately; inferences never raise recovered coverage
-- [ ] All mode contracts and progression fixtures pass
+- [x] Every statically identified state is implemented, explicitly excluded, or recorded unknown
+- [x] Recovered and inferred coverage are reported separately; inferences never raise recovered coverage
+- [x] All mode contracts and progression fixtures pass
 - [x] Asset/audio usage reconciles with catalog as consumed, unknown, excluded, or unsupported
-- [ ] Save reset, upgrade, and corruption behavior are defined and tested
+- [x] Save reset, upgrade, and corruption behavior are defined and tested
 - [ ] No copied unknown-rights content enters a public build without clearance
 - [ ] Creator source/build audit proves that all application behavior is new TypeScript
       and content, with no original libgame.so/Cocos2d-x application runtime dependency
@@ -256,6 +275,6 @@ leaderboards, if retained, require new approved implementations.
 
 ## Next Steps
 
-Build and verify the scene/prefab/composition map for the serialized Creator bridge and every
-dynamically owned production surface. Then run the complete Phase 6 verification/review gate,
-freeze content, and enter Phase 7 for Android build validation and release-rights clearance.
+Freeze the completed Phase 6 content checkpoint and enter Phase 7 for pinned Physics2D
+equivalence, canonical external-corpus/fidelity closure, Android build validation, post-build
+audit, and release-rights clearance.
