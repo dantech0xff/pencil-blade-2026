@@ -42,7 +42,8 @@ app-shell first activation gate is in memory, so no new save field or migration 
 The global resource ledger now classifies all 862 recovered assets without treating unknown
 files as live consumers. The recovered Loading surface now owns its exact four selected-profile
 rasters, 62-step audio preload sequence, `/61` clamped progress, and half-second handoff to
-Main Menu; the remaining cosmetic/presentation and scene-composition work stays open.
+Main Menu. Static reachability review closes the final 90 asset dispositions without inventing
+consumers; only scene/prefab/composition reconciliation and final Phase 6 verification stay open.
 
 ## Context Links
 
@@ -87,10 +88,15 @@ Main Menu; the remaining cosmetic/presentation and scene-composition work stays 
 - [Resource ledger implementation map](./reports/explorer-2026-07-24-resource-ledger-implementation-map.md)
 - [Resource ledger integration review](./reports/reviewer-2026-07-24-resource-ledger-checkpoint.md)
 - [Resource ledger final verification](./reports/tester-2026-07-24-resource-ledger-final-checkpoint.md)
+- [Zero-unknown resource closure review](./reports/reviewer-2026-07-24-zero-unknown-resource-closure.md)
 - [Loading static contract](./reports/researcher-2026-07-24-loading-static-contract.md)
 - [Loading architecture map](./reports/explorer-2026-07-24-loading-architecture-map.md)
 - [Loading checkpoint review](./reports/reviewer-2026-07-24-loading-checkpoint.md)
 - [Loading final verification](./reports/tester-2026-07-24-loading-final-checkpoint.md)
+- [Advanced blade native contract](./reports/researcher-2026-07-24-advanced-blade-native-contract.md)
+- [Advanced blade architecture map](./reports/explorer-2026-07-24-advanced-blade-architecture-map.md)
+- [Nonblade unused-resource contract](./reports/researcher-2026-07-24-nonblade-unused-resource-contract.md)
+- [Zero-unknown resource verification](./reports/tester-2026-07-24-zero-unknown-resource-closure.md)
 - [Remaining mode order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 
 ## Requirements
@@ -171,12 +177,12 @@ save schema and include reproducible fixtures for progression states.
   for real bundle readiness and intentionally does not reproduce the obsolete native cache purge.
 - **Complete:** resource-ledger scaffold. Exact live contract roots account for `761/862`
   assets (`88.28%` runtime consumption); reviewed dispositions close classification to
-  `862/862` with `90` unknown, `10` excluded, and `1` unsupported. Classification does not
-  promote unknown files into runtime consumers.
+  `862/862` with `0` unknown, `100` excluded, and `1` unsupported. All source bytes remain
+  staged; classification does not promote statically unreachable files into runtime consumers.
 - All six production gameplay routes, Leaderboard, Options, standard blades, save/economy,
   Objectives, About/offline, first-launch behavior, and global resource classification are
-  complete. Phase 6 remains in progress for the `90` unknown resource consumers and the
-  scene/prefab/composition map.
+  complete. Phase 6 remains in progress only for the scene/prefab/composition map and final
+  checkpoint verification.
 
 Current certification checkpoint:
 
@@ -219,10 +225,10 @@ Current certification checkpoint:
 - [x] Six modes (`6/6` production routes complete)
 - [x] Options selection, purchase economy, rollback, and exact screen resources
 - [x] Leaderboards, objective progression, and save/economy
-- [ ] Full content/cosmetics
+- [x] Full recovered-runtime content/cosmetics and exact source-resource retention
 - [x] First-launch persisted-sentinel and in-memory activation-gate reconciliation
 - [x] Global `862`-asset consumer/disposition ledger and schema-v2 staging manifest
-- [ ] Remaining results fidelity, `90` unknown resource consumers, and scene composition
+- [ ] Scene/prefab/composition reconciliation and final Phase 6 verification
 - [x] About screen fidelity and offline behavior for retired services
 
 ## Success Criteria
@@ -250,8 +256,6 @@ leaderboards, if retained, require new approved implementations.
 
 ## Next Steps
 
-Continue with the remaining advanced blade/particle, result, audio, font, and packaged-test
-families without converting filename guesses into consumers. Build the
-scene/prefab/composition map in parallel where ownership does not overlap. Freeze content and
-enter Phase 7 only when all identified states/contracts are reconciled and the impact of any
-remaining unknowns is explicit.
+Build and verify the scene/prefab/composition map for the serialized Creator bridge and every
+dynamically owned production surface. Then run the complete Phase 6 verification/review gate,
+freeze content, and enter Phase 7 for Android build validation and release-rights clearance.

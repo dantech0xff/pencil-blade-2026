@@ -28,8 +28,8 @@ Replay/Retry/Quit/Menu ownership. The standard-blade runtime checkpoint is also 
 IDs `0`-`17` now route transactionally through Main Menu, Mode Select, Classic, the Crazy
 standard branch, and GN Style with exact Basic textures, particle plans, Dragon multipart
 behavior, and Centipede multipart behavior. This is a bounded six-route production checkpoint,
-not presentation completion: the remaining unknown resource consumers and the full
-scene/prefab map remain open.
+not presentation completion: every packaged resource now has a reviewed recovered-runtime
+disposition, while the full scene/prefab/composition map remains open.
 
 ## Authority and evidence
 
@@ -60,8 +60,10 @@ replay, and device comparison are unavailable and are not project gates.
 - The full recovered APK game-asset corpus is copied unchanged under `game/assets/game/` and
   its current Creator raster/audio imports are covered by staging and metadata validators.
   The generated resource ledger now measures runtime consumer coverage at `761/862`
-  (`88.28%`) and classifies the full staging inventory as `862/862` with `90 unknown`,
-  `10 excluded`, and `1 unsupported`.
+  (`88.28%`) and classifies the full staging inventory as `862/862` with `0 unknown`,
+  `100 excluded`, and `1 unsupported`. Exclusion preserves the exact source bytes while
+  recording that the recovered Android runtime cannot reach those paths; historical intent
+  and release rights remain separate unknowns.
 - The recovered Loading boot surface uses the exact four selected-profile rasters, the exact
   source-ordered 62-audio preload sequence, the native incremented-counter `/61` clamped fill,
   and the recovered `0.5`-second finish tail. Creator waits for real bundle readiness and
@@ -76,8 +78,8 @@ replay, and device comparison are unavailable and are not project gates.
   unpaid-selection reconciliation. First-launch Settings behavior is resolved as a static
   contract and does not require a production migration.
 - The standard-blade runtime is complete across Main Menu, Mode Select, Classic, the Crazy
-  standard branch, and GN Style; leaderboard/progression wiring is now the next unresolved
-  shared surface.
+  standard branch, and GN Style. Leaderboard and progression wiring are also complete; the
+  remaining Phase 6 integration surface is scene/prefab/composition reconciliation.
 - The current implementation checkpoint covers all six production gameplay routes: `0`, `1`,
   `2`, `3`, `4`, and `5`.
 - The standard-blade checkpoint passes `1285/1285` deterministic vertical-slice tests and `43/43`

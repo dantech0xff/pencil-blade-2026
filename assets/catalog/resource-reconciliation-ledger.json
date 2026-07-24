@@ -7,7 +7,7 @@
     "consumerRegistry": "game/assets/scripts/domain/resource-consumer-registry.ts",
     "consumerRegistrySha256": "d4fb8486b10f245fdf6b9883453fa8b9a8c0d3cff2a5778d86ac4a8643c5913f",
     "dispositions": "forensics/resources/resource-disposition-map.json",
-    "dispositionsSha256": "03dbad33cb8b0696c7766df7cc2a8b0698b2b0032a29e56f8849047af3447932"
+    "dispositionsSha256": "0f35b71edf6ad61c2d2d12259ca6ee10f454dc3f281a2aae899fd5f5cdf9b81f"
   },
   "summary": {
     "consumers": {
@@ -19,8 +19,8 @@
     "reconciliation": {
       "classified": 862,
       "consumed": 761,
-      "unknown": 90,
-      "excluded": 10,
+      "unknown": 0,
+      "excluded": 100,
       "unsupported": 1,
       "total": 862,
       "coveragePercent": 100,
@@ -504,55 +504,61 @@
       "canonicalPath": "480x800/Blades/Bolts/MainBolt4.png",
       "dispositionId": "advanced-blade-bolts-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Bolt ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Bolts/MainBolts.png",
       "dispositionId": "advanced-blade-bolts-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Bolt ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Bolts/MainBolts1.png",
       "dispositionId": "advanced-blade-bolts-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Bolt ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Bolts/MainBolts2.png",
       "dispositionId": "advanced-blade-bolts-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Bolt ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Bolts/MainBolts3.png",
       "dispositionId": "advanced-blade-bolts-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Bolt ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Bolts/SubBolts.png",
       "dispositionId": "advanced-blade-bolts-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Bolt ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Centipede/body.png",
@@ -569,10 +575,11 @@
       "dispositionId": "alternate-centipede-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The unnumbered Centipede triplet is live, but no reviewed branch or index owns this alternate triplet.",
-      "status": "unknown"
+      "reason": "Recovered blade ID 17 constructs one no-argument Centipede owner that eagerly loads only the unnumbered triplet; no selector, path, or later lifecycle branch can reach the alternate files.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Centipede/head.png",
@@ -589,10 +596,11 @@
       "dispositionId": "alternate-centipede-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The unnumbered Centipede triplet is live, but no reviewed branch or index owns this alternate triplet.",
-      "status": "unknown"
+      "reason": "Recovered blade ID 17 constructs one no-argument Centipede owner that eagerly loads only the unnumbered triplet; no selector, path, or later lifecycle branch can reach the alternate files.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Centipede/tail.png",
@@ -609,130 +617,143 @@
       "dispositionId": "alternate-centipede-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The unnumbered Centipede triplet is live, but no reviewed branch or index owns this alternate triplet.",
-      "status": "unknown"
+      "reason": "Recovered blade ID 17 constructs one no-argument Centipede owner that eagerly loads only the unnumbered triplet; no selector, path, or later lifecycle branch can reach the alternate files.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Dragon/BlackDragon/black_dragon_body.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Dragon/BlackDragon/black_dragon_head.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Dragon/BlackDragon/black_dragon_tail.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Dragon/BlueDragon/water_dragon_body.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Dragon/BlueDragon/water_dragon_head.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Dragon/BlueDragon/water_dragon_tail.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Dragon/GoldDragon/gold_dragon_body.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Dragon/GoldDragon/gold_dragon_head.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Dragon/GoldDragon/gold_dragon_tail.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Dragon/RedDragon/red_dragon_body.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Dragon/RedDragon/red_dragon_head.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Dragon/RedDragon/red_dragon_tail.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Dragon/dragon-body-0.png",
@@ -858,64 +879,71 @@
       "canonicalPath": "480x800/Blades/Guidtar/guidtar.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Guidtar/guidtar_line.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Guidtar/nodes0.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Guidtar/nodes1.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Guidtar/nodes2.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Guidtar/nodes3.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Guidtar/nodes4.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Particles/Butterfly/butterfly0.png",
@@ -1041,46 +1069,51 @@
       "canonicalPath": "480x800/Blades/Particles/Lightning/cloud0.png",
       "dispositionId": "lightning-cloud-particles-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The rasters are preserved, but emitter order, timing, blend policy, and blade or mode ownership are not recovered.",
-      "status": "unknown"
+      "reason": "The exhaustive selector, particle dispatch, complete native resource-string set, and app-symbol map expose no blade ID, emitter, path, class, or mode that reaches these clouds; historical emitter behavior remains unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Particles/Lightning/cloud1.png",
       "dispositionId": "lightning-cloud-particles-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The rasters are preserved, but emitter order, timing, blend policy, and blade or mode ownership are not recovered.",
-      "status": "unknown"
+      "reason": "The exhaustive selector, particle dispatch, complete native resource-string set, and app-symbol map expose no blade ID, emitter, path, class, or mode that reaches these clouds; historical emitter behavior remains unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Particles/Lightning/cloud2.png",
       "dispositionId": "lightning-cloud-particles-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The rasters are preserved, but emitter order, timing, blend policy, and blade or mode ownership are not recovered.",
-      "status": "unknown"
+      "reason": "The exhaustive selector, particle dispatch, complete native resource-string set, and app-symbol map expose no blade ID, emitter, path, class, or mode that reaches these clouds; historical emitter behavior remains unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Particles/Lightning/cloud3.png",
       "dispositionId": "lightning-cloud-particles-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The rasters are preserved, but emitter order, timing, blend policy, and blade or mode ownership are not recovered.",
-      "status": "unknown"
+      "reason": "The exhaustive selector, particle dispatch, complete native resource-string set, and app-symbol map expose no blade ID, emitter, path, class, or mode that reaches these clouds; historical emitter behavior remains unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Particles/Lightning/cloud4.png",
       "dispositionId": "lightning-cloud-particles-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The rasters are preserved, but emitter order, timing, blend policy, and blade or mode ownership are not recovered.",
-      "status": "unknown"
+      "reason": "The exhaustive selector, particle dispatch, complete native resource-string set, and app-symbol map expose no blade ID, emitter, path, class, or mode that reaches these clouds; historical emitter behavior remains unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Blades/Particles/Rainbow/rainbowstar0.png",
@@ -1365,10 +1398,11 @@
       "dispositionId": "bomb-id-one-reachability-unproven",
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-standard-bomb-explosion.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-standard-bomb-explosion.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "The native factory maps bomb ID 1 to this raster, but no recovered scheduler or production mode is proven to emit that ID.",
-      "status": "unknown"
+      "reason": "The native factory maps bomb ID 1 to this raster only for toss type 2, while the exhaustive production-mode controller contracts never construct a type-2 scheduler.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Bomb/bomb_X.png",
@@ -1694,10 +1728,10 @@
       "canonicalPath": "480x800/Buttons/button-orange-back-normal.png",
       "dispositionId": "orange-back-button-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "No exact native resource string, contract, loader, or presenter currently owns this button.",
-      "status": "unknown"
+      "reason": "The complete native and Java resource-path sets plus recovered back-button branches contain no exact path, format pattern, or runtime owner for this raster.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Buttons/button-orange-wheel-normal.png",
@@ -3230,30 +3264,33 @@
       "dispositionId": "result-rank-art-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Current Result presentation owns object-medal-none.png; no reviewed rank or new-best branch owns these candidates.",
-      "status": "unknown"
+      "reason": "DisplayScoreLayer::CheckForMedal directly and unconditionally creates object-medal-none.png; the complete native and Java path sets contain no numbered-medal or new-best consumer.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Interfaces/object-medal-2nd.png",
       "dispositionId": "result-rank-art-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Current Result presentation owns object-medal-none.png; no reviewed rank or new-best branch owns these candidates.",
-      "status": "unknown"
+      "reason": "DisplayScoreLayer::CheckForMedal directly and unconditionally creates object-medal-none.png; the complete native and Java path sets contain no numbered-medal or new-best consumer.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Interfaces/object-medal-3rd.png",
       "dispositionId": "result-rank-art-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Current Result presentation owns object-medal-none.png; no reviewed rank or new-best branch owns these candidates.",
-      "status": "unknown"
+      "reason": "DisplayScoreLayer::CheckForMedal directly and unconditionally creates object-medal-none.png; the complete native and Java path sets contain no numbered-medal or new-best consumer.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Interfaces/object-medal-none.png",
@@ -3280,10 +3317,11 @@
       "dispositionId": "result-rank-art-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Current Result presentation owns object-medal-none.png; no reviewed rank or new-best branch owns these candidates.",
-      "status": "unknown"
+      "reason": "DisplayScoreLayer::CheckForMedal directly and unconditionally creates object-medal-none.png; the complete native and Java path sets contain no numbered-medal or new-best consumer.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Interfaces/object-rope-node.png",
@@ -3780,30 +3818,30 @@
       "dispositionId": "packaged-test-family-unclassified",
       "evidenceRefs": [
         "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Static strings do not yet prove whether these assets are reachable production content, debug-only content, or dead packaging.",
-      "status": "unknown"
+      "reason": "The exact Test literals belong to compiled test/debug layers whose constructors have no production call site; Test/bar.png has no native or Java path at all.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Test/box.png",
       "dispositionId": "packaged-test-family-unclassified",
       "evidenceRefs": [
         "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Static strings do not yet prove whether these assets are reachable production content, debug-only content, or dead packaging.",
-      "status": "unknown"
+      "reason": "The exact Test literals belong to compiled test/debug layers whose constructors have no production call site; Test/bar.png has no native or Java path at all.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Test/face.png",
       "dispositionId": "packaged-test-family-unclassified",
       "evidenceRefs": [
         "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Static strings do not yet prove whether these assets are reachable production content, debug-only content, or dead packaging.",
-      "status": "unknown"
+      "reason": "The exact Test literals belong to compiled test/debug layers whose constructors have no production call site; Test/bar.png has no native or Java path at all.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "480x800/Text/text-150s.png",
@@ -4521,55 +4559,61 @@
       "canonicalPath": "720x1280/Blades/Bolts/MainBolt4.png",
       "dispositionId": "advanced-blade-bolts-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Bolt ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Bolts/MainBolts.png",
       "dispositionId": "advanced-blade-bolts-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Bolt ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Bolts/MainBolts1.png",
       "dispositionId": "advanced-blade-bolts-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Bolt ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Bolts/MainBolts2.png",
       "dispositionId": "advanced-blade-bolts-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Bolt ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Bolts/MainBolts3.png",
       "dispositionId": "advanced-blade-bolts-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Bolt ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Bolts/SubBolts.png",
       "dispositionId": "advanced-blade-bolts-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Bolt ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Centipede/body.png",
@@ -4586,10 +4630,11 @@
       "dispositionId": "alternate-centipede-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The unnumbered Centipede triplet is live, but no reviewed branch or index owns this alternate triplet.",
-      "status": "unknown"
+      "reason": "Recovered blade ID 17 constructs one no-argument Centipede owner that eagerly loads only the unnumbered triplet; no selector, path, or later lifecycle branch can reach the alternate files.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Centipede/head.png",
@@ -4606,10 +4651,11 @@
       "dispositionId": "alternate-centipede-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The unnumbered Centipede triplet is live, but no reviewed branch or index owns this alternate triplet.",
-      "status": "unknown"
+      "reason": "Recovered blade ID 17 constructs one no-argument Centipede owner that eagerly loads only the unnumbered triplet; no selector, path, or later lifecycle branch can reach the alternate files.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Centipede/tail.png",
@@ -4626,130 +4672,143 @@
       "dispositionId": "alternate-centipede-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The unnumbered Centipede triplet is live, but no reviewed branch or index owns this alternate triplet.",
-      "status": "unknown"
+      "reason": "Recovered blade ID 17 constructs one no-argument Centipede owner that eagerly loads only the unnumbered triplet; no selector, path, or later lifecycle branch can reach the alternate files.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Dragon/BlackDragon/black_dragon_body.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Dragon/BlackDragon/black_dragon_head.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Dragon/BlackDragon/black_dragon_tail.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Dragon/BlueDragon/water_dragon_body.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Dragon/BlueDragon/water_dragon_head.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Dragon/BlueDragon/water_dragon_tail.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Dragon/GoldDragon/gold_dragon_body.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Dragon/GoldDragon/gold_dragon_head.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Dragon/GoldDragon/gold_dragon_tail.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Dragon/RedDragon/red_dragon_body.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Dragon/RedDragon/red_dragon_head.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Dragon/RedDragon/red_dragon_tail.png",
       "dispositionId": "named-dragon-duplicates-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
-      "status": "unknown"
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Dragon/dragon-body-0.png",
@@ -4875,64 +4934,71 @@
       "canonicalPath": "720x1280/Blades/Guidtar/guidtar.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Guidtar/guidtar_line.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Guidtar/nodes0.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Guidtar/nodes1.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Guidtar/nodes2.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Guidtar/nodes3.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Guidtar/nodes4.png",
       "dispositionId": "guidtar-family-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
-      "status": "unknown"
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Particles/Butterfly/butterfly0.png",
@@ -5058,46 +5124,51 @@
       "canonicalPath": "720x1280/Blades/Particles/Lightning/cloud0.png",
       "dispositionId": "lightning-cloud-particles-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The rasters are preserved, but emitter order, timing, blend policy, and blade or mode ownership are not recovered.",
-      "status": "unknown"
+      "reason": "The exhaustive selector, particle dispatch, complete native resource-string set, and app-symbol map expose no blade ID, emitter, path, class, or mode that reaches these clouds; historical emitter behavior remains unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Particles/Lightning/cloud1.png",
       "dispositionId": "lightning-cloud-particles-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The rasters are preserved, but emitter order, timing, blend policy, and blade or mode ownership are not recovered.",
-      "status": "unknown"
+      "reason": "The exhaustive selector, particle dispatch, complete native resource-string set, and app-symbol map expose no blade ID, emitter, path, class, or mode that reaches these clouds; historical emitter behavior remains unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Particles/Lightning/cloud2.png",
       "dispositionId": "lightning-cloud-particles-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The rasters are preserved, but emitter order, timing, blend policy, and blade or mode ownership are not recovered.",
-      "status": "unknown"
+      "reason": "The exhaustive selector, particle dispatch, complete native resource-string set, and app-symbol map expose no blade ID, emitter, path, class, or mode that reaches these clouds; historical emitter behavior remains unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Particles/Lightning/cloud3.png",
       "dispositionId": "lightning-cloud-particles-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The rasters are preserved, but emitter order, timing, blend policy, and blade or mode ownership are not recovered.",
-      "status": "unknown"
+      "reason": "The exhaustive selector, particle dispatch, complete native resource-string set, and app-symbol map expose no blade ID, emitter, path, class, or mode that reaches these clouds; historical emitter behavior remains unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Particles/Lightning/cloud4.png",
       "dispositionId": "lightning-cloud-particles-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ],
-      "reason": "The rasters are preserved, but emitter order, timing, blend policy, and blade or mode ownership are not recovered.",
-      "status": "unknown"
+      "reason": "The exhaustive selector, particle dispatch, complete native resource-string set, and app-symbol map expose no blade ID, emitter, path, class, or mode that reaches these clouds; historical emitter behavior remains unknown.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Blades/Particles/Rainbow/rainbowstar0.png",
@@ -5382,10 +5453,11 @@
       "dispositionId": "bomb-id-one-reachability-unproven",
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-standard-bomb-explosion.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-standard-bomb-explosion.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "The native factory maps bomb ID 1 to this raster, but no recovered scheduler or production mode is proven to emit that ID.",
-      "status": "unknown"
+      "reason": "The native factory maps bomb ID 1 to this raster only for toss type 2, while the exhaustive production-mode controller contracts never construct a type-2 scheduler.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Bomb/bomb_X.png",
@@ -5711,10 +5783,10 @@
       "canonicalPath": "720x1280/Buttons/button-orange-back-normal.png",
       "dispositionId": "orange-back-button-unowned",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "No exact native resource string, contract, loader, or presenter currently owns this button.",
-      "status": "unknown"
+      "reason": "The complete native and Java resource-path sets plus recovered back-button branches contain no exact path, format pattern, or runtime owner for this raster.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Buttons/button-orange-wheel-normal.png",
@@ -7247,30 +7319,33 @@
       "dispositionId": "result-rank-art-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Current Result presentation owns object-medal-none.png; no reviewed rank or new-best branch owns these candidates.",
-      "status": "unknown"
+      "reason": "DisplayScoreLayer::CheckForMedal directly and unconditionally creates object-medal-none.png; the complete native and Java path sets contain no numbered-medal or new-best consumer.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Interfaces/object-medal-2nd.png",
       "dispositionId": "result-rank-art-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Current Result presentation owns object-medal-none.png; no reviewed rank or new-best branch owns these candidates.",
-      "status": "unknown"
+      "reason": "DisplayScoreLayer::CheckForMedal directly and unconditionally creates object-medal-none.png; the complete native and Java path sets contain no numbered-medal or new-best consumer.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Interfaces/object-medal-3rd.png",
       "dispositionId": "result-rank-art-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Current Result presentation owns object-medal-none.png; no reviewed rank or new-best branch owns these candidates.",
-      "status": "unknown"
+      "reason": "DisplayScoreLayer::CheckForMedal directly and unconditionally creates object-medal-none.png; the complete native and Java path sets contain no numbered-medal or new-best consumer.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Interfaces/object-medal-none.png",
@@ -7297,10 +7372,11 @@
       "dispositionId": "result-rank-art-unowned",
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Current Result presentation owns object-medal-none.png; no reviewed rank or new-best branch owns these candidates.",
-      "status": "unknown"
+      "reason": "DisplayScoreLayer::CheckForMedal directly and unconditionally creates object-medal-none.png; the complete native and Java path sets contain no numbered-medal or new-best consumer.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Interfaces/object-rope-node.png",
@@ -7797,30 +7873,30 @@
       "dispositionId": "packaged-test-family-unclassified",
       "evidenceRefs": [
         "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Static strings do not yet prove whether these assets are reachable production content, debug-only content, or dead packaging.",
-      "status": "unknown"
+      "reason": "The exact Test literals belong to compiled test/debug layers whose constructors have no production call site; Test/bar.png has no native or Java path at all.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Test/box.png",
       "dispositionId": "packaged-test-family-unclassified",
       "evidenceRefs": [
         "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Static strings do not yet prove whether these assets are reachable production content, debug-only content, or dead packaging.",
-      "status": "unknown"
+      "reason": "The exact Test literals belong to compiled test/debug layers whose constructors have no production call site; Test/bar.png has no native or Java path at all.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Test/face.png",
       "dispositionId": "packaged-test-family-unclassified",
       "evidenceRefs": [
         "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "Static strings do not yet prove whether these assets are reachable production content, debug-only content, or dead packaging.",
-      "status": "unknown"
+      "reason": "The exact Test literals belong to compiled test/debug layers whose constructors have no production call site; Test/bar.png has no native or Java path at all.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "720x1280/Text/text-150s.png",
@@ -8098,37 +8174,37 @@
       "canonicalPath": "Fonts/BOD_B.TTF",
       "dispositionId": "unowned-ttf-label-sites-unrecovered",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "No reviewed exact label owner, metrics contract, or runtime load site is recovered for these TTF files.",
-      "status": "unknown"
+      "reason": "The complete native Fonts/ literal set names exactly the nine live TTF consumers and contains no generic format path or Java reference capable of reaching these six packaged fonts.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "Fonts/BRLNSR.TTF",
       "dispositionId": "unowned-ttf-label-sites-unrecovered",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "No reviewed exact label owner, metrics contract, or runtime load site is recovered for these TTF files.",
-      "status": "unknown"
+      "reason": "The complete native Fonts/ literal set names exactly the nine live TTF consumers and contains no generic format path or Java reference capable of reaching these six packaged fonts.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "Fonts/BuxtonSketch.ttf",
       "dispositionId": "unowned-ttf-label-sites-unrecovered",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "No reviewed exact label owner, metrics contract, or runtime load site is recovered for these TTF files.",
-      "status": "unknown"
+      "reason": "The complete native Fonts/ literal set names exactly the nine live TTF consumers and contains no generic format path or Java reference capable of reaching these six packaged fonts.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "Fonts/COOPBL.TTF",
       "dispositionId": "unowned-ttf-label-sites-unrecovered",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "No reviewed exact label owner, metrics contract, or runtime load site is recovered for these TTF files.",
-      "status": "unknown"
+      "reason": "The complete native Fonts/ literal set names exactly the nine live TTF consumers and contains no generic format path or Java reference capable of reaching these six packaged fonts.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "Fonts/Century.ttf",
@@ -8144,10 +8220,10 @@
       "canonicalPath": "Fonts/Comic Book.ttf",
       "dispositionId": "unowned-ttf-label-sites-unrecovered",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "No reviewed exact label owner, metrics contract, or runtime load site is recovered for these TTF files.",
-      "status": "unknown"
+      "reason": "The complete native Fonts/ literal set names exactly the nine live TTF consumers and contains no generic format path or Java reference capable of reaching these six packaged fonts.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "Fonts/CooperBlackStd.otf",
@@ -8221,10 +8297,10 @@
       "canonicalPath": "Fonts/onthemove.ttf",
       "dispositionId": "unowned-ttf-label-sites-unrecovered",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ],
-      "reason": "No reviewed exact label owner, metrics contract, or runtime load site is recovered for these TTF files.",
-      "status": "unknown"
+      "reason": "The complete native Fonts/ literal set names exactly the nine live TTF consumers and contains no generic format path or Java reference capable of reaching these six packaged fonts.",
+      "status": "excluded"
     },
     {
       "canonicalPath": "Sounds/GangnamStyle.mp3",

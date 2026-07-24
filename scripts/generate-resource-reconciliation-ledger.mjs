@@ -31,8 +31,8 @@ const DISPOSITION_STATUSES = new Set(['unknown', 'excluded', 'unsupported']);
 const EXPECTED_COUNTS = Object.freeze({
   staged: 862,
   consumed: 761,
-  unknown: 90,
-  excluded: 10,
+  unknown: 0,
+  excluded: 100,
   unsupported: 1,
   dispositions: 101,
 });

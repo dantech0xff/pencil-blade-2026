@@ -88,7 +88,10 @@ checkpoint.
   vertical-slice and `61/61` top-level resource/build/catalog/tooling tests, with
   Creator 3.8.8 bundled strict TypeScript zero diagnostics and clean diff hygiene.
 - The standard-blade checkpoint is `1285/1285` full vertical-slice tests, `43/43` resource/build/catalog tests, the unchanged `14/14` inventory/evidence workflow in `217s`, reconstruction policy positive plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and clean diff hygiene.
-- The resource consumer registry is exact at `761/862` runtime paths, while the reconciliation ledger classifies all `862/862` staged assets with `90 unknown`, `10 excluded`, and `1 unsupported`; that classification is complete but it is not the same as full runtime consumption.
+- The resource consumer registry is exact at `761/862` runtime paths, while the reconciliation
+  ledger classifies all `862/862` staged assets with `0 unknown`, `100 excluded`, and
+  `1 unsupported`. All exact source bytes remain staged; exclusion proves recovered-runtime
+  unreachability and is not a live consumer or a claim about historical intent or release rights.
 - Fresh Creator Preview reaches Main Menu → Mode Select → GN Style → exact intro → live cuts,
   score, music, and particles → Pause/Resume/Replay → Pause Quit → Main Menu → repeated entry →
   natural Time Up → Result Retry → Result Menu. Options additionally passes Main Menu entry,
@@ -120,14 +123,14 @@ checkpoint.
 - [Leaderboard architecture map](../plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-leaderboard-architecture-map.md)
 - [Leaderboard runtime checkpoint](../plans/260721-2253-pencil-blade-restoration/reports/implementer-2026-07-24-leaderboard-runtime.md)
 - [Leaderboard final verification](../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-leaderboard-final-checkpoint.md)
+- [Advanced blade native contract](../plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md)
+- [Nonblade unused-resource contract](../plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md)
+- [Zero-unknown resource verification](../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-zero-unknown-resource-closure.md)
 
 ## Current Open Gates
 
 - Scene, prefab, and serialized component map completion beyond the first Canvas bridge.
 - Creator Physics2D runtime-equivalence validation and electric-field compatibility.
-- Full Settings coverage beyond the implemented subset and separate mode-unlock keys.
-- Remaining cosmetic, presentation, audio, and effect resource consumers not already covered
-  by the standard-blade, progression, and resource-ledger checkpoints.
 - Technical fidelity is separate from release rights; rights review can still block release even when the technical coverage target is met.
 - Rights review for original assets and product identity.
 - Android build validation and real APK/AAB post-build audit.

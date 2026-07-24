@@ -42,8 +42,10 @@ Cocos Editor console. The current Leaderboard checkpoint is verified at 139/139 
 Main Menu + Leaderboard + shell/viewport tests. Preview passes physical cut entry, aligned
 labels/scores, drag/flick board selection, and Back in the internal compact `480x800` branch
 and high `720x1280` profile. Recovered Loading also passes both branches and hands off to a
-stable Main Menu with zero Cocos console counters. The full product remains incomplete because
-90 resource consumers, the scene/prefab/composition map, and a real Android build remain open.
+stable Main Menu with zero Cocos console counters. Resource reconciliation now has zero
+recovered Android-runtime unknowns: `761` live consumers, `100` reviewed exclusions, and
+`1` unsupported path. The full product remains incomplete because the
+scene/prefab/composition map and a real Android build remain open.
 
 ## Dependency Direction
 
@@ -82,7 +84,7 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 | Evidence and docs | `docs/`, `forensics/`, `reference/`, `plans/` | Static evidence, contracts, and progress records. |
 | Pure gameplay domain | `game/assets/scripts/domain/` | Loading state/presentation/resources plus session, physics, score, combo, fail, toss, random, input, bird, GN choreography/music/result, and shared result logic. |
 | Creator boundary | `game/assets/scripts/creator/` | Loading, unit conversion, manual variable-step lifecycle, standard/Bird input and ray handling, per-route scene/gameplay/resource/audio presenters, Options presenters, and Creator-specific integration. |
-| Creator resource bundle | `game/assets/game/` | Exact staged bytes for all 862 recovered APK game assets; reviewed Loading, Classic, menu/shared-scene, Options, Crazy, Combo, GN, and Bird type-1/type-2/type-3 subsets have production consumers while full consumer coverage remains open. |
+| Creator resource bundle | `game/assets/game/` | Exact staged bytes for all 862 recovered APK game assets: `761` have live production consumers, `100` are statically unreachable in the recovered Android runtime, and `1` remains unsupported. Historical intent and release rights remain separate from runtime disposition. |
 | Initial scene bridge | `game/assets/scenes/classic.scene` | Editor-serialized Canvas with blade input, passive Classic, shared Crazy modes `1`/`4`, Classic Bird, Combo Bird, and GN Style runtime components, and the persistent recovered app shell. |
 | Verification | `tests/reconstruction/vertical-slice/` | Deterministic contract tests, executable controller lifecycle/fault tests, and boundary audits. |
 | Build audit | `scripts/audit-creator-build.mjs` | Post-build APK/AAB inspection for prohibited payloads. |
@@ -110,7 +112,7 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 | Shared scene | `SharedLeafLayerModel` owns both exact seven-leaf profiles, creation-order RNG, body/fixture/world values, strict respawn threshold, and display mapping. `SharedLeafPhysicsAdapter` owns the independent world and receives `Step(dt,5,5)` plus each same-frame respawn as an ordered frozen `wake → add angular velocity → set transform → zero linear velocity` command before display synchronization. `SharedGameScenePresenter` appends Background → Leaf → Theme → current screen at equal recovered z-order `1`; Background/Theme remain immediately opaque because their queued native fades are paused. |
 | Cut presentation | Ordinary cuts instantiate exact bottom/top rasters, recovered body/fixture/impulse values, action-clock fade, and deferred disposal. Critical halves may emit exact recovered particle rasters with shared RNG ordering. |
 | Audio | Creator adapters preload the reviewed Classic/menu, Options, Bird, Crazy, Combo, and GN clip sets and interpret toss, swish, cut, critical, combo, timer, result-rank, bonus/electric, objective, pause, selector-row, and menu-button commands without moving draw/order rules out of the domain. Independent retained voices model ordinary-bomb and Crazy effect ownership; the electric-only `boomhit` path remains separate from ordinary-bomb audio. GN's dedicated non-looping source is mutually exclusive with shared background music and pauses/resumes/stops with its transactional owner; TimeManager effects use the shared exact presenter. |
-| Resource import | Staging and metadata validators prove exact bytes and current Creator raster/audio import geometry for the recovered APK corpus. The generated registry/ledger assigns exact live ownership to `761/862` paths (`88.28%`), including Loading's 70-path closure, while all `862/862` paths are classified as consumed, unknown, excluded, or unsupported. UUID extraction remains separate from consumer accounting. |
+| Resource import | Staging and metadata validators prove exact bytes and current Creator raster/audio import geometry for the recovered APK corpus. The generated registry/ledger assigns exact live ownership to `761/862` paths (`88.28%`), including Loading's 70-path closure, while all `862/862` paths are classified as `761` consumed, `0` unknown, `100` excluded, and `1` unsupported. UUID extraction remains separate from consumer accounting. |
 | Resolution and input | The recovered `720` physical-width profile branch is pure; Creator applies its Show All policy and routes scene-wide touch input into four blade slots or the single Bird blade. |
 | Build boundary | Source-boundary tests reject trackable legacy integration. The separate fail-closed archive audit hashes every entry, parses ZIP records exactly, recurses through bounded nested archives, and inspects ELF payloads; the unchanged inventory/source/staging/archive workflow is `14/14`, `tests/*.mjs` are `61/61`, the full vertical slice is `1520/1520`, and strict Creator TypeScript is green. |
 

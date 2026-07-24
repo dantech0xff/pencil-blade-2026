@@ -167,14 +167,15 @@ Verified starting point:
   It passes `1520/1520` full vertical-slice tests, `61/61` top-level tests, strict Creator
   TypeScript, and compact/high Preview with zero Cocos console counters.
   The resource-ledger scaffold now maps `761/862` exact live consumers (`88.28%`) and
-  classifies all `862/862` assets as `761` consumed, `90` unknown, `10` excluded, or `1`
-  unsupported. Unknown classification is not a runtime consumer. Project completion still
-  requires recovery or explicit retention of those unknown families and the scene/prefab map,
-  a pinned integration/toolchain policy, and build validation.
+  classifies all `862/862` assets as `761` consumed, `0` unknown, `100` excluded, or `1`
+  unsupported. Every exact source file remains staged; exclusions record static unreachability
+  in the recovered Android runtime, while historical intent and release rights remain separate.
+  Project completion still requires the scene/prefab/composition map, a pinned
+  integration/toolchain policy, and build validation.
 - Phase 6 continues after all six production gameplay routes, Loading, Options, Leaderboard,
   Objectives, About/offline, first-launch behavior, and global resource classification reached
-  their contract gates. The remaining scope is the `90` unknown asset consumers plus
-  scene/prefab/composition reconciliation.
+  their contract gates. The remaining scope is scene/prefab/composition reconciliation and
+  final Phase 6 verification.
   Android build validation and release-rights clearance remain Phase 7 gates.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
@@ -255,6 +256,10 @@ Verified starting point:
 - [Resource ledger implementation map](./reports/explorer-2026-07-24-resource-ledger-implementation-map.md)
 - [Resource ledger integration review](./reports/reviewer-2026-07-24-resource-ledger-checkpoint.md)
 - [Resource ledger final verification](./reports/tester-2026-07-24-resource-ledger-final-checkpoint.md)
+- [Advanced blade native contract](./reports/researcher-2026-07-24-advanced-blade-native-contract.md)
+- [Advanced blade architecture map](./reports/explorer-2026-07-24-advanced-blade-architecture-map.md)
+- [Nonblade unused-resource contract](./reports/researcher-2026-07-24-nonblade-unused-resource-contract.md)
+- [Zero-unknown resource verification](./reports/tester-2026-07-24-zero-unknown-resource-closure.md)
 - [Remaining mode implementation order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 - [Creator readiness audit](./reports/creator-readiness-2026-07-22.md)
 - [Android toolchain readiness audit](./reports/android-toolchain-readiness-2026-07-22.md)

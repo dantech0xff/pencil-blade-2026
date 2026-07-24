@@ -60,14 +60,27 @@ const EXPECTED_SUMMARY = Object.freeze({
   reconciliation: {
     classified: 862,
     consumed: 761,
-    unknown: 90,
-    excluded: 10,
+    unknown: 0,
+    excluded: 100,
     unsupported: 1,
     total: 862,
     coveragePercent: 100,
     status: 'complete',
   },
 });
+
+const RECOVERED_RUNTIME_EXCLUSION_IDS = Object.freeze([
+  'advanced-blade-bolts-unowned',
+  'alternate-centipede-unowned',
+  'bomb-id-one-reachability-unproven',
+  'guidtar-family-unowned',
+  'lightning-cloud-particles-unowned',
+  'named-dragon-duplicates-unowned',
+  'orange-back-button-unowned',
+  'packaged-test-family-unclassified',
+  'result-rank-art-unowned',
+  'unowned-ttf-label-sites-unrecovered',
+]);
 
 after(() => {
   fs.rmSync(SUITE_ROOT, { recursive: true, force: true });
@@ -197,6 +210,20 @@ function assertProductionOutput(generated) {
     excluded: EXPECTED_COUNTS.excluded,
     unsupported: EXPECTED_COUNTS.unsupported,
   });
+  assert.equal(
+    generated.ledger.entries.some(({ status }) => status === 'unknown'),
+    false,
+  );
+  for (const dispositionId of RECOVERED_RUNTIME_EXCLUSION_IDS) {
+    const entries = generated.ledger.entries.filter(
+      (entry) => entry.dispositionId === dispositionId,
+    );
+    assert.ok(entries.length > 0, `missing runtime exclusion: ${dispositionId}`);
+    assert.ok(
+      entries.every(({ status }) => status === 'excluded'),
+      `${dispositionId} must remain preserved and excluded`,
+    );
+  }
 
   assert.equal(generated.ledgerContents, `${JSON.stringify(generated.ledger, null, 2)}\n`);
   assert.equal(generated.ledgerContents.includes(ROOT), false);
@@ -292,7 +319,7 @@ test('production CLI writes absent outputs and verifies them without mutation', 
   expectCliSuccess(write, 'production write');
   assert.match(
     write.stdout,
-    /WRITE OK staged=862 consumed=761 unknown=90 excluded=10 unsupported=1 reconciliation_coverage=100%/,
+    /WRITE OK staged=862 consumed=761 unknown=0 excluded=100 unsupported=1 reconciliation_coverage=100%/,
   );
   assert.ok(fs.existsSync(paths.ledgerPath));
   const before = fs.readFileSync(paths.ledgerPath, 'utf8');

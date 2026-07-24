@@ -22,7 +22,7 @@
     },
     {
       "id": "advanced-blade-bolts-unowned",
-      "status": "unknown",
+      "status": "excluded",
       "treePairLogicalPaths": [
         "Blades/Bolts/MainBolt4.png",
         "Blades/Bolts/MainBolts.png",
@@ -32,29 +32,31 @@
         "Blades/Bolts/SubBolts.png"
       ],
       "canonicalPaths": [],
-      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Bolt ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ]
     },
     {
       "id": "alternate-centipede-unowned",
-      "status": "unknown",
+      "status": "excluded",
       "treePairLogicalPaths": [
         "Blades/Centipede/body1.png",
         "Blades/Centipede/head1.png",
         "Blades/Centipede/tail1.png"
       ],
       "canonicalPaths": [],
-      "reason": "The unnumbered Centipede triplet is live, but no reviewed branch or index owns this alternate triplet.",
+      "reason": "Recovered blade ID 17 constructs one no-argument Centipede owner that eagerly loads only the unnumbered triplet; no selector, path, or later lifecycle branch can reach the alternate files.",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ]
     },
     {
       "id": "named-dragon-duplicates-unowned",
-      "status": "unknown",
+      "status": "excluded",
       "treePairLogicalPaths": [
         "Blades/Dragon/BlackDragon/black_dragon_body.png",
         "Blades/Dragon/BlackDragon/black_dragon_head.png",
@@ -70,15 +72,16 @@
         "Blades/Dragon/RedDragon/red_dragon_tail.png"
       ],
       "canonicalPaths": [],
-      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
+      "reason": "Recovered blade IDs 13 through 16 format only the generic Dragon paths; both named-tree copies are compact duplicate aliases and no native canonical-path consumer reaches them.",
       "evidenceRefs": [
         "game/assets/scripts/domain/standard-blade-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ]
     },
     {
       "id": "guidtar-family-unowned",
-      "status": "unknown",
+      "status": "excluded",
       "treePairLogicalPaths": [
         "Blades/Guidtar/guidtar.png",
         "Blades/Guidtar/guidtar_line.png",
@@ -89,14 +92,15 @@
         "Blades/Guidtar/nodes4.png"
       ],
       "canonicalPaths": [],
-      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
+      "reason": "The exhaustive Android blade selector, complete native resource-string set, and app-symbol map contain no Guidtar or Guitar ID, path, pattern, class, or runtime owner; historical mechanics remain unknown.",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ]
     },
     {
       "id": "lightning-cloud-particles-unowned",
-      "status": "unknown",
+      "status": "excluded",
       "treePairLogicalPaths": [
         "Blades/Particles/Lightning/cloud0.png",
         "Blades/Particles/Lightning/cloud1.png",
@@ -105,34 +109,36 @@
         "Blades/Particles/Lightning/cloud4.png"
       ],
       "canonicalPaths": [],
-      "reason": "The rasters are preserved, but emitter order, timing, blend policy, and blade or mode ownership are not recovered.",
+      "reason": "The exhaustive selector, particle dispatch, complete native resource-string set, and app-symbol map expose no blade ID, emitter, path, class, or mode that reaches these clouds; historical emitter behavior remains unknown.",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-advanced-blade-architecture-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-advanced-blade-native-contract.md"
       ]
     },
     {
       "id": "bomb-id-one-reachability-unproven",
-      "status": "unknown",
+      "status": "excluded",
       "treePairLogicalPaths": [
         "Bomb/bomb_10.png"
       ],
       "canonicalPaths": [],
-      "reason": "The native factory maps bomb ID 1 to this raster, but no recovered scheduler or production mode is proven to emit that ID.",
+      "reason": "The native factory maps bomb ID 1 to this raster only for toss type 2, while the exhaustive production-mode controller contracts never construct a type-2 scheduler.",
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-standard-bomb-explosion.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-standard-bomb-explosion.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ]
     },
     {
       "id": "orange-back-button-unowned",
-      "status": "unknown",
+      "status": "excluded",
       "treePairLogicalPaths": [
         "Buttons/button-orange-back-normal.png"
       ],
       "canonicalPaths": [],
-      "reason": "No exact native resource string, contract, loader, or presenter currently owns this button.",
+      "reason": "The complete native and Java resource-path sets plus recovered back-button branches contain no exact path, format pattern, or runtime owner for this raster.",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ]
     },
     {
@@ -153,7 +159,7 @@
     },
     {
       "id": "result-rank-art-unowned",
-      "status": "unknown",
+      "status": "excluded",
       "treePairLogicalPaths": [
         "Interfaces/object-medal-1st.png",
         "Interfaces/object-medal-2nd.png",
@@ -161,30 +167,31 @@
         "Interfaces/object-new-best.png"
       ],
       "canonicalPaths": [],
-      "reason": "Current Result presentation owns object-medal-none.png; no reviewed rank or new-best branch owns these candidates.",
+      "reason": "DisplayScoreLayer::CheckForMedal directly and unconditionally creates object-medal-none.png; the complete native and Java path sets contain no numbered-medal or new-best consumer.",
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-resource-contract.ts",
-        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ]
     },
     {
       "id": "packaged-test-family-unclassified",
-      "status": "unknown",
+      "status": "excluded",
       "treePairLogicalPaths": [
         "Test/bar.png",
         "Test/box.png",
         "Test/face.png"
       ],
       "canonicalPaths": [],
-      "reason": "Static strings do not yet prove whether these assets are reachable production content, debug-only content, or dead packaging.",
+      "reason": "The exact Test literals belong to compiled test/debug layers whose constructors have no production call site; Test/bar.png has no native or Java path at all.",
       "evidenceRefs": [
         "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ]
     },
     {
       "id": "unowned-ttf-label-sites-unrecovered",
-      "status": "unknown",
+      "status": "excluded",
       "treePairLogicalPaths": [],
       "canonicalPaths": [
         "Fonts/BOD_B.TTF",
@@ -194,9 +201,9 @@
         "Fonts/Comic Book.ttf",
         "Fonts/onthemove.ttf"
       ],
-      "reason": "No reviewed exact label owner, metrics contract, or runtime load site is recovered for these TTF files.",
+      "reason": "The complete native Fonts/ literal set names exactly the nine live TTF consumers and contains no generic format path or Java reference capable of reaching these six packaged fonts.",
       "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-nonblade-unused-resource-contract.md"
       ]
     },
     {
