@@ -539,7 +539,7 @@ export class CrazyGameplayController extends Component {
     } else if (cutDriver?.kind === 'bird') {
       cutDriver.presenter.update(deltaSeconds);
     }
-    for (const presenter of [...this.comboItemPresenters]) {
+    for (const presenter of Array.from(this.comboItemPresenters)) {
       presenter.updateAction(deltaSeconds);
     }
     const lifecycleAtFrameStart = this.requireCrazySceneController()
@@ -551,13 +551,13 @@ export class CrazyGameplayController extends Component {
 
     this.timeManagerPresenter?.updateAction(deltaSeconds);
     this.bombElectricPresenter?.updateAction(deltaSeconds);
-    for (const presenter of [...this.magnetPresenters]) {
+    for (const presenter of Array.from(this.magnetPresenters)) {
       presenter.updateAction(deltaSeconds);
       if (presenter.state.phase === 'disposed') {
         this.magnetPresenters.delete(presenter);
       }
     }
-    for (const [targetId, presenter] of [...this.standardBombFuseSmokePresenters]) {
+    for (const [targetId, presenter] of Array.from(this.standardBombFuseSmokePresenters)) {
       presenter.updateAction(deltaSeconds);
       if (presenter.snapshot().drained) {
         // Dispose before deleting so a failed generated-frame cleanup remains retryable.
@@ -566,7 +566,7 @@ export class CrazyGameplayController extends Component {
       }
     }
     const explosionFailures: unknown[] = [];
-    for (const owner of [...this.standardBombExplosionOwners.values()]) {
+    for (const owner of Array.from(this.standardBombExplosionOwners.values())) {
       collectCleanupFailure(
         explosionFailures,
         () => owner.presenter.updateAction(deltaSeconds),
@@ -580,10 +580,10 @@ export class CrazyGameplayController extends Component {
       throw cleanupError('Crazy standard Bomb explosion update', explosionFailures);
     }
     this.registry?.updateDragonEffectsAction(deltaSeconds);
-    for (const presenter of [...this.cutHalfPresenters]) {
+    for (const presenter of Array.from(this.cutHalfPresenters)) {
       presenter.updateAction(deltaSeconds);
     }
-    for (const presenter of [...this.criticalParticlePresenters]) {
+    for (const presenter of Array.from(this.criticalParticlePresenters)) {
       presenter.updateAction(deltaSeconds);
     }
     this.scoreHudPresenter?.updateAction(deltaSeconds);
@@ -2226,7 +2226,7 @@ export class CrazyGameplayController extends Component {
       return;
     }
     const viewport = this.requireViewport();
-    const existingCutHalves = [...this.cutHalfPresenters];
+    const existingCutHalves = Array.from(this.cutHalfPresenters);
     if (driver.kind === 'standard' && 'bladeSegments' in event && registry.size > 0) {
       registry.runRayQueryCutBatch(() => {
         for (const bladeSegment of event.bladeSegments) {
@@ -2686,7 +2686,7 @@ export class CrazyGameplayController extends Component {
   private drainFinishedStandardBombExplosions(): void {
     const failures: unknown[] = [];
     let changed = false;
-    for (const [targetId, owner] of [...this.standardBombExplosionOwners]) {
+    for (const [targetId, owner] of Array.from(this.standardBombExplosionOwners)) {
       if (!owner.completion.snapshot().naturalFinishReached) {
         continue;
       }
@@ -3660,7 +3660,7 @@ export class CrazyGameplayController extends Component {
         failures.push(error);
       }
     }
-    for (const presenter of [...this.magnetPresenters]) {
+    for (const presenter of Array.from(this.magnetPresenters)) {
       try {
         presenter.dispose();
         this.magnetPresenters.delete(presenter);
@@ -3668,7 +3668,7 @@ export class CrazyGameplayController extends Component {
         failures.push(error);
       }
     }
-    for (const [targetId, owner] of [...this.standardBombExplosionOwners]) {
+    for (const [targetId, owner] of Array.from(this.standardBombExplosionOwners)) {
       try {
         // Explicit teardown intentionally does not synthesize AfterBombHit. The registry
         // drain below owns the frozen Bomb once this visual owner is gone.
@@ -3680,7 +3680,7 @@ export class CrazyGameplayController extends Component {
         failures.push(error);
       }
     }
-    for (const [targetId, presenter] of [...this.standardBombFuseSmokePresenters]) {
+    for (const [targetId, presenter] of Array.from(this.standardBombFuseSmokePresenters)) {
       try {
         presenter.dispose();
         if (this.standardBombFuseSmokePresenters.get(targetId) === presenter) {
@@ -3690,13 +3690,13 @@ export class CrazyGameplayController extends Component {
         failures.push(error);
       }
     }
-    for (const targetId of [...this.standardBombEntryAudioHandles.keys()]) {
+    for (const targetId of Array.from(this.standardBombEntryAudioHandles.keys())) {
       collectCleanupFailure(
         failures,
         () => this.disposeStandardBombEntryAudio(targetId),
       );
     }
-    for (const presenter of [...this.cutHalfPresenters]) {
+    for (const presenter of Array.from(this.cutHalfPresenters)) {
       try {
         presenter.disposeAll();
         this.cutHalfPresenters.delete(presenter);
@@ -3705,7 +3705,7 @@ export class CrazyGameplayController extends Component {
         failures.push(error);
       }
     }
-    for (const presenter of [...this.criticalParticlePresenters]) {
+    for (const presenter of Array.from(this.criticalParticlePresenters)) {
       try {
         presenter.dispose();
         this.criticalParticlePresenters.delete(presenter);
@@ -3713,7 +3713,7 @@ export class CrazyGameplayController extends Component {
         failures.push(error);
       }
     }
-    for (const presenter of [...this.comboItemPresenters]) {
+    for (const presenter of Array.from(this.comboItemPresenters)) {
       try {
         presenter.dispose();
         this.comboItemPresenters.delete(presenter);
@@ -3893,7 +3893,7 @@ export class CrazyGameplayController extends Component {
 
   private disposeCrazyPreparation(): void {
     const failures: unknown[] = [];
-    for (const presenter of [...this.objectiveAchievementPresenters]) {
+    for (const presenter of Array.from(this.objectiveAchievementPresenters)) {
       try {
         presenter.dispose();
         this.objectiveAchievementPresenters.delete(presenter);

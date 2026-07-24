@@ -128,7 +128,7 @@ export class ClassicFailPresenter {
   }
 
   get state(): ClassicFailPresenterState {
-    const queuedStrikes = [...this.animations.keys()];
+    const queuedStrikes = Array.from(this.animations.keys());
     const completedStrikes = queuedStrikes.filter(
       (strike) => this.animations.get(strike)?.completed === true,
     );

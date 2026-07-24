@@ -8,6 +8,10 @@ const SOURCE = readFileSync(
   `${REPOSITORY_ROOT}/game/assets/scripts/creator/objective-achievement-presenter.ts`,
   'utf8',
 );
+const CLASSIC_SOURCE = readFileSync(
+  `${REPOSITORY_ROOT}/game/assets/scripts/creator/classic-gameplay-controller.ts`,
+  'utf8',
+);
 
 test('presenter binds exact banners, Arial labels, and retained target order', () => {
   assert.match(SOURCE, /ObjectiveAchievementPresentationState/);
@@ -84,6 +88,33 @@ test('registry updater retires before disposal and reports one contained failure
   assert.equal(report.split('console.error(').length - 1, 1);
 });
 
+test('presenter and Classic host use Array.from for Set snapshots in web builds', () => {
+  const update = extractFunction(
+    SOURCE,
+    'updateAndRetireObjectiveAchievementPresenters',
+  );
+  assert.match(update, /Array\.from\(presenters\)/);
+  assert.doesNotMatch(update, /\[\.\.\.presenters\]/);
+  for (const expected of [
+    'Array.from(this.objectiveAchievementPresenters)',
+    'Array.from(this.comboItemPresenters)',
+    'Array.from(this.cutHalfPresenters)',
+    'Array.from(this.criticalParticlePresenters)',
+    'Array.from(this.deferredControllers)',
+  ]) {
+    assert.match(CLASSIC_SOURCE, new RegExp(escapeRegExp(expected)));
+  }
+  for (const forbidden of [
+    '[...this.objectiveAchievementPresenters]',
+    '[...this.comboItemPresenters]',
+    '[...this.cutHalfPresenters]',
+    '[...this.criticalParticlePresenters]',
+    '[...this.deferredControllers]',
+  ]) {
+    assert.doesNotMatch(CLASSIC_SOURCE, new RegExp(escapeRegExp(forbidden)));
+  }
+});
+
 function extractMethod(source: string, methodName: string): string {
   const signature = new RegExp(
     `^\\s*(?:private\\s+)?${methodName}\\b`,
@@ -134,4 +165,8 @@ function assertOrderedSubstrings(source: string, values: readonly string[]): voi
     assert.ok(current > previous, `${value} must appear in recovered order`);
     previous = current;
   }
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

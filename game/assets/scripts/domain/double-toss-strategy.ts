@@ -194,7 +194,7 @@ export class DoubleTossStrategy {
   }
 
   get pendingStopRequestIds(): readonly number[] {
-    return Object.freeze([...this.pendingStopRequests]);
+    return Object.freeze(Array.from(this.pendingStopRequests));
   }
 
   snapshot(): DoubleTossStrategySnapshot {

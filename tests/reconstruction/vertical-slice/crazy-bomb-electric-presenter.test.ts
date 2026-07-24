@@ -1,7 +1,17 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { extname } from 'node:path';
 import { registerHooks } from 'node:module';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+
+const SOURCE = readFileSync(
+  fileURLToPath(new URL(
+    '../../../game/assets/scripts/creator/crazy-bomb-electric-presenter.ts',
+    import.meta.url,
+  )),
+  'utf8',
+);
 
 const CC_STUB_URL = `data:text/javascript,${encodeURIComponent(`
 export class UITransform {
@@ -227,6 +237,16 @@ function createHarness(
     sensor,
   };
 }
+
+test('Set snapshots use Array.from before Creator loose-build iteration', () => {
+  assert.equal(SOURCE.split('Array.from(this.fields)').length - 1, 1);
+  assert.equal(
+    SOURCE.split('Array.from(this.pendingCleanupNodes)').length - 1,
+    1,
+  );
+  assert.equal(SOURCE.includes('[...this.fields]'), false);
+  assert.equal(SOURCE.includes('[...this.pendingCleanupNodes]'), false);
+});
 
 test('detached attachment keeps BombElectric inactive until hierarchy-bound start', () => {
   const {

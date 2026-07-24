@@ -285,7 +285,7 @@ export class CrazyEntityRegistry {
    */
   updateDragonEffectsAction(unscaledDeltaSeconds: number): void {
     assertNonNegativeFinite(unscaledDeltaSeconds, 'unscaledDeltaSeconds');
-    for (const effect of [...this.activeDragonEffects.values()]) {
+    for (const effect of Array.from(this.activeDragonEffects.values())) {
       if (
         effect.releaseQueued
         || effect.entity.ownedPresentationDisposalQueued
@@ -312,7 +312,7 @@ export class CrazyEntityRegistry {
   ): readonly CrazyDragonEffectPhysicsEvaluation[] {
     assertViewport(viewport);
     const evaluations: CrazyDragonEffectPhysicsEvaluation[] = [];
-    for (const effect of [...this.activeDragonEffects.values()]) {
+    for (const effect of Array.from(this.activeDragonEffects.values())) {
       if (
         !effect.retained
         || effect.releaseQueued
@@ -450,7 +450,7 @@ export class CrazyEntityRegistry {
 
   cuttableSnapshots(): readonly CuttableSnapshot[] {
     return Object.freeze(
-      [...this.byOccurrenceKey.values()].map(({ entity }) => entity.snapshot()),
+      Array.from(this.byOccurrenceKey.values()).map(({ entity }) => entity.snapshot()),
     );
   }
 
@@ -501,7 +501,7 @@ export class CrazyEntityRegistry {
     }
 
     this.rayQueryActive = false;
-    const cutFruit = [...this.rayQueryCutFruit];
+    const cutFruit = Array.from(this.rayQueryCutFruit);
     this.rayQueryCutFruit.clear();
     const failures: CrazyEntityDrainFailure[] = [];
     for (const record of cutFruit) {
@@ -551,7 +551,7 @@ export class CrazyEntityRegistry {
     viewport: LogicalViewport,
   ): readonly CrazyEntityBoundsEvaluation[] {
     const evaluations: CrazyEntityBoundsEvaluation[] = [];
-    for (const record of [...this.byOccurrenceKey.values()]) {
+    for (const record of Array.from(this.byOccurrenceKey.values())) {
       const commands = record.kind === 'dragon-fruit'
         ? record.entity.updatePhysics(viewport).originalBoundsCommands
         : record.entity.evaluateBounds(viewport);
@@ -570,7 +570,7 @@ export class CrazyEntityRegistry {
   disposeAll(): void {
     const failures: CrazyEntityDrainFailure[] = [];
     const registeredDragonKeys = new Set<CrazyEntityOccurrenceKey>();
-    for (const record of [...this.byOccurrenceKey.values()]) {
+    for (const record of Array.from(this.byOccurrenceKey.values())) {
       try {
         if (record.kind === 'dragon-fruit') {
           registeredDragonKeys.add(record.occurrenceKey);
@@ -586,7 +586,7 @@ export class CrazyEntityRegistry {
         }));
       }
     }
-    for (const effect of [...this.activeDragonEffects.values()]) {
+    for (const effect of Array.from(this.activeDragonEffects.values())) {
       if (registeredDragonKeys.has(effect.occurrenceKey)) {
         continue;
       }

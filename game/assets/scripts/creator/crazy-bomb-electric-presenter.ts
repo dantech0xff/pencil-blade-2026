@@ -320,13 +320,13 @@ export class CrazyBombElectricPresenter {
       });
     }
 
-    const fields = [...this.fields];
+    const fields = Array.from(this.fields);
     this.fields.clear();
     this.currentField = null;
     for (const field of fields) {
       this.pendingCleanupNodes.add(field.node);
     }
-    for (const node of [...this.pendingCleanupNodes]) {
+    for (const node of Array.from(this.pendingCleanupNodes)) {
       runCleanup(failures, `destroy ${node.name}`, () => {
         if (isValid(node, true)) {
           node.destroy();

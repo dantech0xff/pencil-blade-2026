@@ -131,7 +131,7 @@ export class TimeManagerAudioPresenter implements TimeManagerAudioPort {
     this.assertUsable();
     this.pauseLeaseActive = true;
     const failures: unknown[] = [];
-    for (const voice of [...this.voices]) {
+    for (const voice of Array.from(this.voices)) {
       collectCleanupFailure(failures, () => voice.pause());
     }
     if (failures.length > 0) {
@@ -145,10 +145,10 @@ export class TimeManagerAudioPresenter implements TimeManagerAudioPort {
       return;
     }
     const failures: unknown[] = [];
-    for (const voice of [...this.voices]) {
+    for (const voice of Array.from(this.voices)) {
       collectCleanupFailure(failures, () => voice.resume());
     }
-    if (![...this.voices].some((voice) => voice.paused)) {
+    if (!Array.from(this.voices).some((voice) => voice.paused)) {
       this.pauseLeaseActive = false;
     }
     if (failures.length > 0) {
@@ -162,7 +162,7 @@ export class TimeManagerAudioPresenter implements TimeManagerAudioPort {
     }
     this.pauseLeaseActive = false;
     const failures: unknown[] = [];
-    for (const voice of [...this.voices]) {
+    for (const voice of Array.from(this.voices)) {
       collectCleanupFailure(failures, () => voice.dispose());
     }
     if (failures.length > 0) {

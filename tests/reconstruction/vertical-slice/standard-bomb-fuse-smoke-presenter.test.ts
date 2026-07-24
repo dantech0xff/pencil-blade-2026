@@ -1,7 +1,17 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { extname } from 'node:path';
 import { registerHooks } from 'node:module';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+
+const SOURCE = readFileSync(
+  fileURLToPath(new URL(
+    '../../../game/assets/scripts/creator/standard-bomb-fuse-smoke-presenter.ts',
+    import.meta.url,
+  )),
+  'utf8',
+);
 
 const CC_STUB_URL = `data:text/javascript,${encodeURIComponent(`
 export const events = [];
@@ -405,6 +415,16 @@ function smokeNodes(): StubNode[] {
     node.name.startsWith('StandardBombFuseSmoke-')
   ));
 }
+
+test('Set snapshots use Array.from before Creator loose-build iteration', () => {
+  assert.equal(SOURCE.split('Array.from(this.activeSmoke)').length - 1, 2);
+  assert.equal(
+    SOURCE.split('Array.from(this.pendingCleanupNodes)').length - 1,
+    1,
+  );
+  assert.equal(SOURCE.includes('[...this.activeSmoke]'), false);
+  assert.equal(SOURCE.includes('[...this.pendingCleanupNodes]'), false);
+});
 
 test('slices the shared atlas into exact row-major 15+15 frames without taking texture ownership', () => {
   cc.resetStub();

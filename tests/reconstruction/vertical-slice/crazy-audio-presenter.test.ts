@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { extname } from 'node:path';
 import { registerHooks } from 'node:module';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 import {
   CRAZY_DOUBLE_SCORE_AUDIO_PATH,
@@ -12,6 +14,14 @@ import {
   CRAZY_REQUIRED_STAGED_AUDIO_PATHS,
 } from '../../../game/assets/scripts/domain/crazy-audio-contract.ts';
 import { canonicalResourceToBundlePath } from '../../../game/assets/scripts/domain/game-resource-contract.ts';
+
+const SOURCE = readFileSync(
+  fileURLToPath(new URL(
+    '../../../game/assets/scripts/creator/crazy-audio-presenter.ts',
+    import.meta.url,
+  )),
+  'utf8',
+);
 
 const CC_STUB_URL = `data:text/javascript,${encodeURIComponent(`
 export const audioOperations = [];
@@ -400,6 +410,11 @@ interface CocosStub {
   readonly resolveClipLoadWithoutAssets: () => void;
   readonly setBundleAvailable: (value: boolean) => void;
 }
+
+test('Set snapshots use Array.from before Creator loose-build iteration', () => {
+  assert.equal(SOURCE.split('Array.from(this.effectVoices)').length - 1, 4);
+  assert.equal(SOURCE.includes('[...this.effectVoices]'), false);
+});
 
 test('Crazy audio preload requests every direct and preload-only recovered row', async () => {
   cc.resetAudioStub();

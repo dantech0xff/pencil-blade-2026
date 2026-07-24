@@ -1,7 +1,17 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { extname } from 'node:path';
 import { registerHooks } from 'node:module';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+
+const SOURCE = readFileSync(
+  fileURLToPath(new URL(
+    '../../../game/assets/scripts/domain/crazy-runtime-command-batches.ts',
+    import.meta.url,
+  )),
+  'utf8',
+);
 
 registerHooks({
   resolve(specifier, context, nextResolve) {
@@ -83,6 +93,14 @@ const bonus = Object.freeze([
     type: 'request-bonus-toss-audio',
   }),
 ] as const);
+
+test('embedded Set expansion uses Array.from before Creator loose-build concatenation', () => {
+  assert.equal(
+    SOURCE.split('...Array.from(CLASSIC_CREATE_TYPES)').length - 1,
+    1,
+  );
+  assert.equal(SOURCE.includes('...CLASSIC_CREATE_TYPES,'), false);
+});
 
 test('partitions mixed composite callbacks without changing observable order', () => {
   const controlBefore = Object.freeze({

@@ -120,7 +120,7 @@ export class ClassicEntityRegistry {
 
   cuttableSnapshots(): readonly CuttableSnapshot[] {
     return Object.freeze(
-      [...this.byOccurrenceId.values()].map((entity) => entity.snapshot()),
+      Array.from(this.byOccurrenceId.values()).map((entity) => entity.snapshot()),
     );
   }
 
@@ -163,7 +163,7 @@ export class ClassicEntityRegistry {
       execute();
     } finally {
       this.rayQueryActive = false;
-      const cutEntities = [...this.rayQueryCutEntities];
+      const cutEntities = Array.from(this.rayQueryCutEntities);
       this.rayQueryCutEntities.clear();
       for (const entity of cutEntities) {
         entity.completeRayQueryCuts();
@@ -175,7 +175,7 @@ export class ClassicEntityRegistry {
     viewport: Readonly<{ width: number; height: number }>,
   ): readonly ClassicEntityBoundsEvaluation[] {
     const evaluations: ClassicEntityBoundsEvaluation[] = [];
-    for (const entity of [...this.byOccurrenceId.values()]) {
+    for (const entity of Array.from(this.byOccurrenceId.values())) {
       const commands = entity.evaluateBounds(viewport);
       if (commands.length > 0) {
         evaluations.push(Object.freeze({
@@ -188,7 +188,7 @@ export class ClassicEntityRegistry {
   }
 
   disposeAll(): void {
-    for (const entity of [...this.byOccurrenceId.values()]) {
+    for (const entity of Array.from(this.byOccurrenceId.values())) {
       entity.queueDispose('registry-dispose-all');
     }
   }

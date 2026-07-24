@@ -469,7 +469,7 @@ export class ComboBirdGameplayController extends Component {
     }
 
     this.birdBladePresenter?.update(deltaSeconds);
-    for (const presenter of [...this.comboItemPresenters]) {
+    for (const presenter of Array.from(this.comboItemPresenters)) {
       presenter.updateAction(deltaSeconds);
     }
     const lifecycleAtFrameStart = this.requireSceneController()
@@ -489,10 +489,10 @@ export class ComboBirdGameplayController extends Component {
       }
       throw error;
     }
-    for (const presenter of [...this.cutHalfPresenters]) {
+    for (const presenter of Array.from(this.cutHalfPresenters)) {
       presenter.updateAction(deltaSeconds);
     }
-    for (const presenter of [...this.criticalParticlePresenters]) {
+    for (const presenter of Array.from(this.criticalParticlePresenters)) {
       presenter.updateAction(deltaSeconds);
     }
     this.scoreHudPresenter?.updateAction(deltaSeconds);
@@ -1244,7 +1244,7 @@ export class ComboBirdGameplayController extends Component {
     }
 
     const viewport = this.requireViewport();
-    const existingCutHalves = [...this.cutHalfPresenters];
+    const existingCutHalves = Array.from(this.cutHalfPresenters);
     if (registry.size > 0) {
       ray.processOneCachedRay((batch) => (
         this.applyBirdRaycastBatch(batch, registry)
@@ -3207,7 +3207,7 @@ export class ComboBirdGameplayController extends Component {
     this.unschedule(this.onSwishCooldownComplete);
     this.swishAudio?.unlock();
     this.swishAudio = null;
-    for (const presenter of [...this.cutHalfPresenters]) {
+    for (const presenter of Array.from(this.cutHalfPresenters)) {
       try {
         presenter.disposeAll();
         this.cutHalfPresenters.delete(presenter);
@@ -3216,7 +3216,7 @@ export class ComboBirdGameplayController extends Component {
         failures.push(error);
       }
     }
-    for (const presenter of [...this.criticalParticlePresenters]) {
+    for (const presenter of Array.from(this.criticalParticlePresenters)) {
       try {
         presenter.dispose();
         this.criticalParticlePresenters.delete(presenter);
@@ -3224,7 +3224,7 @@ export class ComboBirdGameplayController extends Component {
         failures.push(error);
       }
     }
-    for (const presenter of [...this.comboItemPresenters]) {
+    for (const presenter of Array.from(this.comboItemPresenters)) {
       try {
         presenter.dispose();
         this.comboItemPresenters.delete(presenter);
@@ -3376,7 +3376,7 @@ export class ComboBirdGameplayController extends Component {
 
   private disposePreparation(): void {
     const failures: unknown[] = [];
-    for (const presenter of [...this.objectiveAchievementPresenters]) {
+    for (const presenter of Array.from(this.objectiveAchievementPresenters)) {
       try {
         presenter.dispose();
         this.objectiveAchievementPresenters.delete(presenter);

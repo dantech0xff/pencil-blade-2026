@@ -1,7 +1,17 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { registerHooks } from 'node:module';
 import { extname } from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+
+const SOURCE = readFileSync(
+  fileURLToPath(new URL(
+    '../../../game/assets/scripts/creator/objective-achievement-host.ts',
+    import.meta.url,
+  )),
+  'utf8',
+);
 
 const CC_STUB_URL = `data:text/javascript,${encodeURIComponent(`
 export const events = [];
@@ -137,6 +147,13 @@ class StubPresenter {
 const POPUP_EVENT = Object.freeze({
   type: 'objective-achievement',
 }) as never;
+
+test('Set snapshots use Array.from before Creator loose-build iteration', () => {
+  assert.equal(SOURCE.split('Array.from(this.presentations)').length - 1, 2);
+  assert.equal(SOURCE.split('Array.from(this.orphanedTargets)').length - 1, 1);
+  assert.equal(SOURCE.includes('[...this.presentations]'), false);
+  assert.equal(SOURCE.includes('[...this.orphanedTargets]'), false);
+});
 
 test('host preserves cheer-before-create/attach and survives foreground replacement', () => {
   const shell = new cc.Node('Shell');

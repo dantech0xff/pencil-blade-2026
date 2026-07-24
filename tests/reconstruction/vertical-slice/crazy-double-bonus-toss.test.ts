@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 import {
   BONUS_TOSS_AUDIO_PATH,
@@ -17,6 +19,14 @@ import {
 import type { GameplayRandom } from '../../../game/assets/scripts/domain/gameplay-random.ts';
 import type { TossStrategyTimerFactory } from '../../../game/assets/scripts/domain/classic-toss-strategies.ts';
 import { TossTimer } from '../../../game/assets/scripts/domain/toss-timer.ts';
+
+const DOUBLE_TOSS_SOURCE = readFileSync(
+  fileURLToPath(new URL(
+    '../../../game/assets/scripts/domain/double-toss-strategy.ts',
+    import.meta.url,
+  )),
+  'utf8',
+);
 
 class ScriptedGameplayRandom implements GameplayRandom {
   readonly calls: string[] = [];
@@ -114,6 +124,17 @@ function createBonus(
     random,
   });
 }
+
+test('Double pending Set snapshots use Array.from before Creator loose-build iteration', () => {
+  assert.equal(
+    DOUBLE_TOSS_SOURCE.split('Array.from(this.pendingStopRequests)').length - 1,
+    1,
+  );
+  assert.equal(
+    DOUBLE_TOSS_SOURCE.includes('[...this.pendingStopRequests]'),
+    false,
+  );
+});
 
 test('Double setup creates and attaches Left then Right type-0 Free children', () => {
   const strategy = createDouble(new ScriptedGameplayRandom());

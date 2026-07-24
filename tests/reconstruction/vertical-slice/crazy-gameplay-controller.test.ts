@@ -131,6 +131,35 @@ test('activation constructs detached state and commits only through an empty scr
   ]);
 });
 
+test('Set and Map snapshots use Array.from before Creator loose-build iteration', () => {
+  for (const expected of [
+    'Array.from(this.objectiveAchievementPresenters)',
+    'Array.from(this.comboItemPresenters)',
+    'Array.from(this.magnetPresenters)',
+    'Array.from(this.standardBombFuseSmokePresenters)',
+    'Array.from(this.standardBombExplosionOwners)',
+    'Array.from(this.standardBombExplosionOwners.values())',
+    'Array.from(this.standardBombEntryAudioHandles.keys())',
+    'Array.from(this.cutHalfPresenters)',
+    'Array.from(this.criticalParticlePresenters)',
+  ]) {
+    assert.match(SOURCE, new RegExp(escapeRegExp(expected)));
+  }
+  for (const forbidden of [
+    '[...this.objectiveAchievementPresenters]',
+    '[...this.comboItemPresenters]',
+    '[...this.magnetPresenters]',
+    '[...this.standardBombFuseSmokePresenters]',
+    '[...this.standardBombExplosionOwners]',
+    '[...this.standardBombExplosionOwners.values()]',
+    '[...this.standardBombEntryAudioHandles.keys()]',
+    '[...this.cutHalfPresenters]',
+    '[...this.criticalParticlePresenters]',
+  ]) {
+    assert.doesNotMatch(SOURCE, new RegExp(escapeRegExp(forbidden)));
+  }
+});
+
 test('the coordinator registry bridge preserves complete spawn batches and retained Dragon work', () => {
   const coordinator = extractMemberBlock(
     SOURCE,
@@ -266,7 +295,7 @@ test('shared combo batches preserve objective, popup, score, attachment, and aud
   assert.doesNotMatch(applyCombo, /this\.emitCommands\(commands\)/);
   assert.match(
     SOURCE,
-    /for \(const presenter of \[\.\.\.this\.comboItemPresenters\]\)[\s\S]*?presenter\.updateAction\(deltaSeconds\)/,
+    /for \(const presenter of Array\.from\(this\.comboItemPresenters\)\)[\s\S]*?presenter\.updateAction\(deltaSeconds\)/,
   );
   assert.match(
     SOURCE,
@@ -1267,6 +1296,10 @@ function assertOrderedSubstrings(source: string, values: readonly string[]): voi
 
 function occurrences(source: string, value: string): number {
   return source.split(value).length - 1;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function compileSourceMethod<T extends (...args: any[]) => unknown>(

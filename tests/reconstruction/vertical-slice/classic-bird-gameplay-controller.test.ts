@@ -32,6 +32,36 @@ test('Classic Bird gameplay owns the complete four-component Creator boundary', 
   assert.doesNotMatch(start, /prepare|activate|attach|loadBirdResources/);
 });
 
+test('Set and Map snapshots use Array.from before Creator loose-build iteration', () => {
+  for (const expected of [
+    'Array.from(this.comboItemPresenters)',
+    'Array.from(this.magnetPresenters)',
+    'Array.from(this.standardBombFuseSmokePresenters)',
+    'Array.from(this.standardBombExplosionOwners.values())',
+    'Array.from(this.cutHalfPresenters)',
+    'Array.from(this.standardBombExplosionOwners)',
+    'Array.from(this.standardBombEntryAudioHandles.keys())',
+    'Array.from(this.criticalParticlePresenters)',
+  ]) {
+    assert.match(SOURCE, new RegExp(escapeRegExp(expected)));
+  }
+  for (const iterable of [
+    'this.comboItemPresenters',
+    'this.magnetPresenters',
+    'this.standardBombFuseSmokePresenters',
+    'this.standardBombExplosionOwners.values()',
+    'this.cutHalfPresenters',
+    'this.standardBombExplosionOwners',
+    'this.standardBombEntryAudioHandles.keys()',
+    'this.criticalParticlePresenters',
+  ]) {
+    assert.doesNotMatch(
+      SOURCE,
+      new RegExp(`\\[\\s*\\.\\.\\.\\s*${escapeRegExp(iterable)}\\s*\\]`),
+    );
+  }
+});
+
 test('preparation reuses Classic and Crazy before loading exactly 17 Bird rasters', () => {
   const prepare = extractMethod(SOURCE, 'prepareClassicBirdRuntime');
   assertOrderedSubstrings(prepare, [
@@ -215,6 +245,72 @@ test('standard Bomb uses the sole natural 2.5-second presenter and a run token w
     '.hasTarget(targetId)',
     'this.standardBombExplosionOwners.delete(targetId)',
   ]);
+});
+
+test('standard Bomb completion snapshots drain owners in insertion order while deleting them', () => {
+  const events: string[] = [];
+  const makeOwner = (targetId: string, runGeneration: number) => ({
+    completion: {
+      snapshot: () => ({ naturalFinishReached: true }),
+      drain(callbacks: Readonly<{
+        afterBombHit: () => void;
+        finishBombAfterHit: () => void;
+        isBombDisposalCommitted: () => boolean;
+      }>) {
+        events.push(`drain-${targetId}`);
+        callbacks.afterBombHit();
+        callbacks.finishBombAfterHit();
+        assert.equal(callbacks.isBombDisposalCommitted(), true);
+        return true;
+      },
+    },
+    presenter: {},
+    runGeneration,
+  });
+  const standardBombExplosionOwners = new Map([
+    ['bomb-b', makeOwner('bomb-b', 22)],
+    ['bomb-a', makeOwner('bomb-a', 11)],
+  ]);
+  const drain = compileSourceMethod<
+    (this: Record<string, any>) => void
+  >('drainFinishedStandardBombExplosions', {
+    cleanupError(label: string, failures: readonly unknown[]) {
+      return new Error(`${label}: ${failures.map(String).join('; ')}`);
+    },
+  });
+  const controller = {
+    standardBombExplosionOwners,
+    requireSceneController: () => ({
+      afterBombHit: (runGeneration: number) => {
+        events.push(`after-${runGeneration}`);
+      },
+    }),
+    requireRegistry: () => ({
+      finishBombAfterHit: (targetId: string) => {
+        events.push(`finish-${targetId}`);
+      },
+      hasTarget: (targetId: string) => {
+        events.push(`committed-${targetId}`);
+        return false;
+      },
+    }),
+    emitSnapshot: () => events.push('snapshot'),
+  };
+
+  drain.call(controller);
+
+  assert.deepEqual(events, [
+    'drain-bomb-b',
+    'after-22',
+    'finish-bomb-b',
+    'committed-bomb-b',
+    'drain-bomb-a',
+    'after-11',
+    'finish-bomb-a',
+    'committed-bomb-a',
+    'snapshot',
+  ]);
+  assert.equal(standardBombExplosionOwners.size, 0);
 });
 
 test('Pause audio and Replay keep process RNG/settings and never resume music', () => {

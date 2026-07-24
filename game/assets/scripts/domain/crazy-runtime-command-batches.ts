@@ -25,7 +25,7 @@ const CLASSIC_CREATE_TYPES: ReadonlySet<string> = new Set([
   'create-fruit',
 ]);
 const CLASSIC_SPAWN_TYPES: ReadonlySet<string> = new Set([
-  ...CLASSIC_CREATE_TYPES,
+  ...Array.from(CLASSIC_CREATE_TYPES),
   'attach-spawned-entity',
   'play-toss-sound',
   'reset-linear-velocity',

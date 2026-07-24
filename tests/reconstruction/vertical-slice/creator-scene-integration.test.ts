@@ -438,7 +438,10 @@ test('critical cut halves preserve per-half update RNG and exact particle consum
   const particleIndex = postPhysics.indexOf('this.emitRecoveredCriticalParticles(presenter)');
   assert.ok(boundsIndex >= 0 && particleIndex > boundsIndex);
 
-  assert.match(gameplaySource, /const existingCutHalfPresenters = \[\.\.\.this\.cutHalfPresenters\]/);
+  assert.match(
+    gameplaySource,
+    /const existingCutHalfPresenters = Array\.from\(this\.cutHalfPresenters\)/,
+  );
   assert.match(gameplaySource, /if \(event\.critical\) \{[\s\S]*this\.criticalCutHalfPresenters\.add\(presenter\)/);
   assert.match(gameplaySource, /for \(const half of cutHalves\.halves\)/);
   assert.match(gameplaySource, /if \(half\.disposalQueued\)/);

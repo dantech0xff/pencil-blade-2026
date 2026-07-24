@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 import {
   CLASSIC_BOMB_TOSS_SOUND,
@@ -19,6 +21,14 @@ import {
 import type { GameplayRandom } from '../../../game/assets/scripts/domain/gameplay-random.ts';
 import type { RecoveredSpawnKinematics } from '../../../game/assets/scripts/domain/spawn-kinematics.ts';
 import { TossTimer } from '../../../game/assets/scripts/domain/toss-timer.ts';
+
+const SOURCE = readFileSync(
+  fileURLToPath(new URL(
+    '../../../game/assets/scripts/domain/classic-toss-strategies.ts',
+    import.meta.url,
+  )),
+  'utf8',
+);
 
 class ScriptedGameplayRandom implements GameplayRandom {
   readonly calls: string[] = [];
@@ -73,6 +83,14 @@ const CONSTANT_KINEMATICS: SpawnKinematicsSampler = (direction) => {
 
 const CREATE_REAL_TIMER: TossStrategyTimerFactory = (options) => new TossTimer(options);
 const VIEWPORT = Object.freeze({ width: 480, height: 800 });
+
+test('Wave pending Set snapshots use Array.from before Creator loose-build iteration', () => {
+  assert.equal(
+    SOURCE.split('Array.from(this.pendingPauseRequests)').length - 1,
+    1,
+  );
+  assert.equal(SOURCE.includes('[...this.pendingPauseRequests]'), false);
+});
 
 test('type 0 maps all nine fruit-vector indices and draws critical before kinematics', () => {
   assert.deepEqual(CLASSIC_NORMAL_FRUIT_IDS, [0, 1, 6, 5, 7, 4, 2, 3, 8]);

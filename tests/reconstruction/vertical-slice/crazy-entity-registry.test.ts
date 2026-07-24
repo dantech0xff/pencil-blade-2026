@@ -1,7 +1,17 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { registerHooks } from 'node:module';
 import { extname } from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+
+const SOURCE = readFileSync(
+  fileURLToPath(new URL(
+    '../../../game/assets/scripts/creator/crazy-entity-registry.ts',
+    import.meta.url,
+  )),
+  'utf8',
+);
 
 const CC_STUB_URL = `data:text/javascript,${encodeURIComponent(`
 export class Vec2 {
@@ -779,6 +789,24 @@ function bonusBatch(
       : []),
   ]);
 }
+
+test('Set and Map snapshots use Array.from before Creator loose-build iteration', () => {
+  assert.equal(
+    SOURCE.split('Array.from(this.activeDragonEffects.values())').length - 1,
+    3,
+  );
+  assert.equal(
+    SOURCE.split('Array.from(this.byOccurrenceKey.values())').length - 1,
+    3,
+  );
+  assert.equal(SOURCE.split('Array.from(this.rayQueryCutFruit)').length - 1, 1);
+  assert.equal(
+    SOURCE.includes('[...this.activeDragonEffects.values()]'),
+    false,
+  );
+  assert.equal(SOURCE.includes('[...this.byOccurrenceKey.values()]'), false);
+  assert.equal(SOURCE.includes('[...this.rayQueryCutFruit]'), false);
+});
 
 test('registry creates all exact ordinary, standard-bomb, and Crazy special entities', () => {
   const harness = createHarness();

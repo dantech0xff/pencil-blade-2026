@@ -275,6 +275,25 @@ test('running and late-cut frames tick coordinator before TimeManager while part
   );
 });
 
+test('Set snapshots use Array.from before Creator loose-build iteration', () => {
+  for (const expected of [
+    'Array.from(this.objectiveAchievementPresenters)',
+    'Array.from(this.comboItemPresenters)',
+    'Array.from(this.cutHalfPresenters)',
+    'Array.from(this.criticalParticlePresenters)',
+  ]) {
+    assert.match(SOURCE, new RegExp(escapeRegExp(expected)));
+  }
+  for (const forbidden of [
+    '[...this.objectiveAchievementPresenters]',
+    '[...this.comboItemPresenters]',
+    '[...this.cutHalfPresenters]',
+    '[...this.criticalParticlePresenters]',
+  ]) {
+    assert.doesNotMatch(SOURCE, new RegExp(escapeRegExp(forbidden)));
+  }
+});
+
 test('ordinary blade, post-physics bidirectional cuts, score, combo, and miss stay end to end', () => {
   for (const name of ['onBladeBegan', 'onBladeMoved', 'onBladeEnded']) {
     const member = extractMemberBlock(
@@ -1722,6 +1741,10 @@ function assertOrderedSubstrings(
 
 function occurrences(source: string, value: string): number {
   return source.split(value).length - 1;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 class TestGnStyleLifecycleRollbackError extends Error {

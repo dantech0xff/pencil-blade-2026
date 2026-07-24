@@ -175,7 +175,7 @@ export class CrazyAudioPresenter {
   pauseAllEffects(): void {
     this.effectsPauseLeaseActive = true;
     const failures: unknown[] = [];
-    for (const voice of [...this.effectVoices]) {
+    for (const voice of Array.from(this.effectVoices)) {
       runCleanup(failures, () => voice.pauseForPresenter());
     }
     throwOperationFailures('Crazy effect pause', failures);
@@ -186,10 +186,10 @@ export class CrazyAudioPresenter {
       return;
     }
     const failures: unknown[] = [];
-    for (const voice of [...this.effectVoices]) {
+    for (const voice of Array.from(this.effectVoices)) {
       runCleanup(failures, () => voice.resumeFromPresenterPause());
     }
-    if (![...this.effectVoices].some((voice) => voice.pausedByPresenter)) {
+    if (!Array.from(this.effectVoices).some((voice) => voice.pausedByPresenter)) {
       this.effectsPauseLeaseActive = false;
     }
     throwOperationFailures('Crazy effect resume', failures);
@@ -239,7 +239,7 @@ export class CrazyAudioPresenter {
   stopAllEffects(): void {
     this.effectsPauseLeaseActive = false;
     const failures: unknown[] = [];
-    for (const voice of [...this.effectVoices]) {
+    for (const voice of Array.from(this.effectVoices)) {
       runCleanup(failures, () => voice.dispose());
     }
     throwOperationFailures('Crazy effect voices', failures);

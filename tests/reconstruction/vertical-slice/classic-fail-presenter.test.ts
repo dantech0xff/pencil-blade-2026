@@ -1,9 +1,18 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { extname } from 'node:path';
 import { registerHooks } from 'node:module';
 import test from 'node:test';
 
 import { getClassicPresentationResources } from '../../../game/assets/scripts/domain/classic-resource-contract.ts';
+
+const SOURCE = readFileSync(
+  new URL(
+    '../../../game/assets/scripts/creator/classic-fail-presenter.ts',
+    import.meta.url,
+  ),
+  'utf8',
+);
 
 const CC_STUB_URL = `data:text/javascript,${encodeURIComponent(`
 export const createdNodes = [];
@@ -130,6 +139,14 @@ interface StubTransform {
   readonly contentSize: Readonly<{ width: number; height: number }>;
 }
 
+test('queued animation keys use Array.from before Creator loose-build iteration', () => {
+  assert.match(SOURCE, /Array\.from\(this\.animations\.keys\(\)\)/);
+  assert.doesNotMatch(
+    SOURCE,
+    /\[\s*\.\.\.\s*this\.animations\.keys\(\)\s*\]/,
+  );
+});
+
 test('persistent markers use exact profile resources, entry layout, scale, anchor, and z-order', () => {
   for (const assetTree of ['480x800', '720x1280'] as const) {
     cc.resetCreatedNodes();
@@ -223,6 +240,8 @@ test('each miss swaps the exact filled raster, animates 5x to normal in 0.25s, a
       resources.failFilled.dimensions,
     );
   }
+  assert.deepEqual(presenter.state.queuedStrikes, [1, 2, 3]);
+  assert.deepEqual(presenter.state.completedStrikes, []);
   const transientNodes = cc.createdNodes.filter((node) => node.name === 'ClassicTransientFailAnimation');
   assert.equal(transientNodes.length, 3);
   assert.deepEqual(transientNodes.map((node) => vector(node.worldPosition)), [

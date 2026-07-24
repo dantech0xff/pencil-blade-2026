@@ -721,7 +721,7 @@ export class ClassicGameplayController extends Component {
       'Classic objective achievement presentation update failed',
     );
     this.bladePresenter?.update(deltaSeconds);
-    for (const presenter of [...this.comboItemPresenters]) {
+    for (const presenter of Array.from(this.comboItemPresenters)) {
       presenter.updateAction(deltaSeconds);
     }
     const lifecycle = this.sceneController?.sessionSnapshot().lifecycle;
@@ -881,14 +881,14 @@ export class ClassicGameplayController extends Component {
     }
     this.deferredControllers.clear();
     collectClassicCleanupFailure(failures, () => this.disposeCutHalfPresenters());
-    for (const presenter of [...this.criticalParticlePresenters]) {
+    for (const presenter of Array.from(this.criticalParticlePresenters)) {
       attemptClassicOwnedCleanup(
         failures,
         () => presenter.dispose(),
         () => this.criticalParticlePresenters.delete(presenter),
       );
     }
-    for (const presenter of [...this.comboItemPresenters]) {
+    for (const presenter of Array.from(this.comboItemPresenters)) {
       attemptClassicOwnedCleanup(
         failures,
         () => presenter.dispose(),
@@ -1094,7 +1094,7 @@ export class ClassicGameplayController extends Component {
 
   private disposeObjectiveAchievementPresentation(): void {
     const failures: unknown[] = [];
-    for (const presenter of [...this.objectiveAchievementPresenters]) {
+    for (const presenter of Array.from(this.objectiveAchievementPresenters)) {
       collectClassicCleanupFailure(failures, () => presenter.dispose());
     }
     this.objectiveAchievementPresenters.clear();
@@ -1113,7 +1113,7 @@ export class ClassicGameplayController extends Component {
     const score = this.score.snapshot();
     return Object.freeze({
       activeFruitCount: this.registry?.size ?? 0,
-      deferredControllers: Object.freeze([...this.deferredControllers]),
+      deferredControllers: Object.freeze(Array.from(this.deferredControllers)),
       displayedScore: score.displayedScore,
       gameOver: this.gameOver,
       score: score.authoritativeScore,
@@ -1223,7 +1223,7 @@ export class ClassicGameplayController extends Component {
     const viewport = this.requireViewport();
     // A CutFruit created by this frame's blade query does not receive its first native
     // CutFruit::update until the following frame.
-    const existingCutHalfPresenters = [...this.cutHalfPresenters];
+    const existingCutHalfPresenters = Array.from(this.cutHalfPresenters);
     // @cocos/box2d 1.0.2 throws while raycasting an empty dynamic tree. This bounded
     // slice owns every fixture, so the registry is the public, deterministic guard.
     if (registry.size > 0) {
@@ -1358,7 +1358,7 @@ export class ClassicGameplayController extends Component {
 
   private disposeCutHalfPresenters(): void {
     const failures: unknown[] = [];
-    for (const presenter of [...this.cutHalfPresenters]) {
+    for (const presenter of Array.from(this.cutHalfPresenters)) {
       attemptClassicOwnedCleanup(
         failures,
         () => presenter.disposeAll(),
@@ -2440,7 +2440,7 @@ export class ClassicGameplayController extends Component {
       mode: configured.mode,
       previousRunState: Object.freeze({
         combo: this.combo,
-        deferredControllers: Object.freeze([...this.deferredControllers]),
+        deferredControllers: Object.freeze(Array.from(this.deferredControllers)),
         fail: this.fail,
         gameOver: this.gameOver,
         planner: this.planner,

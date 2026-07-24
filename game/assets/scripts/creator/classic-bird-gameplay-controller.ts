@@ -889,7 +889,7 @@ export class ClassicBirdGameplayController extends Component {
     }
 
     this.birdBladePresenter?.update(deltaSeconds);
-    for (const presenter of [...this.comboItemPresenters]) {
+    for (const presenter of Array.from(this.comboItemPresenters)) {
       presenter.updateAction(deltaSeconds);
     }
     const lifecycleAtFrameStart = this.requireSceneController()
@@ -901,15 +901,13 @@ export class ClassicBirdGameplayController extends Component {
     }
 
     this.bombElectricPresenter?.updateAction(deltaSeconds);
-    for (const presenter of [...this.magnetPresenters]) {
+    for (const presenter of Array.from(this.magnetPresenters)) {
       presenter.updateAction(deltaSeconds);
       if (presenter.state.phase === 'disposed') {
         this.magnetPresenters.delete(presenter);
       }
     }
-    for (const [targetId, presenter] of [
-      ...this.standardBombFuseSmokePresenters,
-    ]) {
+    for (const [targetId, presenter] of Array.from(this.standardBombFuseSmokePresenters)) {
       presenter.updateAction(deltaSeconds);
       if (presenter.snapshot().drained) {
         presenter.dispose();
@@ -917,7 +915,7 @@ export class ClassicBirdGameplayController extends Component {
       }
     }
     const explosionFailures: unknown[] = [];
-    for (const owner of [...this.standardBombExplosionOwners.values()]) {
+    for (const owner of Array.from(this.standardBombExplosionOwners.values())) {
       collectCleanupFailure(
         explosionFailures,
         () => owner.presenter.updateAction(deltaSeconds),
@@ -935,10 +933,10 @@ export class ClassicBirdGameplayController extends Component {
     }
 
     this.registry?.updateDragonEffectsAction(deltaSeconds);
-    for (const presenter of [...this.cutHalfPresenters]) {
+    for (const presenter of Array.from(this.cutHalfPresenters)) {
       presenter.updateAction(deltaSeconds);
     }
-    for (const presenter of [...this.criticalParticlePresenters]) {
+    for (const presenter of Array.from(this.criticalParticlePresenters)) {
       presenter.updateAction(deltaSeconds);
     }
     this.scoreHudPresenter?.updateAction(deltaSeconds);
@@ -1004,7 +1002,7 @@ export class ClassicBirdGameplayController extends Component {
       return;
     }
     const viewport = this.requireViewport();
-    const existingCutHalves = [...this.cutHalfPresenters];
+    const existingCutHalves = Array.from(this.cutHalfPresenters);
     const cutEnabled = this.requireSceneController()
       .sessionSnapshot().cutEnabled;
 
@@ -1775,7 +1773,7 @@ export class ClassicBirdGameplayController extends Component {
   private drainFinishedStandardBombExplosions(): void {
     const failures: unknown[] = [];
     let changed = false;
-    for (const [targetId, owner] of [...this.standardBombExplosionOwners]) {
+    for (const [targetId, owner] of Array.from(this.standardBombExplosionOwners)) {
       if (!owner.completion.snapshot().naturalFinishReached) {
         continue;
       }
@@ -3412,7 +3410,7 @@ export class ClassicBirdGameplayController extends Component {
 
   private disposeCutHalfPresenters(): void {
     const failures: unknown[] = [];
-    for (const presenter of [...this.cutHalfPresenters]) {
+    for (const presenter of Array.from(this.cutHalfPresenters)) {
       try {
         presenter.disposeAll();
         this.cutHalfPresenters.delete(presenter);
@@ -3458,7 +3456,7 @@ export class ClassicBirdGameplayController extends Component {
       );
     }
 
-    for (const presenter of [...this.magnetPresenters]) {
+    for (const presenter of Array.from(this.magnetPresenters)) {
       try {
         presenter.dispose();
         this.magnetPresenters.delete(presenter);
@@ -3466,9 +3464,7 @@ export class ClassicBirdGameplayController extends Component {
         failures.push(error);
       }
     }
-    for (const [targetId, owner] of [
-      ...this.standardBombExplosionOwners,
-    ]) {
+    for (const [targetId, owner] of Array.from(this.standardBombExplosionOwners)) {
       try {
         // Explicit teardown does not synthesize AfterBombHit. Registry drain owns the
         // frozen entity, while the generation token prevents a retired callback leak.
@@ -3480,9 +3476,7 @@ export class ClassicBirdGameplayController extends Component {
         failures.push(error);
       }
     }
-    for (const [targetId, presenter] of [
-      ...this.standardBombFuseSmokePresenters,
-    ]) {
+    for (const [targetId, presenter] of Array.from(this.standardBombFuseSmokePresenters)) {
       try {
         presenter.dispose();
         if (
@@ -3494,16 +3488,14 @@ export class ClassicBirdGameplayController extends Component {
         failures.push(error);
       }
     }
-    for (const targetId of [
-      ...this.standardBombEntryAudioHandles.keys(),
-    ]) {
+    for (const targetId of Array.from(this.standardBombEntryAudioHandles.keys())) {
       collectCleanupFailure(
         failures,
         () => this.disposeStandardBombEntryAudio(targetId),
       );
     }
     collectCleanupFailure(failures, () => this.disposeCutHalfPresenters());
-    for (const presenter of [...this.criticalParticlePresenters]) {
+    for (const presenter of Array.from(this.criticalParticlePresenters)) {
       try {
         presenter.dispose();
         this.criticalParticlePresenters.delete(presenter);
@@ -3511,7 +3503,7 @@ export class ClassicBirdGameplayController extends Component {
         failures.push(error);
       }
     }
-    for (const presenter of [...this.comboItemPresenters]) {
+    for (const presenter of Array.from(this.comboItemPresenters)) {
       try {
         presenter.dispose();
         this.comboItemPresenters.delete(presenter);

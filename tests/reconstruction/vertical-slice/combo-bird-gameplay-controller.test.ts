@@ -231,6 +231,25 @@ test('running frames preserve coordinator-before-timer and keep gameplay live du
   assert.match(physics, /registry\.evaluateBounds\(viewport\)/);
 });
 
+test('Set snapshots use Array.from before Creator loose-build iteration', () => {
+  for (const expected of [
+    'Array.from(this.objectiveAchievementPresenters)',
+    'Array.from(this.comboItemPresenters)',
+    'Array.from(this.cutHalfPresenters)',
+    'Array.from(this.criticalParticlePresenters)',
+  ]) {
+    assert.match(SOURCE, new RegExp(escapeRegExp(expected)));
+  }
+  for (const forbidden of [
+    '[...this.objectiveAchievementPresenters]',
+    '[...this.comboItemPresenters]',
+    '[...this.cutHalfPresenters]',
+    '[...this.criticalParticlePresenters]',
+  ]) {
+    assert.doesNotMatch(SOURCE, new RegExp(escapeRegExp(forbidden)));
+  }
+});
+
 test('ordinary spawn, cached Bird ray, cut, and miss paths remain wired end to end', () => {
   const coordinator = extractMemberBlock(
     SOURCE,
@@ -648,4 +667,8 @@ function assertOrderedSubstrings(
 
 function occurrences(source: string, value: string): number {
   return source.split(value).length - 1;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

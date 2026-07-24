@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { extname } from 'node:path';
 import { registerHooks } from 'node:module';
 import test from 'node:test';
@@ -11,6 +12,14 @@ import {
   MAIN_MENU_MUSIC_AUDIO_PATH,
 } from '../../../game/assets/scripts/domain/classic-audio-contract.ts';
 import { canonicalResourceToBundlePath } from '../../../game/assets/scripts/domain/classic-resource-contract.ts';
+
+const SOURCE = readFileSync(
+  new URL(
+    '../../../game/assets/scripts/creator/classic-audio-presenter.ts',
+    import.meta.url,
+  ),
+  'utf8',
+);
 
 const CC_STUB_URL = `data:text/javascript,${encodeURIComponent(`
 export const audioOperations = [];
@@ -315,6 +324,22 @@ interface CocosStub {
   readonly setBundleAvailable: (value: boolean) => void;
 }
 
+test('effect voice snapshots use Array.from before Creator loose-build iteration', () => {
+  assert.equal(
+    SOURCE.split('Array.from(this.effectVoices)').length - 1,
+    4,
+  );
+  assert.doesNotMatch(
+    SOURCE,
+    /\[\s*\.\.\.\s*this\.effectVoices\s*\]/,
+  );
+  assert.match(
+    SOURCE,
+    /Object\.freeze\(\[\.\.\.audioClips\]\)/,
+    'the definite AudioClip array copy must remain an array spread',
+  );
+});
+
 test('preload requests the exact recovered core batch and excludes electric-only bomb audio', async () => {
   cc.resetAudioStub();
   const root = new cc.Node('Root');
@@ -401,6 +426,30 @@ test('owned one-shots overlap and retained voices stop and dispose independently
   assert.equal(explosionVoice?.stopCalls, 1);
   assert.equal(explosionVoice?.node.destroyed, true);
   assert.equal(background?.stopCalls, 1);
+});
+
+test('effect cleanup preserves Set insertion order while each voice releases ownership', async () => {
+  cc.resetAudioStub();
+  const root = new cc.Node('Root');
+  const presenter = await ClassicAudioPresenter.load(root as never);
+  presenter.playOneShot(CLASSIC_TOSS_AUDIO_PATH);
+  presenter.playRetained(CLASSIC_ORDINARY_BOMB_AUDIO_PATHS.entry);
+  presenter.playOneShot(CLASSIC_ORDINARY_BOMB_AUDIO_PATHS.explosion);
+  cc.audioOperations.length = 0;
+
+  presenter.stopAllEffects();
+
+  assert.deepEqual(cc.audioOperations, [
+    'ClassicOneShotAudio:stop',
+    'ClassicOneShotAudio:clear-clip',
+    'ClassicOneShotAudio:destroy',
+    'ClassicRetainedAudio:stop',
+    'ClassicRetainedAudio:clear-clip',
+    'ClassicRetainedAudio:destroy',
+    'ClassicOneShotAudio:stop',
+    'ClassicOneShotAudio:clear-clip',
+    'ClassicOneShotAudio:destroy',
+  ]);
 });
 
 test('looping menu music and effects have independent stop boundaries', async () => {

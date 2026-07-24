@@ -149,7 +149,7 @@ export class ClassicAudioPresenter {
   pauseAllEffects(): void {
     this.effectsPauseLeaseActive = true;
     const failures: unknown[] = [];
-    for (const voice of [...this.effectVoices]) {
+    for (const voice of Array.from(this.effectVoices)) {
       runCleanup(failures, () => voice.pauseForPresenter());
     }
     throwOperationFailures('Classic effect pause', failures);
@@ -160,10 +160,10 @@ export class ClassicAudioPresenter {
       return;
     }
     const failures: unknown[] = [];
-    for (const voice of [...this.effectVoices]) {
+    for (const voice of Array.from(this.effectVoices)) {
       runCleanup(failures, () => voice.resumeFromPresenterPause());
     }
-    if (![...this.effectVoices].some((voice) => voice.pausedByPresenter)) {
+    if (!Array.from(this.effectVoices).some((voice) => voice.pausedByPresenter)) {
       this.effectsPauseLeaseActive = false;
     }
     throwOperationFailures('Classic effect resume', failures);
@@ -212,7 +212,7 @@ export class ClassicAudioPresenter {
   stopAllEffects(): void {
     this.effectsPauseLeaseActive = false;
     const failures: unknown[] = [];
-    for (const voice of [...this.effectVoices]) {
+    for (const voice of Array.from(this.effectVoices)) {
       runCleanup(failures, () => voice.dispose());
     }
     throwOperationFailures('Classic effect voices', failures);

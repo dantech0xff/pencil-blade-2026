@@ -96,7 +96,7 @@ export class ObjectiveAchievementHost {
       return;
     }
 
-    for (const presentation of [...this.presentations]) {
+    for (const presentation of Array.from(this.presentations)) {
       let updateFailure: unknown | null = null;
       let complete = false;
       try {
@@ -122,11 +122,11 @@ export class ObjectiveAchievementHost {
     }
     this.disposedValue = true;
     const failures: unknown[] = [];
-    for (const presentation of [...this.presentations]) {
+    for (const presentation of Array.from(this.presentations)) {
       this.presentations.delete(presentation);
       this.collectPresentationCleanupFailures(failures, presentation);
     }
-    for (const target of [...this.orphanedTargets]) {
+    for (const target of Array.from(this.orphanedTargets)) {
       this.orphanedTargets.delete(target);
       collectFailure(failures, () => destroyNode(target));
     }

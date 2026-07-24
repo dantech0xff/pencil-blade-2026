@@ -420,7 +420,7 @@ export class ClassicWaveTossStrategy extends TimedClassicTossStrategy {
   }
 
   get pendingPauseRequestIds(): readonly number[] {
-    return Object.freeze([...this.pendingPauseRequests]);
+    return Object.freeze(Array.from(this.pendingPauseRequests));
   }
 
   /** Executes one independently scheduled callback; other pending callbacks remain armed. */

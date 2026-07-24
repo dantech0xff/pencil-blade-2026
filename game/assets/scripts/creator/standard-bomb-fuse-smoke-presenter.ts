@@ -167,7 +167,7 @@ export class StandardBombFuseSmokePresenter {
     this.emitter.stop();
 
     const failures = this.retryPendingNodeCleanup();
-    for (const smoke of [...this.activeSmoke]) {
+    for (const smoke of Array.from(this.activeSmoke)) {
       this.activeSmoke.delete(smoke);
       this.destroyOrRetainNode(smoke.node, failures);
     }
@@ -187,7 +187,7 @@ export class StandardBombFuseSmokePresenter {
     deltaSeconds: number,
     failures: unknown[],
   ): void {
-    for (const smoke of [...this.activeSmoke]) {
+    for (const smoke of Array.from(this.activeSmoke)) {
       const update = smoke.animation.updateAction(deltaSeconds);
       if (update.finishedNow || update.snapshot.finished) {
         this.activeSmoke.delete(smoke);
@@ -269,7 +269,7 @@ export class StandardBombFuseSmokePresenter {
 
   private retryPendingNodeCleanup(): unknown[] {
     const failures: unknown[] = [];
-    for (const node of [...this.pendingCleanupNodes]) {
+    for (const node of Array.from(this.pendingCleanupNodes)) {
       if (!isValid(node, true)) {
         this.pendingCleanupNodes.delete(node);
         continue;

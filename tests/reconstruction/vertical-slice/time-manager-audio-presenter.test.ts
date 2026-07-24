@@ -1,11 +1,21 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { extname } from 'node:path';
 import { registerHooks } from 'node:module';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 import {
   canonicalResourceToBundlePath,
 } from '../../../game/assets/scripts/domain/game-resource-contract.ts';
+
+const SOURCE = readFileSync(
+  fileURLToPath(new URL(
+    '../../../game/assets/scripts/creator/time-manager-audio-presenter.ts',
+    import.meta.url,
+  )),
+  'utf8',
+);
 
 const CC_STUB_URL = `data:text/javascript,${encodeURIComponent(`
 export const audioOperations = [];
@@ -286,6 +296,11 @@ interface StubNode {
   readonly parent: StubNode | null;
   destroy(): void;
 }
+
+test('Set snapshots use Array.from before Creator loose-build iteration', () => {
+  assert.equal(SOURCE.split('Array.from(this.voices)').length - 1, 4);
+  assert.equal(SOURCE.includes('[...this.voices]'), false);
+});
 
 test('loads exactly the two shared clips and preserves overlapping one-shot semantics', async () => {
   cc.resetAudioStub();

@@ -353,7 +353,7 @@ export function updateAndRetireObjectiveAchievementPresenters(
   failureLabel: string,
 ): void {
   assertNonNegativeFinite(deltaSeconds, 'deltaSeconds');
-  for (const presenter of [...presenters]) {
+  for (const presenter of Array.from(presenters)) {
     let updateFailed = false;
     let updateFailure: unknown;
     try {
