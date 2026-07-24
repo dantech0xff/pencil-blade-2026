@@ -4,11 +4,11 @@ description: "Static-evidence roadmap to recover Pencil Blade 1.5 from libgame.s
 status: in-progress
 priority: P1
 branch: "main"
-tags: [feature, android, game-preservation, reverse-engineering, cocos-creator, typescript]
+tags: [feature, android, web-h5, github-pages, game-preservation, reverse-engineering, cocos-creator, typescript]
 blockedBy: []
 blocks: []
 created: "2026-07-21"
-updated: "2026-07-24"
+updated: "2026-07-25"
 createdBy: "ck:plan"
 source: skill
 ---
@@ -47,7 +47,10 @@ Verified starting point:
 - Keep the exact Classic score HUD in the recovered slice, including the score icon,
   best-score cup, double-score panel, and `Fonts/Linds.ttf`; seed it from the recovered
   `classic_best_1` Settings key.
-- Android is primary. Creator 3.8 requires API 21+, so original min SDK 9 is a documented platform-envelope change.
+- Phase 7 supports exactly two build targets: an Android debug APK and Cocos Creator Web
+  Mobile (H5) deployed to GitHub Pages. Creator 3.8 requires Android API 21+, so the original
+  min SDK 9 remains a documented platform-envelope change. Android AAB/store release, iOS,
+  desktop, mini-game, HarmonyOS/OpenHarmony, and XR builds are out of scope.
 - Keep archival/decompiled material separate from ship-ready content and rights status.
 - Presentation restoration is complete only after 100% inventory, staging, and consumer
   coverage for every resource actually present in the canonical user-supplied sample project.
@@ -70,10 +73,10 @@ Verified starting point:
 | 1 | [Preserve Evidence and Establish Baseline](./phase-01-preserve-evidence-and-establish-baseline.md) | In progress |
 | 2 | [Establish Static Reconstruction Corpus](./phase-02-establish-static-reconstruction-corpus.md) | In progress |
 | 3 | [Catalog Resources and Reconstruct Presentation](./phase-03-catalog-resources-and-reconstruct-presentation.md) | In progress |
-| 4 | [Recover Gameplay, Physics, and Progression Contracts](./phase-04-reverse-engineer-native-gameplay-contracts.md) | In progress |
+| 4 | [Recover Gameplay, Physics, and Progression Contracts](./phase-04-reverse-engineer-native-gameplay-contracts.md) | Complete |
 | 5 | [Build Cocos Creator Architecture and Vertical Slice](./phase-05-build-cocos-creator-architecture-and-vertical-slice.md) | In progress |
 | 6 | [Recreate Full Game Content and Progression](./phase-06-recreate-full-game-content-and-progression.md) | Complete |
-| 7 | [Validate Static Reconstruction and Prepare Release](./phase-07-validate-fidelity-and-prepare-release.md) | Pending |
+| 7 | [Validate Static Reconstruction and Prepare Release](./phase-07-validate-fidelity-and-prepare-release.md) | In progress |
 
 ## Dependencies
 
@@ -158,10 +161,12 @@ Verified starting point:
   About/offline checkpoint is now complete as the exact ten-raster local/offline screen with
   transactional Main Menu ↔ About ownership, direct Menu/Review/Email/Like controls,
   `MOBILE_BACK`, production pulse disabled by `localCompatibilityAvailable=false`, and
-  sanitized retired-offline review/feedback/social events. The checkpoint passes `169/169`
-  focused tests, `1494/1494` full vertical-slice tests, `43/43` resource/build tests, Creator
-  3.8.8 bundled strict TypeScript, clean diff hygiene, and real pointer
-  Main Menu -> About -> Main Menu Preview in internal `480x800` plus high `720x1280`.
+  sanitized retired-offline review/feedback/social events. The current repository checkpoint
+  now passes `182/182` top-level Node tests, `1567/1567` vertical-slice tests, and `1749/1749`
+  combined, with strict Creator TypeScript/audits still green and the Android debug APK plus
+  private Web Mobile artifact still verified; public GitHub Pages, runtime-device coverage,
+  the canonical denominator, Physics2D equivalence, the final five-domain fidelity score, and
+  release-rights clearance remain open gates.
   The recovered Loading checkpoint now owns the exact four selected-profile rasters, exact
   62-step audio preload order, `/61` clamped progress, and half-second Main Menu handoff.
   It passes `1520/1520` full vertical-slice tests, `61/61` top-level tests, strict Creator
@@ -179,9 +184,11 @@ Verified starting point:
   standard Classic Pause/Resume/Replay/Quit surface, and serialized/dynamic composition reached
   their contract gates. Final standard Classic Preview passes high `720x1280` and compact physical
   `360x800` (logical/resource tree `480x800`) for Resume, fresh Replay, Quit, and repeated entry,
-  with Cocos counters `0/0/0` and no project DevTools error. Android build validation,
-  pinned Physics2D equivalence, canonical external-corpus closure, and release-rights clearance
-  remain Phase 7 gates.
+  with Cocos counters `0/0/0` and no project DevTools error. Phase 7 has now produced and
+  audited the pinned Android debug APK and privately built, prefix-verified, and smoke-tested
+  the Web Mobile H5 output across all six modes. Public GitHub Pages deployment, pinned
+  Physics2D equivalence, canonical external-corpus closure, the final five-domain fidelity
+  score, and release-rights clearance remain open gates.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
 
@@ -202,7 +209,11 @@ Verified starting point:
   finalized without guessing at the denominator.
 - The versioned cross-domain fidelity score reaches at least `99%`, with every residual gap
   listed rather than hidden by weighting or silent substitution.
-- The Creator Android build contains no original binary/runtime, decompiler output, or reference bridge.
+- `./scripts/build-android-debug.sh` produces an audited debug APK from the pinned Creator
+  `3.8.8` toolchain, and the audited Web Mobile H5 build is deployable at the repository
+  GitHub Pages project URL.
+- Android and Web Mobile H5 are the only supported platform builds. Both outputs contain no
+  original binary/runtime, decompiler output, private evidence, or reference bridge.
 - Public release occurs only after asset, font, music, trademark, and code-rights review.
 
 ## Research

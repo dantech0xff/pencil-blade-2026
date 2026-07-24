@@ -108,14 +108,14 @@ remain immutable; Creator receives verified copies without source recompression.
 
 - [x] Catalog reconciles 784 assets/ PNG plus 107 res/ PNG with explicit scope/classification
 - [ ] Every statically identified screen element maps to an asset, generated primitive, or unknown
-- [ ] 480x800 and 720x1280 scaling/cropping rules are recovered or explicitly inferred
+- [x] 480x800 and 720x1280 scaling/cropping rules are recovered or explicitly inferred
 - [ ] Animation and audio cues cite resource sequences plus native event evidence
 - [ ] Shader/material/rendering and level/layout/progression contracts cover all recovered
       evidence, with every unresolved rule labeled unknown or inferred
 - [x] Reconstruction checks and coverage rules are executable before the vertical slice
 - [x] The vertical-slice subset imports into Creator with exact source bytes, untrimmed raster
       geometry, audio metadata, and live Preview loading; original extraction remains untouched
-- [ ] No unknown-rights asset is silently marked ship-ready
+- [x] No unknown-rights asset is silently marked ship-ready
 - [ ] Canonical sample-project resource manifest/root resolved before final coverage claims
 - [ ] Every canonical game-resource manifest entry is byte-verified, staged, and linked to a
       Cocos consumer: 100% technical coverage with zero silent omissions or substitutions

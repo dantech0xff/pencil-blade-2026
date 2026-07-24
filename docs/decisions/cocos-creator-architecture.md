@@ -26,8 +26,13 @@ choreography, late-cut tail, and result lifecycle. Process-owned persistence cov
 expanded implemented Settings subset including all six route leaderboards, immediate
 mode-unlock keys, and the `999999`-coin missing/corrupt-save fallback; valid persisted balances
 still win. The serialized/dynamic composition map and all recovered APK resource dispositions
-are complete. Android build, runtime physics-equivalence, canonical external-corpus
-completeness, and release-rights gates keep the architecture decision in progress.
+are complete. Phase 7 now separates technical preservation from public web release through
+`release/recovered-reconstruction-manifest.json` and
+`release/public-release-variant-manifest.json`, and the supported technical outputs are the
+Android debug APK and Web Mobile H5 build. The Android artifact and local H5 tree now pass
+their technical build and prohibited-content gates. Android runtime-device coverage, public
+Pages deployment, runtime physics-equivalence, canonical external-corpus completeness, and
+release-rights gates keep the architecture decision in progress.
 
 ## Dependency Direction
 
@@ -293,6 +298,7 @@ unrelated Chrome extension.
 - BombElectric runs through the memory-safe target adapter, but exact pinned-backend
   contact-count/direction equivalence remains unresolved.
 - Original content rights remain unknown.
+- Public web release remains blocked until the rights approval record is populated.
 
 ## References
 

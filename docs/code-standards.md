@@ -15,6 +15,8 @@ the restoration plan depends on.
 | `tests/reconstruction/vertical-slice/` | Keep recovered-contract regression tests here. |
 | `scripts/` | Keep repo-level audits and verification utilities here. |
 | `docs/` | Keep decision records, architecture notes, and project summaries here. |
+| `game/build-configs/` | Keep sanitized Creator build-panel exports for the supported Android debug and Web Mobile targets. |
+| `release/` | Keep preservation and public-release variant manifests separate from implementation source. |
 | `game/library/` | Treat as generated Creator cache, not hand-authored source. |
 
 ## Domain Rules
@@ -62,6 +64,12 @@ the restoration plan depends on.
 
 ## Build And Release Rules
 
-- Audit APK/AAB outputs with `node scripts/audit-creator-build.mjs <build.apk|build.aab>`.
+- Audit generated Android debug APK outputs with `node scripts/audit-creator-build.mjs <build.apk>`.
+- Keep the sanitized build-panel exports in `game/build-configs/` and the release manifests in `release/`.
+- Audit the complete Web Mobile tree with `node scripts/audit-web-build.mjs <build-dir>` and
+  verify it at the exact Pages prefix with `node scripts/verify-web-mobile-build.mjs <build-dir>`.
+- Require `node scripts/verify-release-rights.mjs` to pass before uploading a public Pages artifact.
+- Keep generated Android native projects, APKs, Web output, machine-local tool paths, and
+  temporary runtime build configs ignored.
 - Fail any build that contains the original APK, `libgame.so`, legacy Cocos2d-x runtime, decompiler output, or a native compatibility bridge.
-- Keep release authorization separate from technical reconstruction completion.
+- Keep preservation, public-web release approval, and technical reconstruction completion separate.

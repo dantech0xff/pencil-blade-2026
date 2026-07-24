@@ -6,6 +6,9 @@ The original Pencil Blade APK cannot run on any available current Android device
 project never installs or executes it. Restoration uses only the immutable APK,
 `libgame.so`, packaged resources, app-owned Java, and metadata. Historical material and
 user memory may support an inference but cannot become recovered runtime evidence.
+Phase 7 now validates exactly two supported build outputs: an Android debug APK and a Web
+Mobile H5 build. The preservation record lives in `release/recovered-reconstruction-manifest.json`;
+the blocked public-web path lives in `release/public-release-variant-manifest.json`.
 
 ## Immutable Inputs
 
@@ -111,6 +114,10 @@ where static evidence does not support a unique implementation.
 claim gate, clean-room restrictions, Creator physics unit boundary, compatibility decisions,
 asset-fidelity rules, and unresolved scope. Its focused test treats the JSON-syntax file as
 YAML 1.2 and cross-checks it against the evidence register and claims ledger.
+Version `1.0.3` covers only the `classic-vertical-slice` policy scope: 9 registered contracts
+and 21 required claims. It cannot certify the full five-domain Phase 7 fidelity metric.
+See [the reconstruction report](./reconstruction-report.md) for the separate coverage
+definitions and the still-uncomputable final score.
 
 ## Clean-Room Boundary
 
@@ -118,6 +125,9 @@ The shipped Creator project must not contain the source APK, `libgame.so`, Cocos
 application runtime, decompiler output, native compatibility bridge, or emulation layer.
 Recovered behavior is rewritten from reviewed contracts; native instructions are never
 mechanically translated into production code.
+Public distribution is a separate approval path from preservation. The repository can
+validate a Web Mobile artifact without claiming that public Pages deployment or rights
+approval exists.
 
 ## Open Analysis Limits
 
@@ -127,5 +137,6 @@ mechanically translated into production code.
 - The native RNG formulas are recovered, but exact draw interleaving with engine/VFX users
   and libc sequence parity cannot be measured without the original runtime; the Creator
   rewrite uses injectable deterministic fixtures without claiming an observed native trace.
-- Remaining screens/modes and unlinked audio literals still need resource-string call-site
-  correlation; the minimum Classic presentation path is now bounded by its contract.
+- The six production modes and APK-only 862-resource disposition ledger are implemented, but
+  the absent external sample-project denominator, unsupported OTF, final five-domain metric,
+  public rights, and pinned Physics2D equivalence remain open.

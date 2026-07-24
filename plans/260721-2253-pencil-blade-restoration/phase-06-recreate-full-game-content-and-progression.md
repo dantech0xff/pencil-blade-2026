@@ -258,7 +258,7 @@ Current certification checkpoint:
 - [x] Asset/audio usage reconciles with catalog as consumed, unknown, excluded, or unsupported
 - [x] Save reset, upgrade, and corruption behavior are defined and tested
 - [ ] No copied unknown-rights content enters a public build without clearance
-- [ ] Creator source/build audit proves that all application behavior is new TypeScript
+- [x] Creator source/build audit proves that all application behavior is new TypeScript
       and content, with no original libgame.so/Cocos2d-x application runtime dependency
 
 ## Risk Assessment
@@ -276,5 +276,5 @@ leaderboards, if retained, require new approved implementations.
 ## Next Steps
 
 Freeze the completed Phase 6 content checkpoint and enter Phase 7 for pinned Physics2D
-equivalence, canonical external-corpus/fidelity closure, Android build validation, post-build
-audit, and release-rights clearance.
+equivalence, canonical external-corpus/fidelity closure, Android debug APK plus Web Mobile
+H5/GitHub Pages validation, post-build audits, and release-rights clearance.

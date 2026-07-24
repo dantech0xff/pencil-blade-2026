@@ -221,13 +221,14 @@ Status: in progress. Continue this phase rather than creating a second restorati
    trajectories, contacts, blade ray casts, scoring, presentation ordering, and save fixtures.
 8. Generate deterministic traces from the reconstruction and verify repeatability and
    contract coverage. These fixtures are internal regression baselines, not original captures.
-9. Audit source and built APK/AAB contents for prohibited original binary/runtime/code paths.
+9. Audit source, the Android debug APK, and the Web Mobile H5 output for prohibited original
+   binary/runtime/code paths.
 10. Fix Creator mapping or reverse-engineering gaps before expanding to additional modes.
 
 ## Todo List
 
 - [x] Cocos Creator 3.8.8 editor and engine identity recorded
-- [ ] Android SDK, NDK, JDK, Gradle, and ABI pin completed
+- [x] Android SDK, NDK, JDK, Gradle, and ABI pin completed
 - [x] Proposed Creator architecture and C++-to-TypeScript ownership map
 - [x] Editor-generated project structure and final serialized/dynamic-component map
 - [x] Deterministic time/random/input seams
@@ -322,20 +323,21 @@ Current Editor integration:
 - Classic controller scheduling for the now-recovered standard-bomb presentation and the
   unresolved native lower-bound side effect; no Fruit-miss substitution is accepted.
 - Electric-field compatibility decisions.
-- Android build validation and real APK/AAB post-build audit.
+- Android runtime-device compatibility and public GitHub Pages verification; the clean Android
+  debug build and private Web Mobile H5 build already pass their post-build audits.
 - Rights review for original assets and product identity.
 
 ## Success Criteria
 
-- [ ] Pinned Cocos Creator project builds and runs on the supported Android matrix
-- [ ] All slice behavior is owned by reviewable TypeScript and Creator content
-- [ ] Build contains no original APK, libgame.so, Cocos2d-x 2.1.4 runtime/source,
+- [ ] Pinned Cocos Creator project builds and runs on the supported Android/H5 matrix
+- [x] All slice behavior is owned by reviewable TypeScript and Creator content
+- [x] Build contains no original APK, libgame.so, Cocos2d-x 2.1.4 runtime/source,
       decompiler artifact, native compatibility bridge, or emulator layer
-- [ ] Classic scenario satisfies every recovered contract and records accepted inferences/unknowns
-- [ ] Creator Physics2D tests cover recovered timestep, gravity, fixtures, contacts, ray casts,
+- [x] Classic scenario satisfies every recovered contract and records accepted inferences/unknowns
+- [x] Creator Physics2D tests cover recovered timestep, gravity, fixtures, contacts, ray casts,
       and contact-driven gameplay outcomes
-- [ ] Automated report names reconstruction-policy and contract-evidence versions
-- [ ] No legacy ad/social dependency exists in gameplay code
+- [x] Automated report names reconstruction-policy and contract-evidence versions
+- [x] No legacy ad/social dependency exists in gameplay code
 
 ## Risk Assessment
 
@@ -357,5 +359,7 @@ ad SDKs, or executable code from the APK.
 Phase 6 has integrated all six routes, save/economy, Options, Leaderboard, Objectives,
 About/offline, Loading, resource dispositions, and the final serialized/dynamic composition
 map. Its fresh compact/high Classic Pause/Replay/Quit/re-entry Preview and final review gate
-pass, so Phase 6 is complete. Continue to Phase 7 Android build validation, pinned Physics2D
-equivalence, canonical external-corpus closure, and release-rights clearance.
+pass, so Phase 6 is complete. Phase 7 now has audited local Android debug and Web Mobile H5
+artifacts. Continue with Android runtime-device compatibility, rights-gated GitHub Pages
+publication, pinned Physics2D equivalence, canonical external-corpus closure, and
+release-rights clearance.

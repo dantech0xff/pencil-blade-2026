@@ -1,7 +1,7 @@
 ---
 phase: 4
 title: "Recover Gameplay, Physics, and Progression Contracts"
-status: in-progress
+status: completed
 priority: P1
 dependencies: [2]
 effort: "3-8 weeks"
@@ -86,26 +86,26 @@ then names the new Creator domain service, component, scene/prefab, or adapter t
 
 - [x] Native symbol/function map
 - [x] Classic mode/state graph
-- [ ] Remaining-mode state graphs
+- [x] Remaining-mode state graphs
 - [x] Classic physics and toss contracts
 - [x] Classic cut/score/combo/fail contract
 - [x] Classic time/state/pause/termination contract and shared TimeManager behavior
-- [ ] Remaining-mode scoring/failure/time contracts
-- [ ] Save/progression schema
+- [x] Remaining-mode scoring/failure/time contracts
+- [x] Save/progression schema
 - [x] Classic evidence/confidence ledger
 - [x] Classic deterministic-fixture, distribution, or unknown classification
-- [ ] Complete libgame.so-to-Cocos Creator contract map
+- [x] Complete libgame.so-to-Cocos Creator contract map
 
 ## Success Criteria
 
-- [ ] All core modes have entry, update, scoring, and termination contracts
-- [ ] Random ranges/distributions and physics units are quantified or explicitly unknown
-- [ ] Save keys/defaults/unlocks/objectives are documented
-- [ ] No engine implementation detail is mistaken for product behavior
-- [ ] Every app-owned native subsystem is recovered, explicitly excluded with evidence,
+- [x] All core modes have entry, update, scoring, and termination contracts
+- [x] Random ranges/distributions and physics units are quantified or explicitly unknown
+- [x] Save keys/defaults/unlocks/objectives are documented
+- [x] No engine implementation detail is mistaken for product behavior
+- [x] Every app-owned native subsystem is recovered, explicitly excluded with evidence,
       or retained as a named blocker; none is delegated to the old binary at runtime
-- [ ] Every critical contradiction between static views/resources is resolved or disclosed
-- [ ] Creator Physics2D mapping covers every recovered physics rule and names every unknown
+- [x] Every critical contradiction between static views/resources is resolved or disclosed
+- [x] Creator Physics2D mapping covers every recovered physics rule and names every unknown
 
 ## Risk Assessment
 

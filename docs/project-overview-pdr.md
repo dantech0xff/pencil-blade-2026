@@ -8,7 +8,11 @@ Android devices, so restoration is static-only. Facts not recovered from `libgam
 resources, Java/metadata, or explicitly approved as inferences remain unknown. The `game/`
 Creator foundation now exists and the exact root has produced the first Editor-serialized
 Classic scene. All 862 recovered APK game assets are staged byte-for-byte and imported into
-the Creator bundle. The current playable loop consumes the exact paper background,
+the Creator bundle. Phase 7 now supports exactly two technical outputs: an Android debug APK
+and a Web Mobile H5 build. The sanitized build-panel exports live in `game/build-configs/`;
+`release/recovered-reconstruction-manifest.json` keeps preservation non-shipping, and
+`release/public-release-variant-manifest.json` keeps public web release blocked until rights
+approval. The current playable loop consumes the exact paper background,
 intro/terminal/fail-marker art, score icon, best-score cup, double-score panel, Linds font,
 ordinary intact/cut fruit, critical particles, and 23 reviewed core/ordinary-bomb audio clips.
 The exact standard-bomb raster, body, fixture, cut guard, and retained-audio seam are also
@@ -49,7 +53,8 @@ replay, and device comparison are unavailable and are not project gates.
 
 ## Product target
 
-- Android is the primary platform.
+- Android debug APK is one supported artifact; Web Mobile H5 is the second supported
+  artifact.
 - The production implementation uses the latest stable Cocos Creator with TypeScript,
   components, scenes, prefabs, and Creator-managed assets.
 - Cocos Creator Physics2D is the production physics layer. Native analysis recovers its
@@ -58,7 +63,10 @@ replay, and device comparison are unavailable and are not project gates.
 - Cocos Creator 3.8.8 / 3.8 LTS is the baseline rechecked on 2026-07-22. Phase 5 must pin
   the editor, engine revision, Android SDK, NDK, and JDK after resolving local bundle trust.
 - The current workspace contains the Creator 3.8.8 project under `game/`, a `720x1280`
-  default, and the first Editor-authored `classic.scene` Canvas bridge.
+  default, the first Editor-authored `classic.scene` Canvas bridge, the sanitized Android
+  and Web Mobile build configs, and the two release manifests.
+- Web Mobile H5 uses the repository prefix `/pencil-blade-2026/` and the intended URL
+  `https://dantech0xff.github.io/pencil-blade-2026/`; public deployment remains rights-gated.
 - The current static catalog accounts for 862 packaged game assets: 784 PNG, 59 WAV, 3 MP3,
   and 16 fonts; 107 additional Android `res/` PNG are classified separately.
 - The full recovered APK game-asset corpus is copied unchanged under `game/assets/game/` and
@@ -162,7 +170,7 @@ replay, and device comparison are unavailable and are not project gates.
   or captured original trace may be introduced as an implicit dependency.
 - Maximal recoverable fidelity is measurable as recovered-contract coverage. It is not a
   claim of empirically proven 100% runtime identity.
-- Private preservation, source publication, and public store release are distinct outcomes.
+- Private preservation, source publication, and public web release are distinct outcomes.
   The intended release scope remains unresolved.
 - Technical fidelity does not authorize release. If rights block exact reuse, release blocks
   pending an explicit user decision; assets must not be silently omitted or substituted.
@@ -196,6 +204,6 @@ replay, and device comparison are unavailable and are not project gates.
 
 - Where are the two external offline backups stored and when were they verified?
 - What is the APK's original acquisition date and upstream source record?
-- Is the intended outcome private preservation, source publication, or public store release?
+- Who can provide accountable approval and repository evidence for the intended public Web release?
 - What rights or permissions exist for the name, artwork, fonts, music, and other content?
 - Is any authentic historical gameplay media or documentation available for supporting review?

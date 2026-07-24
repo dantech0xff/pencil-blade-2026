@@ -111,8 +111,29 @@ offline. Git is initialized, but version control does not satisfy this backup co
 
 Possession and analysis do not grant publication rights. Until separate evidence is
 registered, the APK, native binary, artwork, audio, fonts, product name, and trademarks are
-`unknown / not cleared`. Private preservation, source publication, and public store release
+`unknown / not cleared`. Private preservation, source publication, and public web release
 remain separate decisions.
+
+## Release records
+
+The following curated records separate preservation from public distribution. They are not
+source evidence, but they are part of the current repository state and the docs now link to
+them directly:
+
+- [Recovered reconstruction manifest](../release/recovered-reconstruction-manifest.json) -
+  preservation-only manifest, version `1.0.0`, static-only evidence mode, Android debug plus
+  Web Mobile targets, rights unresolved, public distribution false.
+- [Public release variant manifest](../release/public-release-variant-manifest.json) - blocked
+  Web Mobile release record, version `0.1.0`, repository prefix `/pencil-blade-2026/`, rights
+  approval absent, and every included record marked `shipReady: false`.
+- [Phase 7 platform build checkpoint](../plans/260721-2253-pencil-blade-restoration/reports/implementer-2026-07-24-phase7-platform-builds.md) -
+  curated 2026-07-24 Android/Web technical-build record, SHA-256
+  `6ef271ab68b585e649e4d928160994db9a853c1c4540b22b9a41c503782c208e`,
+  `14,070` bytes. It records the audited Android APK digest and local Web tree digest while
+  keeping runtime-device proof, public deployment, rights, and final fidelity unclaimed.
+
+The GitHub repository was public when checked on 2026-07-24. Repository visibility is not
+license evidence and must not be treated as approval for a Pages deployment.
 
 ## Unresolved questions
 
