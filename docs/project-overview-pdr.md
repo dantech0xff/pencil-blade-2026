@@ -24,9 +24,12 @@ save restores `999999` coins while a valid persisted balance wins. GN Style mode
 the standard BasicBlade, exact `150`-second ordinary-fruit graph and `2.60`-second intro,
 non-looping `GangnamStyle.mp3`, 439 source-ordered particle parents, three-second late-cut
 Time Up tail, `gnstyle_best_1..3`, float32 `0.6` reward, and transactional
-Replay/Retry/Quit/Menu ownership. This is a bounded six-route production checkpoint, not
-presentation completion: most resource consumers, full progression, and the full
-scene/prefab map remain open.
+Replay/Retry/Quit/Menu ownership. The standard-blade runtime checkpoint is also complete:
+IDs `0`-`17` now route transactionally through Main Menu, Mode Select, Classic, the Crazy
+standard branch, and GN Style with exact Basic textures, particle plans, Dragon multipart
+behavior, and Centipede multipart behavior. This is a bounded six-route production checkpoint,
+not presentation completion: most resource consumers, leaderboard/progression wiring, and the
+full scene/prefab map remain open.
 
 ## Authority and evidence
 
@@ -65,9 +68,12 @@ replay, and device comparison are unavailable and are not project gates.
   Missing or corrupt save falls back to `999999` coins while a valid persisted balance wins.
   Options now applies the recovered selectors, affordability, debit, purchase effects, and
   unpaid-selection reconciliation. First-launch Settings behavior remains open.
+- The standard-blade runtime is complete across Main Menu, Mode Select, Classic, the Crazy
+  standard branch, and GN Style; leaderboard/progression wiring is now the next unresolved
+  shared surface.
 - The current implementation checkpoint covers all six production gameplay routes: `0`, `1`,
   `2`, `3`, `4`, and `5`.
-- The Options checkpoint passes `1212/1212` deterministic vertical-slice tests and `43/43`
+- The standard-blade checkpoint passes `1285/1285` deterministic vertical-slice tests and `43/43`
   resource/build/catalog tests. The unchanged
   inventory/evidence workflow remains `14/14` in `217s`; reconstruction policy positive plus
   `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and diff

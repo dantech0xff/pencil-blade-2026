@@ -133,7 +133,6 @@ import type {
   ClassicGeneratedFruitCutEvent,
   ClassicGeneratedFruitMissEvent,
 } from './classic-generated-fruit';
-import { ClassicBladePresenter } from './classic-blade-presenter';
 import type { ClassicRetainedAudioHandle } from './classic-audio-presenter';
 import { ComboItemPresenter } from './combo-item-presenter';
 import { ClassicCriticalParticlePresenter } from './classic-critical-particle-presenter';
@@ -146,6 +145,7 @@ import type { ClassicSliceResourceCatalog } from './classic-resource-loader';
 import { ClassicResultPresenter } from './classic-result-presenter';
 import { ClassicSceneController } from './classic-scene-controller';
 import { ClassicScoreHudPresenter } from './classic-score-hud-presenter';
+import { StandardBladePresenter } from './standard-blade-presenter';
 import type {
   ClassicSettingsRuntime,
 } from './classic-settings-runtime';
@@ -349,7 +349,7 @@ type CrazyPhysicsRayHit = ReturnType<
 type CrazyCutDriver =
   | Readonly<{
       readonly kind: 'standard';
-      readonly presenter: ClassicBladePresenter;
+      readonly presenter: StandardBladePresenter;
     }>
   | Readonly<{
       readonly kind: 'bird';
@@ -529,7 +529,7 @@ export class CrazyGameplayController extends Component {
 
     const cutDriver = this.cutDriver;
     if (cutDriver?.kind === 'standard') {
-      cutDriver.presenter.updateFrame();
+      cutDriver.presenter.update(deltaSeconds);
     } else if (cutDriver?.kind === 'bird') {
       cutDriver.presenter.update(deltaSeconds);
     }
@@ -1316,10 +1316,11 @@ export class CrazyGameplayController extends Component {
     this.scoreHudPresenter.attach(scoreRoot);
 
     if (profile.kind === 'crazy') {
-      const presenter = ClassicBladePresenter.create({
+      const selectedBlade = settings.state.snapshot.selectedBlade;
+      const presenter = StandardBladePresenter.create({
         assetTree: classicCatalog.assetTree,
-        resource: classicCatalog.defaultBlade,
-        selectedBladeId: 0,
+        profile: classicCatalog.standardBlades.profile(selectedBlade),
+        random,
         viewportWidth: viewport.width,
       });
       presenter.attach(worldRoot);
@@ -2144,20 +2145,20 @@ export class CrazyGameplayController extends Component {
       return;
     }
     const swish = this.swishAudio;
-    if (swish === null) {
-      return;
-    }
-    for (const instruction of swish.request(
-      event.shouldPlaySwish,
-      this.effectsEnabled(),
-    )) {
-      if (instruction.type === 'play-swish-audio') {
-        this.requireClassicGameplayController()
-          .sharedAudioPresenter.playOneShot(instruction.canonicalPath);
-      } else {
-        this.scheduleOnce(this.onSwishCooldownComplete, instruction.delaySeconds);
+    if (swish !== null) {
+      for (const instruction of swish.request(
+        event.shouldPlaySwish,
+        this.effectsEnabled(),
+      )) {
+        if (instruction.type === 'play-swish-audio') {
+          this.requireClassicGameplayController()
+            .sharedAudioPresenter.playOneShot(instruction.canonicalPath);
+        } else {
+          this.scheduleOnce(this.onSwishCooldownComplete, instruction.delaySeconds);
+        }
       }
     }
+    driver.presenter.presentMovedSegment(event.segment);
   };
 
   private readonly onBladeEnded = (event: ClassicBladeEndedEvent): void => {

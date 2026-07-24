@@ -555,6 +555,7 @@ interface SettingsRuntimeProbe {
     readonly snapshot: Readonly<{
       effectsEnabled: boolean;
       leaderboard: Readonly<{ first: number; second: number; third: number }>;
+      selectedBlade: number;
       totalCoins: number;
     }>;
     awardClassicResultCoins(score: number): unknown;
@@ -1356,6 +1357,13 @@ function createRetryFixture(): RetryFixture {
 function createResourceCatalog(): object {
   const contracts = getClassicPresentationResources('720x1280');
   const bladeContract = getClassicDefaultBladeResource(0, '720x1280');
+  const loadedBlade = Object.freeze({
+    ...bladeContract,
+    spriteFrame: new cc.SpriteFrame(
+      bladeContract.dimensions.width,
+      bladeContract.dimensions.height,
+    ),
+  });
   const presentation = Object.fromEntries(
     Object.entries(contracts).map(([key, contract]) => {
       const raster = contract as Readonly<{
@@ -1370,13 +1378,6 @@ function createResourceCatalog(): object {
   );
   return Object.freeze({
     assetTree: '720x1280',
-    defaultBlade: Object.freeze({
-      ...bladeContract,
-      spriteFrame: new cc.SpriteFrame(
-        bladeContract.dimensions.width,
-        bladeContract.dimensions.height,
-      ),
-    }),
     normalFruit() {
       throw new Error('Retry construction must not spawn before the intro gate');
     },
@@ -1384,6 +1385,19 @@ function createResourceCatalog(): object {
     scoreFont: Object.freeze({
       ...CLASSIC_SCORE_HUD_FONT_RESOURCE,
       font: new cc.Font(),
+    }),
+    standardBlades: Object.freeze({
+      profile(bladeId: number) {
+        if (bladeId !== 0) {
+          throw new RangeError('Retry harness only provides standard blade 0');
+        }
+        return Object.freeze({
+          bladeId: 0,
+          kind: 'basic',
+          particles: Object.freeze([]),
+          texture: loadedBlade,
+        });
+      },
     }),
   });
 }
@@ -1402,6 +1416,9 @@ function createAttachedBladePresenter(parent: StubNode) {
     selectedBladeId: 0,
     viewportWidth: 720,
   });
+  Object.assign(presenter, {
+    presentMovedSegment() {},
+  });
   presenter.attach(parent as never);
   return presenter;
 }
@@ -1411,6 +1428,7 @@ function createSettingsRuntime(counters: PersistenceCounters): SettingsRuntimePr
     effectsEnabled: true,
     leaderboard: Object.freeze({ first: 900, second: 800, third: 700 }),
     musicEnabled: true,
+    selectedBlade: 0,
     soundEnabled: true,
     totalCoins: 41,
   });

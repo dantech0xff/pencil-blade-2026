@@ -106,15 +106,34 @@ export function isValid(value) {
 
 const BLADE_STUB_URL = moduleUrl(`
 import { Node } from 'cc';
-export class ClassicBladePresenter {
-  static create() { return new ClassicBladePresenter(); }
-  constructor() { this.root = new Node('ClassicBasicBladeRoot'); this.root.active = false; }
+export const STANDARD_BLADE_SLOT_COUNT = 4;
+export class StandardBladePresenter {
+  static create() { return new StandardBladePresenter(); }
+  constructor() {
+    this.claimed = new Set();
+    this.events = [];
+    this.root = new Node('StandardBladeRoot');
+    this.root.active = false;
+  }
   attach(parent) { this.root.setParent(parent); this.root.active = true; }
-  begin() {}
+  begin(slot) {
+    if (this.claimed.has(slot)) throw new Error('blade slot already claimed: ' + slot);
+    this.claimed.add(slot);
+    this.events.push('begin:' + slot);
+  }
   dispose() { this.root.destroy(); return true; }
-  end() {}
-  move() {}
-  updateFrame() {}
+  end(slot) {
+    if (!this.claimed.has(slot)) throw new Error('blade slot is not claimed: ' + slot);
+    this.claimed.delete(slot);
+    this.events.push('end:' + slot);
+  }
+  isClaimed(slot) { return this.claimed.has(slot); }
+  move(slot) {
+    if (!this.claimed.has(slot)) throw new Error('blade slot is not claimed: ' + slot);
+    this.events.push('move:' + slot);
+  }
+  presentMovedSegment() {}
+  update() {}
 }
 `);
 
@@ -219,7 +238,7 @@ export class MainMenuFruitPresenter {
 registerHooks({
   resolve(specifier, context, nextResolve) {
     if (specifier === 'cc') return { shortCircuit: true, url: CC_STUB_URL };
-    if (specifier === './classic-blade-presenter') {
+    if (specifier === './standard-blade-presenter') {
       return { shortCircuit: true, url: BLADE_STUB_URL };
     }
     if (specifier === './blade-input-controller') {
@@ -308,6 +327,37 @@ test('detached or suspended disposal releases BladeInput only when Main Menu own
     activeInput.events.filter((event) => event === 'deactivate').length,
     releasesAtSuspend,
   );
+});
+
+test('suspend ends claimed blade slots before input reset so rollback can reuse slot zero', () => {
+  fruitStub.resetFruitPresenters();
+  const bladeInput = bladeInputHarness();
+  const presenter = MainMenuPresenter.create(input(bladeInput));
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot') as never);
+  presenter.activate();
+  const blade = presenter.blade as unknown as {
+    readonly events: readonly string[];
+    isClaimed(slot: number): boolean;
+  };
+
+  bladeInput.node.emit('classic-blade-began', {
+    point: { x: 100, y: 200 },
+    slot: 0,
+    touchId: 40,
+  });
+  assert.equal(blade.isClaimed(0), true);
+  assert.equal(presenter.suspendForTransition(), true);
+  assert.equal(blade.isClaimed(0), false);
+  assert.equal(blade.events.at(-1), 'end:0');
+
+  assert.equal(presenter.rearmNavigationAfterFailure(), true);
+  assert.doesNotThrow(() => bladeInput.node.emit('classic-blade-began', {
+    point: { x: 120, y: 220 },
+    slot: 0,
+    touchId: 41,
+  }));
+  assert.equal(blade.isClaimed(0), true);
+  presenter.dispose();
 });
 
 test('partial fruit activation rolls back atomically and permits a clean retry', () => {
@@ -601,6 +651,10 @@ test('runtime source preserves detached construction, exact append order, and se
   assert.match(source, /createDetachedScreenRoot\('MainMenuRoot', input\.canvas\)/);
   assert.match(source, /this\.root\.active = false/);
   assert.match(source, /this\.input\.resources\.raster\(layout\.resource\)/);
+  assert.match(source, /StandardBladePresenter\.create\(/);
+  assert.match(source, /input\.standardBlades\.selectedBladeId/);
+  assert.match(source, /this\.blade\.update\(deltaSeconds\)/);
+  assert.match(source, /this\.blade\.presentMovedSegment\(event\.segment\)/);
   const order = [
     "this.blade.attach(this.root)",
     "'pencilbladebk'",
@@ -657,7 +711,6 @@ function input(
     canvas: new cc.Node('Canvas'),
     classicResources: {
       assetTree: '480x800' as const,
-      defaultBlade: Object.freeze({}),
     },
     lifecycle,
     random: {
@@ -681,6 +734,14 @@ function input(
       save() {},
       state: settingsState,
     },
+    standardBlades: {
+      selectedBladeId: 15,
+      catalog: {
+        profile(bladeId: number) {
+          return makeStandardBladeProfile(bladeId);
+        },
+      },
+    },
     viewport: Object.freeze({
       logicalHeight: 800,
       logicalWidth: 480,
@@ -693,6 +754,85 @@ function input(
       }),
     }),
   };
+}
+
+function makeStandardBladeProfile(bladeId: number) {
+  if (bladeId === 17) {
+    return Object.freeze({
+      bladeId,
+      kind: 'centipede',
+      particles: Object.freeze([]),
+      resources: Object.freeze({
+        body: makeLoadedRaster('480x800/Blades/Centipede/body.png', 12, 40),
+        bodySegmentCount: 20 as const,
+        head: makeLoadedRaster('480x800/Blades/Centipede/head.png', 47, 44),
+        pointCapacity: 32 as const,
+        tail: makeLoadedRaster('480x800/Blades/Centipede/tail.png', 51, 14),
+      }),
+    });
+  }
+  if (bladeId >= 13 && bladeId <= 16) {
+    const variant = bladeId - 13;
+    return Object.freeze({
+      bladeId,
+      kind: 'dragon',
+      particles: Object.freeze([]),
+      resources: Object.freeze({
+        body: makeLoadedRaster(
+          `480x800/Blades/Dragon/dragon-body-${variant}.png`,
+          variant === 0 ? 21 : variant === 1 ? 21 : variant === 2 ? 21 : 21,
+          variant === 0 ? 17 : variant === 1 ? 17 : variant === 2 ? 17 : 17,
+        ),
+        bodySegmentCount: 15 as const,
+        head: makeLoadedRaster(
+          `480x800/Blades/Dragon/dragon-head-${variant}.png`,
+          92,
+          63,
+        ),
+        pointCapacity: 32 as const,
+        tail: makeLoadedRaster(
+          `480x800/Blades/Dragon/dragon-tail-${variant}.png`,
+          53,
+          22,
+        ),
+      }),
+      variant,
+    });
+  }
+  const canonicalPath = bladeId === 11
+    ? '480x800/Blades/firebladetexture.png'
+    : bladeId === 12
+      ? '480x800/Blades/rainbow.png'
+      : `480x800/Blades/blade${bladeId}.png`;
+  const spriteFrame = Object.freeze({
+    destroyed: false,
+    texture: Object.freeze({ canonicalPath }),
+    uv: Object.freeze([0, 1, 1, 1, 0, 0, 1, 0]),
+  });
+  return Object.freeze({
+    bladeId,
+    kind: 'basic',
+    particles: Object.freeze([]),
+    texture: Object.freeze({
+      canonicalPath,
+      dimensions: Object.freeze({ height: 256, width: 256 }),
+      spriteFrame,
+    }),
+  });
+}
+
+function makeLoadedRaster(canonicalPath: string, width: number, height: number) {
+  return Object.freeze({
+    canonicalPath,
+    dimensions: Object.freeze({ height, width }),
+    spriteFrame: {
+      destroyed: false,
+      label: canonicalPath,
+      originalSize: Object.freeze({ height, width }),
+      rect: Object.freeze({ height, width }),
+      destroy() {},
+    },
+  });
 }
 
 function bladeInputHarness(options: Readonly<{

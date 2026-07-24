@@ -14,8 +14,8 @@ import {
   type CutQueryHit,
 } from '../domain/classic-cut-query';
 import type { BladeMoveResult } from '../domain/blade-tracks';
-import type { ClassicRasterResource } from '../domain/classic-resource-contract';
 import type { GameplayRandom } from '../domain/gameplay-random';
+import type { ClassicRasterResource } from '../domain/classic-resource-contract';
 import {
   MAIN_MENU_FRUIT_CIRCLE_ROTATION_DEGREES,
   MAIN_MENU_FRUIT_CIRCLE_ROTATION_SECONDS,
@@ -55,12 +55,13 @@ import {
   type ClassicBladeBeganEvent,
   type ClassicBladeEndedEvent,
 } from './blade-input-controller';
-import {
-  ClassicBladePresenter,
-} from './classic-blade-presenter';
-import type { LoadedClassicRasterResource } from './classic-resource-loader';
 import { createDetachedScreenRoot } from './detached-screen-root';
 import type { LoadedGameRasterResource } from './game-resource-loader';
+import type { LoadedStandardBladeResources } from './standard-blade-resource-loader';
+import {
+  STANDARD_BLADE_SLOT_COUNT,
+  StandardBladePresenter,
+} from './standard-blade-presenter';
 import {
   MainMenuFruitPresenter,
   mainMenuLegacyRotationToCreatorDegrees,
@@ -138,7 +139,11 @@ export interface MainMenuPresenterLifecycle {
 
 export interface MainMenuClassicResources {
   readonly assetTree: ClassicAssetTree;
-  readonly defaultBlade: LoadedClassicRasterResource;
+}
+
+export interface MainMenuStandardBladeResources {
+  readonly selectedBladeId: number;
+  readonly catalog: LoadedStandardBladeResources;
 }
 
 export interface MainMenuPresenterInput {
@@ -151,6 +156,7 @@ export interface MainMenuPresenterInput {
   readonly raycast: MainMenuRaycastPort;
   readonly resources: LoadedMainMenuResources;
   readonly settings: MainMenuSettingsPort;
+  readonly standardBlades: MainMenuStandardBladeResources;
   readonly viewport: MainMenuViewport;
 }
 
@@ -220,7 +226,7 @@ const MAX_MAIN_MENU_UPDATE_SEGMENTS = 512;
 
 /** Detached, activation-gated Creator runtime for the recovered Main Menu foreground. */
 export class MainMenuPresenter {
-  readonly blade: ClassicBladePresenter;
+  readonly blade: StandardBladePresenter;
   readonly fruitButtons: readonly MainMenuFruitPresenter[];
   readonly presentation: MainMenuPresentationSnapshot;
   readonly root: Node;
@@ -269,17 +275,19 @@ export class MainMenuPresenter {
     );
     this.root = createDetachedScreenRoot('MainMenuRoot', input.canvas);
     this.root.active = false;
-    this.blade = ClassicBladePresenter.create({
+    this.blade = StandardBladePresenter.create({
       assetTree: input.classicResources.assetTree,
-      resource: input.classicResources.defaultBlade,
-      selectedBladeId: 0,
+      profile: input.standardBlades.catalog.profile(
+        input.standardBlades.selectedBladeId,
+      ),
+      random: input.random,
       viewportWidth: input.viewport.logicalWidth,
     });
 
     let fruitButtons: readonly MainMenuFruitPresenter[] = Object.freeze([]);
     let controls: MainMenuPresenter['controls'] | null = null;
     try {
-      // The selected BasicBlade wrapper owns the four exact meshes and precedes all owned roots.
+      // The selected standard blade wrapper owns the exact trail/particle presenters.
       this.blade.attach(this.root);
 
       this.attachAnimatedSprite(
@@ -447,7 +455,7 @@ export class MainMenuPresenter {
         `deltaSeconds must not exceed ${String(MAX_MAIN_MENU_UPDATE_SECONDS)} seconds`,
       );
     }
-    this.blade.updateFrame();
+    this.blade.update(deltaSeconds);
     let remaining = deltaSeconds;
     let segmentCount = 0;
     while (remaining > 0 && this.activatedValue && !this.disposedValue) {
@@ -536,6 +544,7 @@ export class MainMenuPresenter {
     this.unregisterBladeEvents();
     try {
       this.bladeInput.setCutEnabled(false);
+      this.releaseClaimedBladeSlots();
       this.bladeInput.deactivateForNonClassicScreen();
       this.inputLeaseHeld = false;
       this.suspendedValue = true;
@@ -741,6 +750,14 @@ export class MainMenuPresenter {
     }
   }
 
+  private releaseClaimedBladeSlots(): void {
+    for (let slot = 0; slot < STANDARD_BLADE_SLOT_COUNT; slot += 1) {
+      if (this.blade.isClaimed(slot)) {
+        this.blade.end(slot);
+      }
+    }
+  }
+
   private unregisterBladeEvents(): void {
     this.bladeInput.node.off(CLASSIC_BLADE_BEGAN_EVENT, this.onBladeBegan, this);
     this.bladeInput.node.off(CLASSIC_BLADE_MOVED_EVENT, this.onBladeMoved, this);
@@ -761,6 +778,7 @@ export class MainMenuPresenter {
       return;
     }
     this.blade.move(event.segment.slot, event.segment.current);
+    this.blade.presentMovedSegment(event.segment);
     if (this.model.snapshot.cuttingDisabled || this.colliderFruit.size === 0) {
       return;
     }

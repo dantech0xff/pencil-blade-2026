@@ -11,8 +11,10 @@ Background/Leaf/Theme stack, boots Main Menu, replaces it with Mode Select, and 
 bounded Classic loop through recovered mode `0`, the production Crazy loop through mode `1`,
 the production Classic Bird loop through mode `3`, or the production Crazy Bird loop through
 mode `4`, the independent production Combo Bird loop through mode `5`, or the independent
-production GN Style loop through mode `2`. All six routes replace screens transactionally and
-support their recovered Retry/Replay/Quit/Main Menu paths.
+production GN Style loop through mode `2`. The standard-blade runtime checkpoint now spans
+Main Menu, Mode Select, Classic, the Crazy standard branch, and GN Style with IDs `0`-`17`
+transactionally routed through the shared shell. All six routes replace screens transactionally
+and support their recovered Retry/Replay/Quit/Main Menu paths.
 Combo Bird does not profile the Crazy graph: it owns a `90`-second timed session, three
 ordinary-fruit toss controllers, BirdBlade type `3`, exact type-3 and
 instruction/TimeManager resources, objectives, pause, result ranking/reward,
@@ -22,7 +24,7 @@ GN Style owns the standard BasicBlade, `150`-second Free/Wave/Concurrent graph, 
 three-second late-cut Time Up tail, objectives `6`/`2`, `gnstyle_best_1..3`, and a
 float32 `0.6` result reward.
 
-Automated verification reaches `1212/1212` full vertical-slice tests and `43/43`
+Automated verification reaches `1285/1285` full vertical-slice tests and `43/43`
 resource/build/catalog tests. The unchanged
 inventory/evidence workflow remains `14/14` in `217s`; reconstruction policy positive plus
 `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and diff
@@ -32,8 +34,9 @@ Creator-served Preview reaches the complete GN entry, live gameplay, Pause/Resum
 Pause Quit, repeated entry, natural Result, Retry, and Menu flow with zero application/runtime
 errors. The current Options screen also passes its Main Menu entry, selection, purchase, Back,
 and rollback flows in compact `360x800` and high `720x1280` Preview profiles with an empty
-Cocos Editor console. The full product remains incomplete because global consumer coverage, full
-progression/menu/settings fidelity, and a real Android build are still open.
+Cocos Editor console. The full product remains incomplete because leaderboard/progression
+wiring, global consumer coverage, full progression/menu/settings fidelity, and a real Android
+build are still open.
 
 ## Dependency Direction
 
@@ -100,7 +103,7 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 | Audio | Creator adapters preload the reviewed Classic/menu, Options, Bird, Crazy, Combo, and GN clip sets and interpret toss, swish, cut, critical, combo, timer, result-rank, bonus/electric, objective, pause, selector-row, and menu-button commands without moving draw/order rules out of the domain. Independent retained voices model ordinary-bomb and Crazy effect ownership; the electric-only `boomhit` path remains separate from ordinary-bomb audio. GN's dedicated non-looping source is mutually exclusive with shared background music and pauses/resumes/stops with its transactional owner; TimeManager effects use the shared exact presenter. |
 | Resource import | Staging and metadata validators prove exact bytes and current Creator raster/audio import geometry for the recovered APK corpus. Options directly consumes 51 rasters per tree plus its exact font and three sounds. Per-asset consumer and UUID coverage is not yet backfilled into the manifest. |
 | Resolution and input | The recovered `720` physical-width profile branch is pure; Creator applies its Show All policy and routes scene-wide touch input into four blade slots or the single Bird blade. |
-| Build boundary | Source-boundary tests reject trackable legacy integration. The separate fail-closed archive audit hashes every entry, parses ZIP records exactly, recurses through bounded nested archives, and inspects ELF payloads; the unchanged inventory/source/staging/archive workflow is `14/14`, `tests/*.mjs` are `43/43`, the full vertical slice is `1212/1212`, and strict Creator TypeScript is green. |
+| Build boundary | Source-boundary tests reject trackable legacy integration. The separate fail-closed archive audit hashes every entry, parses ZIP records exactly, recurses through bounded nested archives, and inspects ELF payloads; the unchanged inventory/source/staging/archive workflow is `14/14`, `tests/*.mjs` are `43/43`, the full vertical slice is `1285/1285`, and strict Creator TypeScript is green. |
 
 ## Checkpoint Evidence
 
@@ -147,6 +150,8 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 - Exact result-entry layout/ranking/actions, reward visuals, app-hide persistence, Result-to-Main
   replacement, same-parent Retry reconstruction, and Bird modes `3`/`4`/`5` are integrated
   behind transactional rollback boundaries.
+- Standard-blade ownership is complete for IDs `0`-`17`; leaderboard and progression wiring
+  is the next shared surface to finish.
 - The electric-field memory-safe adapter runs in automated validation without a crash, but exact
   contact-count/direction equivalence still needs a targeted pinned-backend validation.
 - Rights for legacy art, music, fonts, name, and trademarks are still unknown.

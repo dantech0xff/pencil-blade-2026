@@ -119,15 +119,18 @@ test('immutable profile identity crosses ownership, scene activation, replay, an
   );
 });
 
-test('the discriminated cut driver selects Classic blade or type-2 Bird blade only', () => {
+test('the discriminated cut driver selects the saved standard blade or type-2 Bird blade only', () => {
   assert.match(
     SOURCE,
-    /type CrazyCutDriver =[\s\S]*?kind: 'standard'[\s\S]*?ClassicBladePresenter[\s\S]*?kind: 'bird'[\s\S]*?BirdBladePresenter[\s\S]*?BirdBladeRayAdapter/,
+    /type CrazyCutDriver =[\s\S]*?kind: 'standard'[\s\S]*?StandardBladePresenter[\s\S]*?kind: 'bird'[\s\S]*?BirdBladePresenter[\s\S]*?BirdBladeRayAdapter/,
   );
   const create = extractMethod(SOURCE, 'createCorePresentation');
   assertOrderedSubstrings(create, [
     "if (profile.kind === 'crazy')",
-    'ClassicBladePresenter.create({',
+    'const selectedBlade = settings.state.snapshot.selectedBlade',
+    'StandardBladePresenter.create({',
+    'profile: classicCatalog.standardBlades.profile(selectedBlade)',
+    '        random,',
     "kind: 'standard'",
     'BirdBladePresenter.create({',
     'resources: this.requireCrazyBirdResources()',
@@ -138,7 +141,7 @@ test('the discriminated cut driver selects Classic blade or type-2 Bird blade on
   const update = extractMethod(SOURCE, 'update');
   assert.match(
     update,
-    /cutDriver\?\.kind === 'standard'[\s\S]*?presenter\.updateFrame\(\)[\s\S]*?cutDriver\?\.kind === 'bird'[\s\S]*?presenter\.update\(deltaSeconds\)/,
+    /cutDriver\?\.kind === 'standard'[\s\S]*?presenter\.update\(deltaSeconds\)[\s\S]*?cutDriver\?\.kind === 'bird'[\s\S]*?presenter\.update\(deltaSeconds\)/,
   );
   assert.doesNotMatch(SOURCE, /ClassicBird|BirdSpeed|create-bird-blade/);
 });

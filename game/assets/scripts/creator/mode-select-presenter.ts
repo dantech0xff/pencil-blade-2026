@@ -54,10 +54,13 @@ import {
   type ClassicBladeBeganEvent,
   type ClassicBladeEndedEvent,
 } from './blade-input-controller';
-import { ClassicBladePresenter } from './classic-blade-presenter';
-import type { LoadedClassicRasterResource } from './classic-resource-loader';
+import {
+  STANDARD_BLADE_SLOT_COUNT,
+  StandardBladePresenter,
+} from './standard-blade-presenter';
 import { createDetachedScreenRoot } from './detached-screen-root';
 import type { LoadedGameRasterResource } from './game-resource-loader';
+import type { LoadedStandardBladeResources } from './standard-blade-resource-loader';
 import type { LoadedModeSelectResources } from './mode-select-resource-loader';
 import {
   ModeSelectRopeButtonPresenter,
@@ -106,7 +109,11 @@ export interface ModeSelectSettingsPort {
 
 export interface ModeSelectClassicResources {
   readonly assetTree: ClassicAssetTree;
-  readonly defaultBlade: LoadedClassicRasterResource;
+}
+
+export interface ModeSelectStandardBladeResources {
+  readonly selectedBladeId: number;
+  readonly catalog: LoadedStandardBladeResources;
 }
 
 export type ModeSelectUnsupportedDestination = Exclude<
@@ -160,10 +167,11 @@ export interface ModeSelectPresenterInput {
   readonly canvas: Node;
   readonly classicResources: ModeSelectClassicResources;
   readonly lifecycle: ModeSelectPresenterLifecycle;
-  readonly random: Pick<GameplayRandom, 'nextIntInclusive'>;
+  readonly random: Pick<GameplayRandom, 'nextDecile' | 'nextIntInclusive'>;
   readonly raycast: ModeSelectRaycastPort;
   readonly resources: LoadedModeSelectResources;
   readonly settings: ModeSelectSettingsPort;
+  readonly standardBlades: ModeSelectStandardBladeResources;
   readonly viewport: ModeSelectViewport;
 }
 
@@ -246,7 +254,7 @@ const EPSILON = 1e-7;
 
 /** Detached, activation-gated Creator runtime for the recovered Mode Select foreground. */
 export class ModeSelectPresenter {
-  readonly blade: ClassicBladePresenter;
+  readonly blade: StandardBladePresenter;
   readonly presentation: ModeSelectPresentationSnapshot;
   readonly root: Node;
   readonly ropeButtons: readonly ModeSelectRopeButtonPresenter[];
@@ -291,6 +299,7 @@ export class ModeSelectPresenter {
       input.viewport,
       settingsSnapshot.totalCoins,
       this.persistedUnlocks,
+      input.standardBlades.selectedBladeId,
     );
     this.model = new ModeSelectState({
       layout: {
@@ -303,10 +312,12 @@ export class ModeSelectPresenter {
     });
     this.root = createDetachedScreenRoot('ModeSelectRoot', input.canvas);
     this.root.active = false;
-    this.blade = ClassicBladePresenter.create({
+    this.blade = StandardBladePresenter.create({
       assetTree: input.classicResources.assetTree,
-      resource: input.classicResources.defaultBlade,
-      selectedBladeId: 0,
+      profile: input.standardBlades.catalog.profile(
+        input.standardBlades.selectedBladeId,
+      ),
+      random: input.random,
       viewportWidth: input.viewport.logicalWidth,
     });
 
@@ -522,7 +533,7 @@ export class ModeSelectPresenter {
         `deltaSeconds must not exceed ${String(MAX_MODE_SELECT_UPDATE_SECONDS)} seconds`,
       );
     }
-    this.blade.updateFrame();
+    this.blade.update(deltaSeconds);
     const frame = this.model.updateFrame(this.activeBladeSlots.size > 0);
     if (frame.appliedDeltaX !== 0) {
       for (const ropeButton of this.ropeButtons) {
@@ -549,9 +560,10 @@ export class ModeSelectPresenter {
       return false;
     }
     this.unregisterEvents();
-    this.activeBladeSlots.clear();
     try {
       this.bladeInput.setCutEnabled(false);
+      this.releaseClaimedBladeSlots();
+      this.activeBladeSlots.clear();
       this.bladeInput.deactivateForNonClassicScreen();
       this.inputLeaseHeld = false;
       this.suspendedValue = true;
@@ -685,6 +697,14 @@ export class ModeSelectPresenter {
     this.listenersRegistered = false;
   }
 
+  private releaseClaimedBladeSlots(): void {
+    for (let slot = 0; slot < STANDARD_BLADE_SLOT_COUNT; slot += 1) {
+      if (this.blade.isClaimed(slot)) {
+        this.blade.end(slot);
+      }
+    }
+  }
+
   private readonly onBladeBegan = (event: ClassicBladeBeganEvent): void => {
     if (!this.canInteract() || !hasValidBladeBeganPayload(event)) {
       return;
@@ -699,7 +719,11 @@ export class ModeSelectPresenter {
     if (!this.canInteract() || !hasValidBladeMovePayload(event)) {
       return;
     }
+    if (!this.blade.isClaimed(event.segment.slot)) {
+      return;
+    }
     this.blade.move(event.segment.slot, event.segment.current);
+    this.blade.presentMovedSegment(event.segment);
     const plan = buildBidirectionalRayPlan({
       end: event.segment.current,
       start: event.segment.previous,
@@ -1646,7 +1670,7 @@ function assertInput(input: ModeSelectPresenterInput): void {
     'onMainMenuRequested',
     'onUnsupportedDestinationRequested',
   ], 'lifecycle');
-  assertFunctions(input.random, ['nextIntInclusive'], 'random');
+  assertFunctions(input.random, ['nextDecile', 'nextIntInclusive'], 'random');
   copySettingsSnapshot(input.settings.state.snapshot);
   if (!isValid(input.canvas, true) || !input.canvas.activeInHierarchy) {
     throw new Error('Mode Select canvas must be valid and active');

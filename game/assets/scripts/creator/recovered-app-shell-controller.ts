@@ -542,13 +542,13 @@ export class RecoveredAppShellController extends Component {
   private createMainMenuPresenter(): MainMenuPresenter {
     const gameplay = this.requireGameplayController();
     const resources = this.requireResources();
+    const selectedBladeId = gameplay.sharedSettingsRuntime.state.snapshot.selectedBlade;
     return MainMenuPresenter.create({
       audio: gameplay.sharedAudioPresenter,
       bladeInput: this.requireBladeInput(),
       canvas: this.node,
       classicResources: {
         assetTree: gameplay.sharedResourceCatalog.assetTree,
-        defaultBlade: gameplay.sharedResourceCatalog.defaultBlade,
       },
       lifecycle: {
         onExitRequested: () => director.end(),
@@ -567,6 +567,10 @@ export class RecoveredAppShellController extends Component {
       raycast: this.requireNonClassicPhysics(),
       resources: resources.mainMenu,
       settings: gameplay.sharedSettingsRuntime,
+      standardBlades: {
+        selectedBladeId,
+        catalog: gameplay.sharedResourceCatalog.standardBlades,
+      },
       viewport: this.requireViewport(),
     });
   }
@@ -574,13 +578,13 @@ export class RecoveredAppShellController extends Component {
   private createModeSelectPresenter(): ModeSelectPresenter {
     const gameplay = this.requireGameplayController();
     const resources = this.requireResources();
+    const selectedBladeId = gameplay.sharedSettingsRuntime.state.snapshot.selectedBlade;
     return ModeSelectPresenter.create({
       audio: gameplay.sharedAudioPresenter,
       bladeInput: this.requireBladeInput(),
       canvas: this.node,
       classicResources: {
         assetTree: gameplay.sharedResourceCatalog.assetTree,
-        defaultBlade: gameplay.sharedResourceCatalog.defaultBlade,
       },
       lifecycle: {
         onClassicRequested: (transaction) => this.transitionModeSelectToClassic(transaction),
@@ -608,6 +612,10 @@ export class RecoveredAppShellController extends Component {
       raycast: this.requireNonClassicPhysics(),
       resources: resources.modeSelect,
       settings: gameplay.sharedSettingsRuntime,
+      standardBlades: {
+        selectedBladeId,
+        catalog: gameplay.sharedResourceCatalog.standardBlades,
+      },
       viewport: this.requireViewport(),
     });
   }

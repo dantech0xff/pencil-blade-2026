@@ -26,7 +26,10 @@ Its keys are `bird_combo_best_1..3` and its reward factor is float32 `0.8`. GN S
 owns the standard BasicBlade, `150`-second Free/Wave/Concurrent ordinary-fruit graph, exact
 `2.60`-second intro, dedicated non-looping music, 439-parent particle choreography, three-second
 late-cut tail, `gnstyle_best_1..3`, float32 `0.6` reward, and transactional navigation. The
-implemented Settings slice is now exact: 50 integers, 4 booleans, 18 blade prices, 8 background
+standard-blade runtime checkpoint is also complete: IDs `0`-`17` now route transactionally
+through Main Menu, Mode Select, Classic, the Crazy standard branch, and GN Style with exact
+Basic textures, particle plans, Dragon multipart behavior, and Centipede multipart behavior.
+The implemented Settings slice is now exact: 50 integers, 4 booleans, 18 blade prices, 8 background
 prices, price `0` ownership persistence, field-isolated totalCoins recovery, and write-disable
 on any load recovery. The recovered Options screen now provides eight backgrounds, eighteen
 blades, ten themes, exact resources/audio/timing, affordability and debit, purchase particles,
@@ -119,12 +122,16 @@ save schema and include reproducible fixtures for progression states.
   exact per-tree 51-raster set plus font/audio, staged row entry, selectors, live preview,
   affordability, storage-first ownership plus one debit, Buy state, 45-particle purchase
   burst, Back rollback, and pre-save app-hide reconciliation.
-- All six production gameplay routes are complete. Phase 6 remains in progress for full
-  blade rendering/particles, remaining menu/progression states, and global resource reconciliation.
+- **Complete:** standard-blade runtime checkpoint for IDs `0`-`17` across Main Menu, Mode
+  Select, Classic, the Crazy standard branch, and GN Style, including exact Basic textures,
+  particle plans, Dragon multipart behavior, Centipede multipart behavior, and transactional
+  ownership/rollback.
+- All six production gameplay routes are complete. Phase 6 remains in progress for remaining
+  leaderboard/progression/menu states and global resource reconciliation.
 
 Current certification checkpoint:
 
-- Full deterministic vertical slice: `1212/1212` final clean checkpoint
+- Full deterministic vertical slice: `1285/1285` final clean checkpoint
 - Resource/build/catalog tests: `43/43`
 - Static inventory/source/staging/archive workflow: `14/14` in `217s`
 - Reconstruction policy: positive checkpoint and `4/4` negative fixtures
@@ -150,7 +157,7 @@ Current certification checkpoint:
 - [x] Six modes (`6/6` production routes complete)
 - [x] Options selection, purchase economy, rollback, and exact screen resources
 - [ ] Full content/cosmetics
-- [ ] Progression and saves
+- [ ] Leaderboards, progression, and saves
 - [ ] Full menus/settings/results/objectives fidelity
 - [ ] Offline behavior for retired services
 

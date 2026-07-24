@@ -104,7 +104,6 @@ import {
   loadBaseGameplayResources,
   type LoadedBaseGameplayResources,
 } from './base-gameplay-resource-loader';
-import { ClassicBladePresenter } from './classic-blade-presenter';
 import {
   ClassicCriticalParticlePresenter,
 } from './classic-critical-particle-presenter';
@@ -118,6 +117,7 @@ import {
   ClassicGameplayController,
   type ClassicScreenPlacementPort,
 } from './classic-gameplay-controller';
+import { StandardBladePresenter } from './standard-blade-presenter';
 import { ClassicResultPresenter } from './classic-result-presenter';
 import {
   type LoadedClassicNormalFruitResources,
@@ -310,7 +310,7 @@ interface GnStylePreparationProducts {
 }
 
 interface GnStyleRunOwnership {
-  readonly bladePresenter: ClassicBladePresenter | null;
+  readonly bladePresenter: StandardBladePresenter | null;
   readonly combo: ComboService | null;
   readonly comboItemPresenters: Set<ComboItemPresenter>;
   readonly criticalCutHalfPresenters: Set<ClassicCutHalfPresenter>;
@@ -350,7 +350,7 @@ interface RetiredGnStyleRunOwnership {
 @requireComponent(ClassicSceneController)
 export class GnStyleGameplayController extends Component {
   private baseGameplayResources: LoadedBaseGameplayResources | null = null;
-  private bladePresenter: ClassicBladePresenter | null = null;
+  private bladePresenter: StandardBladePresenter | null = null;
   private classicGameplayController: ClassicGameplayController | null = null;
   private classicSceneController: ClassicSceneController | null = null;
   private combo: ComboService | null = null;
@@ -475,7 +475,7 @@ export class GnStyleGameplayController extends Component {
       this.requireMusic().stop();
     }
 
-    this.bladePresenter?.updateFrame();
+    this.bladePresenter?.update(deltaSeconds);
     for (const presenter of [...this.comboItemPresenters]) {
       presenter.updateAction(deltaSeconds);
     }
@@ -965,11 +965,12 @@ export class GnStyleGameplayController extends Component {
     });
     this.introPresenter.attach(modeRoot);
 
-    // The landed Classic catalog currently exposes the bounded selected/default BasicBlade.
-    this.bladePresenter = ClassicBladePresenter.create({
+    const selectedBlade = this.sharedSettingsRuntime
+      .state.snapshot.selectedBlade;
+    this.bladePresenter = StandardBladePresenter.create({
       assetTree: catalog.assetTree,
-      resource: catalog.defaultBlade,
-      selectedBladeId: 0,
+      profile: catalog.standardBlades.profile(selectedBlade),
+      random,
       viewportWidth: viewport.width,
     });
     this.bladePresenter.attach(worldRoot);
@@ -1311,6 +1312,7 @@ export class GnStyleGameplayController extends Component {
         );
       }
     }
+    presenter?.presentMovedSegment(event.segment);
   };
 
   private readonly onBladeEnded = (

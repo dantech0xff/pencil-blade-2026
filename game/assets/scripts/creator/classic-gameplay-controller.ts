@@ -80,7 +80,6 @@ import {
   loadBaseGameplayResources,
   type LoadedBaseGameplayResources,
 } from './base-gameplay-resource-loader';
-import { ClassicBladePresenter } from './classic-blade-presenter';
 import { ComboItemPresenter } from './combo-item-presenter';
 import { ClassicCriticalParticlePresenter } from './classic-critical-particle-presenter';
 import { ClassicCutHalfPresenter } from './classic-cut-half-presenter';
@@ -93,6 +92,7 @@ import {
   getClassicSettingsRuntime,
   type ClassicSettingsRuntime,
 } from './classic-settings-runtime';
+import { StandardBladePresenter } from './standard-blade-presenter';
 import type {
   ClassicGeneratedFruitCutEvent,
   ClassicGeneratedFruitMissEvent,
@@ -244,7 +244,7 @@ export class ClassicGameplayController extends Component {
   private resultPresentationRoot: Node | null = null;
   private registry: ClassicEntityRegistry | null = null;
   private failPresenter: ClassicFailPresenter | null = null;
-  private bladePresenter: ClassicBladePresenter | null = null;
+  private bladePresenter: StandardBladePresenter | null = null;
   private resultPresenter: ClassicResultPresenter | null = null;
   private scoreHudPresenter: ClassicScoreHudPresenter | null = null;
   private resourceCatalog: ClassicSliceResourceCatalog | null = null;
@@ -578,7 +578,7 @@ export class ClassicGameplayController extends Component {
     for (const presenter of this.objectiveAchievementPresenters) {
       presenter.updateAction(deltaSeconds);
     }
-    this.bladePresenter?.updateFrame();
+    this.bladePresenter?.update(deltaSeconds);
     for (const presenter of [...this.comboItemPresenters]) {
       presenter.updateAction(deltaSeconds);
     }
@@ -774,6 +774,7 @@ export class ClassicGameplayController extends Component {
       presenter.move(event.segment.slot, event.segment.current);
     }
     if (this.gameOver) {
+      presenter?.presentMovedSegment(event.segment);
       return;
     }
     for (const instruction of this.swishAudio.request(
@@ -786,6 +787,7 @@ export class ClassicGameplayController extends Component {
         this.scheduleOnce(this.onSwishCooldownComplete, instruction.delaySeconds);
       }
     }
+    presenter?.presentMovedSegment(event.segment);
   };
 
   private readonly onBladeBegan = (event: ClassicBladeBeganEvent): void => {
@@ -1178,10 +1180,12 @@ export class ClassicGameplayController extends Component {
       parent,
       'ClassicWorldPresentationRoot',
     );
-    this.bladePresenter = ClassicBladePresenter.create({
+    const selectedBlade = this.requireSettingsRuntime()
+      .state.snapshot.selectedBlade;
+    this.bladePresenter = StandardBladePresenter.create({
       assetTree: resources.assetTree,
-      resource: resources.defaultBlade,
-      selectedBladeId: 0,
+      profile: resources.standardBlades.profile(selectedBlade),
+      random: this.random,
       viewportWidth: viewport.width,
     });
     this.bladePresenter.attach(this.worldPresentationRoot);

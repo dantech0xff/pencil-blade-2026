@@ -6,9 +6,9 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import {
-  getClassicDefaultBladeResource,
-  type ClassicDefaultBladeId,
-} from '../../../game/assets/scripts/domain/classic-resource-contract.ts';
+  getStandardBasicBladeResource,
+  type StandardBasicBladeId,
+} from '../../../game/assets/scripts/domain/standard-blade-resource-contract.ts';
 
 const REPOSITORY_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const CC_STUB_URL = `data:text/javascript,${encodeURIComponent(`
@@ -16,12 +16,24 @@ export const createdGraphics = [];
 export const createdMeshes = [];
 export const createdMaterials = [];
 export const createdNodes = [];
+let nextFailedMaterialReset = false;
+let nextFailedMeshResetName = null;
 
 export function resetCreatedNodes() {
   createdGraphics.length = 0;
   createdMeshes.length = 0;
   createdMaterials.length = 0;
   createdNodes.length = 0;
+  nextFailedMaterialReset = false;
+  nextFailedMeshResetName = null;
+}
+
+export function failNextMaterialReset() {
+  nextFailedMaterialReset = true;
+}
+
+export function failNextMeshReset(name) {
+  nextFailedMeshResetName = name;
 }
 
 export class Vec3 {
@@ -40,6 +52,10 @@ export class Material {
     createdMaterials.push(this);
   }
   reset(options) {
+    if (nextFailedMaterialReset) {
+      nextFailedMaterialReset = false;
+      throw new Error('Injected material reset failure');
+    }
     this.resetOptions = options;
   }
   setProperty(name, value) {
@@ -61,6 +77,10 @@ export class Mesh {
     createdMeshes.push(this);
   }
   reset(options) {
+    if (nextFailedMeshResetName === this.name) {
+      nextFailedMeshResetName = null;
+      throw new Error('Injected mesh reset failure: ' + this.name);
+    }
     this.lastReset = options;
     this.data = options.data;
     this.struct = options.struct;
@@ -281,6 +301,8 @@ interface CocosStub {
   readonly createdMaterials: readonly StubMaterial[];
   readonly createdMeshes: readonly StubMesh[];
   readonly createdNodes: readonly StubNode[];
+  readonly failNextMaterialReset: () => void;
+  readonly failNextMeshReset: (name: string) => void;
   readonly gfx: {
     readonly AttributeName: Readonly<{
       ATTR_COLOR: string;
@@ -421,7 +443,7 @@ interface StubVec3 {
   z: number;
 }
 
-test('presenter creates four mesh owners, binds the exact default blade resource, and uses the recovered triangle-strip mesh layout', () => {
+test('presenter creates four mesh owners for every Basic ID and binds each exact recovered texture', () => {
   const source = readFileSync(
     `${REPOSITORY_ROOT}game/assets/scripts/creator/classic-blade-presenter.ts`,
     'utf8',
@@ -434,84 +456,90 @@ test('presenter creates four mesh owners, binds the exact default blade resource
   assert.match(source, /offset \+ 12/);
 
   for (const assetTree of ['480x800', '720x1280'] as const) {
-    cc.resetCreatedNodes();
-    const resource = loadedResource(assetTree);
-    const presenter = ClassicBladePresenter.create({
-      assetTree,
-      resource: resource as never,
-      selectedBladeId: 0,
-      viewportWidth: assetTree === '480x800' ? 480 : 720,
-    });
-
-    assert.equal(presenter.root.active, false);
-    assert.equal(presenter.owners.length, 4);
-    assert.deepEqual(presenter.owners.map((owner) => owner.slot), [0, 1, 2, 3]);
-    assert.deepEqual(presenter.root.children.map(({ name }) => name), [
-      'ClassicBasicBlade-0',
-      'ClassicBasicBlade-1',
-      'ClassicBasicBlade-2',
-      'ClassicBasicBlade-3',
-    ]);
-    assert.deepEqual(cc.createdNodes.map(({ name }) => name), [
-      'ClassicBasicBladeRoot',
-      'ClassicBasicBlade-0',
-      'ClassicBasicBlade-1',
-      'ClassicBasicBlade-2',
-      'ClassicBasicBlade-3',
-    ]);
-    assert.equal(cc.createdMeshes.length, 4);
-
-    const parent = new cc.Node('Parent');
-    parent.layer = 12;
-    const lowerSibling = new cc.Node('LowerSibling');
-    lowerSibling.setParent(parent);
-
-    presenter.attach(parent as never);
-
-    assert.equal(presenter.root.parent, parent);
-    assert.equal(presenter.root.lastRequestedSiblingIndex, 1);
-    assert.deepEqual(parent.children.map(({ name }) => name), [
-      'LowerSibling',
-      'ClassicBasicBladeRoot',
-    ]);
-    for (const owner of presenter.owners) {
-      assert.equal(owner.node.parent, presenter.root);
-      assert.equal(owner.node.lastRequestedSiblingIndex, owner.slot);
-      assert.equal(owner.node.getComponent(cc.UIMeshRenderer), owner.uiMeshRenderer);
-      assert.equal(owner.node.layer, 12);
-      assert.equal(owner.meshRenderer.sharedMaterial, presenter.owners[0].meshRenderer.sharedMaterial);
-      const mesh = owner.meshRenderer.mesh;
-      assert.ok(mesh);
-      assert.equal(mesh.data?.byteLength, 500);
-      assert.equal(mesh.lastReset?.struct.vertexBundles[0].view.length, 500);
-      assert.equal(mesh.lastReset?.struct.vertexBundles[0].view.count, 0);
-      assert.deepEqual(mesh.lastReset?.struct.dynamic.info, {
-        maxSubMeshIndices: 0,
-        maxSubMeshes: 1,
-        maxSubMeshVertices: 25,
+    for (let bladeId = 0; bladeId <= 12; bladeId += 1) {
+      cc.resetCreatedNodes();
+      const resource = loadedResource(assetTree, bladeId as StandardBasicBladeId);
+      const presenter = ClassicBladePresenter.create({
+        assetTree,
+        resource: resource as never,
+        selectedBladeId: bladeId as StandardBasicBladeId,
+        viewportWidth: assetTree === '480x800' ? 480 : 720,
       });
-      assert.equal(mesh.renderingSubMeshes[0].drawInfo.vertexCount, 0);
-    }
 
-    const material = presenter.owners[0].meshRenderer.sharedMaterial;
-    assert.ok(material);
-    assert.equal(material.resetOptions?.effectName, 'builtin-unlit');
-    assert.equal(material.resetOptions?.technique, 3);
-    assert.deepEqual(material.resetOptions?.defines, {
-      USE_TEXTURE: true,
-      USE_VERTEX_COLOR: true,
-    });
-    assert.equal(material.resetOptions?.states.primitive, cc.gfx.PrimitiveMode.TRIANGLE_STRIP);
-    assert.equal(material.resetOptions?.states.depthStencilState.depthTest, false);
-    assert.equal(material.resetOptions?.states.depthStencilState.depthWrite, false);
-    assert.equal(material.properties.mainTexture, resource.spriteFrame.texture);
-    assert.equal(cc.createdGraphics.length, 0);
+      assert.equal(presenter.root.active, false);
+      assert.equal(presenter.owners.length, 4);
+      assert.deepEqual(presenter.owners.map((owner) => owner.slot), [0, 1, 2, 3]);
+      assert.deepEqual(presenter.root.children.map(({ name }) => name), [
+        'ClassicBasicBlade-0',
+        'ClassicBasicBlade-1',
+        'ClassicBasicBlade-2',
+        'ClassicBasicBlade-3',
+      ]);
+      assert.deepEqual(cc.createdNodes.map(({ name }) => name), [
+        'ClassicBasicBladeRoot',
+        'ClassicBasicBlade-0',
+        'ClassicBasicBlade-1',
+        'ClassicBasicBlade-2',
+        'ClassicBasicBlade-3',
+      ]);
+      assert.equal(cc.createdMeshes.length, 4);
+
+      const parent = new cc.Node('Parent');
+      parent.layer = 12;
+      const lowerSibling = new cc.Node('LowerSibling');
+      lowerSibling.setParent(parent);
+
+      presenter.attach(parent as never);
+
+      assert.equal(presenter.root.parent, parent);
+      assert.equal(presenter.root.lastRequestedSiblingIndex, 1);
+      assert.deepEqual(parent.children.map(({ name }) => name), [
+        'LowerSibling',
+        'ClassicBasicBladeRoot',
+      ]);
+      for (const owner of presenter.owners) {
+        assert.equal(owner.node.parent, presenter.root);
+        assert.equal(owner.node.lastRequestedSiblingIndex, owner.slot);
+        assert.equal(owner.node.getComponent(cc.UIMeshRenderer), owner.uiMeshRenderer);
+        assert.equal(owner.node.layer, 12);
+        assert.equal(
+          owner.meshRenderer.sharedMaterial,
+          presenter.owners[0].meshRenderer.sharedMaterial,
+        );
+        const mesh = owner.meshRenderer.mesh;
+        assert.ok(mesh);
+        assert.equal(mesh.data?.byteLength, 500);
+        assert.equal(mesh.lastReset?.struct.vertexBundles[0].view.length, 500);
+        assert.equal(mesh.lastReset?.struct.vertexBundles[0].view.count, 0);
+        assert.deepEqual(mesh.lastReset?.struct.dynamic.info, {
+          maxSubMeshIndices: 0,
+          maxSubMeshes: 1,
+          maxSubMeshVertices: 25,
+        });
+        assert.equal(mesh.renderingSubMeshes[0].drawInfo.vertexCount, 0);
+      }
+
+      const material = presenter.owners[0].meshRenderer.sharedMaterial;
+      assert.ok(material);
+      assert.equal(material.resetOptions?.effectName, 'builtin-unlit');
+      assert.equal(material.resetOptions?.technique, 3);
+      assert.deepEqual(material.resetOptions?.defines, {
+        USE_TEXTURE: true,
+        USE_VERTEX_COLOR: true,
+      });
+      assert.equal(material.resetOptions?.states.primitive, cc.gfx.PrimitiveMode.TRIANGLE_STRIP);
+      assert.equal(material.resetOptions?.states.depthStencilState.depthTest, false);
+      assert.equal(material.resetOptions?.states.depthStencilState.depthWrite, false);
+      assert.equal(material.properties.mainTexture, resource.spriteFrame.texture);
+      assert.equal(cc.createdGraphics.length, 0);
+      presenter.dispose();
+    }
   }
 });
 
 test('mesh data preserves the 20-byte vertex layout, affine SpriteFrame UV mapping, and native frame disposal', () => {
   cc.resetCreatedNodes();
-  const resource = loadedResource('480x800');
+  const resource = loadedResource('480x800', 0);
   const presenter = ClassicBladePresenter.create({
     assetTree: '480x800',
     resource: resource as never,
@@ -612,13 +640,73 @@ test('mesh data preserves the 20-byte vertex layout, affine SpriteFrame UV mappi
   assert.equal(cc.createdGraphics.length, 0);
 });
 
-function loadedResource(assetTree: AssetTree) {
-  const resource = getClassicDefaultBladeResource(0 as ClassicDefaultBladeId, assetTree);
+test('presenter rejects a resource from a different Basic blade instead of falling back to ID 0', () => {
+  const blade0 = loadedResource('720x1280', 0);
+  assert.throws(
+    () => ClassicBladePresenter.create({
+      assetTree: '720x1280',
+      resource: blade0 as never,
+      selectedBladeId: 1,
+      viewportWidth: 720,
+    }),
+    /BasicBlade resource mismatch.*blade1\.png/,
+  );
+});
+
+test('construction rolls back root, material, and partial meshes when Creator allocation fails', () => {
+  cc.resetCreatedNodes();
+  cc.failNextMaterialReset();
+  assert.throws(
+    () => ClassicBladePresenter.create({
+      assetTree: '480x800',
+      resource: loadedResource('480x800', 0) as never,
+      selectedBladeId: 0,
+      viewportWidth: 480,
+    }),
+    /Injected material reset failure/,
+  );
+  assert.equal(cc.createdNodes.length, 1);
+  assert.equal(cc.createdNodes[0]?.destroyed, true);
+  assert.equal(cc.createdMaterials.length, 1);
+  assert.equal(cc.createdMaterials[0]?.destroyed, true);
+  assert.equal(cc.createdMeshes.length, 0);
+
+  cc.resetCreatedNodes();
+  cc.failNextMeshReset('ClassicBasicBladeMesh-1');
+  assert.throws(
+    () => ClassicBladePresenter.create({
+      assetTree: '720x1280',
+      resource: loadedResource('720x1280', 12) as never,
+      selectedBladeId: 12,
+      viewportWidth: 720,
+    }),
+    /Injected mesh reset failure: ClassicBasicBladeMesh-1/,
+  );
+  assert.deepEqual(
+    cc.createdNodes.map(({ name }) => name),
+    [
+      'ClassicBasicBladeRoot',
+      'ClassicBasicBlade-0',
+      'ClassicBasicBlade-1',
+    ],
+  );
+  assert.equal(
+    cc.createdNodes.every(({ destroyed, parent }) => destroyed && parent === null),
+    true,
+  );
+  assert.equal(cc.createdMaterials.length, 1);
+  assert.equal(cc.createdMaterials[0]?.destroyed, true);
+  assert.equal(cc.createdMeshes.length, 2);
+  assert.equal(cc.createdMeshes.every(({ destroyed }) => destroyed), true);
+});
+
+function loadedResource(assetTree: AssetTree, bladeId: StandardBasicBladeId) {
+  const resource = getStandardBasicBladeResource(bladeId, assetTree);
   return Object.freeze({
     ...resource,
     spriteFrame: new cc.SpriteFrame(
       [1, 2, 9, 6, 5, 18, 13, 22],
-      Object.freeze({ id: `${assetTree}-blade-texture` }),
+      Object.freeze({ id: `${assetTree}-blade-${bladeId}-texture` }),
     ),
   });
 }

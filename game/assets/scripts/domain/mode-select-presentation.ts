@@ -1,7 +1,6 @@
 import type { FruitFixtureConfiguration } from './classic-fixture-rules';
 import { createFruitFixtureConfiguration } from './classic-fixture-rules';
 import type { ClassicRasterResource } from './classic-resource-contract';
-import { getClassicDefaultBladeResource } from './classic-resource-contract';
 import type {
   ModeSelectCardResourceDefinition,
   ModeSelectCardRasterSet,
@@ -34,6 +33,11 @@ import {
   createModeSelectUnlockParticleBurst,
 } from './mode-select-state';
 import type { ClassicAssetTree } from './resolution-profile-service';
+import {
+  getStandardBladeResourceProfile,
+  type StandardBladeId,
+  type StandardBladeResourceProfile,
+} from './standard-blade-resource-contract';
 
 export const MODE_SELECT_ROOT_Z_ORDER = 1 as const;
 export const MODE_SELECT_GESTURES_DEFAULT_Z_ORDER = 0 as const;
@@ -430,12 +434,12 @@ export interface ModeSelectUnlockBurstPresentation {
 export interface ModeSelectPresentationSnapshot {
   readonly assetTree: ClassicAssetTree;
   readonly bladeDependency: Readonly<{
-    readonly resource: ClassicRasterResource;
+    readonly profile: StandardBladeResourceProfile;
     readonly scoreManagerRemovedBeforeOwnedRoots: true;
     readonly scoreManagerRemovedWithCleanup: true;
     readonly selectedBladeChildCount: 4;
     readonly selectedBladeChildrenPrecedeOwnedRoots: true;
-    readonly selectedBladeId: 0;
+    readonly selectedBladeId: StandardBladeId;
     readonly selectedBladeLocalZOrder: 1;
   }>;
   readonly cards: readonly ModeSelectRopeButtonPresentation[];
@@ -582,8 +586,13 @@ export function createModeSelectPresentation(
   viewport: ModeSelectViewport,
   totalCoins: number,
   persistedUnlocks: ModeSelectPersistedUnlocks = {},
+  selectedBladeId: number = MODE_SELECT_IMPORTED_CLEAN_SETTINGS_DEFAULTS.selectedBlade,
 ): ModeSelectPresentationSnapshot {
   const resources = getModeSelectRasterResources(assetTree);
+  const selectedBladeProfile = getStandardBladeResourceProfile(
+    selectedBladeId,
+    assetTree,
+  );
   const copiedViewport = copyViewport(viewport);
   assertSignedInt32(totalCoins, 'totalCoins');
 
@@ -605,12 +614,12 @@ export function createModeSelectPresentation(
   return deepFreeze({
     assetTree,
     bladeDependency: {
-      resource: getClassicDefaultBladeResource(0, assetTree),
+      profile: selectedBladeProfile,
       scoreManagerRemovedBeforeOwnedRoots: true as const,
       scoreManagerRemovedWithCleanup: true as const,
       selectedBladeChildCount: 4 as const,
       selectedBladeChildrenPrecedeOwnedRoots: true as const,
-      selectedBladeId: 0 as const,
+      selectedBladeId: selectedBladeProfile.bladeId,
       selectedBladeLocalZOrder: MODE_SELECT_ROOT_Z_ORDER,
     },
     cards,

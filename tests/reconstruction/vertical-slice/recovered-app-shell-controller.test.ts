@@ -44,6 +44,14 @@ test('app shell boots the shared scene into Main Menu before any Classic activat
     "this.stateValue = 'main-menu'",
   ]);
   assert.doesNotMatch(initialize, /activateClassicFromAppShell|activateInitialClassic/);
+  assert.match(
+    SOURCE,
+    /const selectedBladeId = gameplay\.sharedSettingsRuntime\.state\.snapshot\.selectedBlade;/,
+  );
+  assert.match(
+    SOURCE,
+    /standardBlades:\s*\{\s*selectedBladeId,\s*catalog: gameplay\.sharedResourceCatalog\.standardBlades,\s*\}/s,
+  );
 });
 
 test('destroyed shell never starts delayed Classic Bird preparation', async () => {
@@ -85,8 +93,77 @@ test('destroyed shell never starts delayed Classic Bird preparation', async () =
     }),
     requireGameplayController: () => ({
       async prepareRecoveredRuntime() {},
+      sharedSettingsRuntime: {
+        state: {
+          snapshot: Object.freeze({
+            selectedBlade: 17,
+          }),
+        },
+      },
       sharedResourceCatalog: {
         assetTree: Object.freeze({}),
+        standardBlades: Object.freeze({
+          profile(bladeId: number) {
+            if (bladeId === 17) {
+              return Object.freeze({
+                bladeId,
+                kind: 'centipede',
+                particles: Object.freeze([]),
+                resources: Object.freeze({
+                  body: Object.freeze({
+                    canonicalPath: '480x800/Blades/Centipede/body.png',
+                    dimensions: Object.freeze({ height: 40, width: 12 }),
+                    spriteFrame: Object.freeze({
+                      destroyed: false,
+                      label: '480x800/Blades/Centipede/body.png',
+                      originalSize: Object.freeze({ height: 40, width: 12 }),
+                      rect: Object.freeze({ height: 40, width: 12 }),
+                      destroy() {},
+                    }),
+                  }),
+                  bodySegmentCount: 20 as const,
+                  head: Object.freeze({
+                    canonicalPath: '480x800/Blades/Centipede/head.png',
+                    dimensions: Object.freeze({ height: 44, width: 47 }),
+                    spriteFrame: Object.freeze({
+                      destroyed: false,
+                      label: '480x800/Blades/Centipede/head.png',
+                      originalSize: Object.freeze({ height: 44, width: 47 }),
+                      rect: Object.freeze({ height: 44, width: 47 }),
+                      destroy() {},
+                    }),
+                  }),
+                  pointCapacity: 32 as const,
+                  tail: Object.freeze({
+                    canonicalPath: '480x800/Blades/Centipede/tail.png',
+                    dimensions: Object.freeze({ height: 14, width: 51 }),
+                    spriteFrame: Object.freeze({
+                      destroyed: false,
+                      label: '480x800/Blades/Centipede/tail.png',
+                      originalSize: Object.freeze({ height: 14, width: 51 }),
+                      rect: Object.freeze({ height: 14, width: 51 }),
+                      destroy() {},
+                    }),
+                  }),
+                }),
+              });
+            }
+            return Object.freeze({
+              bladeId,
+              kind: 'basic',
+              particles: Object.freeze([]),
+              texture: Object.freeze({
+                canonicalPath: `480x800/Blades/blade${bladeId}.png`,
+                dimensions: Object.freeze({ height: 256, width: 256 }),
+                spriteFrame: Object.freeze({
+                  destroyed: false,
+                  texture: Object.freeze({ canonicalPath: `480x800/Blades/blade${bladeId}.png` }),
+                  uv: Object.freeze([0, 1, 1, 1, 0, 0, 1, 0]),
+                }),
+              }),
+            });
+          },
+        }),
       },
     }),
     requireSceneController: () => ({

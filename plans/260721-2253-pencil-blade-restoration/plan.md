@@ -138,6 +138,10 @@ Verified starting point:
   and reward, and transactional replay/retry/menu lifecycles. Its leaderboard keys are
   `bird_combo_best_1..3` and its recovered reward factor is float32 `0.8`. Missing or corrupt
   storage still falls back to `999999` coins while a valid persisted balance wins.
+  The standard-blade runtime checkpoint is also complete: IDs `0`-`17` now route
+  transactionally through Main Menu, Mode Select, Classic, the Crazy standard branch, and GN
+  Style with exact Basic textures, particle plans, Dragon multipart behavior, and Centipede
+  multipart behavior.
   GN Style mode `2` is an independent ordinary-fruit timed owner using the standard four-slot
   BasicBlade path. It preserves the recovered `150`-second Free/Wave/Concurrent graph, exact
   `2.60`-second intro, non-looping `GangnamStyle.mp3`, all 439 source-ordered particle parents,
@@ -148,7 +152,9 @@ Verified starting point:
   ownership plus one debit, 45-particle purchase burst, transactional Main Menu handoff, and
   unpaid-selection reconciliation on Back and before app-hide save. Missing/corrupt save
   continues to default to `999999` coins while any valid persisted balance, including `0`, wins.
-  The current checkpoint reaches `1212/1212` full vertical-slice tests and `43/43`
+  Leaderboard and progression wiring is now the next unresolved shared surface after the
+  standard-blade runtime checkpoint.
+  The current checkpoint reaches `1285/1285` full vertical-slice tests and `43/43`
   resource/build/catalog tests. The unchanged
   source/staging/archive inventory remains `14/14` in `217s`; strict Creator TypeScript,
   reconstruction-policy positive plus `4/4` negative fixtures, native static analysis `7/7`,
@@ -158,10 +164,11 @@ Verified starting point:
   Project completion still requires the remaining resource consumers and scene/prefab map,
   a pinned integration/toolchain policy, and build validation.
 - Phase 6 continues after all six production gameplay routes and the recovered Options screen
-  reached their contract and fresh Creator Preview gates. The remaining scope is blade IDs
-  `1`-`17` gameplay rendering/particles, the other menu/progression states, first-launch `flag`
-  bootstrap, global asset-consumer and scene/prefab reconciliation, Android build validation,
-  and release-rights clearance.
+  reached their contract and fresh Creator Preview gates. The remaining scope is leaderboard
+  and progression wiring, the other menu/progression states, first-launch `flag` bootstrap,
+  global asset-consumer and scene/prefab reconciliation, Android build validation, and
+  release-rights clearance. The standard-blade runtime checkpoint is complete and no longer
+  part of the open Phase 6 work.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
 

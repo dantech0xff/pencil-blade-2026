@@ -1,15 +1,16 @@
 # Codebase Summary
 
 Snapshot metrics were generated from `repomix-output.xml` on 2026-07-24. Current workspace
-status is maintained manually and is updated through the 2026-07-24 Options checkpoint.
+status is maintained manually and is updated through the 2026-07-24 standard-blade runtime
+checkpoint.
 
 ## Snapshot
 
 | Metric | Value |
 |---|---|
-| Files packed | 1,572 |
-| Total tokens | 3,073,413 |
-| Total characters | 11,287,792 |
+| Files packed | 1,627 |
+| Total tokens | 2,105,362 |
+| Total characters | 7,239,732 |
 | Output format | XML |
 
 ## Current Workspace Shape
@@ -31,6 +32,7 @@ status is maintained manually and is updated through the 2026-07-24 Options chec
 | `game/assets/scripts/creator/classic-settings-runtime.ts` | Process-owned Settings runtime with storage-first cosmetic purchase writes, mode-unlock persistence, rated-flag persistence, and write-disable after any load recovery. |
 | `game/assets/scripts/domain/options-*.ts`, `game/assets/scripts/creator/options-*.ts` | Recovered eight-background/eighteen-blade/ten-theme selection, affordability, storage-first purchase/debit, rollback, row presentation, exact resources, and purchase particles. |
 | `game/assets/scripts/domain/classic-result-presentation.ts`, `classic-result-ranking.ts`, `classic-result-particle-explosion.ts`, `classic-result-reward-presentation.ts` | Exact mode-0 result geometry/actions, ranking, delayed particle burst, and reward tree. |
+| `game/assets/scripts/domain/standard-blade-*.ts`, `game/assets/scripts/creator/standard-blade-*.ts`, `game/assets/scripts/creator/main-menu-presenter.ts`, `mode-select-presenter.ts`, `classic-gameplay-controller.ts`, `crazy-gameplay-controller.ts`, `gn-style-gameplay-controller.ts` | Transactional standard-blade route selection and ownership for Main Menu, Mode Select, Classic, the Crazy standard branch, and GN Style across IDs `0`-`17`. |
 | `game/assets/scripts/domain/bird-blade-state.ts`, `bird-blade-particle-plan.ts`, `bird-resource-contract.ts`, `classic-bird-*` | Shared BaseBird/BirdBlade substrate and Classic Bird mode `3`. |
 | `game/assets/scripts/domain/crazy-timed-mode-profile.ts`, `crazy-bird-result-ranking.ts`, `crazy-bird-result-navigation.ts` | Immutable mode-1/mode-4 profile split, Crazy Bird leaderboard/reward keys, and mode-4 retry/menu commands. |
 | `game/assets/scripts/domain/combo-bird-*.ts` | Independent mode-5 session, three-controller ordinary-only toss graph, intro, supplemental-resource contract, and `bird_combo_best_1..3`. |
@@ -39,7 +41,7 @@ status is maintained manually and is updated through the 2026-07-24 Options chec
 | `game/assets/scripts/creator/classic-scene-controller.ts`, `classic-gameplay-controller.ts`, `crazy-scene-controller.ts`, `crazy-gameplay-controller.ts` | Creator lifecycles for the bounded Classic route and the production Crazy routes. |
 | `game/assets/scripts/creator/combo-bird-*.ts`, `game/assets/scripts/creator/gn-style-*.ts` | Production Combo Bird and GN Style owners, including pause/result/retry/menu transactions. |
 | `game/assets/scenes/classic.scene` | Editor-authored persistent Canvas with the app shell and passive route owners. |
-| `tests/reconstruction/vertical-slice/*.test.ts` | `1212/1212` deterministic regressions through the Options checkpoint and executable lifecycle faults across all routes. |
+| `tests/reconstruction/vertical-slice/*.test.ts` | `1285/1285` deterministic regressions through the standard-blade checkpoint and executable lifecycle faults across all routes. |
 | `scripts/audit-creator-build.mjs` | Post-build archive audit for APK/AAB outputs. |
 | `tests/audit-creator-build-test.mjs` | Synthetic coverage for the build-audit script. |
 
@@ -48,6 +50,7 @@ status is maintained manually and is updated through the 2026-07-24 Options chec
 - Reconstructing Pencil Blade from static evidence only.
 - Keeping the original APK, `libgame.so`, and legacy engine runtime as evidence, not runtime dependencies.
 - Running all six production gameplay routes as clean TypeScript with Creator adapters at the boundary.
+- Running the standard-blade runtime checkpoint across Main Menu, Mode Select, Classic, the Crazy standard branch, and GN Style with IDs `0`-`17` transactionally owned.
 - Preserving the user-approved missing/corrupt save fallback of `999999` coins while valid persisted balances win, including `0`.
 - Keeping the exact bulk Settings slice implemented: 50 integers, 4 booleans, 18 blade prices, 8 background prices, storage-first price-0 ownership, and write-disable on any recovery.
 - Running recovered Options with eight backgrounds, eighteen blades, ten themes, exact
@@ -59,7 +62,8 @@ status is maintained manually and is updated through the 2026-07-24 Options chec
 - Running Crazy Bird as mode `4` through the shared Crazy controllers with BirdBlade type `2`, the exact 17-raster profile, distinct objective selectors, `bird_crazy_best_1..3`, and the float32 `0.8` reward path.
 - Running Combo Bird as an independent mode `5` owner with BirdBlade type `3`, exact type-3 and instruction/TimeManager resources, a `90`-second timer, three ordinary-only toss controllers, objectives, pause, result ranking/reward, and transactional Replay/Retry/Main Menu ownership.
 - Running GN Style as independent mode `2` with the standard BasicBlade, exact `150`-second ordinary-fruit graph and intro, dedicated music, 439-particle choreography, late-cut Time Up, `gnstyle_best_1..3`, float32 `0.6` reward, and transactional Replay/Retry/Quit/Menu ownership.
-- The Options checkpoint is `1212/1212` full vertical-slice tests, `43/43` resource/build/catalog tests, the unchanged `14/14` inventory/evidence workflow in `217s`, reconstruction policy positive plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and clean diff hygiene.
+- Keeping leaderboard and progression wiring as the next unresolved shared-contract surface after the standard-blade runtime checkpoint.
+- The standard-blade checkpoint is `1285/1285` full vertical-slice tests, `43/43` resource/build/catalog tests, the unchanged `14/14` inventory/evidence workflow in `217s`, reconstruction policy positive plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and clean diff hygiene.
 - Fresh Creator Preview reaches Main Menu → Mode Select → GN Style → exact intro → live cuts,
   score, music, and particles → Pause/Resume/Replay → Pause Quit → Main Menu → repeated entry →
   natural Time Up → Result Retry → Result Menu. Options additionally passes Main Menu entry,

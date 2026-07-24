@@ -164,7 +164,7 @@ test('activation constructs detached ordinary gameplay and makes it current befo
   ]);
 });
 
-test('core presentation owns BasicBlade, HUD, 150-second timer, exact intro, and 439 roots', () => {
+test('core presentation owns the saved standard blade, HUD, 150-second timer, exact intro, and 439 roots', () => {
   const create = extractMethod(SOURCE, 'createCorePresentation');
   assertOrderedSubstrings(create, [
     'ClassicScoreHudPresenter.create({',
@@ -177,9 +177,11 @@ test('core presentation owns BasicBlade, HUD, 150-second timer, exact intro, and
     'onShowGo: () => this.requireSceneController().goCallback()',
     'this.requireSceneController().totalTimeCallback()',
     'onStartGame: this.startGnStyleGame',
-    'ClassicBladePresenter.create({',
-    'resource: catalog.defaultBlade',
-    'selectedBladeId: 0',
+    'const selectedBlade = this.sharedSettingsRuntime',
+    '.state.snapshot.selectedBlade',
+    'StandardBladePresenter.create({',
+    'profile: catalog.standardBlades.profile(selectedBlade)',
+    '      random,',
     'GnStyleParticlePresenter.create({',
     'this.particlePresenter.roots.length !== 439',
   ]);
@@ -240,7 +242,7 @@ test('running and late-cut frames tick coordinator before TimeManager while part
     'this.objectiveAchievementPresenters',
     'this.sharedSettingsRuntime.state.snapshot.musicEnabled',
     'this.requireMusic().stop()',
-    'this.bladePresenter?.updateFrame()',
+    'this.bladePresenter?.update(deltaSeconds)',
     'this.introPresenter?.updateAction(deltaSeconds)',
     'this.timeManagerPresenter?.updateAction(deltaSeconds)',
     'this.particlePresenter.updateAction(deltaSeconds)',

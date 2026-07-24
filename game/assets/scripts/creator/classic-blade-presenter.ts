@@ -20,17 +20,20 @@ import {
   type BasicBladeUv,
 } from '../domain/basic-blade-trail';
 import type { BladePoint } from '../domain/blade-tracks';
-import { getClassicDefaultBladeResource } from '../domain/classic-resource-contract';
 import type { ClassicAssetTree } from '../domain/resolution-profile-service';
-import type { LoadedClassicRasterResource } from './classic-resource-loader';
+import {
+  getStandardBasicBladeResource,
+  type StandardBasicBladeId,
+} from '../domain/standard-blade-resource-contract';
+import type { LoadedGameRasterResource } from './game-resource-loader';
 
 export const CLASSIC_BASIC_BLADE_Z_ORDER = 1;
 export const CLASSIC_BASIC_BLADE_MATERIAL_TECHNIQUE = 3;
 
 export interface ClassicBladePresenterInput {
   readonly assetTree: ClassicAssetTree;
-  readonly resource: LoadedClassicRasterResource;
-  readonly selectedBladeId: 0;
+  readonly resource: LoadedGameRasterResource;
+  readonly selectedBladeId: StandardBasicBladeId;
   readonly viewportWidth: number;
 }
 
@@ -53,24 +56,57 @@ export class ClassicBladePresenter {
   private attached = false;
   private disposed = false;
 
-  private constructor(input: ClassicBladePresenterInput) {
-    this.model = new BasicBladeTrailModel(input.viewportWidth);
-    this.root = new Node('ClassicBasicBladeRoot');
-    this.root.active = false;
-
-    this.material = createBasicBladeMaterial(input.resource);
-    this.spriteUv = Object.freeze([...input.resource.spriteFrame.uv]);
-    assertSpriteUv(this.spriteUv);
-
-    this.owners = Object.freeze(Array.from(
-      { length: BASIC_BLADE_SLOT_COUNT },
-      (_, slot) => createMeshOwner(this.root, this.material, slot),
-    ));
+  private constructor(
+    model: BasicBladeTrailModel,
+    root: Node,
+    material: Material,
+    spriteUv: readonly number[],
+    owners: readonly ClassicBladeMeshOwner[],
+  ) {
+    this.model = model;
+    this.root = root;
+    this.material = material;
+    this.spriteUv = spriteUv;
+    this.owners = owners;
   }
 
   static create(input: ClassicBladePresenterInput): ClassicBladePresenter {
     assertInput(input);
-    return new ClassicBladePresenter(input);
+    const spriteUv = Object.freeze([...input.resource.spriteFrame.uv]);
+    assertSpriteUv(spriteUv);
+    const model = new BasicBladeTrailModel(input.viewportWidth);
+    let root: Node | null = null;
+    let material: Material | null = null;
+    const owners: ClassicBladeMeshOwner[] = [];
+    try {
+      root = new Node('ClassicBasicBladeRoot');
+      root.active = false;
+      material = createBasicBladeMaterial(input.resource);
+      for (let slot = 0; slot < BASIC_BLADE_SLOT_COUNT; slot += 1) {
+        owners.push(createMeshOwner(root, material, slot));
+      }
+      return new ClassicBladePresenter(
+        model,
+        root,
+        material,
+        spriteUv,
+        Object.freeze([...owners]),
+      );
+    } catch (error) {
+      for (let index = owners.length - 1; index >= 0; index -= 1) {
+        const owner = owners[index];
+        if (owner !== undefined) {
+          destroyMeshOwner(owner);
+        }
+      }
+      if (material !== null && isValid(material, true)) {
+        material.destroy();
+      }
+      if (root !== null && isValid(root, true)) {
+        root.destroy();
+      }
+      throw error;
+    }
   }
 
   attach(parent: Node): void {
@@ -137,12 +173,11 @@ export class ClassicBladePresenter {
       this.root.removeFromParent();
     }
     for (const owner of this.owners) {
-      const mesh = owner.meshRenderer.mesh;
-      owner.meshRenderer.mesh = null;
-      owner.meshRenderer.setSharedMaterial(null, 0);
-      mesh?.destroy();
+      destroyMeshOwner(owner);
     }
-    this.material.destroy();
+    if (isValid(this.material, true)) {
+      this.material.destroy();
+    }
     if (isValid(this.root, true)) {
       this.root.destroy();
     }
@@ -172,37 +207,68 @@ function createMeshOwner(
   material: Material,
   slot: number,
 ): ClassicBladeMeshOwner {
-  const node = new Node(`ClassicBasicBlade-${slot}`);
-  node.setParent(parent);
-  node.setSiblingIndex(slot);
-  node.addComponent(UITransform);
-  const meshRenderer = node.addComponent(MeshRenderer);
-  meshRenderer.setSharedMaterial(material, 0);
-  const vertexBytes = new Uint8Array(BASIC_BLADE_LEGACY_VERTEX_CAPACITY_BYTES);
-  meshRenderer.mesh = createPersistentLegacyLayoutMesh(vertexBytes, slot);
-  const uiMeshRenderer = node.addComponent(UIMeshRenderer);
-  return Object.freeze({ meshRenderer, node, slot, uiMeshRenderer, vertexBytes });
+  let node: Node | null = null;
+  let mesh: Mesh | null = null;
+  let meshRenderer: MeshRenderer | null = null;
+  try {
+    node = new Node(`ClassicBasicBlade-${slot}`);
+    node.setParent(parent);
+    node.setSiblingIndex(slot);
+    node.addComponent(UITransform);
+    meshRenderer = node.addComponent(MeshRenderer);
+    meshRenderer.setSharedMaterial(material, 0);
+    const vertexBytes = new Uint8Array(BASIC_BLADE_LEGACY_VERTEX_CAPACITY_BYTES);
+    mesh = createPersistentLegacyLayoutMesh(vertexBytes, slot);
+    meshRenderer.mesh = mesh;
+    const uiMeshRenderer = node.addComponent(UIMeshRenderer);
+    return Object.freeze({
+      meshRenderer,
+      node,
+      slot,
+      uiMeshRenderer,
+      vertexBytes,
+    });
+  } catch (error) {
+    if (meshRenderer !== null) {
+      meshRenderer.mesh = null;
+      meshRenderer.setSharedMaterial(null, 0);
+    }
+    if (mesh !== null && isValid(mesh, true)) {
+      mesh.destroy();
+    }
+    if (node !== null && isValid(node, true)) {
+      node.destroy();
+    }
+    throw error;
+  }
 }
 
-function createBasicBladeMaterial(resource: LoadedClassicRasterResource): Material {
+function createBasicBladeMaterial(resource: LoadedGameRasterResource): Material {
   const material = new Material();
-  material.reset({
-    effectName: 'builtin-unlit',
-    technique: CLASSIC_BASIC_BLADE_MATERIAL_TECHNIQUE,
-    defines: {
-      USE_TEXTURE: true,
-      USE_VERTEX_COLOR: true,
-    },
-    states: {
-      primitive: gfx.PrimitiveMode.TRIANGLE_STRIP,
-      depthStencilState: {
-        depthTest: false,
-        depthWrite: false,
+  try {
+    material.reset({
+      effectName: 'builtin-unlit',
+      technique: CLASSIC_BASIC_BLADE_MATERIAL_TECHNIQUE,
+      defines: {
+        USE_TEXTURE: true,
+        USE_VERTEX_COLOR: true,
       },
-    },
-  });
-  material.setProperty('mainTexture', resource.spriteFrame.texture);
-  return material;
+      states: {
+        primitive: gfx.PrimitiveMode.TRIANGLE_STRIP,
+        depthStencilState: {
+          depthTest: false,
+          depthWrite: false,
+        },
+      },
+    });
+    material.setProperty('mainTexture', resource.spriteFrame.texture);
+    return material;
+  } catch (error) {
+    if (isValid(material, true)) {
+      material.destroy();
+    }
+    throw error;
+  }
 }
 
 function createPersistentLegacyLayoutMesh(
@@ -212,49 +278,68 @@ function createPersistentLegacyLayoutMesh(
   const vertexCapacity = BASIC_BLADE_LEGACY_VERTEX_CAPACITY_BYTES
     / BASIC_BLADE_LEGACY_VERTEX_STRIDE_BYTES;
   const mesh = new Mesh(`ClassicBasicBladeMesh-${slot}`);
-  mesh.reset({
-    struct: {
-      vertexBundles: [{
-        attributes: [
-          new gfx.Attribute(
-            gfx.AttributeName.ATTR_POSITION,
-            gfx.Format.RG32F,
-          ),
-          new gfx.Attribute(
-            gfx.AttributeName.ATTR_COLOR,
-            gfx.Format.RGBA8,
-            true,
-          ),
-          new gfx.Attribute(
-            gfx.AttributeName.ATTR_TEX_COORD,
-            gfx.Format.RG32F,
-          ),
-        ],
-        view: {
-          count: 0,
-          length: BASIC_BLADE_LEGACY_VERTEX_CAPACITY_BYTES,
-          offset: 0,
-          stride: BASIC_BLADE_LEGACY_VERTEX_STRIDE_BYTES,
+  try {
+    mesh.reset({
+      struct: {
+        vertexBundles: [{
+          attributes: [
+            new gfx.Attribute(
+              gfx.AttributeName.ATTR_POSITION,
+              gfx.Format.RG32F,
+            ),
+            new gfx.Attribute(
+              gfx.AttributeName.ATTR_COLOR,
+              gfx.Format.RGBA8,
+              true,
+            ),
+            new gfx.Attribute(
+              gfx.AttributeName.ATTR_TEX_COORD,
+              gfx.Format.RG32F,
+            ),
+          ],
+          view: {
+            count: 0,
+            length: BASIC_BLADE_LEGACY_VERTEX_CAPACITY_BYTES,
+            offset: 0,
+            stride: BASIC_BLADE_LEGACY_VERTEX_STRIDE_BYTES,
+          },
+        }],
+        primitives: [{
+          primitiveMode: gfx.PrimitiveMode.TRIANGLE_STRIP,
+          vertexBundelIndices: [0],
+        }],
+        minPosition: new Vec3(),
+        maxPosition: new Vec3(),
+        dynamic: {
+          info: {
+            maxSubMeshes: 1,
+            maxSubMeshIndices: 0,
+            maxSubMeshVertices: vertexCapacity,
+          },
+          bounds: [],
         },
-      }],
-      primitives: [{
-        primitiveMode: gfx.PrimitiveMode.TRIANGLE_STRIP,
-        vertexBundelIndices: [0],
-      }],
-      minPosition: new Vec3(),
-      maxPosition: new Vec3(),
-      dynamic: {
-        info: {
-          maxSubMeshes: 1,
-          maxSubMeshIndices: 0,
-          maxSubMeshVertices: vertexCapacity,
-        },
-        bounds: [],
       },
-    },
-    data: vertexBytes,
-  });
-  return mesh;
+      data: vertexBytes,
+    });
+    return mesh;
+  } catch (error) {
+    if (isValid(mesh, true)) {
+      mesh.destroy();
+    }
+    throw error;
+  }
+}
+
+function destroyMeshOwner(owner: ClassicBladeMeshOwner): void {
+  const mesh = owner.meshRenderer.mesh;
+  owner.meshRenderer.mesh = null;
+  owner.meshRenderer.setSharedMaterial(null, 0);
+  if (mesh !== null && isValid(mesh, true)) {
+    mesh.destroy();
+  }
+  if (isValid(owner.node, true)) {
+    owner.node.destroy();
+  }
 }
 
 function updateLegacyLayoutMesh(
@@ -351,7 +436,7 @@ function mapSpriteUv(
 }
 
 function assertInput(input: ClassicBladePresenterInput): void {
-  const contract = getClassicDefaultBladeResource(input.selectedBladeId, input.assetTree);
+  const contract = getStandardBasicBladeResource(input.selectedBladeId, input.assetTree);
   if (input.resource.canonicalPath !== contract.canonicalPath) {
     throw new Error(`BasicBlade resource mismatch for ${contract.canonicalPath}`);
   }

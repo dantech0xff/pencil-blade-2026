@@ -40,7 +40,7 @@ test('Crazy gameplay is a passive serialized owner of the existing Crazy scene',
     'this.resultPresenter?.updateAction(deltaSeconds)',
     'if (!this.isCrazyGameplayAttached())',
     "cutDriver?.kind === 'standard'",
-    'cutDriver.presenter.updateFrame()',
+    'cutDriver.presenter.update(deltaSeconds)',
   ]);
 });
 
@@ -180,7 +180,7 @@ test('post-physics cutting uses ordered bidirectional rays and one registry batc
 
 test('ordinary, special, timer, electric, magnet, and HUD paths reuse recovered presenters', () => {
   for (const dependency of [
-    'ClassicBladePresenter',
+    'StandardBladePresenter',
     'ComboItemPresenter',
     'ClassicCriticalParticlePresenter',
     'ClassicCutHalfPresenter',
@@ -194,6 +194,26 @@ test('ordinary, special, timer, electric, magnet, and HUD paths reuse recovered 
   ]) {
     assert.match(SOURCE, new RegExp(`\\b${dependency}\\b`));
   }
+
+  const create = extractMethod(SOURCE, 'createCorePresentation');
+  assertOrderedSubstrings(create, [
+    "if (profile.kind === 'crazy')",
+    'const selectedBlade = settings.state.snapshot.selectedBlade',
+    'StandardBladePresenter.create({',
+    'profile: classicCatalog.standardBlades.profile(selectedBlade)',
+    '        random,',
+    "kind: 'standard'",
+  ]);
+
+  const moved = extractMemberBlock(
+    SOURCE,
+    '  private readonly onBladeMoved = (',
+  );
+  assertOrderedSubstrings(moved, [
+    'driver.presenter.move(event.segment.slot, event.segment.current)',
+    'swish.request(',
+    'driver.presenter.presentMovedSegment(event.segment)',
+  ]);
 
   const fruitCommands = extractMethod(SOURCE, 'applyFruitCutCommands');
   assert.match(

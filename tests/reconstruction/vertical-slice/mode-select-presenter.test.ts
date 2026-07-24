@@ -126,20 +126,35 @@ export function isValid(value) {
 
 const BLADE_STUB_URL = moduleUrl(`
 import { Node } from 'cc';
-export class ClassicBladePresenter {
-  static create() { return new ClassicBladePresenter(); }
+export const STANDARD_BLADE_SLOT_COUNT = 4;
+export class StandardBladePresenter {
+  static create() { return new StandardBladePresenter(); }
   constructor() {
+    this.claimed = new Set();
     this.disposed = false;
     this.events = [];
-    this.root = new Node('ClassicBasicBladeRoot');
+    this.root = new Node('StandardBladeRoot');
     this.root.active = false;
   }
   attach(parent) { this.root.setParent(parent); this.root.active = true; }
-  begin(slot) { this.events.push('begin:' + slot); }
+  begin(slot) {
+    if (this.claimed.has(slot)) throw new Error('blade slot already claimed: ' + slot);
+    this.claimed.add(slot);
+    this.events.push('begin:' + slot);
+  }
   dispose() { if (this.disposed) return false; this.disposed = true; this.root.destroy(); return true; }
-  end(slot) { this.events.push('end:' + slot); }
-  move(slot, point) { this.events.push('move:' + slot + ':' + point.x + ':' + point.y); }
-  updateFrame() {}
+  end(slot) {
+    if (!this.claimed.has(slot)) throw new Error('blade slot is not claimed: ' + slot);
+    this.claimed.delete(slot);
+    this.events.push('end:' + slot);
+  }
+  isClaimed(slot) { return this.claimed.has(slot); }
+  move(slot, point) {
+    if (!this.claimed.has(slot)) throw new Error('blade slot is not claimed: ' + slot);
+    this.events.push('move:' + slot + ':' + point.x + ':' + point.y);
+  }
+  presentMovedSegment() {}
+  update() {}
 }
 `);
 
@@ -256,7 +271,7 @@ export class ModeSelectRopeButtonPresenter {
 registerHooks({
   resolve(specifier, context, nextResolve) {
     if (specifier === 'cc') return { shortCircuit: true, url: CC_STUB_URL };
-    if (specifier === './classic-blade-presenter') {
+    if (specifier === './standard-blade-presenter') {
       return { shortCircuit: true, url: BLADE_STUB_URL };
     }
     if (specifier === './blade-input-controller') {
@@ -459,6 +474,14 @@ test('gesture listeners and ownership reset on suspend, rearm, and dispose', () 
   centerCard(presenter, 0);
   emitBladeBegan(bladeInput, 40, 0, 300, 400);
   assert.equal(presenter.suspendForTransition(), true);
+  assert.equal(
+    (presenter.blade as unknown as { isClaimed(slot: number): boolean }).isClaimed(0),
+    false,
+  );
+  assert.equal(
+    (presenter.blade as unknown as { readonly events: readonly string[] }).events.at(-1),
+    'end:0',
+  );
   assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_BEGAN_EVENT), 0);
   assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_MOVED_EVENT), 0);
   assert.equal(bladeInput.node.listenerCount(CLASSIC_BLADE_ENDED_EVENT), 0);
@@ -957,6 +980,10 @@ test('source keeps exact detached/lifecycle boundaries and no destination placeh
   assert.match(source, /createDetachedScreenRoot\('ModeSelectRoot', input\.canvas\)/);
   assert.match(source, /this\.inputLeaseHeld = true/);
   assert.match(source, /this\.bladeInput\.deactivateForNonClassicScreen\(\)/);
+  assert.match(source, /StandardBladePresenter\.create\(/);
+  assert.match(source, /input\.standardBlades\.selectedBladeId/);
+  assert.match(source, /this\.blade\.update\(deltaSeconds\)/);
+  assert.match(source, /this\.blade\.presentMovedSegment\(event\.segment\)/);
   assert.match(source, /onClassicRequested/);
   assert.match(source, /onCrazyRequested/);
   assert.match(source, /onClassicBirdRequested/);
@@ -1512,10 +1539,10 @@ function presenterInput(
     canvas: new cc.Node('Canvas'),
     classicResources: {
       assetTree: '480x800' as const,
-      defaultBlade: Object.freeze({}),
     },
     lifecycle: options.lifecycle ?? defaultLifecycle(),
     random: {
+      nextDecile: () => 0.5,
       nextIntInclusive: (minimum: number) => {
         randomDraws.count += 1;
         return minimum;
@@ -1546,6 +1573,14 @@ function presenterInput(
       },
       state: settingsState,
     },
+    standardBlades: {
+      selectedBladeId: 17,
+      catalog: {
+        profile(bladeId: number) {
+          return makeStandardBladeProfile(bladeId);
+        },
+      },
+    },
     viewport: Object.freeze({
       logicalHeight: 800,
       logicalWidth: 480,
@@ -1570,6 +1605,85 @@ function bladeInputHarness(): BladeInputHarness {
     node: new cc.Node('BladeInput'),
     setCutEnabled: (enabled: boolean) => events.push(`cut:${String(enabled)}`),
   };
+}
+
+function makeStandardBladeProfile(bladeId: number) {
+  if (bladeId === 17) {
+    return Object.freeze({
+      bladeId,
+      kind: 'centipede',
+      particles: Object.freeze([]),
+      resources: Object.freeze({
+        body: makeLoadedRaster('480x800/Blades/Centipede/body.png', 12, 40),
+        bodySegmentCount: 20 as const,
+        head: makeLoadedRaster('480x800/Blades/Centipede/head.png', 47, 44),
+        pointCapacity: 32 as const,
+        tail: makeLoadedRaster('480x800/Blades/Centipede/tail.png', 51, 14),
+      }),
+    });
+  }
+  if (bladeId >= 13 && bladeId <= 16) {
+    const variant = bladeId - 13;
+    return Object.freeze({
+      bladeId,
+      kind: 'dragon',
+      particles: Object.freeze([]),
+      resources: Object.freeze({
+        body: makeLoadedRaster(
+          `480x800/Blades/Dragon/dragon-body-${variant}.png`,
+          21,
+          17,
+        ),
+        bodySegmentCount: 15 as const,
+        head: makeLoadedRaster(
+          `480x800/Blades/Dragon/dragon-head-${variant}.png`,
+          92,
+          63,
+        ),
+        pointCapacity: 32 as const,
+        tail: makeLoadedRaster(
+          `480x800/Blades/Dragon/dragon-tail-${variant}.png`,
+          53,
+          22,
+        ),
+      }),
+      variant,
+    });
+  }
+  const canonicalPath = bladeId === 11
+    ? '480x800/Blades/firebladetexture.png'
+    : bladeId === 12
+      ? '480x800/Blades/rainbow.png'
+      : `480x800/Blades/blade${bladeId}.png`;
+  const spriteFrame = Object.freeze({
+    destroyed: false,
+    texture: Object.freeze({ canonicalPath }),
+    uv: Object.freeze([0, 1, 1, 1, 0, 0, 1, 0]),
+  });
+  return Object.freeze({
+    bladeId,
+    kind: 'basic',
+    particles: Object.freeze([]),
+    texture: Object.freeze({
+      canonicalPath,
+      dimensions: Object.freeze({ height: 256, width: 256 }),
+      spriteFrame,
+    }),
+  });
+}
+
+function makeLoadedRaster(canonicalPath: string, width: number, height: number) {
+  return Object.freeze({
+    canonicalPath,
+    dimensions: Object.freeze({ height, width }),
+    spriteFrame: {
+      destroyed: false,
+      label: canonicalPath,
+      originalSize: Object.freeze({ height, width }),
+      rect: Object.freeze({ height, width }),
+      destroy() {},
+    },
+  });
 }
 
 function defaultLifecycle() {

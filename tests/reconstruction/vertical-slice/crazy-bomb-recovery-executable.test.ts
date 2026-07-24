@@ -157,6 +157,7 @@ export {
   InertDependency as CrazyTossCoordinator,
   InertDependency as ObjectiveAchievementPresenter,
   InertDependency as StandardBombFuseSmokePresenter,
+  InertDependency as StandardBladePresenter,
   InertDependency as TimeManagerPresenter,
   unused as applyComboCommandBatch,
   unused as buildBidirectionalRayPlan,

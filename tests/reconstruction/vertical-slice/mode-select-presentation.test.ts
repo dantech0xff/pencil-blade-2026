@@ -117,9 +117,14 @@ test('imports exact shared/screen orders and the four-child BasicBlade dependenc
 
   const compact = createModeSelectPresentation('480x800', COMPACT_VIEWPORT, 2500);
   assert.deepEqual(compact.bladeDependency, {
-    resource: {
-      canonicalPath: '480x800/Blades/blade0.png',
-      dimensions: { height: 256, width: 256 },
+    profile: {
+      bladeId: 0,
+      kind: 'basic',
+      particles: [],
+      texture: {
+        canonicalPath: '480x800/Blades/blade0.png',
+        dimensions: { height: 256, width: 256 },
+      },
     },
     scoreManagerRemovedBeforeOwnedRoots: true,
     scoreManagerRemovedWithCleanup: true,
@@ -153,6 +158,60 @@ test('imports exact shared/screen orders and the four-child BasicBlade dependenc
     noPlaceholderDestinationNodes: true,
   });
   assertDeepFrozen(compact);
+});
+
+test('Mode Select blade diagnostics preserve Basic, Dragon, and Centipede selections', () => {
+  const basic = createModeSelectPresentation(
+    '480x800',
+    COMPACT_VIEWPORT,
+    0,
+    {},
+    12,
+  );
+  assert.equal(basic.bladeDependency.selectedBladeId, 12);
+  assert.equal(basic.bladeDependency.profile.kind, 'basic');
+  assert.equal(
+    basic.bladeDependency.profile.kind === 'basic'
+      ? basic.bladeDependency.profile.texture.canonicalPath
+      : null,
+    '480x800/Blades/rainbow.png',
+  );
+
+  const dragon = createModeSelectPresentation(
+    '720x1280',
+    HIGH_VIEWPORT,
+    0,
+    {},
+    15,
+  );
+  assert.equal(dragon.bladeDependency.selectedBladeId, 15);
+  assert.equal(dragon.bladeDependency.profile.kind, 'dragon');
+  assert.equal(
+    dragon.bladeDependency.profile.kind === 'dragon'
+      ? dragon.bladeDependency.profile.variant
+      : null,
+    2,
+  );
+
+  const centipede = createModeSelectPresentation(
+    '720x1280',
+    HIGH_VIEWPORT,
+    0,
+    {},
+    17,
+  );
+  assert.equal(centipede.bladeDependency.selectedBladeId, 17);
+  assert.equal(centipede.bladeDependency.profile.kind, 'centipede');
+  assert.throws(
+    () => createModeSelectPresentation(
+      '480x800',
+      COMPACT_VIEWPORT,
+      0,
+      {},
+      18,
+    ),
+    /standard blade ID/,
+  );
 });
 
 test('compact shell preserves exact anchors, positions, moves, rotations, fade, and coin-label boundary', () => {

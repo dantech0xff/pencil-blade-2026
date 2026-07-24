@@ -497,14 +497,24 @@ test('terminal completion replaces Classic with the recovered result shell and e
 
   assert.match(gameplaySource, /CLASSIC_BLADE_BEGAN_EVENT/);
   assert.match(gameplaySource, /CLASSIC_BLADE_ENDED_EVENT/);
-  assert.match(gameplaySource, /ClassicBladePresenter\.create\(\{/);
-  assert.match(gameplaySource, /resource: resources\.defaultBlade/);
-  assert.match(gameplaySource, /selectedBladeId: 0/);
+  assert.match(gameplaySource, /StandardBladePresenter\.create\(\{/);
+  assert.match(
+    gameplaySource,
+    /resources\.standardBlades\.profile\(selectedBlade\)/,
+  );
+  assert.match(
+    gameplaySource,
+    /state\.snapshot\.selectedBlade/,
+  );
   assert.match(gameplaySource, /if \(!presenter\.isClaimed\(event\.segment\.slot\)\)/);
   assert.match(gameplaySource, /presenter\.move\(event\.segment\.slot, event\.segment\.current\)/);
   assert.match(gameplaySource, /if \(presenter !== null && !presenter\.isClaimed\(event\.slot\)\)/);
   assert.match(gameplaySource, /if \(presenter !== null && presenter\.isClaimed\(event\.slot\)\)/);
-  assert.match(gameplaySource, /this\.bladePresenter\?\.updateFrame\(\)/);
+  assert.match(gameplaySource, /this\.bladePresenter\?\.update\(deltaSeconds\)/);
+  assert.match(
+    gameplaySource,
+    /presenter\?\.presentMovedSegment\(event\.segment\)/,
+  );
   assert.match(gameplaySource, /this\.bladePresenter\?\.dispose\(\)/);
   assert.match(
     terminalSource,

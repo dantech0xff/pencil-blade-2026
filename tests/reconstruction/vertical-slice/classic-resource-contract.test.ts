@@ -172,23 +172,20 @@ test('Creator loader exposes the exact standard-Bomb smoke atlas to shared modes
   assert.match(loaderSource, /this\.bombSmoke = bombSmoke/);
 });
 
-test('Creator loader exposes the exact default BasicBlade SpriteFrame', () => {
+test('Creator loader composes the eager exact standard-blade closure instead of a blade-0 descriptor', () => {
   const loaderSource = readText('game/assets/scripts/creator/classic-resource-loader.ts');
 
   assert.match(
     loaderSource,
-    /descriptor\(defaultBladeKey\(0\), getClassicDefaultBladeResource\(0, assetTree\)\)/,
+    /loadStandardBladeResources\(assetTree, bundle\)/,
   );
   assert.match(
     loaderSource,
-    /const defaultBlade = requireLoadedDefaultBlade\(assetTree, loadedByKey\)/,
+    /readonly standardBlades: LoadedStandardBladeResources/,
   );
-  assert.match(loaderSource, /readonly defaultBlade: LoadedClassicRasterResource/);
-  assert.match(loaderSource, /function defaultBladeKey\(selectedBladeId: 0\): string/);
-  assert.match(
-    loaderSource,
-    /getClassicDefaultBladeResource\(selectedBladeId, assetTree\)/,
-  );
+  assert.match(loaderSource, /this\.standardBlades = standardBlades/);
+  assert.doesNotMatch(loaderSource, /descriptor\(defaultBladeKey\(/);
+  assert.doesNotMatch(loaderSource, /function requireLoadedDefaultBlade\(/);
 });
 
 test('contract dimensions match every staged PNG IHDR and untrimmed SpriteFrame', () => {
