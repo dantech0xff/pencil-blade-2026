@@ -13,8 +13,10 @@ the production Classic Bird loop through mode `3`, or the production Crazy Bird 
 mode `4`, the independent production Combo Bird loop through mode `5`, or the independent
 production GN Style loop through mode `2`. The standard-blade runtime checkpoint now spans
 Main Menu, Mode Select, Classic, the Crazy standard branch, and GN Style with IDs `0`-`17`
-transactionally routed through the shared shell. All six routes replace screens transactionally
-and support their recovered Retry/Replay/Quit/Main Menu paths.
+transactionally routed through the shared shell. The six gameplay routes replace screens
+transactionally and support their recovered Retry/Replay/Quit/Main Menu paths. The dedicated
+Leaderboard screen now snapshots the six process-owned Settings boards in native order, stays
+local/offline and read-only, and returns to a fresh Main Menu through the persistent shell.
 Combo Bird does not profile the Crazy graph: it owns a `90`-second timed session, three
 ordinary-fruit toss controllers, BirdBlade type `3`, exact type-3 and
 instruction/TimeManager resources, objectives, pause, result ranking/reward,
@@ -24,7 +26,7 @@ GN Style owns the standard BasicBlade, `150`-second Free/Wave/Concurrent graph, 
 three-second late-cut Time Up tail, objectives `6`/`2`, `gnstyle_best_1..3`, and a
 float32 `0.6` result reward.
 
-Automated verification reaches `1285/1285` full vertical-slice tests and `43/43`
+Automated verification reaches `1354/1354` full vertical-slice tests and `43/43`
 resource/build/catalog tests. The unchanged
 inventory/evidence workflow remains `14/14` in `217s`; reconstruction policy positive plus
 `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and diff
@@ -34,9 +36,12 @@ Creator-served Preview reaches the complete GN entry, live gameplay, Pause/Resum
 Pause Quit, repeated entry, natural Result, Retry, and Menu flow with zero application/runtime
 errors. The current Options screen also passes its Main Menu entry, selection, purchase, Back,
 and rollback flows in compact `360x800` and high `720x1280` Preview profiles with an empty
-Cocos Editor console. The full product remains incomplete because leaderboard/progression
-wiring, global consumer coverage, full progression/menu/settings fidelity, and a real Android
-build are still open.
+Cocos Editor console. The current Leaderboard checkpoint is verified at 139/139 focused
+Main Menu + Leaderboard + shell/viewport tests. Preview passes physical cut entry, aligned
+labels/scores, drag/flick board selection, and Back in the internal compact `480x800` branch
+and high `720x1280` profile. The full product remains incomplete because Objectives/progression wiring, global
+consumer coverage, full progression/menu/settings fidelity, and a real Android build are still
+open.
 
 ## Dependency Direction
 
@@ -88,6 +93,7 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 | Spawn and toss | Spawn ordering, intervals, fruit selection, and controller sequencing live in pure modules. Flattened Concurrent output is accepted only as ordered, contiguous, complete per-entity plans. |
 | Score HUD, combo, fail | Score, combo window, double-score behavior, best-score updates/state, the shared `ComboItem` banner, and the three-miss state are pure. Dedicated Creator presenters own the exact score icon, best-score cup, double-score panel, `Fonts/Linds.ttf`, the shared `ComboItem` label via `Fonts/GroBold.ttf`, recovered entry fade, score-icon pulse, overlapping double-score actions, and the normal/filled marker rasters with their action timings and completion callbacks. The HUD baseline loads from `classic_best_1`. |
 | Result entry | Pure modules own mode-0 layout, completed-run score formatting, `>=` leaderboard insertion, the recovered `[first, second, third]` panel order, signed-int32 Settings mutations, float32 `score * 0.6` truncation, the delayed 100-particle plan, and the reward tree. Creator presenters own the exact shell/reward rasters and fonts, selected button frames, equal-z order, independent `0.75 / 1.0 / 1.75`-second actions, the `1.65`-second five-draw-per-particle burst, `1.75`-second effect → coin → badge → accounting → label boundary, `2.5`-second rotating effect, and `11.15`-second emitter cleanup. Rank audio is emitted at the recovered mid-construction boundary. Retry synchronously detaches Result, constructs fresh run-owned state, restarts the Classic session/physics boundary, and attaches the new mode to the captured parent at z-order `1`. Creator retains Result cleanup only within that callback until attachment commits; a pre-commit exception rolls back physics/run state and rearms the identical Result without replaying ranking, coins, or RNG work. Post-commit engine cleanup is best-effort and cannot tear down the fresh Classic state. |
+| Leaderboard shell | `leaderboard-state.ts`, `leaderboard-presentation.ts`, `leaderboard-resource-contract.ts`, `game/assets/scripts/creator/leaderboard-presenter.ts`, `game/assets/scripts/creator/leaderboard-resource-loader.ts`, `game/assets/scripts/creator/main-menu-presenter.ts`, `game/assets/scripts/creator/recovered-app-shell-controller.ts` | `leaderboard-presenter.test.ts`, `leaderboard-resource-contract.test.ts`, `main-menu-presenter.test.ts`, `recovered-app-shell-controller.test.ts`, `creator-scene-integration.test.ts`, Creator bundled strict TypeScript | Exact six-board local/offline read-only snapshot integrated | Snapshots process-owned Settings once in native order Classic, Crazy, Gangnam Style, Classic Bird, Crazy Bird, Combo Bird; performs no ranking, mutation, load/save, network, JNI/platform, particles, or RNG. The constrained subset uses 10 profile rasters plus `Fonts/Andyb.ttf`, `Fonts/Century.ttf`, and `Sounds/menubuttonclick.wav`. Main Menu target ID `13` waits `0.75s`, Back returns immediately to a fresh Main Menu, and the effects-gated Back click runs only after successful commit. |
 | Classic Settings | A process-owned runtime loads and saves the implemented subset for coins, selections, all six production-route leaderboards, objective state, music/effect flags, network sentinel, and rated state in recovered relative order. The bulk schema is exact: 50 integers and 4 booleans, with 18 blade price keys/defaults and 8 background price keys/defaults. Indexed Mode Select unlocks use their separate immediate persistence keys. Price `0` is the ownership sentinel. Options purchases atomically persist ownership before committing the single in-memory coin debit, accept exact affordability, and leave insufficient/already-owned/storage-failure paths inert. Field-isolated recovery preserves any valid `totalCoins`, including `0`; only missing, corrupt, or unreadable coin storage falls back to `999999`, and any recovery disables writes for that process. Main Menu exit-save and app-hide save are implemented; the first-launch `flag` bootstrap remains open. |
 | Options | `OptionsState` and presentation/resource contracts own eight backgrounds, eighteen blades, ten themes, selector state, exact Buy visibility/prices, affordability, exit rollback, and the 45-particle purchase plan. Creator presenters own the one-screen `1.25 / 1.50 / 1.75`-second row reveal, exact 51-raster per-tree profile, `SlabThing`, `menubuttonclick`, `mono1`, `mono2`, live shared background/theme preview, transactional Main Menu handoff, and `xmasfive` burst. Back and app-hide reconcile unpaid background/blade previews to index `0`; theme, owned choices, and persisted background index `8` follow their recovered compatibility rules. A reconciliation failure suppresses app-hide save and remains retryable. |
 | Bird substrate and mode `3` | `bird-blade-state.ts`, `bird-blade-particle-plan.ts`, `bird-resource-contract.ts`, and the Bird Creator adapters own the single touch-directed blade, always-updating particle trail, cached ray path, and exact Bird resources. Classic Bird adds its untimed intro/fail/result/retry lifecycle through `classic-bird-*`. |
@@ -103,7 +109,7 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 | Audio | Creator adapters preload the reviewed Classic/menu, Options, Bird, Crazy, Combo, and GN clip sets and interpret toss, swish, cut, critical, combo, timer, result-rank, bonus/electric, objective, pause, selector-row, and menu-button commands without moving draw/order rules out of the domain. Independent retained voices model ordinary-bomb and Crazy effect ownership; the electric-only `boomhit` path remains separate from ordinary-bomb audio. GN's dedicated non-looping source is mutually exclusive with shared background music and pauses/resumes/stops with its transactional owner; TimeManager effects use the shared exact presenter. |
 | Resource import | Staging and metadata validators prove exact bytes and current Creator raster/audio import geometry for the recovered APK corpus. Options directly consumes 51 rasters per tree plus its exact font and three sounds. Per-asset consumer and UUID coverage is not yet backfilled into the manifest. |
 | Resolution and input | The recovered `720` physical-width profile branch is pure; Creator applies its Show All policy and routes scene-wide touch input into four blade slots or the single Bird blade. |
-| Build boundary | Source-boundary tests reject trackable legacy integration. The separate fail-closed archive audit hashes every entry, parses ZIP records exactly, recurses through bounded nested archives, and inspects ELF payloads; the unchanged inventory/source/staging/archive workflow is `14/14`, `tests/*.mjs` are `43/43`, the full vertical slice is `1285/1285`, and strict Creator TypeScript is green. |
+| Build boundary | Source-boundary tests reject trackable legacy integration. The separate fail-closed archive audit hashes every entry, parses ZIP records exactly, recurses through bounded nested archives, and inspects ELF payloads; the unchanged inventory/source/staging/archive workflow is `14/14`, `tests/*.mjs` are `43/43`, the full vertical slice is `1354/1354`, the focused Main Menu + Leaderboard + shell/viewport checkpoint is `139/139`, and strict Creator TypeScript is green. |
 
 ## Checkpoint Evidence
 
@@ -125,7 +131,7 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 - Scene and serialized component ownership is established for the first Canvas bridge; the
   remaining scene/prefab/presenter map is open.
 - The persistent shell now preserves the recovered equal-z append order Background → Leaf →
-  Theme → current screen, and all six live routes stay transactional. The current GN Style
+  Theme → current screen, and all seven visible routes stay transactional. The current GN Style
   checkpoint is confirmed across entry, gameplay, pause, replay, quit, natural Result, Retry,
   Menu, and repeated entry in fresh Creator-served Browser Preview.
 - Main Menu ↔ Options, all selector families, purchase/rollback behavior, and both resource
@@ -150,7 +156,7 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 - Exact result-entry layout/ranking/actions, reward visuals, app-hide persistence, Result-to-Main
   replacement, same-parent Retry reconstruction, and Bird modes `3`/`4`/`5` are integrated
   behind transactional rollback boundaries.
-- Standard-blade ownership is complete for IDs `0`-`17`; leaderboard and progression wiring
+- Standard-blade ownership is complete for IDs `0`-`17`; Objectives and progression wiring
   is the next shared surface to finish.
 - The electric-field memory-safe adapter runs in automated validation without a crash, but exact
   contact-count/direction equivalence still needs a targeted pinned-backend validation.

@@ -360,6 +360,32 @@ test('suspend ends claimed blade slots before input reset so rollback can reuse 
   presenter.dispose();
 });
 
+test('failed suspension poisons uncertain Main Menu input ownership and rejects rearm', () => {
+  fruitStub.resetFruitPresenters();
+  const bladeInput = bladeInputHarness({ failDeactivate: true });
+  const presenter = MainMenuPresenter.create(input(bladeInput));
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot') as never);
+  presenter.activate();
+
+  assert.throws(
+    () => presenter.suspendForTransition(),
+    (error: unknown) => {
+      assert.ok(error instanceof Error);
+      assert.equal(error.name, 'MainMenuCleanupError');
+      assert.match(error.message, /Main Menu suspension failed/);
+      return true;
+    },
+  );
+  assert.equal(presenter.state.poisoned, true);
+  assert.equal(presenter.state.suspended, true);
+  assert.throws(
+    () => presenter.rearmNavigationAfterFailure(),
+    /Poisoned Main Menu presenter cannot rearm navigation/,
+  );
+  assert.throws(() => presenter.dispose(), /Main Menu disposal: 1 failure/);
+  assert.equal(presenter.root.destroyed, true);
+});
+
 test('partial fruit activation rolls back atomically and permits a clean retry', () => {
   fruitStub.resetFruitPresenters();
   fruitStub.configureActivationFailure(1);
@@ -469,6 +495,48 @@ test('successful destination callback commits once before fallible post-commit e
   assert.equal((leaderboard as unknown as StubFruitPresenter).commitCount, 1);
   presenter.update(1);
   assert.equal(destinationCalls, 1);
+  presenter.dispose();
+});
+
+test('Leaderboard fruit uses its dedicated delayed route instead of the unsupported boundary', () => {
+  fruitStub.resetFruitPresenters();
+  const bladeInput = bladeInputHarness();
+  const transactions: unknown[] = [];
+  let unsupportedCalls = 0;
+  const lifecycle = defaultLifecycle();
+  lifecycle.onLeaderboardRequested = (transaction: unknown) => {
+    transactions.push(transaction);
+    return true;
+  };
+  lifecycle.onUnsupportedDestinationRequested = () => {
+    unsupportedCalls += 1;
+    return false;
+  };
+  const presenter = MainMenuPresenter.create(input(bladeInput, lifecycle));
+  const host = new cc.Node('SharedGameSceneRoot');
+  presenter.root.setParent(host as never);
+  presenter.activate();
+  const leaderboard = presenter.fruitButtons.find(({ presentation }) => (
+    presentation.purpose === 'leaderboard'
+  ));
+  assert.ok(leaderboard);
+
+  assert.equal(
+    leaderboard.cut({ end: { x: 2, y: 2 }, start: { x: 1, y: 1 } }, true),
+    true,
+  );
+  presenter.update(0.749);
+  assert.deepEqual(transactions, []);
+  presenter.update(0.001);
+
+  assert.equal(unsupportedCalls, 0);
+  assert.deepEqual(transactions, [{
+    destination: 'LeaderboardLayer',
+    root: presenter.root,
+    timing: 'delayed',
+    zOrder: 1,
+  }]);
+  assert.equal(presenter.state.navigationPending, false);
   presenter.dispose();
 });
 
@@ -670,6 +738,7 @@ test('runtime source preserves detached construction, exact append order, and se
   for (let index = 1; index < order.length; index += 1) {
     assert.ok(source.indexOf(order[index - 1]) < source.indexOf(order[index]));
   }
+  assert.match(source, /onLeaderboardRequested/);
   assert.match(source, /onModeSelectRequested/);
   assert.match(source, /onOptionsRequested/);
   assert.match(source, /onUnsupportedDestinationRequested/);
@@ -872,6 +941,7 @@ function bladeInputHarness(options: Readonly<{
 function defaultLifecycle() {
   return {
     onExitRequested() {},
+    onLeaderboardRequested() { return true; },
     onModeSelectRequested() { return true; },
     onOptionsRequested() { return true; },
     onPlatformReviewRequested() { return true; },

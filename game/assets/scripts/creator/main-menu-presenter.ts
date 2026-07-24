@@ -110,7 +110,10 @@ export interface MainMenuSettingsPort {
 
 export type MainMenuUnsupportedDestination =
   | Exclude<MainMenuImmediateDestinationLayer, 'OptionsLayer'>
-  | Exclude<MainMenuDestinationLayer, 'ModeSelectLayer'>;
+  | Exclude<
+      MainMenuDestinationLayer,
+      'LeaderboardLayer' | 'ModeSelectLayer'
+    >;
 
 export interface MainMenuNavigationTransaction {
   readonly destination: MainMenuDestinationLayer | MainMenuImmediateDestinationLayer;
@@ -122,6 +125,10 @@ export interface MainMenuNavigationTransaction {
 export interface MainMenuPresenterLifecycle {
   /** `false` reports a rolled-back host transaction; `void` means success. */
   readonly onModeSelectRequested: (
+    transaction: MainMenuNavigationTransaction,
+  ) => boolean | void;
+  /** Recovered delayed fruit route using the same source transaction boundary. */
+  readonly onLeaderboardRequested: (
     transaction: MainMenuNavigationTransaction,
   ) => boolean | void;
   /** Explicit recovered immediate route; About remains on the unsupported boundary. */
@@ -164,6 +171,7 @@ export interface MainMenuPresenterState {
   readonly activated: boolean;
   readonly disposed: boolean;
   readonly navigationPending: boolean;
+  readonly poisoned: boolean;
   readonly retainedHeartCount: number;
   readonly suspended: boolean;
 }
@@ -245,6 +253,7 @@ export class MainMenuPresenter {
     options: PresentedImageControl;
     review: PresentedImageControl;
   }>;
+  private cleanupPoisoned = false;
   private disposedValue = false;
   private entryElapsedSeconds = 0;
   private readonly hearts: RuntimeHeart[] = [];
@@ -406,6 +415,7 @@ export class MainMenuPresenter {
       activated: this.activatedValue,
       disposed: this.disposedValue,
       navigationPending: this.navigationStatus === 'pending',
+      poisoned: this.cleanupPoisoned,
       retainedHeartCount: this.hearts.length,
       suspended: this.suspendedValue,
     });
@@ -414,6 +424,9 @@ export class MainMenuPresenter {
   activate(): void {
     if (this.disposedValue || !isValid(this.root, true)) {
       throw new Error('Disposed Main Menu presenter cannot activate');
+    }
+    if (this.cleanupPoisoned) {
+      throw new Error('Poisoned Main Menu presenter cannot activate');
     }
     if (this.activatedValue) {
       throw new Error('Main Menu presenter can activate only once');
@@ -507,6 +520,12 @@ export class MainMenuPresenter {
 
   /** Restores the cut gate after a host transaction failed or later rolled back. */
   rearmNavigationAfterFailure(): boolean {
+    if (this.cleanupPoisoned) {
+      throw new MainMenuCleanupError(
+        'Poisoned Main Menu presenter cannot rearm navigation',
+        [new Error('A prior listener or input-lease cleanup did not complete')],
+      );
+    }
     if (
       this.disposedValue
       || !this.activatedValue
@@ -537,27 +556,28 @@ export class MainMenuPresenter {
       this.disposedValue
       || !this.activatedValue
       || this.suspendedValue
+      || this.cleanupPoisoned
       || !this.inputLeaseHeld
     ) {
       return false;
     }
-    this.unregisterBladeEvents();
+
+    const failures: unknown[] = [];
+    attemptCleanup(failures, () => this.unregisterBladeEvents());
+    attemptCleanup(failures, () => this.bladeInput.setCutEnabled(false));
+    attemptCleanup(failures, () => this.releaseClaimedBladeSlots());
     try {
-      this.bladeInput.setCutEnabled(false);
-      this.releaseClaimedBladeSlots();
       this.bladeInput.deactivateForNonClassicScreen();
       this.inputLeaseHeld = false;
-      this.suspendedValue = true;
-      return true;
     } catch (error) {
-      try {
-        this.bladeInput.setCutEnabled(this.navigationStatus === 'idle');
-        this.registerBladeEvents();
-      } catch {
-        this.unregisterBladeEvents();
-      }
-      throw error;
+      failures.push(error);
     }
+    this.suspendedValue = true;
+    if (failures.length > 0) {
+      this.markCleanupPoisoned();
+      throw new MainMenuCleanupError('Main Menu suspension failed', failures);
+    }
+    return true;
   }
 
   dispose(): boolean {
@@ -1070,12 +1090,20 @@ export class MainMenuPresenter {
     });
     let transactionSucceeded: boolean;
     try {
-      transactionSucceeded = attach.destination === 'ModeSelectLayer'
-        ? this.input.lifecycle.onModeSelectRequested(transaction) !== false
-        : this.input.lifecycle.onUnsupportedDestinationRequested(
+      if (attach.destination === 'ModeSelectLayer') {
+        transactionSucceeded = (
+          this.input.lifecycle.onModeSelectRequested(transaction) !== false
+        );
+      } else if (attach.destination === 'LeaderboardLayer') {
+        transactionSucceeded = (
+          this.input.lifecycle.onLeaderboardRequested(transaction) !== false
+        );
+      } else {
+        transactionSucceeded = this.input.lifecycle.onUnsupportedDestinationRequested(
           attach.destination,
           transaction,
         ) !== false;
+      }
     } catch (error) {
       this.navigationStatus = 'completed';
       try {
@@ -1226,6 +1254,7 @@ export class MainMenuPresenter {
   private canInteract(): boolean {
     return this.activatedValue
       && !this.disposedValue
+      && !this.cleanupPoisoned
       && !this.suspendedValue
       && this.navigationStatus === 'idle';
   }
@@ -1255,17 +1284,31 @@ export class MainMenuPresenter {
       this.registerBladeEvents();
       this.suspendedValue = false;
     } catch (error) {
-      this.unregisterBladeEvents();
-      try {
-        if (this.inputLeaseHeld) {
+      const cleanupFailures: unknown[] = [];
+      attemptCleanup(cleanupFailures, () => this.unregisterBladeEvents());
+      if (this.inputLeaseHeld) {
+        try {
           this.bladeInput.deactivateForNonClassicScreen();
           this.inputLeaseHeld = false;
+        } catch (cleanupError) {
+          cleanupFailures.push(cleanupError);
         }
-      } catch {
-        // Preserve the original acquisition failure while keeping the presenter suspended.
+      }
+      this.suspendedValue = true;
+      if (cleanupFailures.length > 0) {
+        this.markCleanupPoisoned();
+        throw new MainMenuCleanupError(
+          'Main Menu navigation rearm rollback failed',
+          [error, ...cleanupFailures],
+        );
       }
       throw error;
     }
+  }
+
+  private markCleanupPoisoned(): void {
+    this.cleanupPoisoned = true;
+    this.suspendedValue = true;
   }
 }
 
@@ -1533,6 +1576,7 @@ function assertInput(input: MainMenuPresenterInput): void {
   ], 'settings.state');
   assertFunctions(input.lifecycle, [
     'onExitRequested',
+    'onLeaderboardRequested',
     'onModeSelectRequested',
     'onOptionsRequested',
     'onPlatformReviewRequested',

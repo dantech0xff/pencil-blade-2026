@@ -57,6 +57,14 @@ import {
 } from './main-menu-presenter';
 import { loadMainMenuResources, type LoadedMainMenuResources } from './main-menu-resource-loader';
 import {
+  LeaderboardPresenter,
+  type LeaderboardNavigationTransaction,
+} from './leaderboard-presenter';
+import {
+  loadLeaderboardResources,
+  type LoadedLeaderboardResources,
+} from './leaderboard-resource-loader';
+import {
   ModeSelectFatalNavigationError,
   ModeSelectPresenter,
   type ModeSelectNavigationTransaction,
@@ -103,6 +111,7 @@ export type RecoveredAppShellState =
   | 'destroyed'
   | 'failed'
   | 'gn-style'
+  | 'leaderboard'
   | 'main-menu'
   | 'mode-select'
   | 'options';
@@ -124,10 +133,14 @@ export interface RecoveredAppShellPlatformReviewRequest {
 }
 
 interface RecoveredAppResources {
+  readonly leaderboard: LoadedLeaderboardResources;
   readonly mainMenu: LoadedMainMenuResources;
   readonly modeSelect: LoadedModeSelectResources;
   readonly options: LoadedOptionsResources;
 }
+
+type MenuScreenPresenter = MainMenuPresenter | OptionsPresenter | LeaderboardPresenter;
+type MenuScreenLabel = 'Leaderboard' | 'Main Menu' | 'Options';
 
 interface CrazyMainMenuNavigationRequest {
   readonly root: Node;
@@ -163,6 +176,7 @@ interface CapturedCrazyMainMenuNavigationRequest {
 @requireComponent(CrazyGameplayController)
 @requireComponent(ClassicGameplayController)
 export class RecoveredAppShellController extends Component {
+  private activeLeaderboard: LeaderboardPresenter | null = null;
   private activeMainMenu: MainMenuPresenter | null = null;
   private activeModeSelect: ModeSelectPresenter | null = null;
   private activeOptions: OptionsPresenter | null = null;
@@ -295,6 +309,7 @@ export class RecoveredAppShellController extends Component {
       return;
     }
     this.sharedLeaf?.update(deltaSeconds);
+    this.activeLeaderboard?.update(deltaSeconds);
     this.activeMainMenu?.update(deltaSeconds);
     this.activeModeSelect?.update(deltaSeconds);
     this.activeOptions?.update(deltaSeconds);
@@ -364,12 +379,14 @@ export class RecoveredAppShellController extends Component {
     this.stateValue = 'destroyed';
     this.onDisable();
     runBestEffortCleanup('Recovered app shell teardown', [
+      () => this.activeLeaderboard?.dispose(),
       () => this.activeMainMenu?.dispose(),
       () => this.activeModeSelect?.dispose(),
       () => this.activeOptions?.dispose(),
       () => this.sharedScene?.dispose(),
       () => this.nonClassicPhysics?.dispose(),
     ]);
+    this.activeLeaderboard = null;
     this.activeMainMenu = null;
     this.activeModeSelect = null;
     this.activeOptions = null;
@@ -465,11 +482,13 @@ export class RecoveredAppShellController extends Component {
     });
     const [
       sharedResources,
+      leaderboardResources,
       mainMenuResources,
       modeSelectResources,
       optionsResources,
     ] = await Promise.all([
       loadSharedGameSceneResources(assetTree),
+      loadLeaderboardResources(assetTree),
       loadMainMenuResources(assetTree),
       loadModeSelectResources(assetTree),
       loadOptionsResources(assetTree),
@@ -505,6 +524,7 @@ export class RecoveredAppShellController extends Component {
       this.viewport = viewport;
       this.nonClassicPhysics = nonClassicPhysics;
       this.resources = Object.freeze({
+        leaderboard: leaderboardResources,
         mainMenu: mainMenuResources,
         modeSelect: modeSelectResources,
         options: optionsResources,
@@ -552,6 +572,9 @@ export class RecoveredAppShellController extends Component {
       },
       lifecycle: {
         onExitRequested: () => director.end(),
+        onLeaderboardRequested: (transaction) => (
+          this.transitionMainMenuToLeaderboard(transaction)
+        ),
         onModeSelectRequested: (transaction) => (
           this.transitionMainMenuToModeSelect(transaction)
         ),
@@ -571,6 +594,34 @@ export class RecoveredAppShellController extends Component {
         selectedBladeId,
         catalog: gameplay.sharedResourceCatalog.standardBlades,
       },
+      viewport: this.requireViewport(),
+    });
+  }
+
+  private createLeaderboardPresenter(): LeaderboardPresenter {
+    const gameplay = this.requireGameplayController();
+    const resources = this.requireResources();
+    const settingsState = gameplay.sharedSettingsRuntime.state;
+    const settingsSnapshot = settingsState.snapshot;
+    return LeaderboardPresenter.create({
+      audio: gameplay.sharedAudioPresenter,
+      bladeInput: this.requireBladeInput(),
+      canvas: this.node,
+      lifecycle: {
+        onMainMenuRequested: (transaction) => (
+          this.transitionLeaderboardToMainMenu(transaction)
+        ),
+      },
+      resources: resources.leaderboard,
+      settings: Object.freeze({
+        effectsEnabled: () => settingsState.snapshot.effectsEnabled,
+        classic: settingsSnapshot.leaderboard,
+        crazy: settingsSnapshot.crazyLeaderboard,
+        gnStyle: settingsState.gnStyleLeaderboard,
+        classicBird: settingsState.birdClassicLeaderboard,
+        crazyBird: settingsState.birdCrazyLeaderboard,
+        comboBird: settingsState.birdComboLeaderboard,
+      }),
       viewport: this.requireViewport(),
     });
   }
@@ -685,6 +736,46 @@ export class RecoveredAppShellController extends Component {
     });
   }
 
+  private transitionMainMenuToLeaderboard(
+    transaction: MainMenuNavigationTransaction,
+  ): boolean {
+    const oldPresenter = this.activeMainMenu;
+    if (
+      oldPresenter === null
+      || transaction.root !== oldPresenter.root
+      || transaction.destination !== 'LeaderboardLayer'
+      || transaction.timing !== 'delayed'
+      || transaction.zOrder !== 1
+    ) {
+      return false;
+    }
+    return this.runTransition('main-menu', 'leaderboard', () => {
+      const sharedScene = this.requireSharedScene();
+      const nextPresenter = this.createLeaderboardPresenter();
+      try {
+        const previous = sharedScene.replaceCurrentScreen(nextPresenter.root);
+        if (previous !== oldPresenter.root || !oldPresenter.suspendForTransition()) {
+          throw new Error('Main Menu did not surrender its Leaderboard transition lease');
+        }
+        nextPresenter.activate();
+      } catch (error) {
+        this.compensateFailedMenuScreenReplacement(
+          oldPresenter,
+          nextPresenter,
+          error,
+          'Main Menu',
+          'Leaderboard',
+          oldPresenter.state.poisoned,
+        );
+      }
+      this.activeMainMenu = null;
+      this.activeLeaderboard = nextPresenter;
+      this.stateValue = 'leaderboard';
+      disposeCommittedPresenter(oldPresenter, 'Main Menu');
+      return true;
+    });
+  }
+
   private transitionMainMenuToOptions(
     transaction: MainMenuNavigationTransaction,
   ): boolean {
@@ -708,18 +799,59 @@ export class RecoveredAppShellController extends Component {
         }
         nextPresenter.activate();
       } catch (error) {
-        this.compensateFailedMenuOptionsReplacement(
+        this.compensateFailedMenuScreenReplacement(
           oldPresenter,
           nextPresenter,
           error,
           'Main Menu',
           'Options',
+          oldPresenter.state.poisoned,
         );
       }
       this.activeMainMenu = null;
       this.activeOptions = nextPresenter;
       this.stateValue = 'options';
       disposeCommittedPresenter(oldPresenter, 'Main Menu');
+      return true;
+    });
+  }
+
+  private transitionLeaderboardToMainMenu(
+    transaction: LeaderboardNavigationTransaction,
+  ): boolean {
+    const oldPresenter = this.activeLeaderboard;
+    if (
+      oldPresenter === null
+      || transaction.root !== oldPresenter.root
+      || transaction.destination !== 'MainMenuLayer'
+      || transaction.timing !== 'immediate'
+      || transaction.zOrder !== 1
+    ) {
+      return false;
+    }
+    return this.runTransition('leaderboard', 'main-menu', () => {
+      const sharedScene = this.requireSharedScene();
+      const nextPresenter = this.createMainMenuPresenter();
+      try {
+        const previous = sharedScene.replaceCurrentScreen(nextPresenter.root);
+        if (previous !== oldPresenter.root || !oldPresenter.suspendForTransition()) {
+          throw new Error('Leaderboard did not surrender its transition lease');
+        }
+        nextPresenter.activate();
+      } catch (error) {
+        this.compensateFailedMenuScreenReplacement(
+          oldPresenter,
+          nextPresenter,
+          error,
+          'Leaderboard',
+          'Main Menu',
+          oldPresenter.state.poisoned,
+        );
+      }
+      this.activeLeaderboard = null;
+      this.activeMainMenu = nextPresenter;
+      this.stateValue = 'main-menu';
+      disposeCommittedPresenter(oldPresenter, 'Leaderboard');
       return true;
     });
   }
@@ -784,7 +916,7 @@ export class RecoveredAppShellController extends Component {
         }
         nextPresenter.activate();
       } catch (error) {
-        this.compensateFailedMenuOptionsReplacement(
+        this.compensateFailedMenuScreenReplacement(
           oldPresenter,
           nextPresenter,
           error,
@@ -2237,33 +2369,47 @@ export class RecoveredAppShellController extends Component {
     throw error;
   }
 
-  private compensateFailedMenuOptionsReplacement(
-    oldPresenter: MainMenuPresenter | OptionsPresenter,
-    nextPresenter: MainMenuPresenter | OptionsPresenter,
+  private compensateFailedMenuScreenReplacement(
+    oldPresenter: MenuScreenPresenter,
+    nextPresenter: MenuScreenPresenter,
     error: unknown,
-    source: 'Main Menu' | 'Options',
-    destination: 'Main Menu' | 'Options',
+    source: MenuScreenLabel,
+    destination: MenuScreenLabel,
+    sourceOwnershipPoisoned = false,
   ): never {
     const rollbackFailures: unknown[] = [];
-    try {
-      this.restorePreviousScreen(oldPresenter.root, nextPresenter.root);
-    } catch (rollbackError) {
-      rollbackFailures.push(rollbackError);
-    }
-    if (rollbackFailures.length === 0) {
+    if (!sourceOwnershipPoisoned) {
       try {
-        nextPresenter.dispose();
+        this.restorePreviousScreen(oldPresenter.root, nextPresenter.root);
       } catch (rollbackError) {
         rollbackFailures.push(rollbackError);
       }
-    }
-    if (rollbackFailures.length === 0) {
-      throw error;
+      if (rollbackFailures.length === 0) {
+        try {
+          nextPresenter.dispose();
+        } catch (rollbackError) {
+          rollbackFailures.push(rollbackError);
+        }
+      }
+      if (rollbackFailures.length === 0) {
+        try {
+          if (!oldPresenter.rearmNavigationAfterFailure()) {
+            throw new Error(
+              `${source} to ${destination} rollback could not rearm the source screen`,
+            );
+          }
+        } catch (rollbackError) {
+          rollbackFailures.push(rollbackError);
+        }
+      }
+      if (rollbackFailures.length === 0) {
+        throw error;
+      }
     }
 
     const fatalCleanupFailures: unknown[] = [];
     try {
-      this.releaseFailedMenuOptionsScreenOwnership(
+      this.releaseFailedMenuScreenOwnership(
         oldPresenter.root,
         nextPresenter.root,
       );
@@ -2286,18 +2432,30 @@ export class RecoveredAppShellController extends Component {
     if (this.activeOptions === oldPresenter) {
       this.activeOptions = null;
     }
+    if (this.activeLeaderboard === oldPresenter) {
+      this.activeLeaderboard = null;
+    }
 
+    const failure = sourceOwnershipPoisoned
+      ? 'source ownership is poisoned'
+      : 'rollback is incomplete';
+    const secondaryFailures = [
+      ...rollbackFailures,
+      ...fatalCleanupFailures,
+    ];
     throw new ModeSelectFatalNavigationError(
-      `${source} to ${destination} rollback is incomplete`,
-      aggregateWithPrimaryError(
-        `${source} to ${destination} rollback failed`,
-        error,
-        [...rollbackFailures, ...fatalCleanupFailures],
-      ),
+      `${source} to ${destination} ${failure}`,
+      secondaryFailures.length === 0
+        ? error
+        : aggregateWithPrimaryError(
+          `${source} to ${destination} cleanup failed`,
+          error,
+          secondaryFailures,
+        ),
     );
   }
 
-  private releaseFailedMenuOptionsScreenOwnership(
+  private releaseFailedMenuScreenOwnership(
     previous: Node,
     attempted: Node,
   ): void {
@@ -2306,19 +2464,19 @@ export class RecoveredAppShellController extends Component {
     if (current !== null) {
       if (current !== previous && current !== attempted) {
         throw new Error(
-          'Menu/Options fatal cleanup cannot release an unexpected current screen',
+          'Menu-screen fatal cleanup cannot release an unexpected current screen',
         );
       }
       const detached = sharedScene.detachCurrentScreen(current);
       if (detached !== current) {
         throw new Error(
-          'Menu/Options fatal cleanup detached an unexpected current screen',
+          'Menu-screen fatal cleanup detached an unexpected current screen',
         );
       }
     }
     if (sharedScene.currentScreen !== null) {
       throw new Error(
-        'Menu/Options fatal cleanup could not release current-screen ownership',
+        'Menu-screen fatal cleanup could not release current-screen ownership',
       );
     }
   }

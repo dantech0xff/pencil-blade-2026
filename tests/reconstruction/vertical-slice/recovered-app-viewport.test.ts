@@ -19,7 +19,7 @@ const {
   createRecoveredAppViewport,
 } = await import('../../../game/assets/scripts/creator/recovered-app-viewport.ts');
 
-test('creates a shared viewport that satisfies both Main Menu and Mode Select contracts', () => {
+test('creates a shared viewport for every non-gameplay foreground contract', () => {
   const compact = createRecoveredAppViewport({
     profile: { designHeight: 800, designWidth: 480 },
     visibleRect: { height: 800, width: 480, x: 0, y: 0 },

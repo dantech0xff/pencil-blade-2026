@@ -59,6 +59,7 @@ test('destroyed shell never starts delayed Classic Bird preparation', async () =
     (this: Record<string, unknown>) => Promise<void>
   >('initializeRecoveredApp', {
     createRecoveredAppViewport: () => Object.freeze({}),
+    loadLeaderboardResources: async () => Object.freeze({}),
     loadMainMenuResources: async () => Object.freeze({}),
     loadModeSelectResources: async () => Object.freeze({}),
     loadOptionsResources: async () => Object.freeze({}),
@@ -270,7 +271,7 @@ test('Main Menu and Options use explicit transactional replacement without stopp
       'replaceCurrentScreen(nextPresenter.root)',
       'oldPresenter.suspendForTransition()',
       'nextPresenter.activate()',
-      'compensateFailedMenuOptionsReplacement(',
+      'compensateFailedMenuScreenReplacement(',
       'this.stateValue =',
       'disposeCommittedPresenter(oldPresenter',
     ]);
@@ -278,12 +279,14 @@ test('Main Menu and Options use explicit transactional replacement without stopp
   }
   const compensation = extractMethod(
     SOURCE,
-    'compensateFailedMenuOptionsReplacement',
+    'compensateFailedMenuScreenReplacement',
   );
   assertOrderedSubstrings(compensation, [
+    'if (!sourceOwnershipPoisoned)',
     'this.restorePreviousScreen(oldPresenter.root, nextPresenter.root)',
     'nextPresenter.dispose()',
-    'this.releaseFailedMenuOptionsScreenOwnership(',
+    'oldPresenter.rearmNavigationAfterFailure()',
+    'this.releaseFailedMenuScreenOwnership(',
     'oldPresenter.dispose()',
     'new ModeSelectFatalNavigationError(',
   ]);
@@ -333,7 +336,7 @@ for (const route of ['main-menu-to-options', 'options-to-main-menu'] as const) {
     assert.equal(outcome.sourcePresenter.disposed, true);
     assert.equal(outcome.sourcePresenter.suspended, true);
     assert.equal(outcome.sourcePresenter.inputLeaseHeld, false);
-    assert.equal(outcome.sourcePresenter.rearmAttemptCount, 1);
+    assert.equal(outcome.sourcePresenter.rearmAttemptCount, 0);
     assert.equal(outcome.sourcePresenter.rearmSuccessCount, 0);
     assert.equal(outcome.destinationPresenter.disposed, true);
     assert.equal(outcome.activeMainMenu, null);
@@ -345,6 +348,550 @@ for (const route of ['main-menu-to-options', 'options-to-main-menu'] as const) {
     );
   });
 }
+
+test('app shell boots, snapshots, updates, and tears down its Leaderboard owner', () => {
+  const initialize = extractMethod(SOURCE, 'initializeRecoveredApp');
+  const create = extractMethod(SOURCE, 'createLeaderboardPresenter');
+  const update = extractMethod(SOURCE, 'update');
+  const destroy = extractMethod(SOURCE, 'onDestroy');
+
+  assert.match(SOURCE, /import \{\s*LeaderboardPresenter,\s*type LeaderboardNavigationTransaction,/);
+  assert.match(
+    SOURCE,
+    /loadLeaderboardResources,\s*type LoadedLeaderboardResources,/,
+  );
+  assert.match(SOURCE, /\| 'leaderboard'/);
+  assert.match(SOURCE, /readonly leaderboard: LoadedLeaderboardResources/);
+  assert.match(SOURCE, /private activeLeaderboard: LeaderboardPresenter \| null = null/);
+  assertOrderedSubstrings(initialize, [
+    'loadLeaderboardResources(assetTree)',
+    'leaderboard: leaderboardResources',
+    'mainMenu = this.createMainMenuPresenter()',
+  ]);
+  assertOrderedSubstrings(create, [
+    'const settingsState = gameplay.sharedSettingsRuntime.state',
+    'const settingsSnapshot = settingsState.snapshot',
+    'LeaderboardPresenter.create({',
+    'audio: gameplay.sharedAudioPresenter',
+    'bladeInput: this.requireBladeInput()',
+    'canvas: this.node',
+    'onMainMenuRequested: (transaction)',
+    'this.transitionLeaderboardToMainMenu(transaction)',
+    'resources: resources.leaderboard',
+    'settings: Object.freeze({',
+    'effectsEnabled: () => settingsState.snapshot.effectsEnabled',
+    'classic: settingsSnapshot.leaderboard',
+    'crazy: settingsSnapshot.crazyLeaderboard',
+    'gnStyle: settingsState.gnStyleLeaderboard',
+    'classicBird: settingsState.birdClassicLeaderboard',
+    'crazyBird: settingsState.birdCrazyLeaderboard',
+    'comboBird: settingsState.birdComboLeaderboard',
+    'viewport: this.requireViewport()',
+  ]);
+  assert.doesNotMatch(create, /\.save\(|record.*Result|networkAvailable/);
+  assert.match(update, /this\.activeLeaderboard\?\.update\(deltaSeconds\)/);
+  assertOrderedSubstrings(destroy, [
+    'this.activeLeaderboard?.dispose()',
+    'this.activeLeaderboard = null',
+    'this.resources = null',
+  ]);
+});
+
+test('app shell snapshots six boards once but defers effects gating to accepted Back', () => {
+  const board = (
+    first: number,
+    second: number,
+    third: number,
+  ): Readonly<{ readonly first: number; readonly second: number; readonly third: number }> => (
+    Object.freeze({ first, second, third })
+  );
+  const classic = board(3, 2, 1);
+  const crazy = board(6, 5, 4);
+  const gnStyle = board(9, 8, 7);
+  const classicBird = board(12, 11, 10);
+  const crazyBird = board(15, 14, 13);
+  const comboBird = board(18, 17, 16);
+  let effectsEnabled = true;
+  let snapshotReadCount = 0;
+  const settingsState = {
+    birdClassicLeaderboard: classicBird,
+    birdComboLeaderboard: comboBird,
+    birdCrazyLeaderboard: crazyBird,
+    get snapshot() {
+      snapshotReadCount += 1;
+      return Object.freeze({
+        crazyLeaderboard: crazy,
+        effectsEnabled,
+        leaderboard: classic,
+      });
+    },
+    gnStyleLeaderboard: gnStyle,
+  };
+  const create = compileSourceMethod<
+    (this: Record<string, unknown>) => Readonly<{
+      readonly settings: Readonly<{
+        readonly classic: unknown;
+        readonly classicBird: unknown;
+        readonly comboBird: unknown;
+        readonly crazy: unknown;
+        readonly crazyBird: unknown;
+        readonly effectsEnabled: () => boolean;
+        readonly gnStyle: unknown;
+      }>;
+    }>
+  >('createLeaderboardPresenter', {
+    LeaderboardPresenter: {
+      create(input: unknown) {
+        return input;
+      },
+    },
+  });
+  const shell: Record<string, unknown> = {
+    node: Object.freeze({}),
+    requireBladeInput: () => Object.freeze({}),
+    requireGameplayController: () => Object.freeze({
+      sharedAudioPresenter: Object.freeze({}),
+      sharedSettingsRuntime: Object.freeze({ state: settingsState }),
+    }),
+    requireResources: () => Object.freeze({
+      leaderboard: Object.freeze({}),
+    }),
+    requireViewport: () => Object.freeze({}),
+    transitionLeaderboardToMainMenu: () => true,
+  };
+
+  const input = create.call(shell);
+  assert.equal(snapshotReadCount, 1);
+  assert.equal(Object.isFrozen(input.settings), true);
+  assert.deepEqual(
+    {
+      classic: input.settings.classic,
+      classicBird: input.settings.classicBird,
+      comboBird: input.settings.comboBird,
+      crazy: input.settings.crazy,
+      crazyBird: input.settings.crazyBird,
+      gnStyle: input.settings.gnStyle,
+    },
+    { classic, classicBird, comboBird, crazy, crazyBird, gnStyle },
+  );
+
+  effectsEnabled = false;
+  assert.equal(input.settings.effectsEnabled(), false);
+  assert.equal(snapshotReadCount, 2);
+});
+
+test('Main Menu and Leaderboard use exact delayed/immediate transactional routes', () => {
+  const createMainMenu = extractMethod(SOURCE, 'createMainMenuPresenter');
+  const toLeaderboard = extractMethod(SOURCE, 'transitionMainMenuToLeaderboard');
+  const toMainMenu = extractMethod(SOURCE, 'transitionLeaderboardToMainMenu');
+
+  assert.match(
+    createMainMenu,
+    /onLeaderboardRequested: \(transaction\) => \([\s\S]*?this\.transitionMainMenuToLeaderboard\(transaction\)/,
+  );
+  assertOrderedSubstrings(toLeaderboard, [
+    "transaction.destination !== 'LeaderboardLayer'",
+    "transaction.timing !== 'delayed'",
+    'transaction.zOrder !== 1',
+    "this.runTransition('main-menu', 'leaderboard'",
+    'this.createLeaderboardPresenter()',
+    'replaceCurrentScreen(nextPresenter.root)',
+    'oldPresenter.suspendForTransition()',
+    'nextPresenter.activate()',
+    'this.compensateFailedMenuScreenReplacement(',
+    'oldPresenter.state.poisoned',
+    'this.activeMainMenu = null',
+    'this.activeLeaderboard = nextPresenter',
+    "this.stateValue = 'leaderboard'",
+    "disposeCommittedPresenter(oldPresenter, 'Main Menu')",
+  ]);
+  assertOrderedSubstrings(toMainMenu, [
+    "transaction.destination !== 'MainMenuLayer'",
+    "transaction.timing !== 'immediate'",
+    'transaction.zOrder !== 1',
+    "this.runTransition('leaderboard', 'main-menu'",
+    'this.createMainMenuPresenter()',
+    'replaceCurrentScreen(nextPresenter.root)',
+    'oldPresenter.suspendForTransition()',
+    'nextPresenter.activate()',
+    'this.compensateFailedMenuScreenReplacement(',
+    'oldPresenter.state.poisoned',
+    'this.activeLeaderboard = null',
+    'this.activeMainMenu = nextPresenter',
+    "this.stateValue = 'main-menu'",
+    "disposeCommittedPresenter(oldPresenter, 'Leaderboard')",
+  ]);
+  for (const transition of [toLeaderboard, toMainMenu]) {
+    assert.match(transition, /transaction\.root !== oldPresenter\.root/);
+    assert.doesNotMatch(
+      transition,
+      /menubuttonclick|playOneShot|playEffect|stopBackgroundMusic/,
+    );
+  }
+});
+
+for (const route of [
+  'main-menu-to-leaderboard',
+  'leaderboard-to-main-menu',
+] as const) {
+  const label = route === 'main-menu-to-leaderboard'
+    ? 'Main Menu to Leaderboard'
+    : 'Leaderboard to Main Menu';
+
+  test(`${label} commits only after destination activation`, () => {
+    const outcome = executeMenuScreenReplacement(route, false, false);
+
+    assert.equal(outcome.thrown, null);
+    assert.equal(outcome.result, true);
+    assert.equal(outcome.state, outcome.destinationState);
+    assert.equal(outcome.currentScreen, outcome.destinationPresenter.root);
+    assert.equal(outcome.sourceRoot.parent, null);
+    assert.equal(outcome.sourcePresenter.disposed, true);
+    assert.equal(outcome.sourcePresenter.inputLeaseHeld, false);
+    assert.equal(outcome.destinationPresenter.disposed, false);
+    assert.equal(outcome.destinationPresenter.inputLeaseHeld, true);
+    assert.equal(outcome.destinationPresenter.activationCount, 1);
+    assert.equal(outcome.transitionFailureCount, 0);
+  });
+
+  test(`${label} activation failure restores the same source and permits rearm`, () => {
+    const outcome = executeMenuScreenReplacement(route, true, false);
+
+    assert.equal(outcome.thrown, null);
+    assert.equal(outcome.result, false);
+    assert.equal(outcome.state, outcome.sourceState);
+    assert.equal(outcome.currentScreen, outcome.sourceRoot);
+    assert.equal(outcome.sourceRoot.parent?.activeInHierarchy, true);
+    assert.equal(outcome.sourcePresenter.disposed, false);
+    assert.equal(outcome.sourcePresenter.suspended, false);
+    assert.equal(outcome.sourcePresenter.inputLeaseHeld, true);
+    assert.equal(outcome.sourcePresenter.rearmSuccessCount, 1);
+    assert.equal(outcome.destinationPresenter.disposed, true);
+    assert.equal(outcome.transitionFailureCount, 1);
+  });
+
+  test(`${label} incomplete rollback clears the correct active owner`, () => {
+    const outcome = executeMenuScreenReplacement(route, true, true);
+
+    assert.ok(outcome.thrown instanceof ExecutableModeSelectFatalNavigationError);
+    assert.equal(outcome.result, null);
+    assert.equal(outcome.state, 'failed');
+    assert.equal(outcome.currentScreen, null);
+    assert.equal(outcome.sourceRoot.parent, null);
+    assert.equal(outcome.sourcePresenter.disposed, true);
+    assert.equal(outcome.sourcePresenter.suspended, true);
+    assert.equal(outcome.sourcePresenter.inputLeaseHeld, false);
+    assert.equal(outcome.destinationPresenter.disposed, true);
+    assert.equal(outcome.activeLeaderboard, null);
+    assert.equal(outcome.activeMainMenu, null);
+    assert.equal(outcome.activeOptions, null);
+    assert.equal(outcome.transitionFailureCount, 1);
+  });
+}
+
+for (const route of [
+  'main-menu-to-leaderboard',
+  'leaderboard-to-main-menu',
+] as const) {
+  const label = route === 'main-menu-to-leaderboard'
+    ? 'Main Menu to Leaderboard'
+    : 'Leaderboard to Main Menu';
+
+  test(`${label} destination creation failure leaves the source untouched`, () => {
+    const outcome = executeMenuScreenReplacement(
+      route,
+      false,
+      false,
+      { creationFails: true },
+    );
+
+    assert.equal(outcome.thrown, null);
+    assert.equal(outcome.result, false);
+    assert.equal(outcome.state, outcome.sourceState);
+    assert.equal(outcome.currentScreen, outcome.sourceRoot);
+    assert.equal(outcome.sourcePresenter.disposed, false);
+    assert.equal(outcome.sourcePresenter.suspended, false);
+    assert.equal(outcome.sourcePresenter.inputLeaseHeld, true);
+    assert.equal(outcome.sourcePresenter.rearmSuccessCount, 1);
+    assert.equal(outcome.destinationPresenter.activationCount, 0);
+    assert.equal(outcome.destinationPresenter.disposed, false);
+    assert.equal(outcome.transitionFailureCount, 1);
+  });
+
+  test(`${label} initial replacement failure disposes only the attempted destination`, () => {
+    const outcome = executeMenuScreenReplacement(
+      route,
+      false,
+      false,
+      { initialReplacementFails: true },
+    );
+
+    assert.equal(outcome.thrown, null);
+    assert.equal(outcome.result, false);
+    assert.equal(outcome.state, outcome.sourceState);
+    assert.equal(outcome.currentScreen, outcome.sourceRoot);
+    assert.equal(outcome.sourcePresenter.disposed, false);
+    assert.equal(outcome.sourcePresenter.suspended, false);
+    assert.equal(outcome.sourcePresenter.inputLeaseHeld, true);
+    assert.equal(outcome.sourcePresenter.rearmSuccessCount, 1);
+    assert.equal(outcome.destinationPresenter.activationCount, 0);
+    assert.equal(outcome.destinationPresenter.disposed, true);
+    assert.equal(outcome.transitionFailureCount, 1);
+  });
+
+  test(`${label} attempted destination disposal failure triggers fatal cleanup`, () => {
+    const outcome = executeMenuScreenReplacement(
+      route,
+      true,
+      false,
+      { destinationDisposeFailures: 1 },
+    );
+
+    assert.ok(outcome.thrown instanceof ExecutableModeSelectFatalNavigationError);
+    assert.equal(outcome.result, null);
+    assert.equal(outcome.state, 'failed');
+    assert.equal(outcome.currentScreen, null);
+    assert.equal(outcome.sourceRoot.parent, null);
+    assert.equal(outcome.sourcePresenter.disposed, true);
+    assert.equal(outcome.sourcePresenter.inputLeaseHeld, false);
+    assert.equal(outcome.sourcePresenter.rearmSuccessCount, 0);
+    assert.equal(outcome.destinationPresenter.activationCount, 1);
+    assert.equal(outcome.destinationPresenter.disposed, true);
+    assert.equal(outcome.activeLeaderboard, null);
+    assert.equal(outcome.activeMainMenu, null);
+    assert.equal(outcome.activeOptions, null);
+    assert.equal(outcome.transitionFailureCount, 1);
+  });
+
+  test(`${label} source rearm failure is fatal and clears both screen owners`, () => {
+    const outcome = executeMenuScreenReplacement(
+      route,
+      true,
+      false,
+      { rearmFails: true },
+    );
+
+    assert.ok(outcome.thrown instanceof ExecutableModeSelectFatalNavigationError);
+    assert.equal(outcome.result, null);
+    assert.equal(outcome.state, 'failed');
+    assert.equal(outcome.currentScreen, null);
+    assert.equal(outcome.sourceRoot.parent, null);
+    assert.equal(outcome.sourcePresenter.disposed, true);
+    assert.equal(outcome.sourcePresenter.inputLeaseHeld, false);
+    assert.equal(outcome.sourcePresenter.rearmAttemptCount, 1);
+    assert.equal(outcome.sourcePresenter.rearmSuccessCount, 0);
+    assert.equal(outcome.destinationPresenter.activationCount, 1);
+    assert.equal(outcome.destinationPresenter.disposed, true);
+    assert.equal(outcome.activeLeaderboard, null);
+    assert.equal(outcome.activeMainMenu, null);
+    assert.equal(outcome.activeOptions, null);
+    assert.equal(outcome.transitionFailureCount, 1);
+  });
+}
+
+for (const route of [
+  'main-menu-to-leaderboard',
+  'leaderboard-to-main-menu',
+] as const) {
+  const label = route === 'main-menu-to-leaderboard'
+    ? 'Main Menu to Leaderboard'
+    : 'Leaderboard to Main Menu';
+
+  test(`${label} poisoned source suspension fails closed without rearm or activation`, () => {
+    const outcome = executeMenuScreenReplacement(
+      route,
+      false,
+      false,
+      { suspensionFails: true },
+    );
+
+    assert.ok(outcome.thrown instanceof ExecutableModeSelectFatalNavigationError);
+    assert.equal(outcome.result, null);
+    assert.equal(outcome.state, 'failed');
+    assert.equal(outcome.currentScreen, null);
+    assert.equal(outcome.sourceRoot.parent, null);
+    assert.equal(outcome.sourcePresenter.poisoned, true);
+    assert.equal(outcome.sourcePresenter.disposed, true);
+    assert.equal(outcome.sourcePresenter.inputLeaseHeld, false);
+    assert.equal(outcome.sourcePresenter.rearmAttemptCount, 0);
+    assert.equal(outcome.sourcePresenter.rearmSuccessCount, 0);
+    assert.equal(outcome.destinationPresenter.activationCount, 0);
+    assert.equal(outcome.destinationPresenter.disposed, true);
+    assert.equal(outcome.activeLeaderboard, null);
+    assert.equal(outcome.activeMainMenu, null);
+    assert.equal(outcome.activeOptions, null);
+    assert.equal(outcome.transitionFailureCount, 1);
+  });
+}
+
+test('Leaderboard transitions reject stale roots and exact-contract mismatches before mutation', () => {
+  for (const methodName of [
+    'transitionMainMenuToLeaderboard',
+    'transitionLeaderboardToMainMenu',
+  ] as const) {
+    const transition = extractMethod(SOURCE, methodName);
+    assertOrderedSubstrings(transition, [
+      'const oldPresenter = this.active',
+      'oldPresenter === null',
+      'transaction.root !== oldPresenter.root',
+      'return false',
+      'this.runTransition(',
+    ]);
+  }
+  const runTransition = extractMethod(SOURCE, 'runTransition');
+  assert.match(
+    runTransition,
+    /this\.destroyedValue \|\| this\.transitioning \|\| this\.stateValue !== from/,
+  );
+});
+
+test('Leaderboard route guards and runTransition reject wrong or reentrant requests', () => {
+  const toLeaderboard = compileSourceMethod<
+    (this: Record<string, unknown>, transaction: Record<string, unknown>) => boolean
+  >('transitionMainMenuToLeaderboard');
+  const toMainMenu = compileSourceMethod<
+    (this: Record<string, unknown>, transaction: Record<string, unknown>) => boolean
+  >('transitionLeaderboardToMainMenu');
+  const sourceRoot = new ExecutableScreenNode();
+  const staleRoot = new ExecutableScreenNode();
+  const sourcePresenter = { root: sourceRoot };
+  let runCount = 0;
+  const shell: Record<string, unknown> = {
+    activeLeaderboard: sourcePresenter,
+    activeMainMenu: sourcePresenter,
+    runTransition() {
+      runCount += 1;
+      return false;
+    },
+  };
+
+  for (const transaction of [
+    {
+      destination: 'LeaderboardLayer',
+      root: staleRoot,
+      timing: 'delayed',
+      zOrder: 1,
+    },
+    {
+      destination: 'ModeSelectLayer',
+      root: sourceRoot,
+      timing: 'delayed',
+      zOrder: 1,
+    },
+    {
+      destination: 'LeaderboardLayer',
+      root: sourceRoot,
+      timing: 'immediate',
+      zOrder: 1,
+    },
+    {
+      destination: 'LeaderboardLayer',
+      root: sourceRoot,
+      timing: 'delayed',
+      zOrder: 2,
+    },
+  ]) {
+    assert.equal(toLeaderboard.call(shell, transaction), false);
+  }
+  for (const transaction of [
+    {
+      destination: 'MainMenuLayer',
+      root: staleRoot,
+      timing: 'immediate',
+      zOrder: 1,
+    },
+    {
+      destination: 'LeaderboardLayer',
+      root: sourceRoot,
+      timing: 'immediate',
+      zOrder: 1,
+    },
+    {
+      destination: 'MainMenuLayer',
+      root: sourceRoot,
+      timing: 'delayed',
+      zOrder: 1,
+    },
+    {
+      destination: 'MainMenuLayer',
+      root: sourceRoot,
+      timing: 'immediate',
+      zOrder: 2,
+    },
+  ]) {
+    assert.equal(toMainMenu.call(shell, transaction), false);
+  }
+  assert.equal(runCount, 0);
+
+  assert.equal(toLeaderboard.call(shell, {
+    destination: 'LeaderboardLayer',
+    root: sourceRoot,
+    timing: 'delayed',
+    zOrder: 1,
+  }), false);
+  assert.equal(toMainMenu.call(shell, {
+    destination: 'MainMenuLayer',
+    root: sourceRoot,
+    timing: 'immediate',
+    zOrder: 1,
+  }), false);
+  assert.equal(runCount, 2);
+
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const runTransition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      from: string,
+      to: string,
+      operation: () => boolean,
+    ) => boolean
+  >('runTransition', {
+    console: { error() {} },
+    ModeSelectFatalNavigationError: ExecutableModeSelectFatalNavigationError,
+    normalizeError,
+  });
+  let operationCount = 0;
+  const transitionShell = {
+    destroyedValue: false,
+    emitTransitionFailure() {},
+    stateValue: 'main-menu',
+    transitioning: true,
+  };
+  assert.equal(runTransition.call(
+    transitionShell,
+    'main-menu',
+    'leaderboard',
+    () => {
+      operationCount += 1;
+      return true;
+    },
+  ), false);
+  assert.equal(operationCount, 0);
+
+  transitionShell.transitioning = false;
+  assert.equal(runTransition.call(
+    transitionShell,
+    'main-menu',
+    'leaderboard',
+    () => {
+      operationCount += 1;
+      transitionShell.stateValue = 'leaderboard';
+      return true;
+    },
+  ), true);
+  assert.equal(runTransition.call(
+    transitionShell,
+    'main-menu',
+    'leaderboard',
+    () => {
+      operationCount += 1;
+      return true;
+    },
+  ), false);
+  assert.equal(operationCount, 1);
+});
 
 test('Mode Select enters Classic only through an empty shared current-screen host', () => {
   const transition = extractMethod(SOURCE, 'transitionModeSelectToClassic');
@@ -2952,14 +3499,17 @@ function assertOrderedSubstrings(source: string, values: readonly string[]): voi
 class ExecutableSharedScene {
   currentScreen: ExecutableScreenNode | null;
   private readonly host = new ExecutableScreenNode();
+  private readonly initialReplacementFailure: Error | null;
   private readonly rollbackFailure: Error | null;
   private replaceCount = 0;
 
   constructor(
     currentScreen: ExecutableScreenNode | null = null,
     rollbackFailure: Error | null = null,
+    initialReplacementFailure: Error | null = null,
   ) {
     this.currentScreen = currentScreen;
+    this.initialReplacementFailure = initialReplacementFailure;
     this.rollbackFailure = rollbackFailure;
     if (currentScreen !== null) {
       currentScreen.parent = this.host;
@@ -2986,6 +3536,9 @@ class ExecutableSharedScene {
 
   replaceCurrentScreen(nextScreen: ExecutableScreenNode): ExecutableScreenNode {
     this.replaceCount += 1;
+    if (this.replaceCount === 1 && this.initialReplacementFailure !== null) {
+      throw this.initialReplacementFailure;
+    }
     if (this.replaceCount > 1 && this.rollbackFailure !== null) {
       throw this.rollbackFailure;
     }
@@ -3022,34 +3575,91 @@ class ExecutableModeSelectFatalNavigationError extends Error {
 function executeMenuOptionsReplacementFailure(
   route: 'main-menu-to-options' | 'options-to-main-menu',
   incompleteRollback: boolean,
+): ReturnType<typeof executeMenuScreenReplacement> {
+  return executeMenuScreenReplacement(route, true, incompleteRollback);
+}
+
+type ExecutableMenuScreenRoute =
+  | 'leaderboard-to-main-menu'
+  | 'main-menu-to-leaderboard'
+  | 'main-menu-to-options'
+  | 'options-to-main-menu';
+
+interface ExecutableMenuScreenFailureOptions {
+  readonly creationFails?: boolean;
+  readonly destinationDisposeFailures?: number;
+  readonly initialReplacementFails?: boolean;
+  readonly rearmFails?: boolean;
+  readonly suspensionFails?: boolean;
+}
+
+function executeMenuScreenReplacement(
+  route: ExecutableMenuScreenRoute,
+  activationFails: boolean,
+  incompleteRollback: boolean,
+  failureOptions: ExecutableMenuScreenFailureOptions = {},
 ): Readonly<{
+  readonly activeLeaderboard: ExecutableMenuOptionsPresenter | null;
   readonly activeMainMenu: ExecutableMenuOptionsPresenter | null;
   readonly activeOptions: ExecutableMenuOptionsPresenter | null;
   readonly currentScreen: ExecutableScreenNode | null;
+  readonly destinationState: 'leaderboard' | 'main-menu' | 'options';
   readonly destinationPresenter: ExecutableMenuOptionsPresenter;
   readonly result: boolean | null;
   readonly sourcePresenter: ExecutableMenuOptionsPresenter;
   readonly sourceRoot: ExecutableScreenNode;
-  readonly sourceState: 'main-menu' | 'options';
+  readonly sourceState: 'leaderboard' | 'main-menu' | 'options';
   readonly state: unknown;
   readonly thrown: unknown;
   readonly transitionFailureCount: number;
 }> {
   const transitionMethod = route === 'main-menu-to-options'
     ? 'transitionMainMenuToOptions'
-    : 'transitionOptionsToMainMenu';
-  const sourceState = route === 'main-menu-to-options' ? 'main-menu' : 'options';
-  const destinationState = route === 'main-menu-to-options' ? 'options' : 'main-menu';
+    : route === 'options-to-main-menu'
+      ? 'transitionOptionsToMainMenu'
+      : route === 'main-menu-to-leaderboard'
+        ? 'transitionMainMenuToLeaderboard'
+        : 'transitionLeaderboardToMainMenu';
+  const sourceState = route === 'options-to-main-menu'
+    ? 'options'
+    : route === 'leaderboard-to-main-menu'
+      ? 'leaderboard'
+      : 'main-menu';
+  const destinationState = route === 'main-menu-to-options'
+    ? 'options'
+    : route === 'main-menu-to-leaderboard'
+      ? 'leaderboard'
+      : 'main-menu';
+  const destination = route === 'main-menu-to-options'
+    ? 'OptionsLayer'
+    : route === 'main-menu-to-leaderboard'
+      ? 'LeaderboardLayer'
+      : 'MainMenuLayer';
+  const timing = route === 'main-menu-to-leaderboard' ? 'delayed' : 'immediate';
   const sourceRoot = new ExecutableScreenNode();
-  const sourcePresenter = new ExecutableMenuOptionsPresenter(sourceRoot, false);
+  const sourcePresenter = new ExecutableMenuOptionsPresenter(
+    sourceRoot,
+    false,
+    true,
+    failureOptions.suspensionFails ?? false,
+    0,
+    failureOptions.rearmFails ?? false,
+  );
   const destinationPresenter = new ExecutableMenuOptionsPresenter(
     new ExecutableScreenNode(),
-    true,
+    activationFails,
+    false,
+    false,
+    failureOptions.destinationDisposeFailures ?? 0,
+    false,
   );
   const sharedScene = new ExecutableSharedScene(
     sourceRoot,
     incompleteRollback
       ? new Error('injected screen restoration failure')
+      : null,
+    failureOptions.initialReplacementFails
+      ? new Error('injected initial screen replacement failure')
       : null,
   );
   const isValid = (value: unknown): boolean => (
@@ -3069,23 +3679,24 @@ function executeMenuOptionsReplacementFailure(
       attempted: ExecutableScreenNode,
     ) => void
   >('restorePreviousScreen', { isValid });
-  const releaseFailedMenuOptionsScreenOwnership = compileSourceMethod<
+  const releaseFailedMenuScreenOwnership = compileSourceMethod<
     (
       this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
       previous: ExecutableScreenNode,
       attempted: ExecutableScreenNode,
     ) => void
-  >('releaseFailedMenuOptionsScreenOwnership');
-  const compensateFailedMenuOptionsReplacement = compileSourceMethod<
+  >('releaseFailedMenuScreenOwnership');
+  const compensateFailedMenuScreenReplacement = compileSourceMethod<
     (
       this: Record<string, unknown>,
       oldPresenter: ExecutableMenuOptionsPresenter,
       nextPresenter: ExecutableMenuOptionsPresenter,
       error: unknown,
-      source: 'Main Menu' | 'Options',
-      destination: 'Main Menu' | 'Options',
+      source: 'Leaderboard' | 'Main Menu' | 'Options',
+      destination: 'Leaderboard' | 'Main Menu' | 'Options',
+      sourceOwnershipPoisoned?: boolean,
     ) => never
-  >('compensateFailedMenuOptionsReplacement', {
+  >('compensateFailedMenuScreenReplacement', {
     aggregateWithPrimaryError,
     ModeSelectFatalNavigationError: ExecutableModeSelectFatalNavigationError,
   });
@@ -3105,44 +3716,58 @@ function executeMenuOptionsReplacementFailure(
     (
       this: Record<string, unknown>,
       transaction: Readonly<{
-        readonly destination: 'MainMenuLayer' | 'OptionsLayer';
+        readonly destination: 'LeaderboardLayer' | 'MainMenuLayer' | 'OptionsLayer';
         readonly root: ExecutableScreenNode;
-        readonly timing: 'immediate';
+        readonly timing: 'delayed' | 'immediate';
         readonly zOrder: 1;
       }>,
     ) => boolean
-  >(transitionMethod);
+  >(transitionMethod, {
+    disposeCommittedPresenter: (
+      presenter: ExecutableMenuOptionsPresenter,
+    ) => presenter.dispose(),
+  });
   let transitionFailureCount = 0;
+  const createDestinationPresenter = (): ExecutableMenuOptionsPresenter => {
+    if (failureOptions.creationFails) {
+      throw new Error('injected destination creation failure');
+    }
+    return destinationPresenter;
+  };
   const shell: Record<string, unknown> = {
-    activeMainMenu: route === 'main-menu-to-options' ? sourcePresenter : null,
-    activeOptions: route === 'options-to-main-menu' ? sourcePresenter : null,
-    compensateFailedMenuOptionsReplacement(
+    activeLeaderboard: sourceState === 'leaderboard' ? sourcePresenter : null,
+    activeMainMenu: sourceState === 'main-menu' ? sourcePresenter : null,
+    activeOptions: sourceState === 'options' ? sourcePresenter : null,
+    compensateFailedMenuScreenReplacement(
       oldPresenter: ExecutableMenuOptionsPresenter,
       nextPresenter: ExecutableMenuOptionsPresenter,
       error: unknown,
-      source: 'Main Menu' | 'Options',
-      destination: 'Main Menu' | 'Options',
+      source: 'Leaderboard' | 'Main Menu' | 'Options',
+      destination: 'Leaderboard' | 'Main Menu' | 'Options',
+      sourceOwnershipPoisoned?: boolean,
     ) {
-      return compensateFailedMenuOptionsReplacement.call(
+      return compensateFailedMenuScreenReplacement.call(
         this,
         oldPresenter,
         nextPresenter,
         error,
         source,
         destination,
+        sourceOwnershipPoisoned,
       );
     },
-    createMainMenuPresenter: () => destinationPresenter,
-    createOptionsPresenter: () => destinationPresenter,
+    createLeaderboardPresenter: createDestinationPresenter,
+    createMainMenuPresenter: createDestinationPresenter,
+    createOptionsPresenter: createDestinationPresenter,
     destroyedValue: false,
     emitTransitionFailure() {
       transitionFailureCount += 1;
     },
-    releaseFailedMenuOptionsScreenOwnership(
+    releaseFailedMenuScreenOwnership(
       previous: ExecutableScreenNode,
       attempted: ExecutableScreenNode,
     ) {
-      return releaseFailedMenuOptionsScreenOwnership.call(
+      return releaseFailedMenuScreenOwnership.call(
         this as never,
         previous,
         attempted,
@@ -3166,25 +3791,34 @@ function executeMenuOptionsReplacementFailure(
   let thrown: unknown = null;
   try {
     result = transition.call(shell, {
-      destination: route === 'main-menu-to-options'
-        ? 'OptionsLayer'
-        : 'MainMenuLayer',
+      destination,
       root: sourceRoot,
-      timing: 'immediate',
+      timing,
       zOrder: 1,
     });
   } catch (error) {
     thrown = error;
   }
-  if (result === false || thrown !== null) {
-    sourcePresenter.rearmNavigationAfterFailure();
+  if (
+    (result === false || thrown !== null)
+    && !sourcePresenter.disposed
+    && sourcePresenter.rearmSuccessCount === 0
+  ) {
+    try {
+      sourcePresenter.rearmNavigationAfterFailure();
+    } catch {
+      // A poisoned presenter must reject the caller's mandatory recovery attempt.
+    }
   }
 
   assert.notEqual(destinationState, sourceState);
   return Object.freeze({
+    activeLeaderboard:
+      shell.activeLeaderboard as ExecutableMenuOptionsPresenter | null,
     activeMainMenu: shell.activeMainMenu as ExecutableMenuOptionsPresenter | null,
     activeOptions: shell.activeOptions as ExecutableMenuOptionsPresenter | null,
     currentScreen: sharedScene.currentScreen,
+    destinationState,
     destinationPresenter,
     result,
     sourcePresenter,
@@ -3198,8 +3832,13 @@ function executeMenuOptionsReplacementFailure(
 
 class ExecutableMenuOptionsPresenter {
   private readonly activationFails: boolean;
+  private disposeFailuresRemaining: number;
+  private readonly rearmFails: boolean;
+  private readonly suspensionFails: boolean;
+  activationCount = 0;
   disposed = false;
-  inputLeaseHeld = true;
+  inputLeaseHeld: boolean;
+  poisoned = false;
   rearmAttemptCount = 0;
   rearmSuccessCount = 0;
   readonly root: ExecutableScreenNode;
@@ -3208,20 +3847,38 @@ class ExecutableMenuOptionsPresenter {
   constructor(
     root: ExecutableScreenNode,
     activationFails: boolean,
+    inputLeaseHeld = true,
+    suspensionFails = false,
+    disposeFailuresRemaining = 0,
+    rearmFails = false,
   ) {
     this.activationFails = activationFails;
+    this.disposeFailuresRemaining = disposeFailuresRemaining;
+    this.inputLeaseHeld = inputLeaseHeld;
+    this.rearmFails = rearmFails;
     this.root = root;
+    this.suspensionFails = suspensionFails;
+  }
+
+  get state(): Readonly<{ readonly poisoned: boolean }> {
+    return Object.freeze({ poisoned: this.poisoned });
   }
 
   activate(): void {
+    this.activationCount += 1;
     if (this.activationFails) {
       throw new Error('injected destination activation failure');
     }
+    this.inputLeaseHeld = true;
   }
 
   dispose(): boolean {
     if (this.disposed) {
       return false;
+    }
+    if (this.disposeFailuresRemaining > 0) {
+      this.disposeFailuresRemaining -= 1;
+      throw new Error('injected presenter disposal failure');
     }
     this.disposed = true;
     this.inputLeaseHeld = false;
@@ -3231,6 +3888,9 @@ class ExecutableMenuOptionsPresenter {
 
   rearmNavigationAfterFailure(): boolean {
     this.rearmAttemptCount += 1;
+    if (this.poisoned || this.rearmFails) {
+      throw new Error('poisoned source cannot rearm');
+    }
     if (this.disposed || this.root.parent === null) {
       return false;
     }
@@ -3245,6 +3905,10 @@ class ExecutableMenuOptionsPresenter {
       return false;
     }
     this.suspended = true;
+    if (this.suspensionFails) {
+      this.poisoned = true;
+      throw new Error('injected source suspension failure');
+    }
     this.inputLeaseHeld = false;
     return true;
   }

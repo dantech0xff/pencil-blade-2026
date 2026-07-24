@@ -107,21 +107,20 @@ Verified starting point:
   Phase 5A now prioritizes fidelity gaps visible in the playable slice. The default selected
   BasicBlade has a statically recovered four-slot lifecycle, exact `blade0.png` resource,
   ten-point limit, frame-based disposal, and textured triangle-strip geometry; its exact default
-  implementation is now review-passed with four persistent fixed-capacity meshes. Main Menu and
-  Mode Select each have independently recovered GREEN owned-subtree contracts. The shared
-  Background/Leaf/Theme contract corrects the old tag-vs-z interpretation, recovers the inert
-  background/theme fades and seven-leaf world, and makes both clean/default full composites GREEN
-  across contracts. The Mode Select rail/navigation/lock state and exact 45-particle/225-draw
-  unlock burst are now pure-model review-passed. The shared seven-leaf model is also review-passed,
-  with `Step(dt,5,5)` isolated behind a real physics adapter boundary and ordered same-frame
-  respawn commands. The persistent app shell, Main Menu, shared Background/Leaf/Theme, Mode Select
-  rail, and RopeButton/FruitButton physics presenters are now implemented. Their lifecycle
-  transactions, input/physics leases, rollback paths, and exact resources currently hold the
-  checkpoint. Fresh Creator-served Browser Preview now reaches GN Style, including Main Menu ->
-  Mode Select -> GN Style -> exact intro -> live ordinary-fruit gameplay -> Pause/Resume/Replay
-  -> Pause Quit -> Main Menu -> repeated entry -> natural Time Up -> Result Retry -> Result
-  Menu. DevTools reports zero application/runtime errors; one unrelated Chrome extension error
-  is outside the game. No placeholder destination screen is authorized.
+  implementation is now review-passed with four persistent fixed-capacity meshes. Main Menu,
+  Mode Select, and the persistent app shell are implemented; the Leaderboard screen is now the
+  exact six-board local/offline read-only surface in native order Classic, Crazy, Gangnam Style,
+  Classic Bird, Crazy Bird, Combo Bird. It snapshots process-owned Settings once, performs no
+  ranking, mutation, load/save, network, JNI/platform, particles, or RNG, and uses the
+  constrained 10-raster/two-font/`menubuttonclick` resource subset. Main Menu target ID `13`
+  waits `0.75s`; Back returns immediately to a fresh Main Menu; the Back click is emitted only
+  after successful commit. The current checkpoint reaches `139/139` focused Main Menu +
+  Leaderboard + shell/viewport tests, `1354/1354` full vertical-slice tests, `43/43` resource/build
+  tests, Creator 3.8.8 bundled strict TypeScript zero diagnostics, and clean `git diff --check`.
+  Creator Preview passes physical cut entry, aligned labels/scores after native-to-Creator
+  anchor conversion, drag/flick board selection, and Back in the internal compact `480x800`
+  branch and high `720x1280` profile. The standard-blade
+  checkpoint remains `1285/1285` as the historical route-ownership slice.
   The exact standard-bomb raster/audio/entity foundation and Concurrent batch partition are
   contract-tested. Crazy mode now owns its recovered 60-second session, controller graph,
   standard-bomb explosion/fuse-smoke path, special/electric/magnet/Dragon entities, audio,
@@ -152,19 +151,12 @@ Verified starting point:
   ownership plus one debit, 45-particle purchase burst, transactional Main Menu handoff, and
   unpaid-selection reconciliation on Back and before app-hide save. Missing/corrupt save
   continues to default to `999999` coins while any valid persisted balance, including `0`, wins.
-  Leaderboard and progression wiring is now the next unresolved shared surface after the
+  Objectives and progression wiring remain the next unresolved shared surface after the
   standard-blade runtime checkpoint.
-  The current checkpoint reaches `1285/1285` full vertical-slice tests and `43/43`
-  resource/build/catalog tests. The unchanged
-  source/staging/archive inventory remains `14/14` in `217s`; strict Creator TypeScript,
-  reconstruction-policy positive plus `4/4` negative fixtures, native static analysis `7/7`,
-  and diff hygiene are clean. Creator metadata has zero structural errors and zero duplicate
-  UUIDs; the audit remains `fidelity-blocked` only because the preserved
-  `Fonts/CooperBlackStd.otf` is unsupported as a Creator Font consumer.
   Project completion still requires the remaining resource consumers and scene/prefab map,
   a pinned integration/toolchain policy, and build validation.
 - Phase 6 continues after all six production gameplay routes and the recovered Options screen
-  reached their contract and fresh Creator Preview gates. The remaining scope is leaderboard
+  reached their contract and fresh Creator Preview gates. The remaining scope is Objectives
   and progression wiring, the other menu/progression states, first-launch `flag` bootstrap,
   global asset-consumer and scene/prefab reconciliation, Android build validation, and
   release-rights clearance. The standard-blade runtime checkpoint is complete and no longer
