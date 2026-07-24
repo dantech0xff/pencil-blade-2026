@@ -102,8 +102,9 @@ Verified starting point:
   with diagnostics while writes stay disabled for that process to prevent progression loss. The
   current Preview attempt exercises the result boundary and a same-parent Result->Retry cycle at
   the captured parent without a reload or error overlay. Result-to-Main Menu replacement is now
-  implemented transactionally. Main Menu exit-save is implemented; the first-launch `flag`
-  bootstrap remains open.
+  implemented transactionally. Main Menu exit-save is implemented. Static recovery confirms
+  that `network_available` is the persisted launch sentinel and first activation is an
+  in-memory shell gate; no additional persisted `flag` or migration is justified.
   Phase 5A now prioritizes fidelity gaps visible in the playable slice. The default selected
   BasicBlade has a statically recovered four-slot lifecycle, exact `blade0.png` resource,
   ten-point limit, frame-based disposal, and textured triangle-strip geometry; its exact default
@@ -161,11 +162,15 @@ Verified starting point:
   focused tests, `1494/1494` full vertical-slice tests, `43/43` resource/build tests, Creator
   3.8.8 bundled strict TypeScript, clean diff hygiene, and real pointer
   Main Menu -> About -> Main Menu Preview in internal `480x800` plus high `720x1280`.
-  Project completion still requires the remaining resource consumers and scene/prefab map,
+  The resource-ledger scaffold now maps `743/862` exact live consumers (`86.19%`) and
+  classifies all `862/862` assets as `743` consumed, `108` unknown, `10` excluded, or `1`
+  unsupported. Unknown classification is not a runtime consumer. Project completion still
+  requires recovery or explicit retention of those unknown families and the scene/prefab map,
   a pinned integration/toolchain policy, and build validation.
 - Phase 6 continues after all six production gameplay routes, Options, Leaderboard, Objectives,
-  and About/offline reached their contract and fresh Creator Preview gates. The remaining scope
-  is first-launch `flag` bootstrap plus global asset-consumer and scene/prefab reconciliation.
+  About/offline, first-launch behavior, and global resource classification reached their
+  contract gates. The remaining scope is the `108` unknown asset consumers plus
+  scene/prefab/composition reconciliation.
   Android build validation and release-rights clearance remain Phase 7 gates.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
@@ -175,8 +180,9 @@ Verified starting point:
 - Every identified state and gameplay mode has a versioned contract or an explicit unknown.
 - Every implemented rule links to binary/resource evidence or a reviewed inference and test.
 - Every reused asset has provenance, usage, hash, and rights status.
-- Every canonical game resource is inventoried, staged losslessly, and linked to a Cocos
-  consumer; technical coverage is 100%, independent of the release-rights decision.
+- Every canonical game resource is inventoried, staged losslessly, and linked to an exact Cocos
+  consumer or a reviewed unknown/excluded/unsupported disposition. Classification coverage is
+  100%; runtime consumer coverage and release-rights status remain separate measures.
 - Recovered physics constants and collision/scoring rules map to Creator Physics2D tests.
 - Deterministic reconstruction fixtures cover state, timing, scoring, input, saves, and
   progression; they validate internal consistency, not identity with an unobservable runtime.
@@ -239,6 +245,12 @@ Verified starting point:
 - [Objectives shell host](./reports/implementer-2026-07-24-objectives-shell-host.md)
 - [Objectives final verification](./reports/tester-2026-07-24-objectives-final-checkpoint.md)
 - [Objectives shell review](./reports/reviewer-2026-07-24-objectives-shell-integration.md)
+- [About final verification](./reports/tester-2026-07-24-about-offline-final-checkpoint.md)
+- [First-launch flag contract](./reports/researcher-2026-07-24-first-launch-flag-contract.md)
+- [Resource reconciliation gap map](./reports/explorer-2026-07-24-resource-reconciliation-gap-map.md)
+- [Resource ledger implementation map](./reports/explorer-2026-07-24-resource-ledger-implementation-map.md)
+- [Resource ledger integration review](./reports/reviewer-2026-07-24-resource-ledger-checkpoint.md)
+- [Resource ledger final verification](./reports/tester-2026-07-24-resource-ledger-final-checkpoint.md)
 - [Remaining mode implementation order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 - [Creator readiness audit](./reports/creator-readiness-2026-07-22.md)
 - [Android toolchain readiness audit](./reports/android-toolchain-readiness-2026-07-22.md)

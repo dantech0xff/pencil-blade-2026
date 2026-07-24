@@ -33,9 +33,13 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
-function options(assetRoot = REAL_ASSET_ROOT, rootMetaPath = REAL_ROOT_META) {
+function options(
+  assetRoot = REAL_ASSET_ROOT,
+  rootMetaPath = REAL_ROOT_META,
+  stagingManifestPath = STAGING_MANIFEST,
+) {
   return {
-    stagingManifestPath: STAGING_MANIFEST,
+    stagingManifestPath,
     assetRoot,
     rootMetaPath,
     editorInfoPath: EDITOR_INFO,
@@ -73,6 +77,36 @@ test('audits every current Creator resource and reports only known fidelity bloc
   assert.equal(report.spriteFrames.targetCompliant, 784);
   assert.equal(report.otf.status, 'unsupported-consumer-blocked');
   assert.equal(report.fidelityBlockers.length, 1);
+});
+
+test('metadata audit accepts consumer-ledger churn but rejects the wrong manifest schema', () => {
+  const consumerChurnPath = path.join(SUITE_ROOT, 'consumer-churn-manifest.json');
+  const consumerChurn = readJson(STAGING_MANIFEST);
+  consumerChurn.entries[0].consumerStatus = 'unknown';
+  delete consumerChurn.entries[0].consumerIds;
+  consumerChurn.entries[0].consumerDispositionId = 'metadata-audit-does-not-own-this-field';
+  writeJson(consumerChurnPath, consumerChurn);
+  const churnReport = auditCreatorMetadata(options(
+    REAL_ASSET_ROOT,
+    REAL_ROOT_META,
+    consumerChurnPath,
+  ));
+  assert.equal(churnReport.status, 'fidelity-blocked');
+  assert.deepEqual(churnReport.structuralErrors, []);
+
+  const wrongSchemaPath = path.join(SUITE_ROOT, 'wrong-schema-manifest.json');
+  const wrongSchema = readJson(STAGING_MANIFEST);
+  wrongSchema.schemaVersion = 1;
+  writeJson(wrongSchemaPath, wrongSchema);
+  const wrongSchemaReport = auditCreatorMetadata(options(
+    REAL_ASSET_ROOT,
+    REAL_ROOT_META,
+    wrongSchemaPath,
+  ));
+  assert.equal(wrongSchemaReport.status, 'structurally-invalid');
+  assert.ok(wrongSchemaReport.structuralErrors.some((message) => (
+    message.startsWith('staging manifest schema:')
+  )));
 });
 
 test('CLI distinguishes fidelity blockers from structural corruption', () => {

@@ -37,7 +37,10 @@ transactional Main Menu navigation, and unpaid-selection reconciliation before B
 save. The recovered Objectives surface now owns all 52 ordered definitions, exact dual-profile
 resources, current/next presentation, Skip, progression popups, global and per-type fruit
 notifications across every production route, and transactional Main Menu ownership. First-launch
-`flag` and the remaining cosmetic presentation consumers stay open.
+storage is now reconciled: the recovered persisted sentinel is `network_available`, while the
+app-shell first activation gate is in memory, so no new save field or migration is justified.
+The global resource ledger now classifies all 862 recovered assets without treating unknown
+files as live consumers; the remaining cosmetic/presentation and scene-composition work stays open.
 
 ## Context Links
 
@@ -77,6 +80,11 @@ notifications across every production route, and transactional Main Menu ownersh
 - [About shell checkpoint](./reports/implementer-2026-07-24-about-shell-host.md)
 - [About integration review](./reports/reviewer-2026-07-24-about-offline-integration.md)
 - [About final verification](./reports/tester-2026-07-24-about-offline-final-checkpoint.md)
+- [First-launch flag contract](./reports/researcher-2026-07-24-first-launch-flag-contract.md)
+- [Resource reconciliation gap map](./reports/explorer-2026-07-24-resource-reconciliation-gap-map.md)
+- [Resource ledger implementation map](./reports/explorer-2026-07-24-resource-ledger-implementation-map.md)
+- [Resource ledger integration review](./reports/reviewer-2026-07-24-resource-ledger-checkpoint.md)
+- [Resource ledger final verification](./reports/tester-2026-07-24-resource-ledger-final-checkpoint.md)
 - [Remaining mode order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 
 ## Requirements
@@ -148,15 +156,25 @@ save schema and include reproducible fixtures for progression states.
 - **Complete:** About/offline checkpoint with the exact ten-raster Android closure, direct
   Menu/Review/Email/Like controls, `MOBILE_BACK`, transactional Main Menu routing, and
   sanitized local-only retired-service events.
+- **Complete:** first-launch storage/lifecycle reconciliation. `network_available` remains the
+  recovered persisted launch sentinel and `initialClassicRuntimeActivated` remains an in-memory
+  shell gate; current evidence does not justify a new persisted `flag`.
+- **Complete:** resource-ledger scaffold. Exact live contract roots account for `743/862`
+  assets (`86.19%` runtime consumption); reviewed dispositions close classification to
+  `862/862` with `108` unknown, `10` excluded, and `1` unsupported. Classification does not
+  promote unknown files into runtime consumers.
 - All six production gameplay routes, Leaderboard, Options, standard blades, save/economy,
-  Objectives, and About/offline are complete. Phase 6 remains in progress for first-launch
-  `flag` plus global resource and scene/prefab reconciliation.
+  Objectives, About/offline, first-launch behavior, and global resource classification are
+  complete. Phase 6 remains in progress for the `108` unknown resource consumers and the
+  scene/prefab/composition map.
 
 Current certification checkpoint:
 
 - Focused About/Main Menu/shell integration suite: `169/169`
-- Full deterministic vertical slice: `1494/1494`
-- Resource/build/catalog tests: `43/43`
+- Full deterministic vertical slice: `1498/1498`
+- Top-level resource/build/catalog/tooling tests: `61/61`
+- Resource-ledger generator/registry focused tests: `18/18`
+- Staging/metadata focused tests: `33/33`
 - Static inventory/source/staging/archive workflow: `14/14` in `217s`
 - Reconstruction policy: positive checkpoint and `4/4` negative fixtures
 - Native static analysis: `7/7`
@@ -187,7 +205,9 @@ Current certification checkpoint:
 - [x] Options selection, purchase economy, rollback, and exact screen resources
 - [x] Leaderboards, objective progression, and save/economy
 - [ ] Full content/cosmetics
-- [ ] Remaining settings/results fidelity, including first-launch `flag`
+- [x] First-launch persisted-sentinel and in-memory activation-gate reconciliation
+- [x] Global `862`-asset consumer/disposition ledger and schema-v2 staging manifest
+- [ ] Remaining results fidelity, `108` unknown resource consumers, and scene composition
 - [x] About screen fidelity and offline behavior for retired services
 
 ## Success Criteria
@@ -195,7 +215,7 @@ Current certification checkpoint:
 - [ ] Every statically identified state is implemented, explicitly excluded, or recorded unknown
 - [ ] Recovered and inferred coverage are reported separately; inferences never raise recovered coverage
 - [ ] All mode contracts and progression fixtures pass
-- [ ] Asset/audio usage reconciles with catalog
+- [x] Asset/audio usage reconciles with catalog as consumed, unknown, excluded, or unsupported
 - [ ] Save reset, upgrade, and corruption behavior are defined and tested
 - [ ] No copied unknown-rights content enters a public build without clearance
 - [ ] Creator source/build audit proves that all application behavior is new TypeScript
@@ -215,6 +235,8 @@ leaderboards, if retained, require new approved implementations.
 
 ## Next Steps
 
-Implement first-launch `flag`, then the remaining cosmetics/content work, scene/prefab map,
-and global asset-consumer coverage. Freeze content and enter Phase 7 only when all identified
-states/contracts are reconciled and remaining unknowns are disclosed with impact.
+Recover the Loading surface first, then the remaining advanced blade/particle, result, audio,
+font, and packaged-test families without converting filename guesses into consumers. Build the
+scene/prefab/composition map in parallel where ownership does not overlap. Freeze content and
+enter Phase 7 only when all identified states/contracts are reconciled and the impact of any
+remaining unknowns is explicit.

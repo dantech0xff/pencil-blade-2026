@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 1,
+  "scope": "recovered-apk-assets-without-current-consumers",
+  "statusPolicy": {
+    "unknown": "Preserved exactly, but no current runtime consumer is justified by the reviewed static evidence.",
+    "excluded": "Preserved exactly, but intentionally outside the recovered Android runtime contract.",
+    "unsupported": "Preserved exactly, but the current Cocos Creator runtime cannot provide a supported consumer."
+  },
+  "groups": [
+    {
+      "id": "about-ios-android-exclusion",
+      "status": "excluded",
+      "treePairLogicalPaths": [
+        "Backgrounds/aboutbackground-ios.png"
+      ],
+      "canonicalPaths": [],
+      "reason": "The recovered Android About path uses aboutbackground.png only; the iOS raster must not be substituted.",
+      "evidenceRefs": [
+        "game/assets/scripts/domain/about-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-about-offline-resource-map.md"
+      ]
+    },
+    {
+      "id": "advanced-blade-bolts-unowned",
+      "status": "unknown",
+      "treePairLogicalPaths": [
+        "Blades/Bolts/MainBolt4.png",
+        "Blades/Bolts/MainBolts.png",
+        "Blades/Bolts/MainBolts1.png",
+        "Blades/Bolts/MainBolts2.png",
+        "Blades/Bolts/MainBolts3.png",
+        "Blades/Bolts/SubBolts.png"
+      ],
+      "canonicalPaths": [],
+      "reason": "No reviewed blade ID, branch, sequencing contract, or exact native consumer owns this family.",
+      "evidenceRefs": [
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      ]
+    },
+    {
+      "id": "alternate-centipede-unowned",
+      "status": "unknown",
+      "treePairLogicalPaths": [
+        "Blades/Centipede/body1.png",
+        "Blades/Centipede/head1.png",
+        "Blades/Centipede/tail1.png"
+      ],
+      "canonicalPaths": [],
+      "reason": "The unnumbered Centipede triplet is live, but no reviewed branch or index owns this alternate triplet.",
+      "evidenceRefs": [
+        "game/assets/scripts/domain/standard-blade-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      ]
+    },
+    {
+      "id": "named-dragon-duplicates-unowned",
+      "status": "unknown",
+      "treePairLogicalPaths": [
+        "Blades/Dragon/BlackDragon/black_dragon_body.png",
+        "Blades/Dragon/BlackDragon/black_dragon_head.png",
+        "Blades/Dragon/BlackDragon/black_dragon_tail.png",
+        "Blades/Dragon/BlueDragon/water_dragon_body.png",
+        "Blades/Dragon/BlueDragon/water_dragon_head.png",
+        "Blades/Dragon/BlueDragon/water_dragon_tail.png",
+        "Blades/Dragon/GoldDragon/gold_dragon_body.png",
+        "Blades/Dragon/GoldDragon/gold_dragon_head.png",
+        "Blades/Dragon/GoldDragon/gold_dragon_tail.png",
+        "Blades/Dragon/RedDragon/red_dragon_body.png",
+        "Blades/Dragon/RedDragon/red_dragon_head.png",
+        "Blades/Dragon/RedDragon/red_dragon_tail.png"
+      ],
+      "canonicalPaths": [],
+      "reason": "Byte identity with live generic Dragon rasters is duplicate-data evidence, not proof of a canonical-path consumer.",
+      "evidenceRefs": [
+        "game/assets/scripts/domain/standard-blade-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      ]
+    },
+    {
+      "id": "guidtar-family-unowned",
+      "status": "unknown",
+      "treePairLogicalPaths": [
+        "Blades/Guidtar/guidtar.png",
+        "Blades/Guidtar/guidtar_line.png",
+        "Blades/Guidtar/nodes0.png",
+        "Blades/Guidtar/nodes1.png",
+        "Blades/Guidtar/nodes2.png",
+        "Blades/Guidtar/nodes3.png",
+        "Blades/Guidtar/nodes4.png"
+      ],
+      "canonicalPaths": [],
+      "reason": "No reviewed resource, state, or presentation contract owns the canonically misspelled Guidtar family.",
+      "evidenceRefs": [
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      ]
+    },
+    {
+      "id": "lightning-cloud-particles-unowned",
+      "status": "unknown",
+      "treePairLogicalPaths": [
+        "Blades/Particles/Lightning/cloud0.png",
+        "Blades/Particles/Lightning/cloud1.png",
+        "Blades/Particles/Lightning/cloud2.png",
+        "Blades/Particles/Lightning/cloud3.png",
+        "Blades/Particles/Lightning/cloud4.png"
+      ],
+      "canonicalPaths": [],
+      "reason": "The rasters are preserved, but emitter order, timing, blend policy, and blade or mode ownership are not recovered.",
+      "evidenceRefs": [
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      ]
+    },
+    {
+      "id": "bomb-id-one-reachability-unproven",
+      "status": "unknown",
+      "treePairLogicalPaths": [
+        "Bomb/bomb_10.png"
+      ],
+      "canonicalPaths": [],
+      "reason": "The native factory maps bomb ID 1 to this raster, but no recovered scheduler or production mode is proven to emit that ID.",
+      "evidenceRefs": [
+        "game/assets/scripts/domain/classic-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-standard-bomb-explosion.md"
+      ]
+    },
+    {
+      "id": "orange-back-button-unowned",
+      "status": "unknown",
+      "treePairLogicalPaths": [
+        "Buttons/button-orange-back-normal.png"
+      ],
+      "canonicalPaths": [],
+      "reason": "No exact native resource string, contract, loader, or presenter currently owns this button.",
+      "evidenceRefs": [
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      ]
+    },
+    {
+      "id": "options-index-extras-excluded",
+      "status": "excluded",
+      "treePairLogicalPaths": [
+        "Icons/background-icon-8.png",
+        "Icons/blade-icon-19.png",
+        "Icons/blade-icon-20.png",
+        "Icons/blade-icon-21.png"
+      ],
+      "canonicalPaths": [],
+      "reason": "Recovered Options bounds expose background icons 0 through 7 and blade icons 0 through 17; these packaged extras are not iterated.",
+      "evidenceRefs": [
+        "game/assets/scripts/domain/options-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-options-resource-audit.md"
+      ]
+    },
+    {
+      "id": "result-rank-art-unowned",
+      "status": "unknown",
+      "treePairLogicalPaths": [
+        "Interfaces/object-medal-1st.png",
+        "Interfaces/object-medal-2nd.png",
+        "Interfaces/object-medal-3rd.png",
+        "Interfaces/object-new-best.png"
+      ],
+      "canonicalPaths": [],
+      "reason": "Current Result presentation owns object-medal-none.png; no reviewed rank or new-best branch owns these candidates.",
+      "evidenceRefs": [
+        "game/assets/scripts/domain/classic-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-23-crazy-bird-resource-map.md"
+      ]
+    },
+    {
+      "id": "loading-surface-not-yet-restored",
+      "status": "unknown",
+      "treePairLogicalPaths": [
+        "Loading/backgroundLogo.png",
+        "Loading/loadbkback.png",
+        "Loading/loadbkfront.png",
+        "Loading/loadprocess.png"
+      ],
+      "canonicalPaths": [],
+      "reason": "Exact native strings exist, but LoadingLayer composition, progress semantics, visibility interval, and shell handoff are not yet recovered.",
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json",
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      ]
+    },
+    {
+      "id": "packaged-test-family-unclassified",
+      "status": "unknown",
+      "treePairLogicalPaths": [
+        "Test/bar.png",
+        "Test/box.png",
+        "Test/face.png"
+      ],
+      "canonicalPaths": [],
+      "reason": "Static strings do not yet prove whether these assets are reachable production content, debug-only content, or dead packaging.",
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json",
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      ]
+    },
+    {
+      "id": "orphan-audio-play-sites-unrecovered",
+      "status": "unknown",
+      "treePairLogicalPaths": [],
+      "canonicalPaths": [
+        "Sounds/fruitfail.wav",
+        "Sounds/get_coins.wav",
+        "Sounds/juice1.wav",
+        "Sounds/juice2.wav",
+        "Sounds/juice3.wav",
+        "Sounds/juice4.wav",
+        "Sounds/kiwi.wav",
+        "Sounds/orange.wav",
+        "Sounds/pineapple.wav",
+        "Sounds/scorescreen.wav"
+      ],
+      "reason": "The files and native strings are preserved, but exact event owners, play order, and overlap policies are not recovered.",
+      "evidenceRefs": [
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      ]
+    },
+    {
+      "id": "unowned-ttf-label-sites-unrecovered",
+      "status": "unknown",
+      "treePairLogicalPaths": [],
+      "canonicalPaths": [
+        "Fonts/BOD_B.TTF",
+        "Fonts/BRLNSR.TTF",
+        "Fonts/BuxtonSketch.ttf",
+        "Fonts/COOPBL.TTF",
+        "Fonts/Comic Book.ttf",
+        "Fonts/onthemove.ttf"
+      ],
+      "reason": "No reviewed exact label owner, metrics contract, or runtime load site is recovered for these TTF files.",
+      "evidenceRefs": [
+        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      ]
+    },
+    {
+      "id": "cooper-black-otf-creator-unsupported",
+      "status": "unsupported",
+      "treePairLogicalPaths": [],
+      "canonicalPaths": [
+        "Fonts/CooperBlackStd.otf"
+      ],
+      "reason": "Exact source bytes are preserved, but Cocos Creator 3.8.8 does not provide a supported Font consumer for the recovered OTF metadata.",
+      "evidenceRefs": [
+        "scripts/validate-creator-resource-meta.mjs",
+        "tests/validate-creator-resource-meta-test.mjs"
+      ]
+    }
+  ]
+}

@@ -22,6 +22,12 @@ const CANONICAL_AUTHORITY = Object.freeze({
 });
 
 const SUPPORTED_EXTENSIONS = new Set(['.png', '.wav', '.mp3', '.ttf', '.otf']);
+const RESOURCE_CONSUMER_STATUSES = new Set([
+  'consumed',
+  'excluded',
+  'unknown',
+  'unsupported',
+]);
 const HASH_PATTERN = /^[a-f0-9]{64}$/;
 const TARGET_SUFFIX = ['game', 'assets', 'game'];
 const NOFOLLOW = fs.constants.O_NOFOLLOW ?? 0;
@@ -115,8 +121,11 @@ function readStableFile(filePath, label, expectedIdentity = null, allowedLinks =
 
   try {
     const descriptorBefore = fs.fstatSync(descriptor, { bigint: true });
-    assertSingleLinkFile(descriptorBefore, label);
-    invariant(descriptorBefore.nlink === allowedLinks, `${label} hard-link count changed during open`);
+    invariant(descriptorBefore.isFile(), `${label} must be a regular file`);
+    invariant(
+      descriptorBefore.nlink === allowedLinks,
+      `${label} hard-link count changed during open`,
+    );
     assertStableStat(pathBefore, descriptorBefore, label);
     const buffer = fs.readFileSync(descriptor);
     const descriptorAfter = fs.fstatSync(descriptor, { bigint: true });
@@ -472,6 +481,202 @@ function flattenResourceMap(resourceMap, authority = CANONICAL_AUTHORITY) {
   return { entries, sourceManifestSha256 };
 }
 
+function assertSortedUniqueStrings(values, label, allowEmpty = false) {
+  invariant(Array.isArray(values), `${label} must be an array`);
+  if (!allowEmpty) invariant(values.length > 0, `${label} must not be empty`);
+  const sorted = [...values].sort(compareText);
+  invariant(
+    values.every((value, index) => (
+      typeof value === 'string'
+      && value.length > 0
+      && value === sorted[index]
+      && (index === 0 || value !== values[index - 1])
+    )),
+    `${label} must contain sorted unique non-empty strings`,
+  );
+  return values;
+}
+
+function percent(numerator, denominator) {
+  return denominator === 0
+    ? 100
+    : Math.round((numerator / denominator) * 10_000) / 100;
+}
+
+function resourceReconciliationSummary(entries) {
+  const counts = {
+    consumed: 0,
+    unknown: 0,
+    excluded: 0,
+    unsupported: 0,
+    unmapped: 0,
+  };
+  for (const entry of entries) {
+    invariant(
+      entry.consumerStatus === 'unmapped'
+      || RESOURCE_CONSUMER_STATUSES.has(entry.consumerStatus),
+      `invalid consumer status for ${entry.canonicalPath}: ${String(entry.consumerStatus)}`,
+    );
+    counts[entry.consumerStatus] += 1;
+  }
+  const total = entries.length;
+  const reconciled = total - counts.unmapped;
+  return {
+    consumers: {
+      consumed: counts.consumed,
+      total,
+      coveragePercent: percent(counts.consumed, total),
+      status: counts.consumed === total
+        ? 'complete'
+        : counts.consumed === 0
+          ? 'unmapped'
+          : 'partial',
+    },
+    reconciliation: {
+      classified: reconciled,
+      consumed: counts.consumed,
+      unknown: counts.unknown,
+      excluded: counts.excluded,
+      unsupported: counts.unsupported,
+      total,
+      coveragePercent: percent(reconciled, total),
+      status: reconciled === total ? 'complete' : 'incomplete',
+    },
+  };
+}
+
+function applyResourceReconciliationLedger(
+  baseEntries,
+  ledger,
+  authority = CANONICAL_AUTHORITY,
+) {
+  validateAuthority(authority);
+  invariant(isPlainObject(ledger), 'resource reconciliation ledger must be an object');
+  invariant(ledger.schemaVersion === 1, 'resource reconciliation ledger schemaVersion must be 1');
+  invariant(
+    ledger.scope === 'recovered-apk-resource-reconciliation',
+    'resource reconciliation ledger scope is invalid',
+  );
+  invariant(isPlainObject(ledger.source), 'resource reconciliation ledger source is required');
+  invariant(
+    ledger.source.resourceMapSha256 === authority.resourceMapSha256,
+    'resource reconciliation ledger resource-map SHA-256 mismatch',
+  );
+  invariant(
+    ledger.source.sourceManifestSha256 === authority.sourceManifestSha256,
+    'resource reconciliation ledger source-manifest SHA-256 mismatch',
+  );
+  invariant(
+    ledger.source.consumerRegistry
+      === 'game/assets/scripts/domain/resource-consumer-registry.ts',
+    'resource reconciliation ledger consumer registry is invalid',
+  );
+  invariant(
+    HASH_PATTERN.test(ledger.source.consumerRegistrySha256),
+    'resource reconciliation ledger consumer registry SHA-256 is invalid',
+  );
+  invariant(
+    ledger.source.dispositions
+      === 'forensics/resources/resource-disposition-map.json',
+    'resource reconciliation ledger disposition authority is invalid',
+  );
+  invariant(
+    HASH_PATTERN.test(ledger.source.dispositionsSha256),
+    'resource reconciliation ledger dispositions SHA-256 is invalid',
+  );
+  invariant(
+    Array.isArray(ledger.entries)
+      && ledger.entries.length === baseEntries.length,
+    `resource reconciliation ledger must enumerate exactly ${baseEntries.length} entries`,
+  );
+
+  const baseByPath = new Map(
+    baseEntries.map((entry) => [entry.canonicalPath, entry]),
+  );
+  const reconciledByPath = new Map();
+  let previousPath = null;
+  for (const [index, record] of ledger.entries.entries()) {
+    const label = `resource reconciliation ledger entries[${index}]`;
+    invariant(isPlainObject(record), `${label} must be an object`);
+    const canonicalPath = validateRelativePosixPath(
+      record.canonicalPath,
+      `${label}.canonicalPath`,
+    );
+    invariant(
+      previousPath === null || compareText(previousPath, canonicalPath) < 0,
+      'resource reconciliation ledger entries must be sorted with unique canonical paths',
+    );
+    previousPath = canonicalPath;
+    invariant(baseByPath.has(canonicalPath), `${label} is not staged: ${canonicalPath}`);
+    invariant(
+      RESOURCE_CONSUMER_STATUSES.has(record.status),
+      `${label}.status is invalid: ${String(record.status)}`,
+    );
+    assertSortedUniqueStrings(record.evidenceRefs, `${label}.evidenceRefs`);
+
+    const base = baseByPath.get(canonicalPath);
+    const {
+      consumerStatus: _consumerStatus,
+      creatorMetaStatus,
+      creatorUuidStatus,
+      ...prefix
+    } = base;
+    if (record.status === 'consumed') {
+      assertSortedUniqueStrings(record.consumerIds, `${label}.consumerIds`);
+      invariant(
+        record.dispositionId === undefined && record.reason === undefined,
+        `${label} consumed entries must not contain disposition fields`,
+      );
+      reconciledByPath.set(canonicalPath, {
+        ...prefix,
+        consumerStatus: record.status,
+        consumerIds: [...record.consumerIds],
+        consumerEvidenceRefs: [...record.evidenceRefs],
+        creatorMetaStatus,
+        creatorUuidStatus,
+      });
+      continue;
+    }
+
+    invariant(
+      typeof record.dispositionId === 'string' && record.dispositionId.length > 0,
+      `${label}.dispositionId must be a non-empty string`,
+    );
+    invariant(
+      typeof record.reason === 'string' && record.reason.length > 0,
+      `${label}.reason must be a non-empty string`,
+    );
+    invariant(
+      record.consumerIds === undefined,
+      `${label} non-consumed entries must not contain consumerIds`,
+    );
+    reconciledByPath.set(canonicalPath, {
+      ...prefix,
+      consumerStatus: record.status,
+      consumerDispositionId: record.dispositionId,
+      consumerEvidenceRefs: [...record.evidenceRefs],
+      creatorMetaStatus,
+      creatorUuidStatus,
+    });
+  }
+
+  invariant(
+    reconciledByPath.size === baseEntries.length,
+    'resource reconciliation ledger omitted staged entries',
+  );
+  const entries = baseEntries.map((entry) => reconciledByPath.get(entry.canonicalPath));
+  const expectedSummary = resourceReconciliationSummary(entries);
+  invariant(
+    JSON.stringify(ledger.summary) === JSON.stringify(expectedSummary),
+    'resource reconciliation ledger summary does not match its entries',
+  );
+  invariant(
+    expectedSummary.reconciliation.status === 'complete',
+    'resource reconciliation ledger must explicitly reconcile every staged asset',
+  );
+  return entries;
+}
+
 function expectedDirectories(entries) {
   const directories = new Set();
   for (const entry of entries) {
@@ -536,14 +741,34 @@ function totalBytes(entries) {
   return entries.reduce((sum, entry) => sum + entry.bytes, 0);
 }
 
-function buildManifest(entries, sourceManifestSha256) {
+function buildManifest(
+  entries,
+  sourceManifestSha256,
+  reconciliationSha256 = null,
+) {
   const bytes = totalBytes(entries);
+  const resourceSummary = resourceReconciliationSummary(entries);
+  const hasReconciliationAuthority = resourceSummary.reconciliation.status === 'complete';
+  invariant(
+    !hasReconciliationAuthority || HASH_PATTERN.test(reconciliationSha256),
+    'a complete resource reconciliation requires its ledger SHA-256',
+  );
+  invariant(
+    hasReconciliationAuthority || reconciliationSha256 === null,
+    'an incomplete resource reconciliation must not claim a ledger SHA-256',
+  );
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     scope: 'recovered-apk-assets',
     scopeLimit: 'Complete for recovered APK assets only; canonical sample-project completeness is unresolved.',
     source: {
       authority: 'resource-usage-map.json',
+      reconciliationAuthority: hasReconciliationAuthority
+        ? {
+          file: 'resource-reconciliation-ledger.json',
+          sha256: reconciliationSha256,
+        }
+        : null,
       root: 'assets',
       manifestSha256: sourceManifestSha256,
       immutable: true,
@@ -555,7 +780,8 @@ function buildManifest(entries, sourceManifestSha256) {
     summary: {
       inventory: { assets: entries.length, bytes, coveragePercent: 100, status: 'complete-for-recovered-apk-assets' },
       staging: { assets: entries.length, bytes, coveragePercent: 100, byteMismatches: 0, status: 'byte-verified' },
-      consumers: { mapped: 0, total: entries.length, coveragePercent: 0, status: 'unmapped' },
+      consumers: resourceSummary.consumers,
+      reconciliation: resourceSummary.reconciliation,
       creatorMetadata: { captured: 0, total: entries.length, coveragePercent: 0, status: 'pending' },
       creatorUuids: { captured: 0, total: entries.length, coveragePercent: 0, status: 'pending' },
       rights: { resolved: 0, unresolved: entries.length, status: 'unresolved' },
@@ -565,8 +791,16 @@ function buildManifest(entries, sourceManifestSha256) {
   };
 }
 
-function serializedManifest(entries, sourceManifestSha256) {
-  return `${JSON.stringify(buildManifest(entries, sourceManifestSha256), null, 2)}\n`;
+function serializedManifest(
+  entries,
+  sourceManifestSha256,
+  reconciliationSha256 = null,
+) {
+  return `${JSON.stringify(buildManifest(
+    entries,
+    sourceManifestSha256,
+    reconciliationSha256,
+  ), null, 2)}\n`;
 }
 
 function hasTargetSuffix(targetRoot) {
@@ -599,6 +833,9 @@ function normalizeOptions(options) {
   return {
     sourceRoot: path.resolve(options.sourceRoot),
     resourceMapPath: path.resolve(options.resourceMapPath),
+    reconciliationPath: options.reconciliationPath
+      ? path.resolve(options.reconciliationPath)
+      : null,
     targetRoot: path.resolve(options.targetRoot),
     manifestPath: path.resolve(options.manifestPath),
   };
@@ -608,6 +845,9 @@ function validatePaths(rawOptions) {
   const options = normalizeOptions(rawOptions);
   const effectiveSource = resolveThroughExistingAncestor(options.sourceRoot);
   const effectiveResourceMap = resolveThroughExistingAncestor(options.resourceMapPath);
+  const effectiveReconciliation = options.reconciliationPath
+    ? resolveThroughExistingAncestor(options.reconciliationPath)
+    : null;
   const effectiveTarget = resolveThroughExistingAncestor(options.targetRoot);
   const effectiveManifest = resolveThroughExistingAncestor(options.manifestPath);
   invariant(hasTargetSuffix(options.targetRoot) && hasTargetSuffix(effectiveTarget), 'target must end with game/assets/game');
@@ -630,6 +870,32 @@ function validatePaths(rawOptions) {
     'manifest output must not be inside target',
   );
   invariant(options.resourceMapPath !== options.manifestPath && effectiveResourceMap !== effectiveManifest, 'resource map and manifest output must be different paths');
+  if (options.reconciliationPath) {
+    invariant(
+      options.reconciliationPath !== options.resourceMapPath
+        && effectiveReconciliation !== effectiveResourceMap,
+      'resource map and reconciliation ledger must be different paths',
+    );
+    invariant(
+      options.reconciliationPath !== options.manifestPath
+        && effectiveReconciliation !== effectiveManifest,
+      'reconciliation ledger and manifest output must be different paths',
+    );
+    invariant(
+      options.reconciliationPath !== options.targetRoot
+        && effectiveReconciliation !== effectiveTarget
+        && !isWithin(options.targetRoot, options.reconciliationPath)
+        && !isWithin(effectiveTarget, effectiveReconciliation),
+      'reconciliation ledger must not be inside target',
+    );
+    invariant(
+      options.reconciliationPath !== options.sourceRoot
+        && effectiveReconciliation !== effectiveSource
+        && !isWithin(options.sourceRoot, options.reconciliationPath)
+        && !isWithin(effectiveSource, effectiveReconciliation),
+      'reconciliation ledger must not be inside the immutable source root',
+    );
+  }
   return options;
 }
 
@@ -651,9 +917,10 @@ function stagingAncestorPaths(options) {
   return [
     options.sourceRoot,
     options.resourceMapPath,
+    options.reconciliationPath,
     path.dirname(options.targetRoot),
     path.dirname(options.manifestPath),
-  ];
+  ].filter(Boolean);
 }
 
 function assertStageOutputsAbsent(options) {
@@ -670,7 +937,12 @@ function revalidateImmutableInputs(options, authorityState, authority, ancestorS
     authorityState.source.records,
   );
   if (recheckSourceDirectories) recheckSnapshots(source.directorySnapshots, 'source directory');
-  recheckAuthority(options.resourceMapPath, authorityState, authority);
+  recheckAuthority(
+    options.resourceMapPath,
+    options.reconciliationPath,
+    authorityState,
+    authority,
+  );
 }
 
 function randomSiblingPath(basePath, kind) {
@@ -871,22 +1143,75 @@ function verifyDestination(targetRoot, entries, sourceIdentities) {
   };
 }
 
-function loadAuthority(sourceRoot, resourceMapPath, authority) {
+function loadAuthority(
+  sourceRoot,
+  resourceMapPath,
+  reconciliationPath,
+  authority,
+) {
   validateAuthority(authority);
   const resourceMap = readStableJson(resourceMapPath, 'resource map');
   invariant(
     resourceMap.file.sha256 === authority.resourceMapSha256,
     `resource map SHA-256 mismatch: actual=${resourceMap.file.sha256} expected=${authority.resourceMapSha256}`,
   );
+  invariant(
+    authority !== CANONICAL_AUTHORITY || reconciliationPath !== null,
+    'canonical recovered asset staging requires --reconciliation',
+  );
   const flattened = flattenResourceMap(resourceMap.value, authority);
-  const source = scanAndValidateSource(sourceRoot, flattened.entries, authority.sourceManifestSha256);
-  invariant(totalBytes(flattened.entries) === authority.totalBytes, `source byte total must be exactly ${authority.totalBytes}`);
-  return { ...flattened, source, resourceMapFile: resourceMap.file };
+  let entries = flattened.entries;
+  let reconciliationFile = null;
+  if (reconciliationPath) {
+    const reconciliation = readStableJson(
+      reconciliationPath,
+      'resource reconciliation ledger',
+    );
+    entries = applyResourceReconciliationLedger(
+      entries,
+      reconciliation.value,
+      authority,
+    );
+    reconciliationFile = reconciliation.file;
+  }
+  const source = scanAndValidateSource(
+    sourceRoot,
+    entries,
+    authority.sourceManifestSha256,
+  );
+  invariant(totalBytes(entries) === authority.totalBytes, `source byte total must be exactly ${authority.totalBytes}`);
+  return {
+    ...flattened,
+    entries,
+    source,
+    resourceMapFile: resourceMap.file,
+    reconciliationFile,
+  };
 }
 
-function recheckAuthority(resourceMapPath, authorityState, authority) {
+function recheckAuthority(
+  resourceMapPath,
+  reconciliationPath,
+  authorityState,
+  authority,
+) {
   const resourceMap = readStableFile(resourceMapPath, 'resource map', authorityState.resourceMapFile.identity);
   invariant(resourceMap.sha256 === authority.resourceMapSha256, `resource map changed during staging. ${RACE_LIMITATION}`);
+  if (reconciliationPath) {
+    invariant(
+      authorityState.reconciliationFile !== null,
+      'resource reconciliation authority state is missing',
+    );
+    const reconciliation = readStableFile(
+      reconciliationPath,
+      'resource reconciliation ledger',
+      authorityState.reconciliationFile.identity,
+    );
+    invariant(
+      reconciliation.sha256 === authorityState.reconciliationFile.sha256,
+      `resource reconciliation ledger changed during staging. ${RACE_LIMITATION}`,
+    );
+  }
 }
 
 function createExclusiveManifestTemp(manifestPath, contents, publicationState) {
@@ -971,8 +1296,17 @@ function stageAssets(rawOptions, authority = CANONICAL_AUTHORITY, hooks = {}) {
   try {
     lock = acquireStageLock(options.targetRoot, hooks);
     assertStageOutputsAbsent(options);
-    const authorityState = loadAuthority(options.sourceRoot, options.resourceMapPath, authority);
-    const manifestContents = serializedManifest(authorityState.entries, authority.sourceManifestSha256);
+    const authorityState = loadAuthority(
+      options.sourceRoot,
+      options.resourceMapPath,
+      options.reconciliationPath,
+      authority,
+    );
+    const manifestContents = serializedManifest(
+      authorityState.entries,
+      authority.sourceManifestSha256,
+      authorityState.reconciliationFile?.sha256 ?? null,
+    );
     const stageDirectory = createExclusiveStageDirectory(options.targetRoot);
     state.stagePath = stageDirectory.path;
     hooks.afterStagingDirectoryCreated?.({ stagePath: state.stagePath, lockPath: lock.path });
@@ -994,7 +1328,11 @@ function stageAssets(rawOptions, authority = CANONICAL_AUTHORITY, hooks = {}) {
     destination = verifyDestination(options.targetRoot, authorityState.entries, authorityState.source.identities);
     assertPathAbsent(options.manifestPath, 'manifest output');
     publishManifest(options.manifestPath, manifestContents, state);
-    result = { destination, sourceManifestSha256: authority.sourceManifestSha256 };
+    result = {
+      destination,
+      sourceManifestSha256: authority.sourceManifestSha256,
+      resourceSummary: resourceReconciliationSummary(authorityState.entries),
+    };
   } catch (error) {
     operationError = error instanceof Error ? error : new Error(String(error));
   } finally {
@@ -1013,14 +1351,24 @@ function verifyAssets(rawOptions, authority = CANONICAL_AUTHORITY) {
   const ancestorSnapshots = snapshotExistingAncestors([
     options.sourceRoot,
     options.resourceMapPath,
+    options.reconciliationPath,
     options.targetRoot,
     options.manifestPath,
-  ]);
+  ].filter(Boolean));
   assertDirectoryStat(options.sourceRoot, 'source root');
   assertDirectoryStat(options.targetRoot, 'target');
   invariant(lstatMaybe(`${options.targetRoot}.stage.lock`) === null, 'stage lock exists; verification refuses an in-progress staging workflow');
-  const authorityState = loadAuthority(options.sourceRoot, options.resourceMapPath, authority);
-  const expectedManifest = serializedManifest(authorityState.entries, authority.sourceManifestSha256);
+  const authorityState = loadAuthority(
+    options.sourceRoot,
+    options.resourceMapPath,
+    options.reconciliationPath,
+    authority,
+  );
+  const expectedManifest = serializedManifest(
+    authorityState.entries,
+    authority.sourceManifestSha256,
+    authorityState.reconciliationFile?.sha256 ?? null,
+  );
   const actualManifest = readStableFile(options.manifestPath, 'staging manifest');
   invariant(actualManifest.buffer.toString('utf8') === expectedManifest, 'staging manifest does not match the validated resource map and source');
   const destination = verifyDestination(options.targetRoot, authorityState.entries, authorityState.source.identities);
@@ -1030,16 +1378,96 @@ function verifyAssets(rawOptions, authority = CANONICAL_AUTHORITY) {
     authority.sourceManifestSha256,
     authorityState.source.records,
   );
-  recheckAuthority(options.resourceMapPath, authorityState, authority);
+  recheckAuthority(
+    options.resourceMapPath,
+    options.reconciliationPath,
+    authorityState,
+    authority,
+  );
   recheckSnapshots(ancestorSnapshots, 'path ancestor');
-  return { destination, sourceManifestSha256: authority.sourceManifestSha256 };
+  return {
+    destination,
+    sourceManifestSha256: authority.sourceManifestSha256,
+    resourceSummary: resourceReconciliationSummary(authorityState.entries),
+  };
+}
+
+function renderManifest(rawOptions, authority = CANONICAL_AUTHORITY) {
+  const options = validatePaths(rawOptions);
+  assertDirectoryStat(options.sourceRoot, 'source root');
+  assertDirectoryStat(options.targetRoot, 'target');
+  assertDirectoryStat(path.dirname(options.manifestPath), 'manifest parent');
+  assertPathAbsent(options.manifestPath, 'manifest output');
+  invariant(
+    lstatMaybe(`${options.targetRoot}.stage.lock`) === null,
+    'stage lock exists; manifest rendering refuses an in-progress staging workflow',
+  );
+  const ancestorSnapshots = snapshotExistingAncestors([
+    options.sourceRoot,
+    options.resourceMapPath,
+    options.reconciliationPath,
+    options.targetRoot,
+    path.dirname(options.manifestPath),
+  ].filter(Boolean));
+  const authorityState = loadAuthority(
+    options.sourceRoot,
+    options.resourceMapPath,
+    options.reconciliationPath,
+    authority,
+  );
+  const manifestContents = serializedManifest(
+    authorityState.entries,
+    authority.sourceManifestSha256,
+    authorityState.reconciliationFile?.sha256 ?? null,
+  );
+  const destination = verifyDestination(
+    options.targetRoot,
+    authorityState.entries,
+    authorityState.source.identities,
+  );
+  scanAndValidateSource(
+    options.sourceRoot,
+    authorityState.entries,
+    authority.sourceManifestSha256,
+    authorityState.source.records,
+  );
+  recheckAuthority(
+    options.resourceMapPath,
+    options.reconciliationPath,
+    authorityState,
+    authority,
+  );
+  recheckSnapshots(ancestorSnapshots, 'path ancestor');
+  assertPathAbsent(options.manifestPath, 'manifest output');
+  const publicationState = {
+    stagePath: null,
+    targetPublished: false,
+    manifestPublished: false,
+    manifestTempPath: null,
+    lockIssue: null,
+  };
+  try {
+    publishManifest(options.manifestPath, manifestContents, publicationState);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new StagingError(`${message}${recoveryMessage(publicationState)}`);
+  }
+  return {
+    destination,
+    sourceManifestSha256: authority.sourceManifestSha256,
+    resourceSummary: resourceReconciliationSummary(authorityState.entries),
+  };
 }
 
 function parseCli(argv) {
   const [mode, ...tokens] = argv;
-  invariant(mode === 'stage' || mode === 'verify', 'mode must be stage or verify');
+  invariant(
+    mode === 'stage' || mode === 'verify' || mode === 'render-manifest',
+    'mode must be stage, verify, or render-manifest',
+  );
   invariant(tokens.length % 2 === 0, 'every option requires a value');
-  const allowed = new Set(['--source', '--resource-map', '--target', '--manifest']);
+  const required = new Set(['--source', '--resource-map', '--target', '--manifest']);
+  const allowed = new Set([...required, '--reconciliation']);
   const values = new Map();
   for (let index = 0; index < tokens.length; index += 2) {
     const flag = tokens[index];
@@ -1049,12 +1477,15 @@ function parseCli(argv) {
     invariant(typeof value === 'string' && value.length > 0 && !value.startsWith('--'), `missing value for ${flag}`);
     values.set(flag, value);
   }
-  for (const flag of allowed) invariant(values.has(flag), `missing required option: ${flag}`);
+  for (const flag of required) invariant(values.has(flag), `missing required option: ${flag}`);
   return {
     mode,
     options: {
       sourceRoot: path.resolve(values.get('--source')),
       resourceMapPath: path.resolve(values.get('--resource-map')),
+      reconciliationPath: values.has('--reconciliation')
+        ? path.resolve(values.get('--reconciliation'))
+        : null,
       targetRoot: path.resolve(values.get('--target')),
       manifestPath: path.resolve(values.get('--manifest')),
     },
@@ -1063,12 +1494,17 @@ function parseCli(argv) {
 
 function formatResult(mode, result) {
   const destination = result.destination;
+  const consumers = result.resourceSummary.consumers;
+  const reconciliation = result.resourceSummary.reconciliation;
   return `${mode.toUpperCase()} OK assets=${destination.assets}/${EXPECTED_COUNTS.total}`
     + ` bytes=${destination.bytes}`
     + ` source_manifest_sha256=${result.sourceManifestSha256}`
     + ` byte_mismatches=${destination.byteMismatches}`
     + ' inventory_coverage=100% staging_coverage=100%'
-    + ' consumer_coverage=0% consumer_status=unmapped'
+    + ` consumer_coverage=${consumers.coveragePercent}%`
+    + ` consumer_status=${consumers.status}`
+    + ` reconciliation_coverage=${reconciliation.coveragePercent}%`
+    + ` reconciliation_status=${reconciliation.status}`
     + ` creator_meta_sidecars=${destination.metaSidecars}/${destination.expectedMetaSidecars}`
     + ` creator_meta_status=${destination.metaStatus}`
     + ' creator_uuid_status=pending';
@@ -1079,7 +1515,9 @@ function main(argv) {
     const parsed = parseCli(argv);
     const result = parsed.mode === 'stage'
       ? stageAssets(parsed.options, CANONICAL_AUTHORITY)
-      : verifyAssets(parsed.options, CANONICAL_AUTHORITY);
+      : parsed.mode === 'verify'
+        ? verifyAssets(parsed.options, CANONICAL_AUTHORITY)
+        : renderManifest(parsed.options, CANONICAL_AUTHORITY);
     console.log(formatResult(parsed.mode, result));
   } catch (error) {
     console.error(`ERROR: ${error instanceof Error ? error.message : String(error)}`);
@@ -1095,6 +1533,7 @@ export {
   EXPECTED_COUNTS,
   RACE_LIMITATION,
   StagingError,
+  applyResourceReconciliationLedger,
   buildManifest,
   collisionKey,
   createTestAuthority,
@@ -1102,6 +1541,9 @@ export {
   formatResult,
   manifestDigest,
   parseCli,
+  readStableFile,
+  renderManifest,
+  resourceReconciliationSummary,
   scanAndValidateSource,
   stageAssets,
   verifyAssets,

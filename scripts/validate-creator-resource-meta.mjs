@@ -6,7 +6,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const PINNED = Object.freeze({
-  stagingManifestSha256: '9462b09d39004366269b215e25ce61829cf9982d668d79c1940c0fbe10e4e2c2',
   sourceManifestSha256: '0143473b21e56525cde92163f72fd49b2a898ab70ef2b224cdad00eaba9238e3',
   assets: 862,
   bytes: 32945747,
@@ -379,14 +378,16 @@ function finalizeReport(state, pins, editorInfo) {
 
 function auditCreatorMetadata(options, pins = PINNED) {
   const structuralErrors = [];
-  const stagingBytes = fs.readFileSync(options.stagingManifestPath);
-  if (sha256(stagingBytes) !== pins.stagingManifestSha256) {
-    structuralErrors.push('staging manifest SHA-256 mismatch');
-  }
   const staging = readJson(options.stagingManifestPath, structuralErrors, 'staging manifest');
   const editorInfo = readJson(options.editorInfoPath, structuralErrors, 'Creator info') ?? {};
   if (!staging || !Array.isArray(staging.entries)) {
     throw new MetadataAuditError('staging manifest cannot be audited');
+  }
+  if (staging.schemaVersion !== 2) {
+    structuralErrors.push(`staging manifest schema: expected 2, got ${String(staging.schemaVersion)}`);
+  }
+  if (staging.scope !== 'recovered-apk-assets') {
+    structuralErrors.push('staging manifest scope mismatch');
   }
   if (staging.source?.manifestSha256 !== pins.sourceManifestSha256) {
     structuralErrors.push('source manifest SHA-256 mismatch');
@@ -396,6 +397,13 @@ function auditCreatorMetadata(options, pins = PINNED) {
   }
   const totalBytes = staging.entries.reduce((sum, entry) => sum + entry.bytes, 0);
   if (totalBytes !== pins.bytes) structuralErrors.push(`byte count: expected ${pins.bytes}, got ${totalBytes}`);
+  if (
+    staging.summary?.inventory?.assets !== pins.assets
+    || staging.summary?.inventory?.bytes !== pins.bytes
+    || staging.summary?.inventory?.coveragePercent !== 100
+  ) {
+    structuralErrors.push('staging manifest inventory summary mismatch');
+  }
 
   const directories = expectedDirectories(staging.entries);
   const expectedFiles = new Set();

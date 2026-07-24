@@ -10,8 +10,11 @@ import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
   CANONICAL_AUTHORITY,
+  applyResourceReconciliationLedger,
   createTestAuthority,
+  flattenResourceMap,
   formatResult,
+  renderManifest,
   stageAssets,
   verifyAssets,
 } from '../scripts/stage-creator-assets.mjs';
@@ -22,6 +25,12 @@ const REAL_SOURCE = path.join(ROOT, '.forensics-work', 'phase-01', 'jadx', 'reso
 const REAL_MAP = path.join(ROOT, 'forensics', 'resources', 'resource-usage-map.json');
 const REAL_TARGET = path.join(ROOT, 'game', 'assets', 'game');
 const REAL_MANIFEST = path.join(ROOT, 'assets', 'catalog', 'creator-staging-manifest.json');
+const REAL_RECONCILIATION = path.join(
+  ROOT,
+  'assets',
+  'catalog',
+  'resource-reconciliation-ledger.json',
+);
 const EXPECTED_REAL_DIGEST = '0143473b21e56525cde92163f72fd49b2a898ab70ef2b224cdad00eaba9238e3';
 const EXPECTED_MAP_DIGEST = '165238f13f4186a9ab429c9c5a8bab07b4a42e941d0608f757d9e41a44d2ce67';
 const EXPECTED_REAL_BYTES = 32_945_747;
@@ -179,22 +188,37 @@ function runDirect(mode, options, authority = FIXTURE_AUTHORITY, hooks = {}) {
   try {
     const result = mode === 'stage'
       ? stageAssets(options, authority, hooks)
-      : verifyAssets(options, authority);
+      : mode === 'verify'
+        ? verifyAssets(options, authority)
+        : renderManifest(options, authority);
     return { status: 0, stdout: `${formatResult(mode, result)}\n`, stderr: '', result };
   } catch (error) {
     return { status: 1, stdout: '', stderr: `ERROR: ${error.message}\n`, error };
   }
 }
 
-function runCli(mode, { sourceRoot, resourceMapPath, targetRoot, manifestPath }) {
-  return spawnSync(process.execPath, [
+function runCli(
+  mode,
+  {
+    sourceRoot,
+    resourceMapPath,
+    reconciliationPath = null,
+    targetRoot,
+    manifestPath,
+  },
+) {
+  const args = [
     SCRIPT,
     mode,
     '--source', sourceRoot,
     '--resource-map', resourceMapPath,
     '--target', targetRoot,
     '--manifest', manifestPath,
-  ], {
+  ];
+  if (reconciliationPath) {
+    args.push('--reconciliation', reconciliationPath);
+  }
+  return spawnSync(process.execPath, args, {
     cwd: ROOT,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -266,6 +290,49 @@ test('canonical authority constants are pinned and synthetic CLI staging is reje
   assert.equal(fs.existsSync(fixture.manifestPath), false);
 });
 
+test('canonical recovered asset staging requires the reconciliation ledger', () => {
+  const fixture = newCase('canonical-reconciliation-required');
+  fixture.sourceRoot = REAL_SOURCE;
+  fixture.resourceMapPath = REAL_MAP;
+
+  expectFailure(
+    runCli('stage', fixture),
+    /canonical recovered asset staging requires --reconciliation/i,
+    'canonical staging without reconciliation',
+  );
+  assert.equal(fs.existsSync(fixture.targetRoot), false);
+  assert.equal(fs.existsSync(fixture.manifestPath), false);
+  assert.equal(fs.existsSync(`${fixture.targetRoot}.stage.lock`), false);
+});
+
+test('reconciliation ledger requires registry and disposition provenance digests', () => {
+  const entries = flattenResourceMap(
+    readJson(REAL_MAP),
+    CANONICAL_AUTHORITY,
+  ).entries;
+  const missingRegistryDigest = readJson(REAL_RECONCILIATION);
+  delete missingRegistryDigest.source.consumerRegistrySha256;
+  assert.throws(
+    () => applyResourceReconciliationLedger(
+      entries,
+      missingRegistryDigest,
+      CANONICAL_AUTHORITY,
+    ),
+    /consumer registry SHA-256 is invalid/,
+  );
+
+  const invalidDispositionDigest = readJson(REAL_RECONCILIATION);
+  invalidDispositionDigest.source.dispositionsSha256 = 'not-a-sha256';
+  assert.throws(
+    () => applyResourceReconciliationLedger(
+      entries,
+      invalidDispositionDigest,
+      CANONICAL_AUTHORITY,
+    ),
+    /dispositions SHA-256 is invalid/,
+  );
+});
+
 test('direct fixture staging is deterministic and preserves spaces and duplicate bytes', () => {
   const first = newCase('deterministic-one');
   const second = newCase('deterministic-two');
@@ -276,10 +343,26 @@ test('direct fixture staging is deterministic and preserves spaces and duplicate
   assert.equal(firstManifest, fs.readFileSync(second.manifestPath, 'utf8'));
   assert.equal(corpusDigest(FIXTURE_SOURCE), sourceBefore);
   const manifest = readJson(first.manifestPath);
+  assert.equal(manifest.schemaVersion, 2);
   assert.equal(manifest.entries.length, 862);
   assert.equal(manifest.summary.inventory.coveragePercent, 100);
   assert.equal(manifest.summary.staging.coveragePercent, 100);
-  assert.deepEqual(manifest.summary.consumers, { mapped: 0, total: 862, coveragePercent: 0, status: 'unmapped' });
+  assert.deepEqual(manifest.summary.consumers, {
+    consumed: 0,
+    total: 862,
+    coveragePercent: 0,
+    status: 'unmapped',
+  });
+  assert.deepEqual(manifest.summary.reconciliation, {
+    classified: 0,
+    consumed: 0,
+    unknown: 0,
+    excluded: 0,
+    unsupported: 0,
+    total: 862,
+    coveragePercent: 0,
+    status: 'incomplete',
+  });
   assert.equal(manifest.summary.creatorMetadata.coveragePercent, 0);
   assert.equal(manifest.summary.creatorMetadata.status, 'pending');
   assert.equal(firstManifest.includes(first.root), false);
@@ -308,6 +391,27 @@ test('direct verify is repeatable, non-mutating, and permits only expected meta 
   assert.deepEqual(treeSnapshot(fixture.targetRoot), before);
   fs.writeFileSync(path.join(fixture.targetRoot, 'unexpected.meta'), 'unexpected\n');
   expectFailure(runDirect('verify', fixture), /unexpected file/i, 'unexpected meta');
+});
+
+test('render-manifest recreates only an absent deterministic manifest without mutating target or source', () => {
+  const fixture = newCase('render-manifest');
+  expectSuccess(runDirect('stage', fixture), 'render fixture stage');
+  const expectedManifest = fs.readFileSync(fixture.manifestPath, 'utf8');
+  const sourceBefore = corpusDigest(FIXTURE_SOURCE);
+  const targetBefore = treeSnapshot(fixture.targetRoot);
+  fs.unlinkSync(fixture.manifestPath);
+
+  const rendered = runDirect('render-manifest', fixture);
+  expectSuccess(rendered, 'render absent manifest');
+  assert.equal(fs.readFileSync(fixture.manifestPath, 'utf8'), expectedManifest);
+  assert.equal(corpusDigest(FIXTURE_SOURCE), sourceBefore);
+  assert.deepEqual(treeSnapshot(fixture.targetRoot), targetBefore);
+  expectFailure(
+    runDirect('render-manifest', fixture),
+    /manifest output must be absent/i,
+    'render refuses overwrite',
+  );
+  assert.equal(fs.readFileSync(fixture.manifestPath, 'utf8'), expectedManifest);
 });
 
 test('resource-map structure rejects omissions, duplicates, traversal, unsupported types, and NFC collisions', () => {
@@ -663,12 +767,15 @@ test('production CLI stages the canonical corpus into a fresh temporary project'
   const fixture = newCase('real-corpus-stage');
   fixture.sourceRoot = REAL_SOURCE;
   fixture.resourceMapPath = REAL_MAP;
+  fixture.reconciliationPath = REAL_RECONCILIATION;
   const sourceBefore = corpusDigest(REAL_SOURCE);
   const stage = runCli('stage', fixture);
   expectSuccess(stage, 'real corpus stage');
   assert.match(stage.stdout, /assets=862\/862/);
   assert.match(stage.stdout, /bytes=32945747/);
   assert.match(stage.stdout, new RegExp(`source_manifest_sha256=${EXPECTED_REAL_DIGEST}`));
+  assert.match(stage.stdout, /consumer_coverage=86.19%/);
+  assert.match(stage.stdout, /reconciliation_coverage=100%/);
   assert.match(stage.stdout, /creator_meta_sidecars=0\/934/);
   const verify = runCli('verify', fixture);
   expectSuccess(verify, 'real corpus temporary verify');
@@ -685,6 +792,7 @@ test('production CLI verifies the current Creator-imported corpus with all 934 m
   const verify = runCli('verify', {
     sourceRoot: REAL_SOURCE,
     resourceMapPath: REAL_MAP,
+    reconciliationPath: REAL_RECONCILIATION,
     targetRoot: REAL_TARGET,
     manifestPath: REAL_MANIFEST,
   });

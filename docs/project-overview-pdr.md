@@ -59,15 +59,17 @@ replay, and device comparison are unavailable and are not project gates.
   and 16 fonts; 107 additional Android `res/` PNG are classified separately.
 - The full recovered APK game-asset corpus is copied unchanged under `game/assets/game/` and
   its current Creator raster/audio imports are covered by staging and metadata validators.
-  The staging manifest's consumer/UUID fields remain incomplete and do not yet measure the
-  subset that the playable slice consumes.
+  The generated resource ledger now measures runtime consumer coverage at `743/862`
+  (`86.19%`) and classifies the full staging inventory as `862/862` with `108 unknown`,
+  `10 excluded`, and `1 unsupported`.
 - The Classic score HUD now uses the exact recovered score icon, best-score cup,
   double-score panel, and `Fonts/Linds.ttf`. Best-score display follows the authoritative
   score service seeded from persisted `classic_best_1`; app hide saves the expanded
   implemented Settings subset, including all six route leaderboards and objective state.
   Missing or corrupt save falls back to `999999` coins while a valid persisted balance wins.
   Options now applies the recovered selectors, affordability, debit, purchase effects, and
-  unpaid-selection reconciliation. First-launch Settings behavior remains open.
+  unpaid-selection reconciliation. First-launch Settings behavior is resolved as a static
+  contract and does not require a production migration.
 - The standard-blade runtime is complete across Main Menu, Mode Select, Classic, the Crazy
   standard branch, and GN Style; leaderboard/progression wiring is now the next unresolved
   shared surface.
@@ -87,7 +89,8 @@ replay, and device comparison are unavailable and are not project gates.
 - Compact `360x800` and high `720x1280` Creator Preview profiles also pass Main Menu →
   Options selection/purchase/Back with an empty Cocos Editor console.
 - Presentation restoration is complete only when the canonical user-supplied sample project
-  has 100% inventory, staging, and consumer coverage for every resource actually present.
+  has 100% inventory, staging, and reconciliation classification for every resource actually
+  present. That is separate from the current `743/862` runtime consumer coverage target.
 - No canonical graphics, animation frame, sound, music, font, shader/material, level/layout,
   progression, or other game resource may be silently omitted or substituted.
 - Creator's Android API 21+ floor is an explicit platform-envelope change from the original
@@ -106,7 +109,7 @@ replay, and device comparison are unavailable and are not project gates.
   score, state, and save behavior maps from evidence to contracts, reconstruction fixtures,
   tests, and Creator implementation.
 - Best-score presentation in the Classic HUD is exact and backed by `classic_best_1`; the
-  remaining Settings fields and first-launch/Main Menu save checkpoints remain separate tasks.
+  remaining Settings fields and Main Menu save checkpoints remain separate tasks.
 - The Android build contains only the clean-room TypeScript/Creator implementation and assets
   whose use is permitted for the chosen release scope.
 - `99%` is the future acceptance target for a versioned static-contract/resource fidelity
@@ -149,7 +152,7 @@ replay, and device comparison are unavailable and are not project gates.
   name, artwork, fonts, music, trademarks, and other third-party material.
 - The canonical sample-project resource manifest/root remains unresolved; until it is resolved,
   the `99%` metric cannot be finalized and residual gaps cannot be enumerated completely.
-- Crazy Bird's exact native `ActionGoCallback` operand/order remains a disclosed static
+- Crazy Bird's exact native combo callback operand/order remains a disclosed static
   inference gap and is not counted as recovered behavior.
 - Git is initialized on `main` with a committed foundation. The curated/ignored boundary remains
   mandatory for staging and commits.
