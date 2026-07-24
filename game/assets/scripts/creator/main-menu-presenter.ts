@@ -136,7 +136,11 @@ export interface MainMenuPresenterLifecycle {
   readonly onObjectivesRequested: (
     transaction: MainMenuNavigationTransaction,
   ) => boolean | void;
-  /** Explicit recovered immediate route; About remains on the unsupported boundary. */
+  /** Explicit recovered immediate About route. */
+  readonly onAboutRequested: (
+    transaction: MainMenuNavigationTransaction,
+  ) => boolean | void;
+  /** Explicit recovered immediate Options route. */
   readonly onOptionsRequested: (
     transaction: MainMenuNavigationTransaction,
   ) => boolean | void;
@@ -540,9 +544,17 @@ export class MainMenuPresenter {
     if (
       this.disposedValue
       || !this.activatedValue
-      || (this.navigationStatus === 'idle' && !this.suspendedValue)
+      || this.root.parent === null
+      || !isValid(this.root.parent, true)
+      || !this.root.parent.activeInHierarchy
     ) {
       return false;
+    }
+    // Screen replacement can fail before the shell asks Main Menu to suspend.
+    // In that case SharedGameScene has already restored this still-active source,
+    // so rollback is complete without reacquiring an input lease.
+    if (this.navigationStatus === 'idle' && !this.suspendedValue) {
+      return true;
     }
     if (this.suspendedValue) {
       this.resumeInputAfterTransitionFailure();
@@ -956,12 +968,9 @@ export class MainMenuPresenter {
             timing: 'immediate' as const,
             zOrder: command.zOrder,
           });
-          succeeded = command.destination === 'OptionsLayer'
-            ? this.input.lifecycle.onOptionsRequested(transaction)
-            : this.input.lifecycle.onUnsupportedDestinationRequested(
-              command.destination,
-              transaction,
-            );
+          succeeded = command.destination === 'AboutLayer'
+            ? this.input.lifecycle.onAboutRequested(transaction)
+            : this.input.lifecycle.onOptionsRequested(transaction);
         } catch (error) {
           try {
             this.rearmNavigationAfterFailure();
@@ -1627,6 +1636,7 @@ function assertInput(input: MainMenuPresenterInput): void {
     'setRated',
   ], 'settings.state');
   assertFunctions(input.lifecycle, [
+    'onAboutRequested',
     'onExitRequested',
     'onLeaderboardRequested',
     'onModeSelectRequested',

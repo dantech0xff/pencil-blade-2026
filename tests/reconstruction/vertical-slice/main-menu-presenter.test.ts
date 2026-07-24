@@ -364,6 +364,25 @@ test('suspend ends claimed blade slots before input reset so rollback can reuse 
   presenter.dispose();
 });
 
+test('pre-suspension screen replacement failure treats an active idle source as already rearmed', () => {
+  fruitStub.resetFruitPresenters();
+  const bladeInput = bladeInputHarness();
+  const presenter = MainMenuPresenter.create(input(bladeInput));
+  const host = new cc.Node('SharedGameSceneRoot');
+  presenter.root.setParent(host as never);
+  presenter.activate();
+  const eventsBeforeRearm = [...bladeInput.events];
+
+  assert.equal(presenter.state.navigationPending, false);
+  assert.equal(presenter.state.suspended, false);
+  assert.equal(presenter.rearmNavigationAfterFailure(), true);
+  assert.deepEqual(bladeInput.events, eventsBeforeRearm);
+  assert.equal(presenter.state.navigationPending, false);
+  assert.equal(presenter.state.suspended, false);
+
+  presenter.dispose();
+});
+
 test('failed suspension poisons uncertain Main Menu input ownership and rejects rearm', () => {
   fruitStub.resetFruitPresenters();
   const bladeInput = bladeInputHarness({ failDeactivate: true });
@@ -697,32 +716,47 @@ test('cut-gate failure restores model and fruit so a later cut can navigate', ()
   presenter.dispose();
 });
 
-test('immediate route false and throw both reacquire input after host suspension', () => {
+test('About false and throw both bypass unsupported routing and reacquire host-suspended input', () => {
   for (const failure of ['false', 'throw'] as const) {
     fruitStub.resetFruitPresenters();
     const bladeInput = bladeInputHarness();
+    const audioCalls: string[] = [];
     let presenter: InstanceType<typeof MainMenuPresenter>;
+    let unsupportedCalls = 0;
     const lifecycle = defaultLifecycle();
-    lifecycle.onUnsupportedDestinationRequested = () => {
+    lifecycle.onAboutRequested = () => {
       presenter.suspendForTransition();
-      if (failure === 'throw') throw new Error('injected immediate route failure');
+      if (failure === 'throw') throw new Error('injected About route failure');
       return false;
     };
-    presenter = MainMenuPresenter.create(input(bladeInput, lifecycle));
+    lifecycle.onUnsupportedDestinationRequested = () => {
+      unsupportedCalls += 1;
+      return false;
+    };
+    const presenterInput = input(bladeInput, lifecycle);
+    presenterInput.audio.playOneShot = () => {
+      audioCalls.push('menu-click');
+    };
+    presenter = MainMenuPresenter.create(presenterInput);
     const host = new cc.Node('SharedGameSceneRoot');
     presenter.root.setParent(host as never);
     presenter.activate();
+    audioCalls.length = 0;
     const controls = presenter as unknown as {
       readonly controls: { readonly about: { readonly node: StubNode } };
     };
     if (failure === 'throw') {
       assert.throws(
         () => controls.controls.about.node.emit('touch-end'),
-        /injected immediate route failure/,
+        /injected About route failure/,
       );
     } else {
       controls.controls.about.node.emit('touch-end');
     }
+    assert.equal(unsupportedCalls, 0);
+    assert.deepEqual(audioCalls, []);
+    assert.equal(presenter.state.navigationPending, false);
+    assert.equal(presenter.state.poisoned, false);
     assert.equal(presenter.state.suspended, false);
     assert.deepEqual(bladeInput.events.slice(-4), [
       'cut:false',
@@ -732,6 +766,61 @@ test('immediate route false and throw both reacquire input after host suspension
     ]);
     presenter.dispose();
   }
+});
+
+test('About uses its explicit immediate route and plays its click only after host commit', () => {
+  fruitStub.resetFruitPresenters();
+  const bladeInput = bladeInputHarness();
+  const transactions: unknown[] = [];
+  const order: string[] = [];
+  let unsupportedCalls = 0;
+  const lifecycle = defaultLifecycle();
+  lifecycle.onAboutRequested = (transaction: unknown) => {
+    order.push('host-commit');
+    transactions.push(transaction);
+    return true;
+  };
+  lifecycle.onUnsupportedDestinationRequested = () => {
+    unsupportedCalls += 1;
+    return false;
+  };
+  const presenterInput = input(bladeInput, lifecycle);
+  presenterInput.audio.playOneShot = () => {
+    order.push('menu-click');
+  };
+  const presenter = MainMenuPresenter.create(presenterInput);
+  const host = new cc.Node('SharedGameSceneRoot');
+  presenter.root.setParent(host as never);
+  presenter.activate();
+  order.length = 0;
+  const controls = presenter as unknown as {
+    readonly controls: { readonly about: { readonly node: StubNode } };
+  };
+
+  controls.controls.about.node.emit('touch-end');
+
+  assert.equal(unsupportedCalls, 0);
+  assert.deepEqual(order, ['host-commit', 'menu-click']);
+  assert.deepEqual(transactions, [{
+    destination: 'AboutLayer',
+    root: presenter.root,
+    timing: 'immediate',
+    zOrder: 1,
+  }]);
+  presenter.dispose();
+});
+
+test('About lifecycle boundary is required during presenter construction', () => {
+  fruitStub.resetFruitPresenters();
+  const lifecycle = {
+    ...defaultLifecycle(),
+    onAboutRequested: undefined,
+  };
+
+  assert.throws(
+    () => MainMenuPresenter.create(input(bladeInputHarness(), lifecycle as never)),
+    /lifecycle port requires onAboutRequested\(\)/,
+  );
 });
 
 test('immediate Options host and rearm failures are retained together', () => {
@@ -877,6 +966,7 @@ test('runtime source preserves detached construction, exact append order, and se
   assert.match(source, /onLeaderboardRequested/);
   assert.match(source, /onModeSelectRequested/);
   assert.match(source, /onObjectivesRequested/);
+  assert.match(source, /onAboutRequested/);
   assert.match(source, /onOptionsRequested/);
   assert.match(source, /onUnsupportedDestinationRequested/);
   assert.match(source, /callAfterStep: \(mutation\) => input\.raycast\.callAfterStep\(mutation\)/);
@@ -1081,6 +1171,7 @@ function bladeInputHarness(options: Readonly<{
 
 function defaultLifecycle() {
   return {
+    onAboutRequested() { return true; },
     onExitRequested() {},
     onLeaderboardRequested() { return true; },
     onModeSelectRequested() { return true; },

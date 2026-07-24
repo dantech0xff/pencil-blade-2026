@@ -37,7 +37,7 @@ transactional Main Menu navigation, and unpaid-selection reconciliation before B
 save. The recovered Objectives surface now owns all 52 ordered definitions, exact dual-profile
 resources, current/next presentation, Skip, progression popups, global and per-type fruit
 notifications across every production route, and transactional Main Menu ownership. First-launch
-`flag`, About/offline policy, and the remaining cosmetic presentation consumers stay open.
+`flag` and the remaining cosmetic presentation consumers stay open.
 
 ## Context Links
 
@@ -70,6 +70,13 @@ notifications across every production route, and transactional Main Menu ownersh
 - [Objectives shell host](./reports/implementer-2026-07-24-objectives-shell-host.md)
 - [Objectives final verification](./reports/tester-2026-07-24-objectives-final-checkpoint.md)
 - [Objectives shell review](./reports/reviewer-2026-07-24-objectives-shell-integration.md)
+- [About native contract](./reports/researcher-2026-07-24-about-offline-native-contract.md)
+- [About resource map](./reports/researcher-2026-07-24-about-offline-resource-map.md)
+- [About architecture map](./reports/explorer-2026-07-24-about-offline-architecture-map.md)
+- [About presenter checkpoint](./reports/implementer-2026-07-24-about-presenter.md)
+- [About shell checkpoint](./reports/implementer-2026-07-24-about-shell-host.md)
+- [About integration review](./reports/reviewer-2026-07-24-about-offline-integration.md)
+- [About final verification](./reports/tester-2026-07-24-about-offline-final-checkpoint.md)
 - [Remaining mode order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 
 ## Requirements
@@ -138,14 +145,17 @@ save schema and include reproducible fixtures for progression states.
 - **Complete:** Objectives and progression checkpoint with 52 ordered definitions, exact
   compact/high resources, current/next rows, Skip, shell-owned achievement popups, gameplay and
   menu fruit notifications, fatal ownership recovery, and transactional Main Menu routing.
-- All six production gameplay routes, Leaderboard, Options, standard blades, save/economy, and
-  Objectives are complete. Phase 6 remains in progress for About/offline policy and global
-  resource reconciliation.
+- **Complete:** About/offline checkpoint with the exact ten-raster Android closure, direct
+  Menu/Review/Email/Like controls, `MOBILE_BACK`, transactional Main Menu routing, and
+  sanitized local-only retired-service events.
+- All six production gameplay routes, Leaderboard, Options, standard blades, save/economy,
+  Objectives, and About/offline are complete. Phase 6 remains in progress for first-launch
+  `flag` plus global resource and scene/prefab reconciliation.
 
 Current certification checkpoint:
 
-- Focused Main Menu/Objectives/shell suite: `196/196`
-- Full deterministic vertical slice: `1444/1444`
+- Focused About/Main Menu/shell integration suite: `169/169`
+- Full deterministic vertical slice: `1494/1494`
 - Resource/build/catalog tests: `43/43`
 - Static inventory/source/staging/archive workflow: `14/14` in `217s`
 - Reconstruction policy: positive checkpoint and `4/4` negative fixtures
@@ -164,6 +174,8 @@ Current certification checkpoint:
 - After refreshing the stale Creator Preview bundle, real pointer cuts reach Objectives in the
   internal compact `480x800` branch and high `720x1280` profile. Skip, list drag, and Back pass
   in both profiles with zero game/Cocos browser errors.
+- The same two profiles pass Main Menu -> About -> Main Menu. Review, Email, and Social stay
+  local/offline, preserve the `999999` balance, and emit zero Preview errors or warnings.
 - Missing or corrupt coin storage still falls back to `999999` coins; a valid persisted balance
   wins, including `0`
 
@@ -175,8 +187,8 @@ Current certification checkpoint:
 - [x] Options selection, purchase economy, rollback, and exact screen resources
 - [x] Leaderboards, objective progression, and save/economy
 - [ ] Full content/cosmetics
-- [ ] Remaining menu/settings/results fidelity, including About
-- [ ] Offline behavior for retired services
+- [ ] Remaining settings/results fidelity, including first-launch `flag`
+- [x] About screen fidelity and offline behavior for retired services
 
 ## Success Criteria
 
@@ -203,7 +215,6 @@ leaderboards, if retained, require new approved implementations.
 
 ## Next Steps
 
-Implement the About/offline-policy checkpoint, then reconcile remaining cosmetics/content,
-the scene/prefab map, and global asset-consumer coverage. Freeze content and enter Phase 7
-only when all identified states/contracts are reconciled and remaining unknowns are disclosed
-with impact.
+Implement first-launch `flag`, then the remaining cosmetics/content work, scene/prefab map,
+and global asset-consumer coverage. Freeze content and enter Phase 7 only when all identified
+states/contracts are reconciled and remaining unknowns are disclosed with impact.

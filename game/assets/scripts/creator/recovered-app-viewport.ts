@@ -1,5 +1,9 @@
 import type { AppliedClassicResolution } from './classic-resolution-adapter';
 import type {
+  AboutPoint,
+  AboutViewport,
+} from '../domain/about-presentation';
+import type {
   LeaderboardPoint,
   LeaderboardViewport,
 } from '../domain/leaderboard-presentation';
@@ -34,6 +38,7 @@ export interface RecoveredAppViewportSource {
 }
 
 export type RecoveredAppViewport =
+  & AboutViewport
   & LeaderboardViewport
   & MainMenuViewport
   & ModeSelectViewport
@@ -42,8 +47,8 @@ export type RecoveredAppViewport =
 
 /**
  * Converts the recovered Classic resolution into the shared viewport contract used by
- * Main Menu, Mode Select, Options, and Leaderboard. The output is deeply frozen and
- * float32-normalized.
+ * About, Main Menu, Mode Select, Objectives, Options, and Leaderboard. The output is
+ * deeply frozen and float32-normalized.
  */
 export function createRecoveredAppViewport(
   input: AppliedClassicResolution | RecoveredAppViewportSource,
@@ -99,7 +104,8 @@ export function createRecoveredAppViewport(
 function point(
   x: number,
   y: number,
-): LeaderboardPoint
+): AboutPoint
+  & LeaderboardPoint
   & MainMenuPoint
   & ModeSelectPoint
   & ObjectivesScreenPoint

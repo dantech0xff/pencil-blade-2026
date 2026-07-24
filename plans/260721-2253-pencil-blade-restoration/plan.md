@@ -154,15 +154,19 @@ Verified starting point:
   Objectives and progression are now complete: all 52 ordered definitions, dual-profile screen
   resources, current/next rows, Skip, achievement popups, Main Menu/Mode Select/gameplay fruit
   notifications, fatal ownership recovery, and Main Menu transactions are integrated. The
-  checkpoint passes `196/196` focused tests, `1444/1444` full vertical-slice tests, `43/43`
-  resource/build tests, Creator 3.8.8 bundled strict TypeScript, clean diff hygiene, and real
-  pointer Preview entry/Skip/list-drag/Back in internal `480x800` plus high `720x1280`.
+  About/offline checkpoint is now complete as the exact ten-raster local/offline screen with
+  transactional Main Menu ↔ About ownership, direct Menu/Review/Email/Like controls,
+  `MOBILE_BACK`, production pulse disabled by `localCompatibilityAvailable=false`, and
+  sanitized retired-offline review/feedback/social events. The checkpoint passes `169/169`
+  focused tests, `1494/1494` full vertical-slice tests, `43/43` resource/build tests, Creator
+  3.8.8 bundled strict TypeScript, clean diff hygiene, and real pointer
+  Main Menu -> About -> Main Menu Preview in internal `480x800` plus high `720x1280`.
   Project completion still requires the remaining resource consumers and scene/prefab map,
   a pinned integration/toolchain policy, and build validation.
-- Phase 6 continues after all six production gameplay routes, Options, Leaderboard, and
-  Objectives reached their contract and fresh Creator Preview gates. The remaining scope is
-  About/offline policy, first-launch `flag` bootstrap, global asset-consumer and scene/prefab
-  reconciliation, Android build validation, and release-rights clearance.
+- Phase 6 continues after all six production gameplay routes, Options, Leaderboard, Objectives,
+  and About/offline reached their contract and fresh Creator Preview gates. The remaining scope
+  is first-launch `flag` bootstrap plus global asset-consumer and scene/prefab reconciliation.
+  Android build validation and release-rights clearance remain Phase 7 gates.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
 

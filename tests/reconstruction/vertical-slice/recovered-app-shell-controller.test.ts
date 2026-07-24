@@ -59,6 +59,7 @@ test('destroyed shell never starts delayed Classic Bird preparation', async () =
     (this: Record<string, unknown>) => Promise<void>
   >('initializeRecoveredApp', {
     createRecoveredAppViewport: () => Object.freeze({}),
+    loadAboutResources: async () => Object.freeze({}),
     loadLeaderboardResources: async () => Object.freeze({}),
     loadMainMenuResources: async () => Object.freeze({}),
     loadModeSelectResources: async () => Object.freeze({}),
@@ -349,6 +350,107 @@ for (const route of ['main-menu-to-options', 'options-to-main-menu'] as const) {
     );
   });
 }
+
+test('app shell loads, creates, updates, and tears down its local-only About owner', () => {
+  const initialize = extractMethod(SOURCE, 'initializeRecoveredApp');
+  const createMainMenu = extractMethod(SOURCE, 'createMainMenuPresenter');
+  const createAbout = extractMethod(SOURCE, 'createAboutPresenter');
+  const update = extractMethod(SOURCE, 'update');
+  const destroy = extractMethod(SOURCE, 'onDestroy');
+
+  assert.match(
+    SOURCE,
+    /import \{\s*AboutPresenter,\s*type AboutNavigationTransaction,\s*type AboutRetiredActionEvent,/,
+  );
+  assert.match(SOURCE, /loadAboutResources,\s*type LoadedAboutResources,/);
+  assert.match(SOURCE, /\| 'about'/);
+  assert.match(SOURCE, /readonly about: LoadedAboutResources/);
+  assert.match(SOURCE, /private activeAbout: AboutPresenter \| null = null/);
+  assertOrderedSubstrings(initialize, [
+    'loadAboutResources(assetTree)',
+    'about: aboutResources',
+    'mainMenu = this.createMainMenuPresenter()',
+  ]);
+  assert.match(
+    createMainMenu,
+    /onAboutRequested: \(transaction\) => \([\s\S]*?this\.transitionMainMenuToAbout\(transaction\)/,
+  );
+  assertOrderedSubstrings(createAbout, [
+    'const settingsState = gameplay.sharedSettingsRuntime.state',
+    'AboutPresenter.create({',
+    'audio: gameplay.sharedAudioPresenter',
+    'canvas: this.node',
+    'onMainMenuRequested: (transaction)',
+    'this.transitionAboutToMainMenu(transaction)',
+    'onRetiredAction: (event)',
+    'this.emitRetiredPlatformAction(event)',
+    'localCompatibilityAvailable: false',
+    'rated: settingsState.snapshot.rated',
+    'random: gameplay.sharedGameplayRandom',
+    'resources: resources.about',
+    'effectsEnabled: () => settingsState.snapshot.effectsEnabled',
+    'viewport: this.requireViewport()',
+  ]);
+  assert.doesNotMatch(
+    createAbout,
+    /networkAvailable|fetch\(|XMLHttpRequest|openURL|mailto:|https?:|platformReview/,
+  );
+  assert.match(update, /this\.activeAbout\?\.update\(deltaSeconds\)/);
+  assertOrderedSubstrings(destroy, [
+    'this.activeAbout?.dispose()',
+    'this.activeAbout = null',
+    'this.resources = null',
+  ]);
+  assert.match(
+    initialize,
+    /catch \(error\)[\s\S]*?this\.activeAbout = null;[\s\S]*?this\.resources = null;/,
+  );
+});
+
+test('Main Menu and About use exact immediate z1 transactions and fresh ownership', () => {
+  const toAbout = extractMethod(SOURCE, 'transitionMainMenuToAbout');
+  const toMainMenu = extractMethod(SOURCE, 'transitionAboutToMainMenu');
+
+  assertOrderedSubstrings(toAbout, [
+    "transaction.destination !== 'AboutLayer'",
+    "transaction.timing !== 'immediate'",
+    'transaction.zOrder !== 1',
+    "this.runTransition('main-menu', 'about'",
+    'this.createAboutPresenter()',
+    'replaceCurrentScreen(nextPresenter.root)',
+    'oldPresenter.suspendForTransition()',
+    'nextPresenter.activate()',
+    'this.compensateFailedMenuScreenReplacement(',
+    'oldPresenter.state.poisoned',
+    'this.activeMainMenu = null',
+    'this.activeAbout = nextPresenter',
+    "this.stateValue = 'about'",
+    "disposeCommittedPresenter(oldPresenter, 'Main Menu')",
+  ]);
+  assertOrderedSubstrings(toMainMenu, [
+    "transaction.destination !== 'MainMenuLayer'",
+    "transaction.timing !== 'immediate'",
+    'transaction.zOrder !== 1',
+    "this.runTransition('about', 'main-menu'",
+    'this.createMainMenuPresenter()',
+    'replaceCurrentScreen(nextPresenter.root)',
+    'oldPresenter.suspendForTransition()',
+    'nextPresenter.activate()',
+    'this.compensateFailedMenuScreenReplacement(',
+    'oldPresenter.state.poisoned',
+    'this.activeAbout = null',
+    'this.activeMainMenu = nextPresenter',
+    "this.stateValue = 'main-menu'",
+    "disposeCommittedPresenter(oldPresenter, 'About')",
+  ]);
+  for (const transition of [toAbout, toMainMenu]) {
+    assert.match(transition, /transaction\.root !== oldPresenter\.root/);
+    assert.doesNotMatch(
+      transition,
+      /menubuttonclick|playOneShot|playEffect|stopBackgroundMusic/,
+    );
+  }
+});
 
 test('app shell boots, snapshots, updates, and tears down its Leaderboard owner', () => {
   const initialize = extractMethod(SOURCE, 'initializeRecoveredApp');
@@ -653,6 +755,8 @@ test('Main Menu and Objectives use exact delayed/immediate transactional routes'
 });
 
 for (const route of [
+  'main-menu-to-about',
+  'about-to-main-menu',
   'main-menu-to-leaderboard',
   'leaderboard-to-main-menu',
   'main-menu-to-objectives',
@@ -673,6 +777,10 @@ for (const route of [
     assert.equal(outcome.destinationPresenter.disposed, false);
     assert.equal(outcome.destinationPresenter.inputLeaseHeld, true);
     assert.equal(outcome.destinationPresenter.activationCount, 1);
+    assert.equal(
+      outcome.activeAbout,
+      outcome.destinationState === 'about' ? outcome.destinationPresenter : null,
+    );
     assert.equal(outcome.transitionFailureCount, 0);
   });
 
@@ -704,6 +812,7 @@ for (const route of [
     assert.equal(outcome.sourcePresenter.suspended, true);
     assert.equal(outcome.sourcePresenter.inputLeaseHeld, false);
     assert.equal(outcome.destinationPresenter.disposed, true);
+    assert.equal(outcome.activeAbout, null);
     assert.equal(outcome.activeLeaderboard, null);
     assert.equal(outcome.activeMainMenu, null);
     assert.equal(outcome.activeObjectives, null);
@@ -713,6 +822,8 @@ for (const route of [
 }
 
 for (const route of [
+  'main-menu-to-about',
+  'about-to-main-menu',
   'main-menu-to-leaderboard',
   'leaderboard-to-main-menu',
   'main-menu-to-objectives',
@@ -780,6 +891,7 @@ for (const route of [
     assert.equal(outcome.sourcePresenter.rearmSuccessCount, 0);
     assert.equal(outcome.destinationPresenter.activationCount, 1);
     assert.equal(outcome.destinationPresenter.disposed, true);
+    assert.equal(outcome.activeAbout, null);
     assert.equal(outcome.activeLeaderboard, null);
     assert.equal(outcome.activeMainMenu, null);
     assert.equal(outcome.activeObjectives, null);
@@ -806,6 +918,7 @@ for (const route of [
     assert.equal(outcome.sourcePresenter.rearmSuccessCount, 0);
     assert.equal(outcome.destinationPresenter.activationCount, 1);
     assert.equal(outcome.destinationPresenter.disposed, true);
+    assert.equal(outcome.activeAbout, null);
     assert.equal(outcome.activeLeaderboard, null);
     assert.equal(outcome.activeMainMenu, null);
     assert.equal(outcome.activeObjectives, null);
@@ -815,6 +928,8 @@ for (const route of [
 }
 
 for (const route of [
+  'main-menu-to-about',
+  'about-to-main-menu',
   'main-menu-to-leaderboard',
   'leaderboard-to-main-menu',
   'main-menu-to-objectives',
@@ -842,6 +957,7 @@ for (const route of [
     assert.equal(outcome.sourcePresenter.rearmSuccessCount, 0);
     assert.equal(outcome.destinationPresenter.activationCount, 0);
     assert.equal(outcome.destinationPresenter.disposed, true);
+    assert.equal(outcome.activeAbout, null);
     assert.equal(outcome.activeLeaderboard, null);
     assert.equal(outcome.activeMainMenu, null);
     assert.equal(outcome.activeObjectives, null);
@@ -850,8 +966,10 @@ for (const route of [
   });
 }
 
-test('Leaderboard and Objectives transitions reject stale roots before mutation', () => {
+test('About, Leaderboard, and Objectives transitions reject stale roots before mutation', () => {
   for (const methodName of [
+    'transitionMainMenuToAbout',
+    'transitionAboutToMainMenu',
     'transitionMainMenuToLeaderboard',
     'transitionLeaderboardToMainMenu',
     'transitionMainMenuToObjectives',
@@ -871,6 +989,103 @@ test('Leaderboard and Objectives transitions reject stale roots before mutation'
     runTransition,
     /this\.destroyedValue \|\| this\.transitioning \|\| this\.stateValue !== from/,
   );
+});
+
+test('About route guards reject stale, inexact, and reentrant transactions before mutation', () => {
+  const toAbout = compileSourceMethod<
+    (this: Record<string, unknown>, transaction: Record<string, unknown>) => boolean
+  >('transitionMainMenuToAbout');
+  const toMainMenu = compileSourceMethod<
+    (this: Record<string, unknown>, transaction: Record<string, unknown>) => boolean
+  >('transitionAboutToMainMenu');
+  const sourceRoot = new ExecutableScreenNode();
+  const staleRoot = new ExecutableScreenNode();
+  const sourcePresenter = { root: sourceRoot };
+  let runCount = 0;
+  const shell: Record<string, unknown> = {
+    activeAbout: sourcePresenter,
+    activeMainMenu: sourcePresenter,
+    runTransition() {
+      runCount += 1;
+      return false;
+    },
+  };
+
+  for (const transaction of [
+    { destination: 'AboutLayer', root: staleRoot, timing: 'immediate', zOrder: 1 },
+    { destination: 'OptionsLayer', root: sourceRoot, timing: 'immediate', zOrder: 1 },
+    { destination: 'AboutLayer', root: sourceRoot, timing: 'delayed', zOrder: 1 },
+    { destination: 'AboutLayer', root: sourceRoot, timing: 'immediate', zOrder: 2 },
+  ]) {
+    assert.equal(toAbout.call(shell, transaction), false);
+  }
+  for (const transaction of [
+    { destination: 'MainMenuLayer', root: staleRoot, timing: 'immediate', zOrder: 1 },
+    { destination: 'AboutLayer', root: sourceRoot, timing: 'immediate', zOrder: 1 },
+    { destination: 'MainMenuLayer', root: sourceRoot, timing: 'delayed', zOrder: 1 },
+    { destination: 'MainMenuLayer', root: sourceRoot, timing: 'immediate', zOrder: 2 },
+  ]) {
+    assert.equal(toMainMenu.call(shell, transaction), false);
+  }
+  assert.equal(runCount, 0);
+
+  assert.equal(toAbout.call(shell, {
+    destination: 'AboutLayer',
+    root: sourceRoot,
+    timing: 'immediate',
+    zOrder: 1,
+  }), false);
+  assert.equal(toMainMenu.call(shell, {
+    destination: 'MainMenuLayer',
+    root: sourceRoot,
+    timing: 'immediate',
+    zOrder: 1,
+  }), false);
+  assert.equal(runCount, 2);
+
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const runTransition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      from: string,
+      to: string,
+      operation: () => boolean,
+    ) => boolean
+  >('runTransition', {
+    console: { error() {} },
+    ModeSelectFatalNavigationError: ExecutableModeSelectFatalNavigationError,
+    normalizeError,
+  });
+  let operationCount = 0;
+  const transitionShell = {
+    destroyedValue: false,
+    emitTransitionFailure() {},
+    stateValue: 'main-menu',
+    transitioning: true,
+  };
+  assert.equal(runTransition.call(
+    transitionShell,
+    'main-menu',
+    'about',
+    () => {
+      operationCount += 1;
+      return true;
+    },
+  ), false);
+  transitionShell.transitioning = false;
+  transitionShell.stateValue = 'about';
+  assert.equal(runTransition.call(
+    transitionShell,
+    'main-menu',
+    'about',
+    () => {
+      operationCount += 1;
+      return true;
+    },
+  ), false);
+  assert.equal(operationCount, 0);
 });
 
 test('Leaderboard route guards and runTransition reject wrong or reentrant requests', () => {
@@ -3566,6 +3781,93 @@ test('unrecovered destinations and platform review fail closed at isolated shell
   assert.doesNotMatch(SOURCE, /CrazyModePresenter|GNStylePresenter|BirdModePresenter/);
 });
 
+test('About direct actions emit only frozen sanitized shell-local payloads', () => {
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const logged: unknown[] = [];
+  const emitRetiredPlatformAction = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      event: Readonly<{ readonly action: string; readonly reason: string }>,
+    ) => void
+  >('emitRetiredPlatformAction', {
+    console: { error: (error: unknown) => logged.push(error) },
+    normalizeError,
+    RECOVERED_APP_SHELL_RETIRED_PLATFORM_ACTION_EVENT:
+      'recovered-app-shell-retired-platform-action',
+  });
+  const emissions: Array<Readonly<{
+    readonly eventName: string;
+    readonly payload: Record<string, unknown>;
+  }>> = [];
+  const shell = {
+    node: {
+      emit(eventName: string, payload: Record<string, unknown>) {
+        emissions.push(Object.freeze({ eventName, payload }));
+      },
+    },
+  };
+
+  for (const action of ['review', 'feedback', 'social'] as const) {
+    emitRetiredPlatformAction.call(shell, {
+      action,
+      legacyIdentifier: 'must-not-cross-shell-boundary',
+      reason: 'attacker-controlled',
+    } as never);
+  }
+  emitRetiredPlatformAction.call(shell, {
+    action: 'unknown',
+    reason: 'retired-offline',
+  });
+
+  assert.deepEqual(
+    emissions.map(({ eventName, payload }) => ({ eventName, payload })),
+    [
+      {
+        eventName: 'recovered-app-shell-retired-platform-action',
+        payload: { action: 'review', reason: 'retired-offline' },
+      },
+      {
+        eventName: 'recovered-app-shell-retired-platform-action',
+        payload: { action: 'feedback', reason: 'retired-offline' },
+      },
+      {
+        eventName: 'recovered-app-shell-retired-platform-action',
+        payload: { action: 'social', reason: 'retired-offline' },
+      },
+    ],
+  );
+  for (const emission of emissions) {
+    assert.ok(Object.isFrozen(emission.payload));
+    assert.deepEqual(Object.keys(emission.payload).sort(), ['action', 'reason']);
+  }
+
+  const observerFailure = new Error('injected retired action observer failure');
+  const throwingShell = {
+    node: {
+      emit() {
+        throw observerFailure;
+      },
+    },
+  };
+  assert.doesNotThrow(() => emitRetiredPlatformAction.call(throwingShell, {
+    action: 'review',
+    reason: 'retired-offline',
+  }));
+  assert.equal(logged.length, 1);
+  assert.equal(logged[0], observerFailure);
+
+  const boundarySource = [
+    extractMethod(SOURCE, 'createAboutPresenter'),
+    extractMethod(SOURCE, 'emitRetiredPlatformAction'),
+  ].join('\n');
+  assert.doesNotMatch(
+    boundarySource,
+    /mailto:|https?:\/\/|facebook\.com|play\.google|uit\.dev|openURL|XMLHttpRequest|fetch\(/i,
+  );
+});
+
 test('app shell owns the single application-hide settings save boundary', () => {
   const onEnable = extractMethod(SOURCE, 'onEnable');
   const onDisable = extractMethod(SOURCE, 'onDisable');
@@ -3909,7 +4211,9 @@ function executeMenuOptionsReplacementFailure(
 }
 
 type ExecutableMenuScreenRoute =
+  | 'about-to-main-menu'
   | 'leaderboard-to-main-menu'
+  | 'main-menu-to-about'
   | 'main-menu-to-leaderboard'
   | 'main-menu-to-objectives'
   | 'main-menu-to-options'
@@ -3918,8 +4222,12 @@ type ExecutableMenuScreenRoute =
 
 function executableMenuScreenRouteLabel(route: ExecutableMenuScreenRoute): string {
   switch (route) {
+    case 'about-to-main-menu':
+      return 'About to Main Menu';
     case 'leaderboard-to-main-menu':
       return 'Leaderboard to Main Menu';
+    case 'main-menu-to-about':
+      return 'Main Menu to About';
     case 'main-menu-to-leaderboard':
       return 'Main Menu to Leaderboard';
     case 'main-menu-to-objectives':
@@ -3947,24 +4255,29 @@ function executeMenuScreenReplacement(
   incompleteRollback: boolean,
   failureOptions: ExecutableMenuScreenFailureOptions = {},
 ): Readonly<{
+  readonly activeAbout: ExecutableMenuOptionsPresenter | null;
   readonly activeLeaderboard: ExecutableMenuOptionsPresenter | null;
   readonly activeMainMenu: ExecutableMenuOptionsPresenter | null;
   readonly activeObjectives: ExecutableMenuOptionsPresenter | null;
   readonly activeOptions: ExecutableMenuOptionsPresenter | null;
   readonly currentScreen: ExecutableScreenNode | null;
-  readonly destinationState: 'leaderboard' | 'main-menu' | 'objectives' | 'options';
+  readonly destinationState: 'about' | 'leaderboard' | 'main-menu' | 'objectives' | 'options';
   readonly destinationPresenter: ExecutableMenuOptionsPresenter;
   readonly result: boolean | null;
   readonly sourcePresenter: ExecutableMenuOptionsPresenter;
   readonly sourceRoot: ExecutableScreenNode;
-  readonly sourceState: 'leaderboard' | 'main-menu' | 'objectives' | 'options';
+  readonly sourceState: 'about' | 'leaderboard' | 'main-menu' | 'objectives' | 'options';
   readonly state: unknown;
   readonly thrown: unknown;
   readonly transitionFailureCount: number;
 }> {
-  const transitionMethod = route === 'main-menu-to-options'
-    ? 'transitionMainMenuToOptions'
-    : route === 'options-to-main-menu'
+  const transitionMethod = route === 'main-menu-to-about'
+    ? 'transitionMainMenuToAbout'
+    : route === 'about-to-main-menu'
+      ? 'transitionAboutToMainMenu'
+      : route === 'main-menu-to-options'
+        ? 'transitionMainMenuToOptions'
+        : route === 'options-to-main-menu'
       ? 'transitionOptionsToMainMenu'
       : route === 'main-menu-to-objectives'
         ? 'transitionMainMenuToObjectives'
@@ -3973,23 +4286,29 @@ function executeMenuScreenReplacement(
       : route === 'main-menu-to-leaderboard'
         ? 'transitionMainMenuToLeaderboard'
         : 'transitionLeaderboardToMainMenu';
-  const sourceState = route === 'options-to-main-menu'
-    ? 'options'
-    : route === 'objectives-to-main-menu'
+  const sourceState = route === 'about-to-main-menu'
+    ? 'about'
+    : route === 'options-to-main-menu'
+      ? 'options'
+      : route === 'objectives-to-main-menu'
       ? 'objectives'
     : route === 'leaderboard-to-main-menu'
       ? 'leaderboard'
       : 'main-menu';
-  const destinationState = route === 'main-menu-to-options'
-    ? 'options'
-    : route === 'main-menu-to-objectives'
+  const destinationState = route === 'main-menu-to-about'
+    ? 'about'
+    : route === 'main-menu-to-options'
+      ? 'options'
+      : route === 'main-menu-to-objectives'
       ? 'objectives'
     : route === 'main-menu-to-leaderboard'
       ? 'leaderboard'
       : 'main-menu';
-  const destination = route === 'main-menu-to-options'
-    ? 'OptionsLayer'
-    : route === 'main-menu-to-objectives'
+  const destination = route === 'main-menu-to-about'
+    ? 'AboutLayer'
+    : route === 'main-menu-to-options'
+      ? 'OptionsLayer'
+      : route === 'main-menu-to-objectives'
       ? 'ObjectivesLayer'
     : route === 'main-menu-to-leaderboard'
       ? 'LeaderboardLayer'
@@ -4054,8 +4373,8 @@ function executeMenuScreenReplacement(
       oldPresenter: ExecutableMenuOptionsPresenter,
       nextPresenter: ExecutableMenuOptionsPresenter,
       error: unknown,
-      source: 'Leaderboard' | 'Main Menu' | 'Objectives' | 'Options',
-      destination: 'Leaderboard' | 'Main Menu' | 'Objectives' | 'Options',
+      source: 'About' | 'Leaderboard' | 'Main Menu' | 'Objectives' | 'Options',
+      destination: 'About' | 'Leaderboard' | 'Main Menu' | 'Objectives' | 'Options',
       sourceOwnershipPoisoned?: boolean,
     ) => never
   >('compensateFailedMenuScreenReplacement', {
@@ -4079,6 +4398,7 @@ function executeMenuScreenReplacement(
       this: Record<string, unknown>,
       transaction: Readonly<{
         readonly destination:
+          | 'AboutLayer'
           | 'LeaderboardLayer'
           | 'MainMenuLayer'
           | 'ObjectivesLayer'
@@ -4101,6 +4421,7 @@ function executeMenuScreenReplacement(
     return destinationPresenter;
   };
   const shell: Record<string, unknown> = {
+    activeAbout: sourceState === 'about' ? sourcePresenter : null,
     activeLeaderboard: sourceState === 'leaderboard' ? sourcePresenter : null,
     activeMainMenu: sourceState === 'main-menu' ? sourcePresenter : null,
     activeObjectives: sourceState === 'objectives' ? sourcePresenter : null,
@@ -4109,8 +4430,8 @@ function executeMenuScreenReplacement(
       oldPresenter: ExecutableMenuOptionsPresenter,
       nextPresenter: ExecutableMenuOptionsPresenter,
       error: unknown,
-      source: 'Leaderboard' | 'Main Menu' | 'Objectives' | 'Options',
-      destination: 'Leaderboard' | 'Main Menu' | 'Objectives' | 'Options',
+      source: 'About' | 'Leaderboard' | 'Main Menu' | 'Objectives' | 'Options',
+      destination: 'About' | 'Leaderboard' | 'Main Menu' | 'Objectives' | 'Options',
       sourceOwnershipPoisoned?: boolean,
     ) {
       return compensateFailedMenuScreenReplacement.call(
@@ -4123,6 +4444,7 @@ function executeMenuScreenReplacement(
         sourceOwnershipPoisoned,
       );
     },
+    createAboutPresenter: createDestinationPresenter,
     createLeaderboardPresenter: createDestinationPresenter,
     createMainMenuPresenter: createDestinationPresenter,
     createObjectivesPresenter: createDestinationPresenter,
@@ -4181,6 +4503,7 @@ function executeMenuScreenReplacement(
 
   assert.notEqual(destinationState, sourceState);
   return Object.freeze({
+    activeAbout: shell.activeAbout as ExecutableMenuOptionsPresenter | null,
     activeLeaderboard:
       shell.activeLeaderboard as ExecutableMenuOptionsPresenter | null,
     activeMainMenu: shell.activeMainMenu as ExecutableMenuOptionsPresenter | null,

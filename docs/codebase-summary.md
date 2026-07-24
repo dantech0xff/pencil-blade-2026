@@ -1,16 +1,16 @@
 # Codebase Summary
 
 Snapshot metrics were generated from `repomix-output.xml` on 2026-07-24. Current workspace
-status is maintained manually and is updated through the 2026-07-24 Objectives runtime
+status is maintained manually and is updated through the 2026-07-24 About/offline runtime
 checkpoint.
 
 ## Snapshot
 
 | Metric | Value |
 |---|---|
-| Files packed | 1,627 |
-| Total tokens | 2,105,362 |
-| Total characters | 7,239,732 |
+| Files packed | 1,698 |
+| Total tokens | 3,515,298 |
+| Total characters | 13,073,972 |
 | Output format | XML |
 
 ## Current Workspace Shape
@@ -19,7 +19,7 @@ checkpoint.
 |---|---|
 | `docs/` | Program plan, evidence register, architecture decision, PDR, contract map, and supporting summaries. |
 | `forensics/` | Static evidence maps, contracts, claims, and native/resource analysis outputs. |
-| `game/` | Creator 3.8.8 project with pure TypeScript domain modules, Creator adapters, exact recovered APK assets, Options, Leaderboard, Objectives/progression, and all six production gameplay routes: Classic, Crazy, GN Style, Classic Bird, Crazy Bird, and Combo Bird. |
+| `game/` | Creator 3.8.8 project with pure TypeScript domain modules, Creator adapters, exact recovered APK assets, Options, About/offline, Leaderboard, Objectives/progression, and all six production gameplay routes: Classic, Crazy, GN Style, Classic Bird, Crazy Bird, and Combo Bird. |
 | `tests/reconstruction/vertical-slice/` | Contract tests for the recovered menu/shared-scene, the six production routes, and source-boundary audits. |
 | `scripts/` | Build-audit, extraction, staging, and reconstruction utility scripts. |
 | `plans/260721-2253-pencil-blade-restoration/` | The restoration plan, phase specs, and dated progress reports. |
@@ -33,6 +33,7 @@ checkpoint.
 | `game/assets/scripts/domain/options-*.ts`, `game/assets/scripts/creator/options-*.ts` | Recovered eight-background/eighteen-blade/ten-theme selection, affordability, storage-first purchase/debit, rollback, row presentation, exact resources, and purchase particles. |
 | `game/assets/scripts/domain/classic-result-presentation.ts`, `classic-result-ranking.ts`, `classic-result-particle-explosion.ts`, `classic-result-reward-presentation.ts` | Exact mode-0 result geometry/actions, ranking, delayed particle burst, and reward tree. |
 | `game/assets/scripts/domain/standard-blade-*.ts`, `game/assets/scripts/creator/standard-blade-*.ts`, `game/assets/scripts/creator/main-menu-presenter.ts`, `mode-select-presenter.ts`, `classic-gameplay-controller.ts`, `crazy-gameplay-controller.ts`, `gn-style-gameplay-controller.ts` | Transactional standard-blade route selection and ownership for Main Menu, Mode Select, Classic, the Crazy standard branch, and GN Style across IDs `0`-`17`. |
+| `game/assets/scripts/domain/about-*.ts`, `game/assets/scripts/creator/about-*.ts`, `game/assets/scripts/creator/main-menu-presenter.ts`, `game/assets/scripts/creator/recovered-app-shell-controller.ts` | Exact ten-raster local/offline About screen with transactional Main Menu ↔ About routing, direct Menu/Review/Email/Like controls, `MOBILE_BACK`, sanitized retired-action events, and production review pulse disabled by `localCompatibilityAvailable=false`. |
 | `game/assets/scripts/domain/leaderboard-*.ts`, `game/assets/scripts/creator/leaderboard-*.ts`, `game/assets/scripts/creator/main-menu-presenter.ts`, `game/assets/scripts/creator/recovered-app-shell-controller.ts` | Exact six-board local/offline read-only Leaderboard snapshot, presentation, resource loading, and shell routing in native order Classic, Crazy, Gangnam Style, Classic Bird, Crazy Bird, Combo Bird. |
 | `game/assets/scripts/domain/objectives-*.ts`, `objective-achievement-presentation.ts`, `game/assets/scripts/creator/objectives-*.ts`, `objective-achievement-*.ts`, `game/assets/scripts/creator/recovered-app-shell-controller.ts` | Exact 52-definition Objectives/progression state, dual-profile screen resources, current/next presentation, Skip, shell-owned achievement popups, all-route fruit notifications, and transactional Main Menu ownership. |
 | `game/assets/scripts/domain/bird-blade-state.ts`, `bird-blade-particle-plan.ts`, `bird-resource-contract.ts`, `classic-bird-*` | Shared BaseBird/BirdBlade substrate and Classic Bird mode `3`. |
@@ -43,7 +44,7 @@ checkpoint.
 | `game/assets/scripts/creator/classic-scene-controller.ts`, `classic-gameplay-controller.ts`, `crazy-scene-controller.ts`, `crazy-gameplay-controller.ts` | Creator lifecycles for the bounded Classic route and the production Crazy routes. |
 | `game/assets/scripts/creator/combo-bird-*.ts`, `game/assets/scripts/creator/gn-style-*.ts` | Production Combo Bird and GN Style owners, including pause/result/retry/menu transactions. |
 | `game/assets/scenes/classic.scene` | Editor-authored persistent Canvas with the app shell and passive route owners. |
-| `tests/reconstruction/vertical-slice/*.test.ts` | `1444/1444` deterministic regressions through the Objectives checkpoint and executable lifecycle faults across all routes. |
+| `tests/reconstruction/vertical-slice/*.test.ts` | `1494/1494` deterministic regressions through the About/offline checkpoint and executable lifecycle faults across all routes. |
 | `scripts/audit-creator-build.mjs` | Post-build archive audit for APK/AAB outputs. |
 | `tests/audit-creator-build-test.mjs` | Synthetic coverage for the build-audit script. |
 
@@ -53,6 +54,7 @@ checkpoint.
 - Keeping the original APK, `libgame.so`, and legacy engine runtime as evidence, not runtime dependencies.
 - Running all six production gameplay routes as clean TypeScript with Creator adapters at the boundary.
 - Running the standard-blade runtime checkpoint across Main Menu, Mode Select, Classic, the Crazy standard branch, and GN Style with IDs `0`-`17` transactionally owned.
+- Running the exact ten-raster About/offline screen as a local/offline route with Main Menu ↔ About ownership, direct Menu/Review/Email/Like controls, `MOBILE_BACK`, and production review pulse disabled by `localCompatibilityAvailable=false`.
 - Running the exact six-board Leaderboard checkpoint as the local/offline read-only screen in native order Classic, Crazy, Gangnam Style, Classic Bird, Crazy Bird, Combo Bird.
 - Running the exact 52-definition Objectives screen, current/next progression, Skip, achievement
   popups, and global/per-type notifications across Main Menu, Mode Select, and all six routes.
@@ -69,9 +71,15 @@ checkpoint.
 - Running GN Style as independent mode `2` with the standard BasicBlade, exact `150`-second ordinary-fruit graph and intro, dedicated music, 439-particle choreography, late-cut Time Up, `gnstyle_best_1..3`, float32 `0.6` reward, and transactional Replay/Retry/Quit/Menu ownership.
 - The Objectives/progression checkpoint is complete, including transactional screen ownership,
   fatal recovery, route-wide notification wiring, and process-independent popup lifetime.
-- The Objectives checkpoint is `196/196` focused Main Menu + Objectives + shell tests,
-  `1444/1444` full vertical-slice tests, `43/43` resource/build/catalog tests, Creator 3.8.8
-  bundled strict TypeScript zero diagnostics, and clean `git diff --check` hygiene.
+- The About/offline checkpoint is complete as the exact ten-raster local/offline screen with
+  transactional Main Menu ↔ About ownership, direct Menu/Review/Email/Like controls,
+  `MOBILE_BACK`, production review pulse disabled by `localCompatibilityAvailable=false`, and
+  sanitized retired-offline review/feedback/social events; see [About/offline final
+  verification](../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-about-offline-final-checkpoint.md).
+- The Objectives checkpoint remains historically certified at `196/196` focused and
+  `1444/1444` full vertical-slice tests. The current About/offline checkpoint is `169/169`
+  focused, `1494/1494` full vertical-slice, and `43/43` resource/build/catalog tests, with
+  Creator 3.8.8 bundled strict TypeScript zero diagnostics and clean diff hygiene.
 - The standard-blade checkpoint is `1285/1285` full vertical-slice tests, `43/43` resource/build/catalog tests, the unchanged `14/14` inventory/evidence workflow in `217s`, reconstruction policy positive plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and clean diff hygiene.
 - Fresh Creator Preview reaches Main Menu → Mode Select → GN Style → exact intro → live cuts,
   score, music, and particles → Pause/Resume/Replay → Pause Quit → Main Menu → repeated entry →
@@ -106,9 +114,10 @@ checkpoint.
 
 - Scene, prefab, and serialized component map completion beyond the first Canvas bridge.
 - Creator Physics2D runtime-equivalence validation and electric-field compatibility.
-- Full Settings coverage beyond the implemented subset and separate mode-unlock keys, including the first-launch `flag` bootstrap.
-- Blade IDs `1`-`17` gameplay presentation/particles and remaining cosmetic resource consumers.
-- Full progression state and the rest of the presentation/audio/effect consumers.
+- Full Settings coverage beyond the implemented subset and separate mode-unlock keys,
+  including the first-launch `flag` bootstrap.
+- Remaining cosmetic, presentation, audio, and effect resource consumers not already covered
+  by the standard-blade and progression checkpoints.
 - Technical fidelity is separate from release rights; rights review can still block release even when the technical coverage target is met.
 - Rights review for original assets and product identity.
 - Android build validation and real APK/AAB post-build audit.

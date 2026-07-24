@@ -57,6 +57,15 @@ import {
 } from './crazy-gameplay-controller';
 import { CrazyLifecycleRollbackError } from './crazy-scene-controller';
 import {
+  AboutPresenter,
+  type AboutNavigationTransaction,
+  type AboutRetiredActionEvent,
+} from './about-presenter';
+import {
+  loadAboutResources,
+  type LoadedAboutResources,
+} from './about-resource-loader';
+import {
   MainMenuPresenter,
   type MainMenuNavigationTransaction,
   type MainMenuUnsupportedDestination,
@@ -116,10 +125,13 @@ export const RECOVERED_APP_SHELL_UNSUPPORTED_DESTINATION_EVENT
   = 'recovered-app-shell-unsupported-destination';
 export const RECOVERED_APP_SHELL_PLATFORM_REVIEW_REQUESTED_EVENT
   = 'recovered-app-shell-platform-review-requested';
+export const RECOVERED_APP_SHELL_RETIRED_PLATFORM_ACTION_EVENT
+  = 'recovered-app-shell-retired-platform-action';
 export const RECOVERED_APP_SHELL_OBJECTIVE_ACHIEVEMENT_FAILED_EVENT
   = 'recovered-app-shell-objective-achievement-failed';
 
 export type RecoveredAppShellState =
+  | 'about'
   | 'booting'
   | 'classic-bird'
   | 'classic'
@@ -151,11 +163,17 @@ export interface RecoveredAppShellPlatformReviewRequest {
   approve(): void;
 }
 
+export interface RecoveredAppShellRetiredPlatformAction {
+  readonly action: AboutRetiredActionEvent['action'];
+  readonly reason: 'retired-offline';
+}
+
 export interface RecoveredAppShellObjectiveAchievementFailure {
   readonly error: Error;
 }
 
 interface RecoveredAppResources {
+  readonly about: LoadedAboutResources;
   readonly leaderboard: LoadedLeaderboardResources;
   readonly mainMenu: LoadedMainMenuResources;
   readonly modeSelect: LoadedModeSelectResources;
@@ -164,11 +182,12 @@ interface RecoveredAppResources {
 }
 
 type MenuScreenPresenter =
+  | AboutPresenter
   | LeaderboardPresenter
   | MainMenuPresenter
   | ObjectivesScreenPresenter
   | OptionsPresenter;
-type MenuScreenLabel = 'Leaderboard' | 'Main Menu' | 'Objectives' | 'Options';
+type MenuScreenLabel = 'About' | 'Leaderboard' | 'Main Menu' | 'Objectives' | 'Options';
 
 interface CrazyMainMenuNavigationRequest {
   readonly root: Node;
@@ -204,6 +223,7 @@ interface CapturedCrazyMainMenuNavigationRequest {
 @requireComponent(CrazyGameplayController)
 @requireComponent(ClassicGameplayController)
 export class RecoveredAppShellController extends Component {
+  private activeAbout: AboutPresenter | null = null;
   private activeLeaderboard: LeaderboardPresenter | null = null;
   private activeMainMenu: MainMenuPresenter | null = null;
   private activeModeSelect: ModeSelectPresenter | null = null;
@@ -341,6 +361,7 @@ export class RecoveredAppShellController extends Component {
     }
     this.objectiveAchievementHost?.update(deltaSeconds);
     this.sharedLeaf?.update(deltaSeconds);
+    this.activeAbout?.update(deltaSeconds);
     this.activeLeaderboard?.update(deltaSeconds);
     this.activeMainMenu?.update(deltaSeconds);
     this.activeModeSelect?.update(deltaSeconds);
@@ -412,6 +433,7 @@ export class RecoveredAppShellController extends Component {
     this.stateValue = 'destroyed';
     this.onDisable();
     runBestEffortCleanup('Recovered app shell teardown', [
+      () => this.activeAbout?.dispose(),
       () => this.activeLeaderboard?.dispose(),
       () => this.activeMainMenu?.dispose(),
       () => this.activeModeSelect?.dispose(),
@@ -421,6 +443,7 @@ export class RecoveredAppShellController extends Component {
       () => this.sharedScene?.dispose(),
       () => this.nonClassicPhysics?.dispose(),
     ]);
+    this.activeAbout = null;
     this.activeLeaderboard = null;
     this.activeMainMenu = null;
     this.activeModeSelect = null;
@@ -520,6 +543,7 @@ export class RecoveredAppShellController extends Component {
     });
     const [
       sharedResources,
+      aboutResources,
       leaderboardResources,
       mainMenuResources,
       modeSelectResources,
@@ -527,6 +551,7 @@ export class RecoveredAppShellController extends Component {
       optionsResources,
     ] = await Promise.all([
       loadSharedGameSceneResources(assetTree),
+      loadAboutResources(assetTree),
       loadLeaderboardResources(assetTree),
       loadMainMenuResources(assetTree),
       loadModeSelectResources(assetTree),
@@ -565,6 +590,7 @@ export class RecoveredAppShellController extends Component {
       this.viewport = viewport;
       this.nonClassicPhysics = nonClassicPhysics;
       this.resources = Object.freeze({
+        about: aboutResources,
         leaderboard: leaderboardResources,
         mainMenu: mainMenuResources,
         modeSelect: modeSelectResources,
@@ -613,6 +639,7 @@ export class RecoveredAppShellController extends Component {
         () => this.nonClassicPhysics?.dispose(),
         () => gameplayController.sharedAudioPresenter.stop(),
       ]);
+      this.activeAbout = null;
       this.activeMainMenu = null;
       this.objectiveAchievementHost = null;
       this.objectivesManager = null;
@@ -637,6 +664,9 @@ export class RecoveredAppShellController extends Component {
         assetTree: gameplay.sharedResourceCatalog.assetTree,
       },
       lifecycle: {
+        onAboutRequested: (transaction) => (
+          this.transitionMainMenuToAbout(transaction)
+        ),
         onExitRequested: () => director.end(),
         onLeaderboardRequested: (transaction) => (
           this.transitionMainMenuToLeaderboard(transaction)
@@ -664,6 +694,32 @@ export class RecoveredAppShellController extends Component {
         selectedBladeId,
         catalog: gameplay.sharedResourceCatalog.standardBlades,
       },
+      viewport: this.requireViewport(),
+    });
+  }
+
+  private createAboutPresenter(): AboutPresenter {
+    const gameplay = this.requireGameplayController();
+    const resources = this.requireResources();
+    const settingsState = gameplay.sharedSettingsRuntime.state;
+    return AboutPresenter.create({
+      audio: gameplay.sharedAudioPresenter,
+      canvas: this.node,
+      lifecycle: {
+        onMainMenuRequested: (transaction) => (
+          this.transitionAboutToMainMenu(transaction)
+        ),
+        onRetiredAction: (event) => this.emitRetiredPlatformAction(event),
+      },
+      localReviewEligibility: Object.freeze({
+        localCompatibilityAvailable: false,
+        rated: settingsState.snapshot.rated,
+      }),
+      random: gameplay.sharedGameplayRandom,
+      resources: resources.about,
+      settings: Object.freeze({
+        effectsEnabled: () => settingsState.snapshot.effectsEnabled,
+      }),
       viewport: this.requireViewport(),
     });
   }
@@ -800,6 +856,46 @@ export class RecoveredAppShellController extends Component {
         selectTheme: (index) => sharedScene.theme.select(index),
       },
       viewport: this.requireViewport(),
+    });
+  }
+
+  private transitionMainMenuToAbout(
+    transaction: MainMenuNavigationTransaction,
+  ): boolean {
+    const oldPresenter = this.activeMainMenu;
+    if (
+      oldPresenter === null
+      || transaction.root !== oldPresenter.root
+      || transaction.destination !== 'AboutLayer'
+      || transaction.timing !== 'immediate'
+      || transaction.zOrder !== 1
+    ) {
+      return false;
+    }
+    return this.runTransition('main-menu', 'about', () => {
+      const sharedScene = this.requireSharedScene();
+      const nextPresenter = this.createAboutPresenter();
+      try {
+        const previous = sharedScene.replaceCurrentScreen(nextPresenter.root);
+        if (previous !== oldPresenter.root || !oldPresenter.suspendForTransition()) {
+          throw new Error('Main Menu did not surrender its About transition lease');
+        }
+        nextPresenter.activate();
+      } catch (error) {
+        this.compensateFailedMenuScreenReplacement(
+          oldPresenter,
+          nextPresenter,
+          error,
+          'Main Menu',
+          'About',
+          oldPresenter.state.poisoned,
+        );
+      }
+      this.activeMainMenu = null;
+      this.activeAbout = nextPresenter;
+      this.stateValue = 'about';
+      disposeCommittedPresenter(oldPresenter, 'Main Menu');
+      return true;
     });
   }
 
@@ -955,6 +1051,46 @@ export class RecoveredAppShellController extends Component {
       this.activeOptions = nextPresenter;
       this.stateValue = 'options';
       disposeCommittedPresenter(oldPresenter, 'Main Menu');
+      return true;
+    });
+  }
+
+  private transitionAboutToMainMenu(
+    transaction: AboutNavigationTransaction,
+  ): boolean {
+    const oldPresenter = this.activeAbout;
+    if (
+      oldPresenter === null
+      || transaction.root !== oldPresenter.root
+      || transaction.destination !== 'MainMenuLayer'
+      || transaction.timing !== 'immediate'
+      || transaction.zOrder !== 1
+    ) {
+      return false;
+    }
+    return this.runTransition('about', 'main-menu', () => {
+      const sharedScene = this.requireSharedScene();
+      const nextPresenter = this.createMainMenuPresenter();
+      try {
+        const previous = sharedScene.replaceCurrentScreen(nextPresenter.root);
+        if (previous !== oldPresenter.root || !oldPresenter.suspendForTransition()) {
+          throw new Error('About did not surrender its transition lease');
+        }
+        nextPresenter.activate();
+      } catch (error) {
+        this.compensateFailedMenuScreenReplacement(
+          oldPresenter,
+          nextPresenter,
+          error,
+          'About',
+          'Main Menu',
+          oldPresenter.state.poisoned,
+        );
+      }
+      this.activeAbout = null;
+      this.activeMainMenu = nextPresenter;
+      this.stateValue = 'main-menu';
+      disposeCommittedPresenter(oldPresenter, 'About');
       return true;
     });
   }
@@ -2733,6 +2869,9 @@ export class RecoveredAppShellController extends Component {
     if (this.activeObjectives === oldPresenter) {
       this.activeObjectives = null;
     }
+    if (this.activeAbout === oldPresenter) {
+      this.activeAbout = null;
+    }
 
     const failure = sourceOwnershipPoisoned
       ? 'source ownership is poisoned'
@@ -2868,6 +3007,36 @@ export class RecoveredAppShellController extends Component {
     });
     this.node.emit(RECOVERED_APP_SHELL_UNSUPPORTED_DESTINATION_EVENT, payload);
     return false;
+  }
+
+  private emitRetiredPlatformAction(event: AboutRetiredActionEvent): void {
+    try {
+      const action = event.action;
+      if (
+        action !== 'review'
+        && action !== 'feedback'
+        && action !== 'social'
+      ) {
+        return;
+      }
+      const payload: RecoveredAppShellRetiredPlatformAction = Object.freeze({
+        action,
+        reason: 'retired-offline',
+      });
+      this.node.emit(
+        RECOVERED_APP_SHELL_RETIRED_PLATFORM_ACTION_EVENT,
+        payload,
+      );
+    } catch (error) {
+      try {
+        console.error(normalizeError(
+          error,
+          'Recovered retired platform action observer failed',
+        ));
+      } catch {
+        // The retired local event is informational and cannot escape into its presenter.
+      }
+    }
   }
 
   private requestPlatformReview(): boolean {

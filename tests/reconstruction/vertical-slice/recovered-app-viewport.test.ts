@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { registerHooks } from 'node:module';
 import { extname } from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 registerHooks({
   resolve(specifier, context, nextResolve) {
@@ -18,6 +20,18 @@ registerHooks({
 const {
   createRecoveredAppViewport,
 } = await import('../../../game/assets/scripts/creator/recovered-app-viewport.ts');
+const SOURCE = readFileSync(
+  fileURLToPath(new URL(
+    '../../../game/assets/scripts/creator/recovered-app-viewport.ts',
+    import.meta.url,
+  )),
+  'utf8',
+);
+
+test('shared viewport facade explicitly includes the About viewport and point contracts', () => {
+  assert.match(SOURCE, /type RecoveredAppViewport =\s*& AboutViewport/);
+  assert.match(SOURCE, /\): AboutPoint\s*& LeaderboardPoint/);
+});
 
 test('creates a shared viewport for every non-gameplay foreground contract', () => {
   const compact = createRecoveredAppViewport({
