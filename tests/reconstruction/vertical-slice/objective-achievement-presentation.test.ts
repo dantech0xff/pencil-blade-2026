@@ -16,6 +16,7 @@ registerHooks({
 });
 
 const {
+  OBJECTIVE_ACHIEVEMENT_COMPLETE_SECONDS,
   OBJECTIVE_ACHIEVEMENT_PARTICLE_REMOVE_SECONDS,
   OBJECTIVE_ACHIEVEMENT_PARTICLE_START_SECONDS,
   ObjectiveAchievementPresentationState,
@@ -106,8 +107,10 @@ test('completed banner occupies t0-.5 ingress, one-second hold, and .5 egress', 
   );
 });
 
-test('next banner delays four seconds, enters .5, holds 2.5, exits .5, and persists', () => {
+test('next banner signals natural completion at its exact 7.5-second egress', () => {
   const state = new ObjectiveAchievementPresentationState(INPUT);
+  assert.equal(OBJECTIVE_ACHIEVEMENT_COMPLETE_SECONDS, 7.5);
+  assert.equal(state.snapshot.complete, false);
   state.updateAction(4);
   assert.deepEqual(state.snapshot.nextBannerWorldPosition, { x: 240, y: 866 });
   state.updateAction(0.25);
@@ -118,10 +121,13 @@ test('next banner delays four seconds, enters .5, holds 2.5, exits .5, and persi
   assert.deepEqual(state.snapshot.nextBannerWorldPosition, { x: 240, y: 734 });
   state.updateAction(0.25);
   assert.deepEqual(state.snapshot.nextBannerWorldPosition, { x: 240, y: 800 });
+  assert.equal(state.snapshot.complete, false);
   state.updateAction(0.25);
   assert.deepEqual(state.snapshot.nextBannerWorldPosition, { x: 240, y: 866 });
+  assert.equal(state.snapshot.complete, true);
   state.updateAction(10);
   assert.deepEqual(state.snapshot.nextBannerWorldPosition, { x: 240, y: 866 });
+  assert.equal(state.snapshot.complete, true);
 });
 
 test('particle callbacks fire once at .41 and remove all containers at 4.41', () => {
@@ -132,6 +138,7 @@ test('particle callbacks fire once at .41 and remove all containers at 4.41', ()
   assert.deepEqual(state.updateAction(0.01), {
     removeParticleContainersNow: false,
     snapshot: {
+      complete: false,
       completedBannerWorldPosition: { x: 240, y: 755.84 },
       disposed: false,
       elapsedActionSeconds: 0.41000000000000003,
@@ -215,5 +222,7 @@ test('invalid strings, clocks, emitters, and random values fail closed', () => {
   );
   assert.equal(state.dispose(), true);
   assert.equal(state.dispose(), false);
-  assert.equal(state.updateAction(10).snapshot.elapsedActionSeconds, 0);
+  const disposed = state.updateAction(10).snapshot;
+  assert.equal(disposed.complete, false);
+  assert.equal(disposed.elapsedActionSeconds, 0);
 });

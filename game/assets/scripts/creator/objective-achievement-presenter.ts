@@ -67,8 +67,8 @@ interface ActiveObjectiveAchievementParticle {
 }
 
 /**
- * Persistent scene-level achievement UI. The five equal-z roots are attached directly to the
- * app-shell target so the next-objective banner survives Crazy-to-Result replacement.
+ * Scene-level achievement UI. The five equal-z roots are attached directly to their owning
+ * target so the next-objective banner can finish before the owner retires it at natural egress.
  */
 export class ObjectiveAchievementPresenter {
   readonly completedBanner: PresentedObjectiveAchievementBanner;
@@ -141,6 +141,10 @@ export class ObjectiveAchievementPresenter {
 
   get isAttached(): boolean {
     return this.attachedValue;
+  }
+
+  get isComplete(): boolean {
+    return this.state.snapshot.complete;
   }
 
   get isDisposed(): boolean {
@@ -233,7 +237,7 @@ export class ObjectiveAchievementPresenter {
     }
   }
 
-  /** Explicit target teardown. Banners otherwise intentionally persist offscreen. */
+  /** Explicit target teardown after natural completion or host rollback/destruction. */
   dispose(): boolean {
     if (this.disposedValue) {
       return false;
@@ -341,6 +345,59 @@ export class ObjectiveAchievementPresenter {
       this.emitters[2].node,
     ];
   }
+}
+
+export function updateAndRetireObjectiveAchievementPresenters(
+  presenters: Set<ObjectiveAchievementPresenter>,
+  deltaSeconds: number,
+  failureLabel: string,
+): void {
+  assertNonNegativeFinite(deltaSeconds, 'deltaSeconds');
+  for (const presenter of [...presenters]) {
+    let updateFailed = false;
+    let updateFailure: unknown;
+    try {
+      presenter.updateAction(deltaSeconds);
+      if (!presenter.isComplete) {
+        continue;
+      }
+    } catch (error) {
+      updateFailed = true;
+      updateFailure = error;
+    }
+
+    // Publish retirement before cleanup so a disposal fault cannot leave a per-frame owner.
+    presenters.delete(presenter);
+    const cleanupFailures: unknown[] = [];
+    collectFailure(cleanupFailures, () => presenter.dispose());
+    if (updateFailed) {
+      reportObjectiveAchievementPresentationFailure(
+        failureLabel,
+        updateFailure,
+        cleanupFailures,
+      );
+    } else if (cleanupFailures.length > 0) {
+      const [primary, ...remainingFailures] = cleanupFailures;
+      reportObjectiveAchievementPresentationFailure(
+        failureLabel,
+        primary,
+        remainingFailures,
+      );
+    }
+  }
+}
+
+export function reportObjectiveAchievementPresentationFailure(
+  label: string,
+  primary: unknown,
+  cleanupFailures: readonly unknown[] = [],
+): void {
+  const cleanupDetails = cleanupFailures.length === 0
+    ? ''
+    : `; cleanup: ${cleanupFailures.map(errorMessage).join('; ')}`;
+  console.error(new Error(
+    `${label}: ${errorMessage(primary)}${cleanupDetails}`,
+  ));
 }
 
 function createCompletedBanner(

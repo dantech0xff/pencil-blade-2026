@@ -47,6 +47,7 @@ import {
   type ModeSelectStateSnapshot,
 } from '../domain/mode-select-state';
 import type { ClassicAssetTree } from '../domain/resolution-profile-service';
+import type { ObjectivesManagerState } from '../domain/objectives-manager-state';
 import {
   CLASSIC_BLADE_BEGAN_EVENT,
   CLASSIC_BLADE_ENDED_EVENT,
@@ -167,6 +168,10 @@ export interface ModeSelectPresenterInput {
   readonly canvas: Node;
   readonly classicResources: ModeSelectClassicResources;
   readonly lifecycle: ModeSelectPresenterLifecycle;
+  readonly objectives: Pick<
+    ObjectivesManagerState,
+    'processFruitTypeCut' | 'processGlobalFruitCut'
+  >;
   readonly random: Pick<GameplayRandom, 'nextDecile' | 'nextIntInclusive'>;
   readonly raycast: ModeSelectRaycastPort;
   readonly resources: LoadedModeSelectResources;
@@ -412,6 +417,8 @@ export class ModeSelectPresenter {
           onColliderRestored: (collider, presenter) => {
             this.colliderRopeButton.set(collider, presenter);
           },
+          onFruitTypeCut: (fruitId) => input.objectives.processFruitTypeCut(fruitId),
+          onGlobalFruitCut: () => input.objectives.processGlobalFruitCut(),
           onModeSelected: (modeIndex) => this.modeSelected(modeIndex),
           onPlayFruitAudio: (canonicalPath) => input.audio.playOneShot(canonicalPath),
           onUnlockRequested: () => this.unlockCurrentMode(),
@@ -1658,6 +1665,11 @@ function assertInput(input: ModeSelectPresenterInput): void {
     throw new Error('Mode Select blade event owner must be a valid Creator node');
   }
   assertFunctions(input.raycast, ['callAfterStep', 'raycastAll'], 'raycast');
+  assertFunctions(
+    input.objectives,
+    ['processFruitTypeCut', 'processGlobalFruitCut'],
+    'objectives',
+  );
   assertFunctions(input.settings, ['persistModeUnlock', 'readModeUnlock'], 'settings');
   assertFunctions(input.settings.state, ['addTotalCoins'], 'settings.state');
   assertFunctions(input.lifecycle, [

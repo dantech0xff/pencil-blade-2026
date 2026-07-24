@@ -188,7 +188,11 @@ import {
 import * as CrazyResourceLoader from './crazy-resource-loader';
 import type { LoadedCrazyResources } from './crazy-resource-loader';
 import { createDetachedScreenRoot } from './detached-screen-root';
-import { ObjectiveAchievementPresenter } from './objective-achievement-presenter';
+import {
+  ObjectiveAchievementPresenter,
+  reportObjectiveAchievementPresentationFailure,
+  updateAndRetireObjectiveAchievementPresenters,
+} from './objective-achievement-presenter';
 import { StandardBombExplosionPresenter } from './standard-bomb-explosion-presenter';
 import { StandardBombFuseSmokePresenter } from './standard-bomb-fuse-smoke-presenter';
 import { TimeManagerPresenter } from './time-manager-presenter';
@@ -516,9 +520,11 @@ export class CrazyGameplayController extends Component {
 
   update(deltaSeconds: number): void {
     assertNonNegativeFinite(deltaSeconds, 'deltaSeconds');
-    for (const presenter of this.objectiveAchievementPresenters) {
-      presenter.updateAction(deltaSeconds);
-    }
+    updateAndRetireObjectiveAchievementPresenters(
+      this.objectiveAchievementPresenters,
+      deltaSeconds,
+      'Crazy objective achievement presentation update failed',
+    );
     if (this.pendingResultEntryTransaction === null) {
       this.resultPresenter?.updateAction(deltaSeconds);
     }
@@ -1893,33 +1899,35 @@ export class CrazyGameplayController extends Component {
   private readonly onObjectiveAchievement = (
     event: ObjectiveAchievementPopupEvent,
   ): void => {
-    if (this.effectsEnabled()) {
-      // Native requests cheer before allocating either banner or any particle owner.
-      this.requireClassicGameplayController().sharedAudioPresenter.playOneShot(
-        CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH,
-      );
-    }
-    const viewport = this.requireViewport();
-    const presenter = ObjectiveAchievementPresenter.create({
-      event,
-      random: this.sharedGameplayRandom,
-      resources: this.requireBaseGameplayResources(),
-      viewport,
-    });
+    let presenter: ObjectiveAchievementPresenter | null = null;
     try {
+      if (this.effectsEnabled()) {
+        // Native requests cheer before allocating either banner or any particle owner.
+        this.requireClassicGameplayController().sharedAudioPresenter.playOneShot(
+          CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH,
+        );
+      }
+      const viewport = this.requireViewport();
+      presenter = ObjectiveAchievementPresenter.create({
+        event,
+        random: this.sharedGameplayRandom,
+        resources: this.requireBaseGameplayResources(),
+        viewport,
+      });
       presenter.attach(this.requireObjectiveAchievementTargetRoot());
       this.objectiveAchievementPresenters.add(presenter);
     } catch (error) {
       const failures: unknown[] = [];
-      collectCleanupFailure(failures, () => presenter.dispose());
-      if (failures.length > 0) {
-        throw aggregateWithPrimary(
-          'Crazy objective achievement rollback failed',
-          error,
-          failures,
-        );
+      if (presenter !== null) {
+        const failedPresenter = presenter;
+        this.objectiveAchievementPresenters.delete(failedPresenter);
+        collectCleanupFailure(failures, () => failedPresenter.dispose());
       }
-      throw error;
+      reportObjectiveAchievementPresentationFailure(
+        'Crazy objective achievement presentation failed',
+        error,
+        failures,
+      );
     }
   };
 
@@ -2322,6 +2330,7 @@ export class CrazyGameplayController extends Component {
   private readonly onOrdinaryFruitCut = (
     event: ClassicGeneratedFruitCutEvent,
   ): void => {
+    this.requireObjectivesManager().processGlobalFruitCut();
     this.presentCutHalves({
       ...event,
       visuals: this.requireClassicGameplayController()
@@ -2335,11 +2344,13 @@ export class CrazyGameplayController extends Component {
     this.applyFruitCutCommands(
       createCrazyFruitCutCommands(event.worldPosition, event.fruitId, event.score),
     );
+    this.requireObjectivesManager().processFruitTypeCut(event.fruitId);
   };
 
   private readonly onSpecialFruitCut = (
     event: CrazyGeneratedSpecialFruitCutEvent,
   ): void => {
+    this.requireObjectivesManager().processGlobalFruitCut();
     this.presentCutHalves({
       ...event,
       critical: false,
@@ -2353,6 +2364,7 @@ export class CrazyGameplayController extends Component {
     this.applyFruitCutCommands(
       createCrazyFruitCutCommands(event.worldPosition, event.fruitId, 10),
     );
+    this.requireObjectivesManager().processFruitTypeCut(event.fruitId);
   };
 
   private applyFruitCutCommands(commands: readonly CrazyFruitCutCommand[]): void {

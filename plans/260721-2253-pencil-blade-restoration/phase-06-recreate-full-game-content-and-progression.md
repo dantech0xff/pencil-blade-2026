@@ -34,8 +34,10 @@ prices, price `0` ownership persistence, field-isolated totalCoins recovery, and
 on any load recovery. The recovered Options screen now provides eight backgrounds, eighteen
 blades, ten themes, exact resources/audio/timing, affordability and debit, purchase particles,
 transactional Main Menu navigation, and unpaid-selection reconciliation before Back or app-hide
-save. First-launch `flag`, blade gameplay rendering/particles, and the remaining cosmetic
-presentation consumers stay open.
+save. The recovered Objectives surface now owns all 52 ordered definitions, exact dual-profile
+resources, current/next presentation, Skip, progression popups, global and per-type fruit
+notifications across every production route, and transactional Main Menu ownership. First-launch
+`flag`, About/offline policy, and the remaining cosmetic presentation consumers stay open.
 
 ## Context Links
 
@@ -61,6 +63,13 @@ presentation consumers stay open.
 - [Options production checkpoint](./reports/implementer-2026-07-24-options-runtime.md)
 - [Options final verification](./reports/tester-2026-07-24-options-final-checkpoint.md)
 - [Options runtime review](./reports/reviewer-2026-07-24-options-runtime.md)
+- [Objectives native contract](./reports/researcher-2026-07-24-objectives-native-contract.md)
+- [Objectives architecture map](./reports/explorer-2026-07-24-objectives-architecture-map.md)
+- [Objectives resource map](./reports/researcher-2026-07-24-objectives-resource-map.md)
+- [Objectives Creator runtime](./reports/implementer-2026-07-24-objectives-creator.md)
+- [Objectives shell host](./reports/implementer-2026-07-24-objectives-shell-host.md)
+- [Objectives final verification](./reports/tester-2026-07-24-objectives-final-checkpoint.md)
+- [Objectives shell review](./reports/reviewer-2026-07-24-objectives-shell-integration.md)
 - [Remaining mode order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 
 ## Requirements
@@ -126,17 +135,22 @@ save schema and include reproducible fixtures for progression states.
   Select, Classic, the Crazy standard branch, and GN Style, including exact Basic textures,
   particle plans, Dragon multipart behavior, Centipede multipart behavior, and transactional
   ownership/rollback.
-- All six production gameplay routes are complete. Phase 6 remains in progress for remaining
-  leaderboard/progression/menu states and global resource reconciliation.
+- **Complete:** Objectives and progression checkpoint with 52 ordered definitions, exact
+  compact/high resources, current/next rows, Skip, shell-owned achievement popups, gameplay and
+  menu fruit notifications, fatal ownership recovery, and transactional Main Menu routing.
+- All six production gameplay routes, Leaderboard, Options, standard blades, save/economy, and
+  Objectives are complete. Phase 6 remains in progress for About/offline policy and global
+  resource reconciliation.
 
 Current certification checkpoint:
 
-- Full deterministic vertical slice: `1285/1285` final clean checkpoint
+- Focused Main Menu/Objectives/shell suite: `196/196`
+- Full deterministic vertical slice: `1444/1444`
 - Resource/build/catalog tests: `43/43`
 - Static inventory/source/staging/archive workflow: `14/14` in `217s`
 - Reconstruction policy: positive checkpoint and `4/4` negative fixtures
 - Native static analysis: `7/7`
-- Cocos Creator 3.8.8 strict TypeScript: observed
+- Cocos Creator 3.8.8 bundled strict TypeScript: zero diagnostics
 - Creator metadata audit: zero structural errors and zero duplicate UUIDs; still
   `fidelity-blocked` only by the preserved unsupported `Fonts/CooperBlackStd.otf`
 - Fresh Creator-served Browser Preview reaches Main Menu -> Mode Select -> GN Style -> exact
@@ -147,6 +161,9 @@ Current certification checkpoint:
   `360x800` and high `720x1280` profiles with zero Cocos Editor console entries. Browser focus
   did not reliably emit Cocos app-hide, so that ordering is certified by executable tests and
   source review rather than claimed as direct Preview evidence.
+- After refreshing the stale Creator Preview bundle, real pointer cuts reach Objectives in the
+  internal compact `480x800` branch and high `720x1280` profile. Skip, list drag, and Back pass
+  in both profiles with zero game/Cocos browser errors.
 - Missing or corrupt coin storage still falls back to `999999` coins; a valid persisted balance
   wins, including `0`
 
@@ -156,9 +173,9 @@ Current certification checkpoint:
 - [x] Shared BaseBird/BirdBlade systems
 - [x] Six modes (`6/6` production routes complete)
 - [x] Options selection, purchase economy, rollback, and exact screen resources
+- [x] Leaderboards, objective progression, and save/economy
 - [ ] Full content/cosmetics
-- [ ] Leaderboards, progression, and saves
-- [ ] Full menus/settings/results/objectives fidelity
+- [ ] Remaining menu/settings/results fidelity, including About
 - [ ] Offline behavior for retired services
 
 ## Success Criteria
@@ -186,7 +203,7 @@ leaderboards, if retained, require new approved implementations.
 
 ## Next Steps
 
-Reconcile the remaining cosmetics/content, progression/save schema, menu/settings fidelity,
-scene/prefab map, and global asset-consumer coverage. Freeze content and enter Phase 7 only
-when all identified states/contracts are reconciled and remaining unknowns are disclosed
+Implement the About/offline-policy checkpoint, then reconcile remaining cosmetics/content,
+the scene/prefab map, and global asset-consumer coverage. Freeze content and enter Phase 7
+only when all identified states/contracts are reconciled and remaining unknowns are disclosed
 with impact.

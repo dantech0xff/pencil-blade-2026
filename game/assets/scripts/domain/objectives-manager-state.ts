@@ -83,6 +83,19 @@ export const OBJECTIVE_DESCRIPTIONS = Object.freeze([
 
 export type ObjectiveId = typeof OBJECTIVE_ORDER[number];
 export type ObjectiveTransition = 'finish' | 'skip';
+export type FruitObjectiveSelector = 11 | 12 | 13 | 14 | 16 | 17 | 18;
+
+const FRUIT_OBJECTIVE_SELECTORS = Object.freeze({
+  1: 11,
+  2: 12,
+  3: 18,
+  7: 17,
+  8: 16,
+  12: 13,
+  13: 14,
+} as const satisfies Readonly<Record<number, FruitObjectiveSelector>>);
+
+const FRUITS_CUT_INCREMENT_CEILING = 100_000;
 
 export interface ObjectivesManagerInt32PreferencePort {
   readInt32(key: string, defaultValue: number): number;
@@ -398,6 +411,30 @@ export class ObjectivesManagerState {
     }
   }
 
+  /**
+   * Mirrors Fruit::Cut's per-type objective dispatch. Fruits without a recovered selector still
+   * participate in the later global fruit notification.
+   */
+  processFruitTypeCut(fruitId: number): ObjectiveAchievementPopupEvent | null {
+    const selector = objectiveSelectorForFruitId(fruitId);
+    return selector === null ? null : this.processGameEvent(selector, 1);
+  }
+
+  /**
+   * Mirrors NotifycationManager::FruitCut: update the process-wide cumulative counter first,
+   * dispatch selector 10 with that value, then let the caller apply its mode-specific cut.
+   */
+  processGlobalFruitCut(): ObjectiveAchievementPopupEvent | null {
+    const current = this.settings.snapshot.fruitsCut;
+    const next = current <= FRUITS_CUT_INCREMENT_CEILING
+      ? current + 1
+      : current;
+    if (next !== current) {
+      this.settings.setFruitsCut(next);
+    }
+    return this.processGameEvent(10, next);
+  }
+
   private popupAfterAdvance(
     transition: ObjectiveTransition,
     awardedCoins: number,
@@ -445,6 +482,14 @@ export class ObjectivesManagerState {
 export function objectivesValueStorageKey(objectiveId: number): string {
   assertSignedInt32(objectiveId, 'objectiveId');
   return `${OBJECTIVES_VALUE_STORAGE_KEY_PREFIX}${objectiveId}`;
+}
+
+export function objectiveSelectorForFruitId(
+  fruitId: number,
+): FruitObjectiveSelector | null {
+  assertSignedInt32(fruitId, 'fruitId');
+  const selectors = FRUIT_OBJECTIVE_SELECTORS as Readonly<Record<number, FruitObjectiveSelector>>;
+  return selectors[fruitId] ?? null;
 }
 
 export function objectiveDefinitionAt(

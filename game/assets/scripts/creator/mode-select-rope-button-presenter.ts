@@ -54,6 +54,8 @@ export interface ModeSelectRopeButtonPresenterLifecycle
     collider: Collider2D,
     presenter: ModeSelectRopeButtonPresenter,
   ) => void;
+  readonly onFruitTypeCut: (fruitId: number) => void;
+  readonly onGlobalFruitCut: () => void;
   readonly onModeSelected: (modeIndex: ModeSelectIndex) => void;
   readonly onPlayFruitAudio: (canonicalPath: string) => void;
   readonly onUnlockRequested: () => void;
@@ -127,6 +129,8 @@ export class ModeSelectRopeButtonPresenter {
   private fruitNodeValue: Node;
   private fruitOpacityValue: UIOpacity;
   private fruitSpriteValue: Sprite;
+  private fruitTypeObjectiveProcessed = false;
+  private globalObjectiveProcessed = false;
   private readonly input: ModeSelectRopeButtonPresenterInput;
   private lockEventsRegistered = false;
   private readonly lockMenu: Node | null;
@@ -542,7 +546,9 @@ export class ModeSelectRopeButtonPresenter {
       if (fruitAudio !== undefined && fruitAudio.type === 'request-fruit-audio') {
         this.lifecycle.onPlayFruitAudio(fruitAudio.canonicalPath);
       }
+      // RopeButton/FruitButton destination callback precedes Fruit's shared objective tail.
       this.lifecycle.onModeSelected(this.modeIndex);
+      this.processObjectiveNotificationsOnce();
     } catch (error) {
       const cleanupFailures: unknown[] = [];
       if (cutHalf !== null) {
@@ -697,6 +703,18 @@ export class ModeSelectRopeButtonPresenter {
         steady.y - wrapper.y,
         0,
       );
+    }
+  }
+
+  private processObjectiveNotificationsOnce(): void {
+    if (!this.globalObjectiveProcessed) {
+      // The manager can commit before its popup callback throws; latch the irreversible phase.
+      this.globalObjectiveProcessed = true;
+      this.lifecycle.onGlobalFruitCut();
+    }
+    if (!this.fruitTypeObjectiveProcessed) {
+      this.fruitTypeObjectiveProcessed = true;
+      this.lifecycle.onFruitTypeCut(this.presentation.card.fruitId);
     }
   }
 
@@ -974,6 +992,8 @@ function assertLifecycle(lifecycle: ModeSelectRopeButtonPresenterLifecycle): voi
     lifecycle.callAfterStep,
     lifecycle.onColliderDisposed,
     lifecycle.onColliderRestored,
+    lifecycle.onFruitTypeCut,
+    lifecycle.onGlobalFruitCut,
     lifecycle.onModeSelected,
     lifecycle.onPlayFruitAudio,
     lifecycle.onUnlockRequested,

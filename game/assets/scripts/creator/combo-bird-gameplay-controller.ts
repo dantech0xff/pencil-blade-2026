@@ -159,6 +159,8 @@ import {
 } from './detached-screen-root';
 import {
   ObjectiveAchievementPresenter,
+  reportObjectiveAchievementPresentationFailure,
+  updateAndRetireObjectiveAchievementPresenters,
 } from './objective-achievement-presenter';
 import {
   TimeManagerPresenter,
@@ -454,9 +456,11 @@ export class ComboBirdGameplayController extends Component {
     if (this.lifecycleFatalError !== null) {
       return;
     }
-    for (const presenter of this.objectiveAchievementPresenters) {
-      presenter.updateAction(deltaSeconds);
-    }
+    updateAndRetireObjectiveAchievementPresenters(
+      this.objectiveAchievementPresenters,
+      deltaSeconds,
+      'Combo Bird objective achievement presentation update failed',
+    );
     if (this.pendingResultEntryTransaction === null) {
       this.resultPresenter?.updateAction(deltaSeconds);
     }
@@ -1299,6 +1303,7 @@ export class ComboBirdGameplayController extends Component {
     if (this.lifecycleFatalError !== null) {
       return;
     }
+    this.requireObjectivesManager().processGlobalFruitCut();
     this.presentCutHalves({
       ...event,
       visuals: this.requireClassicGameplayController()
@@ -1318,6 +1323,7 @@ export class ComboBirdGameplayController extends Component {
       event.fruitId,
       event.score,
     );
+    this.requireObjectivesManager().processFruitTypeCut(event.fruitId);
   };
 
   private readonly onOrdinaryFruitMiss = (
@@ -2892,30 +2898,32 @@ export class ComboBirdGameplayController extends Component {
     if (this.lifecycleFatalError !== null) {
       return;
     }
-    if (this.effectsEnabled()) {
-      this.requireClassicGameplayController()
-        .sharedAudioPresenter.playOneShot(CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH);
-    }
-    const presenter = ObjectiveAchievementPresenter.create({
-      event,
-      random: this.sharedGameplayRandom,
-      resources: this.requireBaseGameplayResources(),
-      viewport: this.requireViewport(),
-    });
+    let presenter: ObjectiveAchievementPresenter | null = null;
     try {
+      if (this.effectsEnabled()) {
+        this.requireClassicGameplayController()
+          .sharedAudioPresenter.playOneShot(CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH);
+      }
+      presenter = ObjectiveAchievementPresenter.create({
+        event,
+        random: this.sharedGameplayRandom,
+        resources: this.requireBaseGameplayResources(),
+        viewport: this.requireViewport(),
+      });
       presenter.attach(this.requireObjectiveAchievementTargetRoot());
       this.objectiveAchievementPresenters.add(presenter);
     } catch (error) {
       const failures: unknown[] = [];
-      collectCleanupFailure(failures, () => presenter.dispose());
-      if (failures.length > 0) {
-        throw aggregateWithPrimary(
-          'Combo Bird objective achievement rollback failed',
-          error,
-          failures,
-        );
+      if (presenter !== null) {
+        const failedPresenter = presenter;
+        this.objectiveAchievementPresenters.delete(failedPresenter);
+        collectCleanupFailure(failures, () => failedPresenter.dispose());
       }
-      throw error;
+      reportObjectiveAchievementPresentationFailure(
+        'Combo Bird objective achievement presentation failed',
+        error,
+        failures,
+      );
     }
   };
 

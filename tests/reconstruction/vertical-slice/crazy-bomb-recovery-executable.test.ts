@@ -183,7 +183,9 @@ export {
   unused as loadCrazyDragonFont,
   unused as loadCrazyResources,
   unused as partitionCrazyRuntimeCommands,
+  unused as reportObjectiveAchievementPresentationFailure,
   unused as sampleSpawnKinematics,
+  unused as updateAndRetireObjectiveAchievementPresenters,
 };
 `);
 

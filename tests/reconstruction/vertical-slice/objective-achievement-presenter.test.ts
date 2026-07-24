@@ -9,7 +9,7 @@ const SOURCE = readFileSync(
   'utf8',
 );
 
-test('presenter binds exact banners, Arial labels, and persistent target order', () => {
+test('presenter binds exact banners, Arial labels, and retained target order', () => {
   assert.match(SOURCE, /ObjectiveAchievementPresentationState/);
   assert.match(SOURCE, /objectiveAchievement\.completedMessage/);
   assert.match(SOURCE, /objectiveAchievement\.nextMessage/);
@@ -46,7 +46,7 @@ test('particle boundary consumes each exact burst and projects move, scale, and 
   assert.doesNotMatch(SOURCE, /UIOpacity|fade|material|blend/i);
 });
 
-test('t=4.41 cleanup removes only particle containers while banners persist until owner disposal', () => {
+test('t=4.41 cleanup keeps banners until the exact natural-completion owner disposal', () => {
   const particleCleanup = extractMethod(SOURCE, 'removeParticleContainers');
   assert.match(particleCleanup, /for \(const emitter of this\.emitters\)/);
   assert.match(particleCleanup, /emitter\.node\.destroy\(\)/);
@@ -56,6 +56,32 @@ test('t=4.41 cleanup removes only particle containers while banners persist unti
   );
   const disposal = extractMethod(SOURCE, 'dispose');
   assert.match(disposal, /for \(const node of this\.rootNodes\(\)\)/);
+  assert.match(
+    SOURCE,
+    /get isComplete\(\): boolean \{\s*return this\.state\.snapshot\.complete;/,
+  );
+});
+
+test('registry updater retires before disposal and reports one contained failure', () => {
+  const update = extractFunction(
+    SOURCE,
+    'updateAndRetireObjectiveAchievementPresenters',
+  );
+  assertOrderedSubstrings(update, [
+    'presenter.updateAction(deltaSeconds)',
+    'presenter.isComplete',
+    'presenters.delete(presenter)',
+    'presenter.dispose()',
+  ]);
+  assert.match(
+    update,
+    /reportObjectiveAchievementPresentationFailure\(/,
+  );
+  const report = extractFunction(
+    SOURCE,
+    'reportObjectiveAchievementPresentationFailure',
+  );
+  assert.equal(report.split('console.error(').length - 1, 1);
 });
 
 function extractMethod(source: string, methodName: string): string {
@@ -79,6 +105,26 @@ function extractMethod(source: string, methodName: string): string {
     }
   }
   throw new Error(`${methodName} is unterminated`);
+}
+
+function extractFunction(source: string, functionName: string): string {
+  const signature = new RegExp(`^export function ${functionName}\\b`, 'm');
+  const match = signature.exec(source);
+  assert.ok(match, `${functionName} function must exist`);
+  const openBrace = source.indexOf('{', match.index);
+  assert.notEqual(openBrace, -1);
+  let depth = 0;
+  for (let index = openBrace; index < source.length; index += 1) {
+    if (source[index] === '{') {
+      depth += 1;
+    } else if (source[index] === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        return source.slice(match.index, index + 1);
+      }
+    }
+  }
+  throw new Error(`${functionName} is unterminated`);
 }
 
 function assertOrderedSubstrings(source: string, values: readonly string[]): void {

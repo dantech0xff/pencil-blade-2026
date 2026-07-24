@@ -8,6 +8,11 @@ export const OBJECTIVE_ACHIEVEMENT_NEXT_DELAY_SECONDS = 4;
 export const OBJECTIVE_ACHIEVEMENT_NEXT_INGRESS_SECONDS = 0.5;
 export const OBJECTIVE_ACHIEVEMENT_NEXT_HOLD_SECONDS = 2.5;
 export const OBJECTIVE_ACHIEVEMENT_NEXT_EGRESS_SECONDS = 0.5;
+export const OBJECTIVE_ACHIEVEMENT_COMPLETE_SECONDS
+  = OBJECTIVE_ACHIEVEMENT_NEXT_DELAY_SECONDS
+    + OBJECTIVE_ACHIEVEMENT_NEXT_INGRESS_SECONDS
+    + OBJECTIVE_ACHIEVEMENT_NEXT_HOLD_SECONDS
+    + OBJECTIVE_ACHIEVEMENT_NEXT_EGRESS_SECONDS;
 export const OBJECTIVE_ACHIEVEMENT_PARTICLE_START_SECONDS = 0.41;
 export const OBJECTIVE_ACHIEVEMENT_PARTICLE_CLEANUP_DELAY_SECONDS = 4;
 export const OBJECTIVE_ACHIEVEMENT_PARTICLE_REMOVE_SECONDS
@@ -88,6 +93,7 @@ export interface ObjectiveAchievementParticlePlan {
 }
 
 export interface ObjectiveAchievementPresentationSnapshot {
+  readonly complete: boolean;
   readonly completedBannerWorldPosition: ObjectiveAchievementPoint;
   readonly disposed: boolean;
   readonly elapsedActionSeconds: number;
@@ -166,6 +172,8 @@ export class ObjectiveAchievementPresentationState {
 
   private createSnapshot(): ObjectiveAchievementPresentationSnapshot {
     return Object.freeze({
+      complete:
+        this.elapsedActionSecondsValue >= OBJECTIVE_ACHIEVEMENT_COMPLETE_SECONDS,
       completedBannerWorldPosition: completedBannerPosition(
         this.elapsedActionSecondsValue,
         this.plan.completed,

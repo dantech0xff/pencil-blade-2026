@@ -151,16 +151,18 @@ Verified starting point:
   ownership plus one debit, 45-particle purchase burst, transactional Main Menu handoff, and
   unpaid-selection reconciliation on Back and before app-hide save. Missing/corrupt save
   continues to default to `999999` coins while any valid persisted balance, including `0`, wins.
-  Objectives and progression wiring remain the next unresolved shared surface after the
-  standard-blade runtime checkpoint.
+  Objectives and progression are now complete: all 52 ordered definitions, dual-profile screen
+  resources, current/next rows, Skip, achievement popups, Main Menu/Mode Select/gameplay fruit
+  notifications, fatal ownership recovery, and Main Menu transactions are integrated. The
+  checkpoint passes `196/196` focused tests, `1444/1444` full vertical-slice tests, `43/43`
+  resource/build tests, Creator 3.8.8 bundled strict TypeScript, clean diff hygiene, and real
+  pointer Preview entry/Skip/list-drag/Back in internal `480x800` plus high `720x1280`.
   Project completion still requires the remaining resource consumers and scene/prefab map,
   a pinned integration/toolchain policy, and build validation.
-- Phase 6 continues after all six production gameplay routes and the recovered Options screen
-  reached their contract and fresh Creator Preview gates. The remaining scope is Objectives
-  and progression wiring, the other menu/progression states, first-launch `flag` bootstrap,
-  global asset-consumer and scene/prefab reconciliation, Android build validation, and
-  release-rights clearance. The standard-blade runtime checkpoint is complete and no longer
-  part of the open Phase 6 work.
+- Phase 6 continues after all six production gameplay routes, Options, Leaderboard, and
+  Objectives reached their contract and fresh Creator Preview gates. The remaining scope is
+  About/offline policy, first-launch `flag` bootstrap, global asset-consumer and scene/prefab
+  reconciliation, Android build validation, and release-rights clearance.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
 
@@ -226,6 +228,13 @@ Verified starting point:
 - [Options production checkpoint](./reports/implementer-2026-07-24-options-runtime.md)
 - [Options final verification](./reports/tester-2026-07-24-options-final-checkpoint.md)
 - [Options runtime review](./reports/reviewer-2026-07-24-options-runtime.md)
+- [Objectives native contract](./reports/researcher-2026-07-24-objectives-native-contract.md)
+- [Objectives architecture map](./reports/explorer-2026-07-24-objectives-architecture-map.md)
+- [Objectives resource map](./reports/researcher-2026-07-24-objectives-resource-map.md)
+- [Objectives Creator runtime](./reports/implementer-2026-07-24-objectives-creator.md)
+- [Objectives shell host](./reports/implementer-2026-07-24-objectives-shell-host.md)
+- [Objectives final verification](./reports/tester-2026-07-24-objectives-final-checkpoint.md)
+- [Objectives shell review](./reports/reviewer-2026-07-24-objectives-shell-integration.md)
 - [Remaining mode implementation order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 - [Creator readiness audit](./reports/creator-readiness-2026-07-22.md)
 - [Android toolchain readiness audit](./reports/android-toolchain-readiness-2026-07-22.md)

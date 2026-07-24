@@ -167,8 +167,10 @@ test('FruitButton cut is reversible until route commit and the same fruit can be
   }, {
     callAfterStep: (mutation: () => void) => deferred.push(mutation),
     onColliderDisposed: () => events.push('collider-disposed'),
+    onGlobalFruitCut: () => events.push('global-objective'),
     onNavigation: () => events.push('navigation'),
     onPlayFruitAudio: () => events.push('fruit-audio'),
+    onFruitTypeCut: () => events.push('type-objective'),
   });
   const parent = new cc.Node('MainMenuRoot');
   presenter.attach(parent as never, 0);
@@ -183,7 +185,12 @@ test('FruitButton cut is reversible until route commit and the same fruit can be
     'MainMenuCutHalf-bottom',
     'MainMenuCutHalf-top',
   ]);
-  assert.deepEqual(events, ['fruit-audio', 'navigation']);
+  assert.deepEqual(events, [
+    'fruit-audio',
+    'navigation',
+    'global-objective',
+    'type-objective',
+  ]);
   assert.equal(presenter.blurNode.active, false);
   assert.equal(presenter.fruitNode.active, false);
   assert.equal(presenter.state.cutCommitted, false);
@@ -195,7 +202,14 @@ test('FruitButton cut is reversible until route commit and the same fruit can be
   assert.deepEqual(presenter.circleNode.scale, { x: 1, y: 1, z: 1 });
 
   assert.equal(presenter.cut(segment, true), true);
-  assert.deepEqual(events, ['fruit-audio', 'navigation', 'fruit-audio', 'navigation']);
+  assert.deepEqual(events, [
+    'fruit-audio',
+    'navigation',
+    'global-objective',
+    'type-objective',
+    'fruit-audio',
+    'navigation',
+  ]);
   assert.equal(presenter.commitCut(), true);
   assert.equal(presenter.rollbackCut(), false);
   assert.equal(deferred.length, 1);
@@ -233,8 +247,10 @@ test('FruitButton restores its cut gate when pre-attach resource preparation thr
   }, {
     callAfterStep: () => {},
     onColliderDisposed: () => {},
+    onGlobalFruitCut: () => {},
     onNavigation: () => {},
     onPlayFruitAudio: () => {},
+    onFruitTypeCut: () => {},
   });
   const parent = new cc.Node('MainMenuRoot');
   presenter.attach(parent as never, 0);
@@ -253,6 +269,118 @@ test('FruitButton restores its cut gate when pre-attach resource preparation thr
   rejectCutRaster = false;
   assert.equal(presenter.cut(segment, true), true);
   assert.equal(presenter.rollbackCut(), true);
+  presenter.dispose();
+});
+
+test('FruitButton cancels its scheduled route when a later objective callback fails', () => {
+  const presentation = createMainMenuFruitButtonPresentations('480x800', VIEWPORT)[1];
+  assert.ok(presentation);
+  const events: string[] = [];
+  let failGlobalObjective = true;
+  const presenter = MainMenuFruitPresenter.create({
+    assetTree: '480x800',
+    presentation,
+    resources: {
+      assetTree: '480x800',
+      font: Object.freeze({}),
+      raster: (contract: Readonly<{
+        canonicalPath: string;
+        dimensions: Readonly<{ height: number; width: number }>;
+      }>) => Object.freeze({ ...contract, spriteFrame: Object.freeze({}) }),
+    },
+    viewport: { height: 800, width: 480 },
+  }, {
+    callAfterStep: () => {},
+    onColliderDisposed: () => {},
+    onGlobalFruitCut: () => {
+      events.push('global-objective');
+      if (failGlobalObjective) {
+        throw new Error('injected objective storage failure');
+      }
+    },
+    onNavigation: () => {
+      events.push('navigation');
+      return () => events.push('navigation-rollback');
+    },
+    onPlayFruitAudio: () => events.push('fruit-audio'),
+    onFruitTypeCut: () => events.push('type-objective'),
+  });
+  presenter.attach(new cc.Node('MainMenuRoot') as never, 0);
+  presenter.activate();
+  const segment = Object.freeze({
+    end: Object.freeze({ x: 200, y: 400 }),
+    start: Object.freeze({ x: 100, y: 300 }),
+  });
+
+  assert.throws(
+    () => presenter.cut(segment, true),
+    /injected objective storage failure/,
+  );
+  assert.deepEqual(events, [
+    'fruit-audio',
+    'navigation',
+    'global-objective',
+    'navigation-rollback',
+  ]);
+  assert.equal(presenter.state.cutAccepted, false);
+  assert.equal(presenter.blurNode.active, true);
+  assert.equal(presenter.fruitNode.active, true);
+
+  failGlobalObjective = false;
+  assert.equal(presenter.cut(segment, true), true);
+  assert.deepEqual(events.slice(-3), [
+    'fruit-audio',
+    'navigation',
+    'type-objective',
+  ]);
+  assert.equal(presenter.rollbackCut(), true);
+  presenter.dispose();
+});
+
+test('FruitButton preserves both objective and navigation rollback failures', () => {
+  const presentation = createMainMenuFruitButtonPresentations('480x800', VIEWPORT)[1];
+  assert.ok(presentation);
+  const objectiveFailure = new Error('injected objective failure');
+  const rollbackFailure = new Error('injected navigation rollback failure');
+  const presenter = MainMenuFruitPresenter.create({
+    assetTree: '480x800',
+    presentation,
+    resources: {
+      assetTree: '480x800',
+      font: Object.freeze({}),
+      raster: (contract: Readonly<{
+        canonicalPath: string;
+        dimensions: Readonly<{ height: number; width: number }>;
+      }>) => Object.freeze({ ...contract, spriteFrame: Object.freeze({}) }),
+    },
+    viewport: { height: 800, width: 480 },
+  }, {
+    callAfterStep: () => {},
+    onColliderDisposed: () => {},
+    onGlobalFruitCut: () => { throw objectiveFailure; },
+    onNavigation: () => () => { throw rollbackFailure; },
+    onPlayFruitAudio: () => {},
+    onFruitTypeCut: () => {},
+  });
+  presenter.attach(new cc.Node('MainMenuRoot') as never, 0);
+  presenter.activate();
+
+  assert.throws(
+    () => presenter.cut({
+      end: { x: 200, y: 400 },
+      start: { x: 100, y: 300 },
+    }, true),
+    (error: unknown) => {
+      assert.ok(error instanceof Error);
+      assert.equal(error.name, 'MainMenuFruitCutRollbackError');
+      assert.deepEqual(
+        (error as Error & { failures: readonly unknown[] }).failures,
+        [objectiveFailure, rollbackFailure],
+      );
+      return true;
+    },
+  );
+  assert.equal(presenter.state.cutAccepted, false);
   presenter.dispose();
 });
 

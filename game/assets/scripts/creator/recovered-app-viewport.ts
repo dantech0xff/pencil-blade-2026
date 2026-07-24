@@ -12,6 +12,10 @@ import type {
   ModeSelectViewport,
 } from '../domain/mode-select-presentation';
 import type {
+  ObjectivesScreenPoint,
+  ObjectivesScreenViewport,
+} from '../domain/objectives-screen-presentation';
+import type {
   OptionsPoint,
   OptionsViewport,
 } from '../domain/options-presentation';
@@ -33,6 +37,7 @@ export type RecoveredAppViewport =
   & LeaderboardViewport
   & MainMenuViewport
   & ModeSelectViewport
+  & ObjectivesScreenViewport
   & OptionsViewport;
 
 /**
@@ -94,7 +99,11 @@ export function createRecoveredAppViewport(
 function point(
   x: number,
   y: number,
-): LeaderboardPoint & MainMenuPoint & ModeSelectPoint & OptionsPoint {
+): LeaderboardPoint
+  & MainMenuPoint
+  & ModeSelectPoint
+  & ObjectivesScreenPoint
+  & OptionsPoint {
   return Object.freeze({
     x: finiteFloat32(x, 'point.x'),
     y: finiteFloat32(y, 'point.y'),

@@ -8,6 +8,12 @@ import {
   isValid,
 } from 'cc';
 
+import {
+  CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH,
+} from '../domain/classic-audio-contract';
+import type {
+  ObjectivesManagerState,
+} from '../domain/objectives-manager-state';
 import { BladeInputController } from './blade-input-controller';
 import {
   CLASSIC_RESULT_MENU_REQUESTED_EVENT,
@@ -75,6 +81,16 @@ import {
   type LoadedModeSelectResources,
 } from './mode-select-resource-loader';
 import { NonClassicPhysicsAdapter } from './non-classic-physics-adapter';
+import { ObjectiveAchievementHost } from './objective-achievement-host';
+import { ObjectiveAchievementPresenter } from './objective-achievement-presenter';
+import {
+  ObjectivesScreenPresenter,
+  type ObjectivesScreenNavigationTransaction,
+} from './objectives-screen-presenter';
+import {
+  loadObjectivesScreenResources,
+  type LoadedObjectivesScreenResources,
+} from './objectives-screen-resource-loader';
 import {
   OptionsPresenter,
   type OptionsNavigationTransaction,
@@ -100,6 +116,8 @@ export const RECOVERED_APP_SHELL_UNSUPPORTED_DESTINATION_EVENT
   = 'recovered-app-shell-unsupported-destination';
 export const RECOVERED_APP_SHELL_PLATFORM_REVIEW_REQUESTED_EVENT
   = 'recovered-app-shell-platform-review-requested';
+export const RECOVERED_APP_SHELL_OBJECTIVE_ACHIEVEMENT_FAILED_EVENT
+  = 'recovered-app-shell-objective-achievement-failed';
 
 export type RecoveredAppShellState =
   | 'booting'
@@ -114,6 +132,7 @@ export type RecoveredAppShellState =
   | 'leaderboard'
   | 'main-menu'
   | 'mode-select'
+  | 'objectives'
   | 'options';
 
 export interface RecoveredAppShellTransitionFailure {
@@ -132,15 +151,24 @@ export interface RecoveredAppShellPlatformReviewRequest {
   approve(): void;
 }
 
+export interface RecoveredAppShellObjectiveAchievementFailure {
+  readonly error: Error;
+}
+
 interface RecoveredAppResources {
   readonly leaderboard: LoadedLeaderboardResources;
   readonly mainMenu: LoadedMainMenuResources;
   readonly modeSelect: LoadedModeSelectResources;
+  readonly objectives: LoadedObjectivesScreenResources;
   readonly options: LoadedOptionsResources;
 }
 
-type MenuScreenPresenter = MainMenuPresenter | OptionsPresenter | LeaderboardPresenter;
-type MenuScreenLabel = 'Leaderboard' | 'Main Menu' | 'Options';
+type MenuScreenPresenter =
+  | LeaderboardPresenter
+  | MainMenuPresenter
+  | ObjectivesScreenPresenter
+  | OptionsPresenter;
+type MenuScreenLabel = 'Leaderboard' | 'Main Menu' | 'Objectives' | 'Options';
 
 interface CrazyMainMenuNavigationRequest {
   readonly root: Node;
@@ -179,6 +207,7 @@ export class RecoveredAppShellController extends Component {
   private activeLeaderboard: LeaderboardPresenter | null = null;
   private activeMainMenu: MainMenuPresenter | null = null;
   private activeModeSelect: ModeSelectPresenter | null = null;
+  private activeObjectives: ObjectivesScreenPresenter | null = null;
   private activeOptions: OptionsPresenter | null = null;
   private bladeInput: BladeInputController | null = null;
   private bootPromise: Promise<void> | null = null;
@@ -189,6 +218,8 @@ export class RecoveredAppShellController extends Component {
   private gameplayController: ClassicGameplayController | null = null;
   private gnStyleGameplayController: GnStyleGameplayController | null = null;
   private nonClassicPhysics: NonClassicPhysicsAdapter | null = null;
+  private objectiveAchievementHost: ObjectiveAchievementHost | null = null;
+  private objectivesManager: ObjectivesManagerState | null = null;
   private resources: RecoveredAppResources | null = null;
   private sceneController: ClassicSceneController | null = null;
   private sharedLeaf: SharedLeafPresenter | null = null;
@@ -308,10 +339,12 @@ export class RecoveredAppShellController extends Component {
     if (this.destroyedValue) {
       return;
     }
+    this.objectiveAchievementHost?.update(deltaSeconds);
     this.sharedLeaf?.update(deltaSeconds);
     this.activeLeaderboard?.update(deltaSeconds);
     this.activeMainMenu?.update(deltaSeconds);
     this.activeModeSelect?.update(deltaSeconds);
+    this.activeObjectives?.update(deltaSeconds);
     this.activeOptions?.update(deltaSeconds);
   }
 
@@ -382,14 +415,19 @@ export class RecoveredAppShellController extends Component {
       () => this.activeLeaderboard?.dispose(),
       () => this.activeMainMenu?.dispose(),
       () => this.activeModeSelect?.dispose(),
+      () => this.activeObjectives?.dispose(),
       () => this.activeOptions?.dispose(),
+      () => this.objectiveAchievementHost?.dispose(),
       () => this.sharedScene?.dispose(),
       () => this.nonClassicPhysics?.dispose(),
     ]);
     this.activeLeaderboard = null;
     this.activeMainMenu = null;
     this.activeModeSelect = null;
+    this.activeObjectives = null;
     this.activeOptions = null;
+    this.objectiveAchievementHost = null;
+    this.objectivesManager = null;
     this.sharedScene = null;
     this.sharedLeaf = null;
     this.resources = null;
@@ -485,12 +523,14 @@ export class RecoveredAppShellController extends Component {
       leaderboardResources,
       mainMenuResources,
       modeSelectResources,
+      objectivesResources,
       optionsResources,
     ] = await Promise.all([
       loadSharedGameSceneResources(assetTree),
       loadLeaderboardResources(assetTree),
       loadMainMenuResources(assetTree),
       loadModeSelectResources(assetTree),
+      loadObjectivesScreenResources(assetTree),
       loadOptionsResources(assetTree),
     ]);
     await Promise.all([
@@ -511,6 +551,7 @@ export class RecoveredAppShellController extends Component {
     });
     let sharedScene: SharedGameScenePresenter | null = null;
     let mainMenu: MainMenuPresenter | null = null;
+    let objectiveAchievementHost: ObjectiveAchievementHost | null = null;
     try {
       sharedScene = SharedGameScenePresenter.create({
         backgroundIndex: settings.selectedBackground,
@@ -527,10 +568,32 @@ export class RecoveredAppShellController extends Component {
         leaderboard: leaderboardResources,
         mainMenu: mainMenuResources,
         modeSelect: modeSelectResources,
+        objectives: objectivesResources,
         options: optionsResources,
       });
       this.sharedLeaf = sharedLeaf;
       this.sharedScene = sharedScene;
+
+      objectiveAchievementHost = ObjectiveAchievementHost.create({
+        createPresenter: (event) => ObjectiveAchievementPresenter.create({
+          event,
+          random: gameplayController.sharedGameplayRandom,
+          resources: gameplayController.sharedBaseGameplayResources,
+          viewport: appliedResolution.visibleRect,
+        }),
+        effectsEnabled: () => (
+          gameplayController.sharedSettingsRuntime.state.snapshot.effectsEnabled
+        ),
+        onFailure: this.onObjectiveAchievementFailure,
+        parent: this.node,
+        playCheer: () => gameplayController.sharedAudioPresenter.playOneShot(
+          CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH,
+        ),
+      });
+      const objectivesManager = gameplayController.sharedSettingsRuntime
+        .createObjectivesManager(objectiveAchievementHost.onPopup);
+      this.objectiveAchievementHost = objectiveAchievementHost;
+      this.objectivesManager = objectivesManager;
 
       mainMenu = this.createMainMenuPresenter();
       sharedScene.attachCurrentScreen(mainMenu.root);
@@ -540,6 +603,7 @@ export class RecoveredAppShellController extends Component {
     } catch (error) {
       runBestEffortCleanup('Recovered app shell failed-boot cleanup', [
         () => mainMenu?.dispose(),
+        () => objectiveAchievementHost?.dispose(),
         () => sharedScene?.dispose(),
         () => {
           if (sharedScene === null) {
@@ -550,6 +614,8 @@ export class RecoveredAppShellController extends Component {
         () => gameplayController.sharedAudioPresenter.stop(),
       ]);
       this.activeMainMenu = null;
+      this.objectiveAchievementHost = null;
+      this.objectivesManager = null;
       this.sharedScene = null;
       this.sharedLeaf = null;
       this.resources = null;
@@ -578,6 +644,9 @@ export class RecoveredAppShellController extends Component {
         onModeSelectRequested: (transaction) => (
           this.transitionMainMenuToModeSelect(transaction)
         ),
+        onObjectivesRequested: (transaction) => (
+          this.transitionMainMenuToObjectives(transaction)
+        ),
         onOptionsRequested: (transaction) => (
           this.transitionMainMenuToOptions(transaction)
         ),
@@ -586,6 +655,7 @@ export class RecoveredAppShellController extends Component {
           this.rejectUnsupportedDestination('main-menu', destination)
         ),
       },
+      objectives: this.requireObjectivesManager(),
       random: gameplay.sharedGameplayRandom,
       raycast: this.requireNonClassicPhysics(),
       resources: resources.mainMenu,
@@ -626,6 +696,38 @@ export class RecoveredAppShellController extends Component {
     });
   }
 
+  private createObjectivesPresenter(): ObjectivesScreenPresenter {
+    const gameplay = this.requireGameplayController();
+    const resources = this.requireResources();
+    const settingsState = gameplay.sharedSettingsRuntime.state;
+    let presenter: ObjectivesScreenPresenter | null = null;
+    presenter = ObjectivesScreenPresenter.create({
+      audio: gameplay.sharedAudioPresenter,
+      bladeInput: this.requireBladeInput(),
+      canvas: this.node,
+      lifecycle: {
+        onFatalOwnership: (error) => {
+          if (presenter === null) {
+            throw new Error(
+              'Objectives reported fatal ownership before presenter construction completed',
+            );
+          }
+          this.recoverFromObjectivesFatalOwnership(presenter, error);
+        },
+        onMainMenuRequested: (transaction) => (
+          this.transitionObjectivesToMainMenu(transaction)
+        ),
+      },
+      manager: this.requireObjectivesManager(),
+      resources: resources.objectives,
+      settings: {
+        effectsEnabled: () => settingsState.snapshot.effectsEnabled,
+      },
+      viewport: this.requireViewport(),
+    });
+    return presenter;
+  }
+
   private createModeSelectPresenter(): ModeSelectPresenter {
     const gameplay = this.requireGameplayController();
     const resources = this.requireResources();
@@ -659,6 +761,7 @@ export class RecoveredAppShellController extends Component {
           this.rejectUnsupportedDestination('mode-select', destination)
         ),
       },
+      objectives: this.requireObjectivesManager(),
       random: gameplay.sharedGameplayRandom,
       raycast: this.requireNonClassicPhysics(),
       resources: resources.modeSelect,
@@ -776,6 +879,46 @@ export class RecoveredAppShellController extends Component {
     });
   }
 
+  private transitionMainMenuToObjectives(
+    transaction: MainMenuNavigationTransaction,
+  ): boolean {
+    const oldPresenter = this.activeMainMenu;
+    if (
+      oldPresenter === null
+      || transaction.root !== oldPresenter.root
+      || transaction.destination !== 'ObjectivesLayer'
+      || transaction.timing !== 'delayed'
+      || transaction.zOrder !== 1
+    ) {
+      return false;
+    }
+    return this.runTransition('main-menu', 'objectives', () => {
+      const sharedScene = this.requireSharedScene();
+      const nextPresenter = this.createObjectivesPresenter();
+      try {
+        const previous = sharedScene.replaceCurrentScreen(nextPresenter.root);
+        if (previous !== oldPresenter.root || !oldPresenter.suspendForTransition()) {
+          throw new Error('Main Menu did not surrender its Objectives transition lease');
+        }
+        nextPresenter.activate();
+      } catch (error) {
+        this.compensateFailedMenuScreenReplacement(
+          oldPresenter,
+          nextPresenter,
+          error,
+          'Main Menu',
+          'Objectives',
+          oldPresenter.state.poisoned,
+        );
+      }
+      this.activeMainMenu = null;
+      this.activeObjectives = nextPresenter;
+      this.stateValue = 'objectives';
+      disposeCommittedPresenter(oldPresenter, 'Main Menu');
+      return true;
+    });
+  }
+
   private transitionMainMenuToOptions(
     transaction: MainMenuNavigationTransaction,
   ): boolean {
@@ -854,6 +997,158 @@ export class RecoveredAppShellController extends Component {
       disposeCommittedPresenter(oldPresenter, 'Leaderboard');
       return true;
     });
+  }
+
+  private transitionObjectivesToMainMenu(
+    transaction: ObjectivesScreenNavigationTransaction,
+  ): boolean {
+    const oldPresenter = this.activeObjectives;
+    if (
+      oldPresenter === null
+      || transaction.root !== oldPresenter.root
+      || transaction.destination !== 'MainMenuLayer'
+      || transaction.timing !== 'immediate'
+      || transaction.zOrder !== 1
+    ) {
+      return false;
+    }
+    return this.runTransition('objectives', 'main-menu', () => {
+      const sharedScene = this.requireSharedScene();
+      const nextPresenter = this.createMainMenuPresenter();
+      try {
+        const previous = sharedScene.replaceCurrentScreen(nextPresenter.root);
+        if (previous !== oldPresenter.root || !oldPresenter.suspendForTransition()) {
+          throw new Error('Objectives did not surrender its transition lease');
+        }
+        nextPresenter.activate();
+      } catch (error) {
+        this.compensateFailedMenuScreenReplacement(
+          oldPresenter,
+          nextPresenter,
+          error,
+          'Objectives',
+          'Main Menu',
+          oldPresenter.state.poisoned,
+        );
+      }
+      this.activeObjectives = null;
+      this.activeMainMenu = nextPresenter;
+      this.stateValue = 'main-menu';
+      disposeCommittedPresenter(oldPresenter, 'Objectives');
+      return true;
+    });
+  }
+
+  private recoverFromObjectivesFatalOwnership(
+    presenter: ObjectivesScreenPresenter,
+    error: unknown,
+  ): void {
+    const primary = normalizeError(error, 'Objectives presenter ownership failed');
+    if (this.destroyedValue) {
+      console.error(primary);
+      return;
+    }
+
+    const recoveryFailures: unknown[] = [];
+    const sharedScene = this.sharedScene;
+    if (
+      this.stateValue !== 'objectives'
+      || this.activeObjectives !== presenter
+      || sharedScene === null
+      || sharedScene.disposed
+    ) {
+      recoveryFailures.push(new Error(
+        'Objectives fatal ownership notification does not match the active shell owner',
+      ));
+      this.reportObjectivesFatalOwnership(primary, recoveryFailures);
+      return;
+    }
+
+    this.transitioning = true;
+    let sourceReleased = false;
+    let nextPresenter: MainMenuPresenter | null = null;
+    try {
+      try {
+        if (sharedScene.currentScreen === presenter.root) {
+          const detached = sharedScene.detachCurrentScreen(presenter.root);
+          if (detached !== presenter.root || presenter.root.parent !== null) {
+            throw new Error(
+              'Objectives fatal recovery detached an unexpected foreground root',
+            );
+          }
+        } else if (
+          sharedScene.currentScreen !== null
+          || presenter.root.parent !== null
+        ) {
+          throw new Error(
+            'Objectives fatal recovery cannot release an unexpected foreground owner',
+          );
+        }
+        sourceReleased = true;
+      } catch (releaseError) {
+        recoveryFailures.push(releaseError);
+      }
+
+      this.activeObjectives = null;
+      collectShellFailure(recoveryFailures, () => presenter.dispose());
+
+      if (sourceReleased) {
+        try {
+          nextPresenter = this.createMainMenuPresenter();
+          sharedScene.attachCurrentScreen(nextPresenter.root);
+          nextPresenter.activate();
+          this.activeMainMenu = nextPresenter;
+          this.stateValue = 'main-menu';
+        } catch (recoveryError) {
+          recoveryFailures.push(recoveryError);
+          let destinationReleased = sharedScene.currentScreen === null;
+          if (
+            nextPresenter !== null
+            && sharedScene.currentScreen === nextPresenter.root
+          ) {
+            try {
+              const detached = sharedScene.detachCurrentScreen(nextPresenter.root);
+              destinationReleased = (
+                detached === nextPresenter.root
+                && sharedScene.currentScreen === null
+              );
+              if (!destinationReleased) {
+                throw new Error(
+                  'Objectives fatal recovery did not release failed Main Menu',
+                );
+              }
+            } catch (releaseError) {
+              recoveryFailures.push(releaseError);
+              destinationReleased = false;
+            }
+          } else if (sharedScene.currentScreen !== null) {
+            recoveryFailures.push(new Error(
+              'Objectives fatal recovery retained an unexpected destination root',
+            ));
+            destinationReleased = false;
+          }
+          if (nextPresenter !== null) {
+            collectShellFailure(
+              recoveryFailures,
+              () => nextPresenter?.dispose(),
+            );
+          }
+          if (!destinationReleased) {
+            collectShellFailure(recoveryFailures, () => sharedScene.dispose());
+          }
+          this.activeMainMenu = null;
+          this.stateValue = 'failed';
+        }
+      } else {
+        collectShellFailure(recoveryFailures, () => sharedScene.dispose());
+        this.activeMainMenu = null;
+        this.stateValue = 'failed';
+      }
+    } finally {
+      this.transitioning = false;
+    }
+
+    this.reportObjectivesFatalOwnership(primary, recoveryFailures);
   }
 
   private transitionModeSelectToMainMenu(
@@ -2435,6 +2730,9 @@ export class RecoveredAppShellController extends Component {
     if (this.activeLeaderboard === oldPresenter) {
       this.activeLeaderboard = null;
     }
+    if (this.activeObjectives === oldPresenter) {
+      this.activeObjectives = null;
+    }
 
     const failure = sourceOwnershipPoisoned
       ? 'source ownership is poisoned'
@@ -2597,6 +2895,41 @@ export class RecoveredAppShellController extends Component {
     }
   };
 
+  private readonly onObjectiveAchievementFailure = (error: Error): void => {
+    const failure: RecoveredAppShellObjectiveAchievementFailure = Object.freeze({
+      error,
+    });
+    if (!this.destroyedValue) {
+      this.node.emit(
+        RECOVERED_APP_SHELL_OBJECTIVE_ACHIEVEMENT_FAILED_EVENT,
+        failure,
+      );
+    }
+    console.error(error);
+  };
+
+  private reportObjectivesFatalOwnership(
+    primary: Error,
+    recoveryFailures: readonly unknown[],
+  ): void {
+    const failure = recoveryFailures.length === 0
+      ? primary
+      : aggregateWithPrimaryError(
+        'Objectives fatal ownership recovery failed',
+        primary,
+        recoveryFailures,
+      );
+    try {
+      this.emitTransitionFailure('objectives', this.stateValue, failure);
+    } catch (reportingError) {
+      console.error(aggregateWithPrimaryError(
+        'Objectives fatal ownership reporting failed',
+        failure,
+        [reportingError],
+      ));
+    }
+  }
+
   private emitTransitionFailure(
     from: RecoveredAppShellState,
     to: RecoveredAppShellState,
@@ -2629,6 +2962,13 @@ export class RecoveredAppShellController extends Component {
       throw new Error('Recovered app shell requires ClassicGameplayController');
     }
     return this.gameplayController;
+  }
+
+  private requireObjectivesManager(): ObjectivesManagerState {
+    if (this.objectivesManager === null) {
+      throw new Error('Recovered app shell objectives manager is unavailable');
+    }
+    return this.objectivesManager;
   }
 
   private requireCrazyGameplayController(): CrazyGameplayController {
@@ -3310,6 +3650,17 @@ function isSignedInt32(value: unknown): value is number {
 
 function normalizeError(error: unknown, fallback: string): Error {
   return error instanceof Error ? error : new Error(`${fallback}: ${String(error)}`);
+}
+
+function collectShellFailure(
+  failures: unknown[],
+  operation: () => unknown,
+): void {
+  try {
+    operation();
+  } catch (error) {
+    failures.push(error);
+  }
 }
 
 function runBestEffortCleanup(

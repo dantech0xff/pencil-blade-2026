@@ -108,7 +108,11 @@ import {
   loadClassicSliceResourceCatalog,
   type LoadedClassicRasterResource,
 } from './classic-resource-loader';
-import { ObjectiveAchievementPresenter } from './objective-achievement-presenter';
+import {
+  ObjectiveAchievementPresenter,
+  reportObjectiveAchievementPresentationFailure,
+  updateAndRetireObjectiveAchievementPresenters,
+} from './objective-achievement-presenter';
 
 const { ccclass, requireComponent } = _decorator;
 
@@ -293,6 +297,14 @@ export class ClassicGameplayController extends Component {
 
   get sharedSettingsRuntime(): ClassicSettingsRuntime {
     return this.requireSettingsRuntime();
+  }
+
+  get sharedObjectivesManager(): ObjectivesManagerState {
+    return this.requireObjectivesManager();
+  }
+
+  get sharedBaseGameplayResources(): LoadedBaseGameplayResources {
+    return this.requireBaseGameplayResources();
   }
 
   get sharedAudioPresenter(): ClassicAudioPresenter {
@@ -575,9 +587,11 @@ export class ClassicGameplayController extends Component {
   }
 
   update(deltaSeconds: number): void {
-    for (const presenter of this.objectiveAchievementPresenters) {
-      presenter.updateAction(deltaSeconds);
-    }
+    updateAndRetireObjectiveAchievementPresenters(
+      this.objectiveAchievementPresenters,
+      deltaSeconds,
+      'Classic objective achievement presentation update failed',
+    );
     this.bladePresenter?.update(deltaSeconds);
     for (const presenter of [...this.comboItemPresenters]) {
       presenter.updateAction(deltaSeconds);
@@ -902,6 +916,7 @@ export class ClassicGameplayController extends Component {
   };
 
   private onFruitCut(event: ClassicGeneratedFruitCutEvent): void {
+    this.requireObjectivesManager().processGlobalFruitCut();
     this.presentRecoveredCutHalves(event);
     if (this.effectsEnabled()) {
       for (const audioPath of getClassicFruitCutAudioSequence(event.fruitId, event.critical)) {
@@ -920,6 +935,7 @@ export class ClassicGameplayController extends Component {
     }
     this.emitCommands(commands);
     this.emitSnapshot();
+    this.requireObjectivesManager().processFruitTypeCut(event.fruitId);
   }
 
   private presentRecoveredCutHalves(event: ClassicGeneratedFruitCutEvent): void {
@@ -1840,37 +1856,48 @@ export class ClassicGameplayController extends Component {
   private readonly onObjectiveAchievement = (
     event: ObjectiveAchievementPopupEvent,
   ): void => {
-    if (this.effectsEnabled()) {
-      this.sharedAudioPresenter.playOneShot(CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH);
-    }
-    const presenter = ObjectiveAchievementPresenter.create({
-      event,
-      random: this.random,
-      resources: this.requireBaseGameplayResources(),
-      viewport: this.requireViewport(),
-    });
+    const retainedTarget = this.objectiveAchievementTargetRoot;
+    let presenter: ObjectiveAchievementPresenter | null = null;
+    let presentationTarget: Node | null = null;
     try {
-      presenter.attach(this.requireObjectiveAchievementTargetRoot());
+      if (this.effectsEnabled()) {
+        this.sharedAudioPresenter.playOneShot(CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH);
+      }
+      presenter = ObjectiveAchievementPresenter.create({
+        event,
+        random: this.random,
+        resources: this.requireBaseGameplayResources(),
+        viewport: this.requireViewport(),
+      });
+      presentationTarget = this.requireObjectiveAchievementTargetRoot();
+      presenter.attach(presentationTarget);
       this.objectiveAchievementPresenters.add(presenter);
     } catch (error) {
       const failures: unknown[] = [];
-      collectClassicCleanupFailure(failures, () => presenter.dispose());
-      if (this.objectiveAchievementPresenters.size === 0) {
-        const target = this.objectiveAchievementTargetRoot;
+      if (presenter !== null) {
+        const failedPresenter = presenter;
+        this.objectiveAchievementPresenters.delete(failedPresenter);
+        collectClassicCleanupFailure(failures, () => failedPresenter.dispose());
+      }
+      if (
+        presentationTarget !== null
+        && presentationTarget !== retainedTarget
+        && this.objectiveAchievementPresenters.size === 0
+        && this.objectiveAchievementTargetRoot === presentationTarget
+      ) {
+        const failedTarget = presentationTarget;
         this.objectiveAchievementTargetRoot = null;
-        if (target !== null && isValid(target, true)) {
-          collectClassicCleanupFailure(failures, () => target.destroy());
-        }
+        collectClassicCleanupFailure(failures, () => {
+          if (isValid(failedTarget, true)) {
+            failedTarget.destroy();
+          }
+        });
       }
-      if (failures.length > 0) {
-        const details = failures
-          .map((failure) => failure instanceof Error ? failure.message : String(failure))
-          .join('; ');
-        throw new Error(
-          `Classic objective-achievement rollback failed after ${String(error)}: ${details}`,
-        );
-      }
-      throw error;
+      reportObjectiveAchievementPresentationFailure(
+        'Classic objective achievement presentation failed',
+        error,
+        failures,
+      );
     }
   };
 

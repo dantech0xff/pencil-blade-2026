@@ -1541,6 +1541,10 @@ function presenterInput(
       assetTree: '480x800' as const,
     },
     lifecycle: options.lifecycle ?? defaultLifecycle(),
+    objectives: {
+      processFruitTypeCut() {},
+      processGlobalFruitCut() {},
+    },
     random: {
       nextDecile: () => 0.5,
       nextIntInclusive: (minimum: number) => {

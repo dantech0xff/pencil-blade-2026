@@ -46,8 +46,16 @@ export interface MainMenuFruitPresenterInput {
 
 export interface MainMenuFruitPresenterLifecycle extends MainMenuCutHalfPresenterLifecycle {
   readonly onColliderDisposed: (collider: Collider2D) => void;
-  readonly onNavigation: (purpose: MainMenuFruitButtonPurpose) => void;
+  readonly onGlobalFruitCut: () => void;
+  /**
+   * Starts the delayed destination transaction and returns its synchronous rollback.
+   * Objective persistence runs after this callback to preserve the recovered ordering.
+   */
+  readonly onNavigation: (
+    purpose: MainMenuFruitButtonPurpose,
+  ) => (() => void) | void;
   readonly onPlayFruitAudio: (canonicalPath: string) => void;
+  readonly onFruitTypeCut: (fruitId: number) => void;
 }
 
 export interface MainMenuFruitPresenterState {
@@ -83,7 +91,9 @@ export class MainMenuFruitPresenter {
   private cutHalfPresenterValue: MainMenuCutHalfPresenter | null = null;
   private disposedValue = false;
   private entryElapsedSeconds = 0;
+  private fruitTypeObjectiveProcessed = false;
   private fruitOpacity: UIOpacity;
+  private globalObjectiveProcessed = false;
   private readonly input: MainMenuFruitPresenterInput;
   private readonly lifecycle: MainMenuFruitPresenterLifecycle;
   private wrapperCutValue = false;
@@ -301,6 +311,7 @@ export class MainMenuFruitPresenter {
     }
     this.cutAcceptedValue = true;
     let cutHalf: MainMenuCutHalfPresenter | null = null;
+    let rollbackNavigation: (() => void) | null = null;
     try {
       const sourcePosition = this.fruitNode.worldPosition;
       const sourceMass = this.body.getMass();
@@ -337,7 +348,8 @@ export class MainMenuFruitPresenter {
         throw new Error('Main Menu FruitButton cut requires its active Main Menu parent');
       }
 
-      // Fruit::Cut order: bottom, top, optional fruit audio, then Main Menu notification.
+      // FruitButton callback order: halves/audio, destination callback, then Fruit's shared
+      // global and per-type objective notifications.
       cutHalf.attach(parent, parent.children.length);
       this.cutHalfPresenterValue = cutHalf;
       const fruitAudio = cutPlan.orderedOperations.find(
@@ -346,7 +358,10 @@ export class MainMenuFruitPresenter {
       if (fruitAudio !== undefined && fruitAudio.type === 'request-fruit-audio') {
         this.lifecycle.onPlayFruitAudio(fruitAudio.canonicalPath);
       }
-      this.lifecycle.onNavigation(this.presentation.purpose);
+      rollbackNavigation = (
+        this.lifecycle.onNavigation(this.presentation.purpose) ?? null
+      );
+      this.processObjectiveNotificationsOnce();
 
       // Hide reversible nodes now; destruction waits for the host transaction commit.
       this.wrapperCutValue = true;
@@ -355,6 +370,12 @@ export class MainMenuFruitPresenter {
       this.circleCutElapsedSeconds = 0;
       return true;
     } catch (error) {
+      let navigationRollbackError: unknown | null = null;
+      try {
+        rollbackNavigation?.();
+      } catch (rollbackError) {
+        navigationRollbackError = rollbackError;
+      }
       cutHalf?.dispose();
       if (this.cutHalfPresenterValue === cutHalf) {
         this.cutHalfPresenterValue = null;
@@ -365,6 +386,9 @@ export class MainMenuFruitPresenter {
       this.fruitNode.active = true;
       this.circleCutElapsedSeconds = null;
       this.circleNode.setScale(1, 1, 1);
+      if (navigationRollbackError !== null) {
+        throw new MainMenuFruitCutRollbackError(error, navigationRollbackError);
+      }
       throw error;
     }
   }
@@ -437,6 +461,28 @@ export class MainMenuFruitPresenter {
       // The fruit remains cut-disabled; retrying a cut cannot duplicate halves/navigation.
       throw error;
     }
+  }
+
+  private processObjectiveNotificationsOnce(): void {
+    if (!this.globalObjectiveProcessed) {
+      // Progression can mutate before its popup callback throws, so latch before invocation.
+      this.globalObjectiveProcessed = true;
+      this.lifecycle.onGlobalFruitCut();
+    }
+    if (!this.fruitTypeObjectiveProcessed) {
+      this.fruitTypeObjectiveProcessed = true;
+      this.lifecycle.onFruitTypeCut(this.presentation.fruitId);
+    }
+  }
+}
+
+export class MainMenuFruitCutRollbackError extends Error {
+  readonly failures: readonly [unknown, unknown];
+
+  constructor(cutFailure: unknown, rollbackFailure: unknown) {
+    super('Main Menu FruitButton cut and navigation rollback both failed');
+    this.name = 'MainMenuFruitCutRollbackError';
+    this.failures = Object.freeze([cutFailure, rollbackFailure]);
   }
 }
 
@@ -557,8 +603,10 @@ function assertLifecycle(lifecycle: MainMenuFruitPresenterLifecycle): void {
   for (const callback of [
     lifecycle.callAfterStep,
     lifecycle.onColliderDisposed,
+    lifecycle.onGlobalFruitCut,
     lifecycle.onNavigation,
     lifecycle.onPlayFruitAudio,
+    lifecycle.onFruitTypeCut,
   ]) {
     if (typeof callback !== 'function') {
       throw new TypeError('Main Menu FruitButton lifecycle callbacks must be functions');

@@ -38,6 +38,7 @@ const {
   OBJECTIVE_TARGETS,
   ObjectivesManagerState,
   objectiveDefinitionAt,
+  objectiveSelectorForFruitId,
   objectivesValueStorageKey,
 } = await import('../../../game/assets/scripts/domain/objectives-manager-state.ts');
 
@@ -290,6 +291,54 @@ test('selectors 0 through 21 use the exact recovered active-objective gates', ()
       );
     }
   }
+});
+
+test('Fruit::Cut maps only the seven recovered fruit IDs to per-type selectors', () => {
+  assert.deepEqual(
+    Array.from({ length: 14 }, (_, fruitId) => objectiveSelectorForFruitId(fruitId)),
+    [null, 11, 12, 18, null, null, null, 17, 16, null, null, null, 13, 14],
+  );
+
+  const banana = createHarness(4, { 18: 48 });
+  assert.equal(banana.manager.processFruitTypeCut(1), null);
+  assert.equal(banana.preferences.values.get('objectives_value_18'), 49);
+
+  const unmapped = createHarness(4, { 18: 48 });
+  assert.equal(unmapped.manager.processFruitTypeCut(6), null);
+  assert.deepEqual(unmapped.preferences.reads, []);
+  assert.deepEqual(unmapped.preferences.writes, []);
+});
+
+test('NotifycationManager fruit count increments first, dispatches selector 10, and caps at 100001', () => {
+  const threshold = createHarness(2, {}, 999);
+  assert.equal(threshold.manager.processGlobalFruitCut()?.completed.id, 8);
+  assert.equal(threshold.settings.snapshot.fruitsCut, 1000);
+  assert.equal(threshold.popups.length, 1);
+
+  const ceiling = createHarness(0, {}, 100_000);
+  assert.equal(ceiling.manager.processGlobalFruitCut(), null);
+  assert.equal(ceiling.settings.snapshot.fruitsCut, 100_001);
+  assert.equal(ceiling.manager.processGlobalFruitCut(), null);
+  assert.equal(ceiling.settings.snapshot.fruitsCut, 100_001);
+
+  const alreadyBeyond = createHarness(0, {}, 123_456);
+  assert.equal(alreadyBeyond.manager.processGlobalFruitCut(), null);
+  assert.equal(alreadyBeyond.settings.snapshot.fruitsCut, 123_456);
+});
+
+test('one cut can advance a global objective before applying its per-type progress', () => {
+  const harness = createHarness(27, { 24: 0 }, 14_999, 2014);
+
+  assert.equal(harness.manager.processGlobalFruitCut()?.completed.id, 12);
+  assert.equal(harness.settings.snapshot.currentObjective, 28);
+  assert.equal(harness.manager.processFruitTypeCut(8), null);
+  assert.equal(harness.settings.snapshot.currentObjective, 28);
+  assert.equal(harness.settings.snapshot.fruitsCut, 15_000);
+  assert.equal(harness.preferences.values.get('objectives_value_24'), 1);
+  assert.deepEqual(
+    harness.popups.map(({ completed }) => completed.id),
+    [12],
+  );
 });
 
 test('AchievementEvent preserves finish/lose reads, progress groups, and threshold rules', () => {

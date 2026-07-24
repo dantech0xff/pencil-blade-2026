@@ -1304,6 +1304,7 @@ export class ClassicBirdGameplayController extends Component {
   private readonly onOrdinaryFruitCut = (
     event: ClassicGeneratedFruitCutEvent,
   ): void => {
+    this.requireObjectivesManager().processGlobalFruitCut();
     this.presentCutHalves({
       ...event,
       visuals: this.requireClassicGameplayController()
@@ -1323,11 +1324,13 @@ export class ClassicBirdGameplayController extends Component {
       event.fruitId,
       event.score,
     );
+    this.requireObjectivesManager().processFruitTypeCut(event.fruitId);
   };
 
   private readonly onSpecialFruitCut = (
     event: CrazyGeneratedSpecialFruitCutEvent,
   ): void => {
+    this.requireObjectivesManager().processGlobalFruitCut();
     this.presentCutHalves({
       ...event,
       critical: false,
@@ -1343,6 +1346,7 @@ export class ClassicBirdGameplayController extends Component {
       event.fruitId,
       10,
     );
+    this.requireObjectivesManager().processFruitTypeCut(event.fruitId);
   };
 
   private presentCutHalves(event: ClassicBirdCutPresentationEvent): void {

@@ -48,6 +48,7 @@ import {
   type MainMenuToggleCommand,
 } from '../domain/main-menu-state';
 import type { ClassicAssetTree } from '../domain/resolution-profile-service';
+import type { ObjectivesManagerState } from '../domain/objectives-manager-state';
 import {
   CLASSIC_BLADE_BEGAN_EVENT,
   CLASSIC_BLADE_ENDED_EVENT,
@@ -112,7 +113,7 @@ export type MainMenuUnsupportedDestination =
   | Exclude<MainMenuImmediateDestinationLayer, 'OptionsLayer'>
   | Exclude<
       MainMenuDestinationLayer,
-      'LeaderboardLayer' | 'ModeSelectLayer'
+      'LeaderboardLayer' | 'ModeSelectLayer' | 'ObjectivesLayer'
     >;
 
 export interface MainMenuNavigationTransaction {
@@ -129,6 +130,10 @@ export interface MainMenuPresenterLifecycle {
   ) => boolean | void;
   /** Recovered delayed fruit route using the same source transaction boundary. */
   readonly onLeaderboardRequested: (
+    transaction: MainMenuNavigationTransaction,
+  ) => boolean | void;
+  /** Recovered delayed Objectives fruit route using the same source transaction boundary. */
+  readonly onObjectivesRequested: (
     transaction: MainMenuNavigationTransaction,
   ) => boolean | void;
   /** Explicit recovered immediate route; About remains on the unsupported boundary. */
@@ -159,6 +164,10 @@ export interface MainMenuPresenterInput {
   readonly canvas: Node;
   readonly classicResources: MainMenuClassicResources;
   readonly lifecycle: MainMenuPresenterLifecycle;
+  readonly objectives: Pick<
+    ObjectivesManagerState,
+    'processFruitTypeCut' | 'processGlobalFruitCut'
+  >;
   readonly random: Pick<GameplayRandom, 'nextDecile' | 'nextIntInclusive'>;
   readonly raycast: MainMenuRaycastPort;
   readonly resources: LoadedMainMenuResources;
@@ -376,8 +385,10 @@ export class MainMenuPresenter {
         }, {
           callAfterStep: (mutation) => input.raycast.callAfterStep(mutation),
           onColliderDisposed: (collider) => this.colliderFruit.delete(collider),
+          onGlobalFruitCut: () => input.objectives.processGlobalFruitCut(),
           onNavigation: (purpose) => this.acceptFruitNavigation(purpose),
           onPlayFruitAudio: (canonicalPath) => this.audio.playOneShot(canonicalPath),
+          onFruitTypeCut: (fruitId) => input.objectives.processFruitTypeCut(fruitId),
         });
         fruit.attach(this.root, 8 + index);
         this.colliderFruit.set(fruit.collider, fruit);
@@ -1038,11 +1049,11 @@ export class MainMenuPresenter {
     }
   }
 
-  private acceptFruitNavigation(purpose: MainMenuFruitButtonPurpose): void {
+  private acceptFruitNavigation(purpose: MainMenuFruitButtonPurpose): () => void {
     const outcome = this.model.acceptFruitNavigation(purpose);
     if (!outcome.accepted) {
       this.trackPendingCutFruit(purpose);
-      return;
+      return () => this.untrackPendingCutFruit(purpose);
     }
     try {
       for (const command of outcome.commands) {
@@ -1061,6 +1072,7 @@ export class MainMenuPresenter {
         }
       }
       this.trackPendingCutFruit(purpose);
+      return () => this.cancelFruitNavigation(purpose);
     } catch (error) {
       this.navigationStatus = 'idle';
       this.navigationElapsedSeconds = 0;
@@ -1071,6 +1083,29 @@ export class MainMenuPresenter {
         // Preserve the original port failure; the host still owns the active input lease.
       }
       throw error;
+    }
+  }
+
+  /**
+   * Cancels the route that was scheduled before a later objective callback failed.
+   * The FruitButton itself restores its visual/collider state in the same catch boundary.
+   */
+  private cancelFruitNavigation(purpose: MainMenuFruitButtonPurpose): void {
+    this.untrackPendingCutFruit(purpose);
+    if (this.navigationStatus !== 'pending') {
+      return;
+    }
+    this.navigationStatus = 'idle';
+    this.navigationElapsedSeconds = 0;
+    this.model = new MainMenuState(copySettingsSnapshot(this.input.settings.state.snapshot));
+    try {
+      this.bladeInput.setCutEnabled(true);
+    } catch (error) {
+      this.markCleanupPoisoned();
+      throw new MainMenuCleanupError(
+        'Main Menu objective rollback could not restore the cut lease',
+        [error],
+      );
     }
   }
 
@@ -1097,6 +1132,10 @@ export class MainMenuPresenter {
       } else if (attach.destination === 'LeaderboardLayer') {
         transactionSucceeded = (
           this.input.lifecycle.onLeaderboardRequested(transaction) !== false
+        );
+      } else if (attach.destination === 'ObjectivesLayer') {
+        transactionSucceeded = (
+          this.input.lifecycle.onObjectivesRequested(transaction) !== false
         );
       } else {
         transactionSucceeded = this.input.lifecycle.onUnsupportedDestinationRequested(
@@ -1273,6 +1312,14 @@ export class MainMenuPresenter {
     const fruit = this.findFruit(purpose);
     if (this.pendingCutFruits.indexOf(fruit) < 0) {
       this.pendingCutFruits.push(fruit);
+    }
+  }
+
+  private untrackPendingCutFruit(purpose: MainMenuFruitButtonPurpose): void {
+    const fruit = this.findFruit(purpose);
+    const pendingIndex = this.pendingCutFruits.indexOf(fruit);
+    if (pendingIndex >= 0) {
+      this.pendingCutFruits.splice(pendingIndex, 1);
     }
   }
 
@@ -1567,6 +1614,11 @@ function assertInput(input: MainMenuPresenterInput): void {
     throw new Error('Main Menu blade event owner must be a valid Creator node');
   }
   assertFunctions(input.raycast, ['callAfterStep', 'raycastAll'], 'raycast');
+  assertFunctions(
+    input.objectives,
+    ['processFruitTypeCut', 'processGlobalFruitCut'],
+    'objectives',
+  );
   assertFunctions(input.settings, ['persistRatedFlag', 'save'], 'settings');
   assertFunctions(input.settings.state, [
     'addTotalCoins',
@@ -1578,6 +1630,7 @@ function assertInput(input: MainMenuPresenterInput): void {
     'onExitRequested',
     'onLeaderboardRequested',
     'onModeSelectRequested',
+    'onObjectivesRequested',
     'onOptionsRequested',
     'onPlatformReviewRequested',
     'onUnsupportedDestinationRequested',

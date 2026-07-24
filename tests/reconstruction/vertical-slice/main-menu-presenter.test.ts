@@ -206,10 +206,14 @@ export class MainMenuFruitPresenter {
   cut(_segment, effectsEnabled) {
     if (!this.activated || this.disposed || this.cutAccepted) return false;
     this.cutAccepted = true;
+    let rollbackNavigation = null;
     try {
       if (effectsEnabled) this.lifecycle.onPlayFruitAudio('fruit.wav');
-      this.lifecycle.onNavigation(this.presentation.purpose);
+      rollbackNavigation = this.lifecycle.onNavigation(this.presentation.purpose) ?? null;
+      this.lifecycle.onGlobalFruitCut();
+      this.lifecycle.onFruitTypeCut(this.presentation.fruitId);
     } catch (error) {
+      rollbackNavigation?.();
       this.cutAccepted = false;
       throw error;
     }
@@ -540,6 +544,138 @@ test('Leaderboard fruit uses its dedicated delayed route instead of the unsuppor
   presenter.dispose();
 });
 
+test('Objectives fruit uses its dedicated delayed route instead of the unsupported boundary', () => {
+  fruitStub.resetFruitPresenters();
+  const bladeInput = bladeInputHarness();
+  const transactions: unknown[] = [];
+  let unsupportedCalls = 0;
+  const lifecycle = defaultLifecycle();
+  lifecycle.onObjectivesRequested = (transaction: unknown) => {
+    transactions.push(transaction);
+    return true;
+  };
+  lifecycle.onUnsupportedDestinationRequested = () => {
+    unsupportedCalls += 1;
+    return false;
+  };
+  const presenter = MainMenuPresenter.create(input(bladeInput, lifecycle));
+  const host = new cc.Node('SharedGameSceneRoot');
+  presenter.root.setParent(host as never);
+  presenter.activate();
+  const objectives = presenter.fruitButtons.find(({ presentation }) => (
+    presentation.purpose === 'objectives'
+  ));
+  assert.ok(objectives);
+
+  assert.equal(
+    objectives.cut({ end: { x: 2, y: 2 }, start: { x: 1, y: 1 } }, true),
+    true,
+  );
+  presenter.update(0.749);
+  assert.deepEqual(transactions, []);
+  presenter.update(0.001);
+
+  assert.equal(unsupportedCalls, 0);
+  assert.deepEqual(transactions, [{
+    destination: 'ObjectivesLayer',
+    root: presenter.root,
+    timing: 'delayed',
+    zOrder: 1,
+  }]);
+  assert.equal(presenter.state.navigationPending, false);
+  presenter.dispose();
+});
+
+test('objective failure cancels the delayed route before the same fruit can be cut again', () => {
+  fruitStub.resetFruitPresenters();
+  const bladeInput = bladeInputHarness();
+  let destinationCalls = 0;
+  const lifecycle = defaultLifecycle();
+  lifecycle.onObjectivesRequested = () => {
+    destinationCalls += 1;
+    return true;
+  };
+  const presenterInput = input(bladeInput, lifecycle);
+  let failGlobalObjective = true;
+  presenterInput.objectives.processGlobalFruitCut = () => {
+    if (failGlobalObjective) {
+      throw new Error('injected objective storage failure');
+    }
+  };
+  const presenter = MainMenuPresenter.create(presenterInput);
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot') as never);
+  presenter.activate();
+  const objectives = presenter.fruitButtons.find(({ presentation }) => (
+    presentation.purpose === 'objectives'
+  ));
+  assert.ok(objectives);
+  const segment = { end: { x: 2, y: 2 }, start: { x: 1, y: 1 } };
+
+  assert.throws(
+    () => objectives.cut(segment, true),
+    /injected objective storage failure/,
+  );
+  assert.equal(presenter.state.navigationPending, false);
+  assert.equal((objectives as unknown as StubFruitPresenter).cutAccepted, false);
+  assert.deepEqual(bladeInput.events.slice(-2), ['cut:false', 'cut:true']);
+  presenter.update(1);
+  assert.equal(destinationCalls, 0);
+
+  failGlobalObjective = false;
+  assert.equal(objectives.cut(segment, true), true);
+  assert.equal(presenter.state.navigationPending, true);
+  presenter.update(0.75);
+  assert.equal(destinationCalls, 1);
+  presenter.dispose();
+});
+
+test('objective failure on a follower fruit preserves the route owned by the first fruit', () => {
+  fruitStub.resetFruitPresenters();
+  const bladeInput = bladeInputHarness();
+  let destinationCalls = 0;
+  const lifecycle = defaultLifecycle();
+  lifecycle.onModeSelectRequested = () => {
+    destinationCalls += 1;
+    return true;
+  };
+  const presenterInput = input(bladeInput, lifecycle);
+  let globalObjectiveCalls = 0;
+  presenterInput.objectives.processGlobalFruitCut = () => {
+    globalObjectiveCalls += 1;
+    if (globalObjectiveCalls === 2) {
+      throw new Error('injected follower objective storage failure');
+    }
+  };
+  const presenter = MainMenuPresenter.create(presenterInput);
+  presenter.root.setParent(new cc.Node('SharedGameSceneRoot') as never);
+  presenter.activate();
+  const newGame = presenter.fruitButtons.find(({ presentation }) => (
+    presentation.purpose === 'new-game'
+  ));
+  const leaderboard = presenter.fruitButtons.find(({ presentation }) => (
+    presentation.purpose === 'leaderboard'
+  ));
+  assert.ok(newGame);
+  assert.ok(leaderboard);
+  const segment = { end: { x: 2, y: 2 }, start: { x: 1, y: 1 } };
+
+  assert.equal(newGame.cut(segment, true), true);
+  assert.throws(
+    () => leaderboard.cut(segment, true),
+    /injected follower objective storage failure/,
+  );
+  assert.equal(presenter.state.navigationPending, true);
+  assert.equal((newGame as unknown as StubFruitPresenter).cutAccepted, true);
+  assert.equal((leaderboard as unknown as StubFruitPresenter).cutAccepted, false);
+
+  presenter.update(0.75);
+
+  assert.equal(destinationCalls, 1);
+  assert.equal((newGame as unknown as StubFruitPresenter).commitCount, 1);
+  assert.equal((leaderboard as unknown as StubFruitPresenter).commitCount, 0);
+  presenter.dispose();
+});
+
 test('cut-gate failure restores model and fruit so a later cut can navigate', () => {
   fruitStub.resetFruitPresenters();
   const bladeInput = bladeInputHarness({ failDisableOnce: true });
@@ -740,6 +876,7 @@ test('runtime source preserves detached construction, exact append order, and se
   }
   assert.match(source, /onLeaderboardRequested/);
   assert.match(source, /onModeSelectRequested/);
+  assert.match(source, /onObjectivesRequested/);
   assert.match(source, /onOptionsRequested/);
   assert.match(source, /onUnsupportedDestinationRequested/);
   assert.match(source, /callAfterStep: \(mutation\) => input\.raycast\.callAfterStep\(mutation\)/);
@@ -782,6 +919,10 @@ function input(
       assetTree: '480x800' as const,
     },
     lifecycle,
+    objectives: {
+      processFruitTypeCut() {},
+      processGlobalFruitCut() {},
+    },
     random: {
       nextDecile: () => 0.5,
       nextIntInclusive: (minimum: number) => minimum,
@@ -943,6 +1084,7 @@ function defaultLifecycle() {
     onExitRequested() {},
     onLeaderboardRequested() { return true; },
     onModeSelectRequested() { return true; },
+    onObjectivesRequested() { return true; },
     onOptionsRequested() { return true; },
     onPlatformReviewRequested() { return true; },
     onUnsupportedDestinationRequested() { return false; },

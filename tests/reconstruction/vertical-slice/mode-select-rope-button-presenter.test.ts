@@ -237,6 +237,8 @@ test('RopeButton owns the exact visual topology and reversible real-physics cut'
     callAfterStep: (mutation: () => void) => deferred.push(mutation),
     onColliderDisposed: () => events.push('collider-disposed'),
     onColliderRestored: () => events.push('collider-restored'),
+    onFruitTypeCut: () => events.push('type-objective'),
+    onGlobalFruitCut: () => events.push('global-objective'),
     onModeSelected: () => {
       events.push('mode-selected');
       if (rejectSelection) throw new Error('injected selection failure');
@@ -286,12 +288,22 @@ test('RopeButton owns the exact visual topology and reversible real-physics cut'
   assert.equal(presenter.state.cutAccepted, false);
   assert.equal(presenter.state.wrapperCut, false);
   assert.equal(presenter.cutHalfPresenter, null);
+  assert.deepEqual(events, [
+    'fruit-audio',
+    'mode-selected',
+  ]);
 
   rejectSelection = false;
   assert.equal(presenter.cut(segment, true), true);
   assert.equal(presenter.state.cutAccepted, true);
   assert.equal(presenter.state.wrapperCut, true);
   assert.ok(presenter.cutHalfPresenter);
+  assert.deepEqual(events.slice(-4), [
+    'fruit-audio',
+    'mode-selected',
+    'global-objective',
+    'type-objective',
+  ]);
   assert.equal(deferred.length, 1);
   deferred.shift()?.();
   assert.equal(presenter.fruitButton.collider.enabled, false);
@@ -315,6 +327,8 @@ test('RopeButton owns the exact visual topology and reversible real-physics cut'
   assert.equal(presenter.fruitButton.root.children.some(({ name }) => name === 'intact-fruit'), true);
   assert.equal(events.includes('collider-restored'), true);
   assert.equal(presenter.cut(segment, false), true);
+  assert.equal(events.filter((event) => event === 'global-objective').length, 1);
+  assert.equal(events.filter((event) => event === 'type-objective').length, 1);
   assert.equal(presenter.dispose(), true);
   assert.equal(presenter.dispose(), false);
 });
