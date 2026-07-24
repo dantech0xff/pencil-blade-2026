@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "manifestId": "pencil-blade-public-web-variant",
+  "manifestVersion": "0.1.0",
+  "asOf": "2026-07-24",
+  "target": {
+    "platform": "web-mobile",
+    "distribution": "github-pages",
+    "url": "https://dantech0xff.github.io/pencil-blade-2026/",
+    "repositoryPrefix": "/pencil-blade-2026/"
+  },
+  "reconstructionManifest": "release/recovered-reconstruction-manifest.json",
+  "releaseDecision": {
+    "status": "blocked",
+    "approvedBy": null,
+    "approvedAt": null,
+    "evidenceRefs": [],
+    "reason": "Recovered artwork, audio, fonts, game identity, source, and generated runtime have not received documented public-distribution approval."
+  },
+  "releaseExceptions": {
+    "policy": "Any omission, replacement, conversion, substitution, or identity change requires explicit approval and cannot increase recovered fidelity.",
+    "approved": [],
+    "pending": [
+      {
+        "id": "unsupported-cooper-black-otf-treatment",
+        "scope": "Fonts/CooperBlackStd.otf",
+        "status": "pending-user-decision",
+        "reason": "The exact bytes are preserved, but Cocos Creator 3.8.8 has no supported consumer for this OTF resource."
+      }
+    ]
+  },
+  "records": [
+    {
+      "id": "clean-room-source",
+      "category": "code",
+      "included": true,
+      "scope": "game/assets/scripts and game/assets/scenes",
+      "origin": "clean-room-static-evidence-reconstruction",
+      "itemCount": null,
+      "rightsStatus": "unreviewed",
+      "license": null,
+      "rightsEvidenceRefs": [],
+      "approver": null,
+      "approvedAt": null,
+      "shipReady": false
+    },
+    {
+      "id": "recovered-png-assets",
+      "category": "graphics",
+      "included": true,
+      "scope": "784 PNG entries in assets/catalog/creator-staging-manifest.json",
+      "origin": "recovered-apk-resource-corpus",
+      "itemCount": 784,
+      "rightsStatus": "unresolved",
+      "license": null,
+      "rightsEvidenceRefs": [],
+      "approver": null,
+      "approvedAt": null,
+      "shipReady": false
+    },
+    {
+      "id": "recovered-audio-assets",
+      "category": "audio",
+      "included": true,
+      "scope": "59 WAV and 3 MP3 entries in assets/catalog/creator-staging-manifest.json",
+      "origin": "recovered-apk-resource-corpus",
+      "itemCount": 62,
+      "rightsStatus": "unresolved",
+      "license": null,
+      "rightsEvidenceRefs": [],
+      "approver": null,
+      "approvedAt": null,
+      "shipReady": false
+    },
+    {
+      "id": "recovered-font-assets",
+      "category": "fonts",
+      "included": true,
+      "scope": "15 TTF and 1 OTF entries in assets/catalog/creator-staging-manifest.json",
+      "origin": "recovered-apk-resource-corpus",
+      "itemCount": 16,
+      "rightsStatus": "unresolved",
+      "license": null,
+      "rightsEvidenceRefs": [],
+      "approver": null,
+      "approvedAt": null,
+      "shipReady": false
+    },
+    {
+      "id": "pencil-blade-identity",
+      "category": "name-trademark",
+      "included": true,
+      "scope": "Pencil Blade name, title treatment, and recovered identity",
+      "origin": "recovered-application-identity",
+      "itemCount": 1,
+      "rightsStatus": "unresolved",
+      "license": null,
+      "rightsEvidenceRefs": [],
+      "approver": null,
+      "approvedAt": null,
+      "shipReady": false
+    },
+    {
+      "id": "cocos-generated-web-runtime",
+      "category": "engine-runtime",
+      "included": true,
+      "scope": "Cocos Creator 3.8.8 generated Web Mobile runtime and built-in WebAssembly payloads",
+      "origin": "Cocos Creator 3.8.8 build output",
+      "itemCount": null,
+      "rightsStatus": "unreviewed",
+      "license": null,
+      "rightsEvidenceRefs": [],
+      "approver": null,
+      "approvedAt": null,
+      "shipReady": false
+    }
+  ]
+}

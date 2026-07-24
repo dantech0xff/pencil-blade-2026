@@ -1,0 +1,42 @@
+{
+  "__version__": "1.3.9",
+  "buildMode": "normal",
+  "buildPath": "project://build",
+  "debug": false,
+  "designResolution": {
+    "fitHeight": true,
+    "fitWidth": true,
+    "height": 1280,
+    "width": 720
+  },
+  "inlineEnum": true,
+  "mainBundleCompressionType": "merge_all_json",
+  "mainBundleIsRemote": false,
+  "md5Cache": true,
+  "name": "Pencil Blade",
+  "outputName": "web-mobile-pages",
+  "packages": {
+    "web-mobile": {
+      "embedWebDebugger": false,
+      "orientation": "portrait",
+      "polyfills": {
+        "asyncFunctions": true,
+        "coreJs": false
+      },
+      "useWebGPU": false
+    }
+  },
+  "platform": "web-mobile",
+  "scenes": [
+    {
+      "url": "db://assets/scenes/classic.scene",
+      "uuid": "35e5417d-c3dd-4522-9339-99c81a0b9b4b"
+    }
+  ],
+  "server": "",
+  "sourceMaps": false,
+  "startScene": "35e5417d-c3dd-4522-9339-99c81a0b9b4b",
+  "taskName": "web-mobile-pages",
+  "useBuiltinServer": false,
+  "useSplashScreen": false
+}

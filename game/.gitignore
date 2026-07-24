@@ -8,7 +8,7 @@
 /local/
 /build/
 /profiles/
-/native/engine/android/**/*/assets
+/native/
 #//////////////////////////
 # NPM
 #//////////////////////////

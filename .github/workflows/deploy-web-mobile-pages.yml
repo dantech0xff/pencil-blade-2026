@@ -1,0 +1,142 @@
+name: Deploy Web Mobile to GitHub Pages
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: pencil-blade-github-pages
+  cancel-in-progress: false
+
+jobs:
+  build-web-mobile:
+    name: Build and audit Web Mobile
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on:
+      - self-hosted
+      - macOS
+      - ARM64
+      - cocos-creator-3.8.8
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      COCOS_CREATOR_APP: /Applications/Cocos/Creator/3.8.8/CocosCreator.app
+      COCOS_CREATOR_BIN: /Applications/Cocos/Creator/3.8.8/CocosCreator.app/Contents/MacOS/CocosCreator
+      WEB_BUILD_DIR: game/build/web-mobile-pages
+
+    steps:
+      - name: Check out protected main
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Verify pinned runner toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/main"
+          test -x "$COCOS_CREATOR_BIN"
+          test -x /opt/homebrew/bin/gtar
+          creator_version=$(/usr/bin/defaults read "$COCOS_CREATOR_APP/Contents/Info" CFBundleShortVersionString)
+          test "$creator_version" = "3.8.8"
+          /usr/bin/codesign --verify --deep --strict "$COCOS_CREATOR_APP"
+          node_version=$(node --version)
+          case "$node_version" in
+            v22.*|v23.*|v24.*|v25.*|v26.*) ;;
+            *)
+              printf 'Node 22 or newer is required, found %s\n' "$node_version" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Run reconstruction and release tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/audit-creator-iterable-spreads.mjs \
+            --typescript "$COCOS_CREATOR_APP/Contents/Resources/app.asar.unpacked/node_modules/typescript/lib/typescript.js"
+          node --test tests/*.mjs
+          node --test tests/reconstruction/vertical-slice/*.test.ts
+          node "$COCOS_CREATOR_APP/Contents/Resources/app.asar.unpacked/node_modules/typescript/lib/tsc.js" \
+            -p game/tsconfig.json \
+            --pretty false \
+            --noEmit
+          sh tests/reconstruction-policy-test.sh
+          sh tests/reconstruction-policy-negative-test.sh
+
+      - name: Require public-distribution approval
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/verify-release-rights.mjs \
+            --manifest release/public-release-variant-manifest.json \
+            --root .
+
+      - name: Build Web Mobile with Cocos Creator 3.8.8
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected_output="$GITHUB_WORKSPACE/game/build/web-mobile-pages"
+          test "$GITHUB_WORKSPACE/$WEB_BUILD_DIR" = "$expected_output"
+          if test -e "$expected_output"; then
+            test -d "$expected_output"
+            test ! -L "$expected_output"
+            /bin/rm -rf "$expected_output"
+          fi
+          set +e
+          "$COCOS_CREATOR_BIN" \
+            --project "$GITHUB_WORKSPACE/game" \
+            --build "stage=build;configPath=$GITHUB_WORKSPACE/game/build-configs/web-mobile-pages.json;"
+          creator_status=$?
+          set -e
+          case "$creator_status" in
+            36)
+              printf 'Cocos Creator Web Mobile build succeeded (exit 36).\n'
+              ;;
+            32)
+              printf 'Cocos Creator rejected the build parameters (exit 32).\n' >&2
+              exit 32
+              ;;
+            34)
+              printf 'Cocos Creator reported a build failure (exit 34).\n' >&2
+              exit 34
+              ;;
+            *)
+              printf 'Unexpected Cocos Creator exit code: %s\n' "$creator_status" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Audit generated Web Mobile tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/audit-web-build.mjs "$WEB_BUILD_DIR"
+          node scripts/verify-web-mobile-build.mjs "$WEB_BUILD_DIR"
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload immutable Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: game/build/web-mobile-pages
+
+  deploy:
+    name: Deploy approved Pages artifact
+    needs: build-web-mobile
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

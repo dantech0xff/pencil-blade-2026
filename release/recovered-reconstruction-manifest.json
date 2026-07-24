@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "manifestId": "pencil-blade-recovered-reconstruction",
+  "manifestVersion": "1.0.0",
+  "asOf": "2026-07-24",
+  "purpose": "Preservation manifest for the static-evidence reconstruction. This is not a public-distribution approval.",
+  "evidenceMode": "static-only",
+  "originalRuntime": {
+    "available": false,
+    "observed": false,
+    "executed": false,
+    "required": false
+  },
+  "target": {
+    "engine": "Cocos Creator",
+    "engineVersion": "3.8.8",
+    "language": "TypeScript",
+    "physics": "Physics2D",
+    "platforms": [
+      "android-debug",
+      "web-mobile"
+    ]
+  },
+  "resourceCorpus": {
+    "scope": "recovered-apk-assets",
+    "canonicalRoot": ".forensics-work/phase-01/jadx/resources/assets",
+    "canonicalRootDistribution": "local-evidence-only",
+    "resourceMap": "forensics/resources/resource-usage-map.json",
+    "resourceMapSha256": "165238f13f4186a9ab429c9c5a8bab07b4a42e941d0608f757d9e41a44d2ce67",
+    "stagingManifest": "assets/catalog/creator-staging-manifest.json",
+    "stagingManifestSha256": "a2697c58152451e8a234a39404191263c9d60c2eba1fb1f352722816b1cdd606",
+    "reconciliationLedger": "assets/catalog/resource-reconciliation-ledger.json",
+    "reconciliationLedgerSha256": "18ea8ef7ae3fb3751d530dd89426979d601fd8e918d5e9b539a1b8d969daacae",
+    "sourceManifestSha256": "0143473b21e56525cde92163f72fd49b2a898ab70ef2b224cdad00eaba9238e3",
+    "assetCount": 862,
+    "byteCount": 32945747,
+    "classification": {
+      "consumed": 761,
+      "excluded": 100,
+      "unsupported": 1,
+      "unknown": 0
+    },
+    "formats": {
+      "png": 784,
+      "wav": 59,
+      "mp3": 3,
+      "ttf": 15,
+      "otf": 1
+    },
+    "externalSampleProject": {
+      "provided": false,
+      "includedInDenominator": false,
+      "status": "not-available"
+    }
+  },
+  "implementation": {
+    "productionSourceRoot": "game/assets/scripts",
+    "scene": "game/assets/scenes/classic.scene",
+    "sceneUuid": "35e5417d-c3dd-4522-9339-99c81a0b9b4b",
+    "originalExecutableCodeIncluded": false,
+    "compatibilityLayerIncluded": false,
+    "emulatorIncluded": false
+  },
+  "rights": {
+    "status": "unresolved",
+    "publicDistributionApproved": false,
+    "publicReleaseManifest": "release/public-release-variant-manifest.json"
+  },
+  "knownResiduals": [
+    {
+      "id": "unsupported-cooper-black-otf",
+      "scope": "Fonts/CooperBlackStd.otf",
+      "status": "byte-preserved-not-consumed",
+      "effect": "Does not count as recovered runtime coverage and remains visible in the resource ledger."
+    },
+    {
+      "id": "external-sample-project-not-provided",
+      "scope": "canonical resource denominator",
+      "status": "open",
+      "effect": "The frozen denominator is complete only for the recovered APK resource corpus."
+    }
+  ]
+}
