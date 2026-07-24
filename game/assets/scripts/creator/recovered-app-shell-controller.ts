@@ -68,6 +68,14 @@ import {
 } from './mode-select-resource-loader';
 import { NonClassicPhysicsAdapter } from './non-classic-physics-adapter';
 import {
+  OptionsPresenter,
+  type OptionsNavigationTransaction,
+} from './options-presenter';
+import {
+  loadOptionsResources,
+  type LoadedOptionsResources,
+} from './options-resource-loader';
+import {
   createRecoveredAppViewport,
   type RecoveredAppViewport,
 } from './recovered-app-viewport';
@@ -96,7 +104,8 @@ export type RecoveredAppShellState =
   | 'failed'
   | 'gn-style'
   | 'main-menu'
-  | 'mode-select';
+  | 'mode-select'
+  | 'options';
 
 export interface RecoveredAppShellTransitionFailure {
   readonly error: Error;
@@ -117,6 +126,7 @@ export interface RecoveredAppShellPlatformReviewRequest {
 interface RecoveredAppResources {
   readonly mainMenu: LoadedMainMenuResources;
   readonly modeSelect: LoadedModeSelectResources;
+  readonly options: LoadedOptionsResources;
 }
 
 interface CrazyMainMenuNavigationRequest {
@@ -155,6 +165,7 @@ interface CapturedCrazyMainMenuNavigationRequest {
 export class RecoveredAppShellController extends Component {
   private activeMainMenu: MainMenuPresenter | null = null;
   private activeModeSelect: ModeSelectPresenter | null = null;
+  private activeOptions: OptionsPresenter | null = null;
   private bladeInput: BladeInputController | null = null;
   private bootPromise: Promise<void> | null = null;
   private classicBirdGameplayController: ClassicBirdGameplayController | null = null;
@@ -286,6 +297,7 @@ export class RecoveredAppShellController extends Component {
     this.sharedLeaf?.update(deltaSeconds);
     this.activeMainMenu?.update(deltaSeconds);
     this.activeModeSelect?.update(deltaSeconds);
+    this.activeOptions?.update(deltaSeconds);
   }
 
   onDisable(): void {
@@ -354,11 +366,13 @@ export class RecoveredAppShellController extends Component {
     runBestEffortCleanup('Recovered app shell teardown', [
       () => this.activeMainMenu?.dispose(),
       () => this.activeModeSelect?.dispose(),
+      () => this.activeOptions?.dispose(),
       () => this.sharedScene?.dispose(),
       () => this.nonClassicPhysics?.dispose(),
     ]);
     this.activeMainMenu = null;
     this.activeModeSelect = null;
+    this.activeOptions = null;
     this.sharedScene = null;
     this.sharedLeaf = null;
     this.resources = null;
@@ -449,10 +463,16 @@ export class RecoveredAppShellController extends Component {
       }
       this.assertBootStillCurrent();
     });
-    const [sharedResources, mainMenuResources, modeSelectResources] = await Promise.all([
+    const [
+      sharedResources,
+      mainMenuResources,
+      modeSelectResources,
+      optionsResources,
+    ] = await Promise.all([
       loadSharedGameSceneResources(assetTree),
       loadMainMenuResources(assetTree),
       loadModeSelectResources(assetTree),
+      loadOptionsResources(assetTree),
     ]);
     await Promise.all([
       crazyPreparation,
@@ -487,6 +507,7 @@ export class RecoveredAppShellController extends Component {
       this.resources = Object.freeze({
         mainMenu: mainMenuResources,
         modeSelect: modeSelectResources,
+        options: optionsResources,
       });
       this.sharedLeaf = sharedLeaf;
       this.sharedScene = sharedScene;
@@ -533,6 +554,9 @@ export class RecoveredAppShellController extends Component {
         onExitRequested: () => director.end(),
         onModeSelectRequested: (transaction) => (
           this.transitionMainMenuToModeSelect(transaction)
+        ),
+        onOptionsRequested: (transaction) => (
+          this.transitionMainMenuToOptions(transaction)
         ),
         onPlatformReviewRequested: () => this.requestPlatformReview(),
         onUnsupportedDestinationRequested: (destination) => (
@@ -588,6 +612,35 @@ export class RecoveredAppShellController extends Component {
     });
   }
 
+  private createOptionsPresenter(): OptionsPresenter {
+    const gameplay = this.requireGameplayController();
+    const resources = this.requireResources();
+    const sharedScene = this.requireSharedScene();
+    return OptionsPresenter.create({
+      audio: gameplay.sharedAudioPresenter,
+      canvas: this.node,
+      lifecycle: {
+        onMainMenuRequested: (transaction) => (
+          this.transitionOptionsToMainMenu(transaction)
+        ),
+      },
+      random: gameplay.sharedGameplayRandom,
+      resources: resources.options,
+      settings: gameplay.sharedSettingsRuntime,
+      sharedCosmetics: {
+        get currentBackgroundIndex() {
+          return sharedScene.background.selectedIndex;
+        },
+        get currentThemeIndex() {
+          return sharedScene.theme.selectedIndex;
+        },
+        selectBackground: (index) => sharedScene.background.select(index),
+        selectTheme: (index) => sharedScene.theme.select(index),
+      },
+      viewport: this.requireViewport(),
+    });
+  }
+
   private transitionMainMenuToModeSelect(
     transaction: MainMenuNavigationTransaction,
   ): boolean {
@@ -619,6 +672,45 @@ export class RecoveredAppShellController extends Component {
       this.activeMainMenu = null;
       this.activeModeSelect = nextPresenter;
       this.stateValue = 'mode-select';
+      disposeCommittedPresenter(oldPresenter, 'Main Menu');
+      return true;
+    });
+  }
+
+  private transitionMainMenuToOptions(
+    transaction: MainMenuNavigationTransaction,
+  ): boolean {
+    const oldPresenter = this.activeMainMenu;
+    if (
+      oldPresenter === null
+      || transaction.root !== oldPresenter.root
+      || transaction.destination !== 'OptionsLayer'
+      || transaction.timing !== 'immediate'
+      || transaction.zOrder !== 1
+    ) {
+      return false;
+    }
+    return this.runTransition('main-menu', 'options', () => {
+      const sharedScene = this.requireSharedScene();
+      const nextPresenter = this.createOptionsPresenter();
+      try {
+        const previous = sharedScene.replaceCurrentScreen(nextPresenter.root);
+        if (previous !== oldPresenter.root || !oldPresenter.suspendForTransition()) {
+          throw new Error('Main Menu did not surrender its Options transition lease');
+        }
+        nextPresenter.activate();
+      } catch (error) {
+        this.compensateFailedMenuOptionsReplacement(
+          oldPresenter,
+          nextPresenter,
+          error,
+          'Main Menu',
+          'Options',
+        );
+      }
+      this.activeMainMenu = null;
+      this.activeOptions = nextPresenter;
+      this.stateValue = 'options';
       disposeCommittedPresenter(oldPresenter, 'Main Menu');
       return true;
     });
@@ -657,6 +749,45 @@ export class RecoveredAppShellController extends Component {
       this.activeMainMenu = nextPresenter;
       this.stateValue = 'main-menu';
       disposeCommittedPresenter(oldPresenter, 'Mode Select');
+      return true;
+    });
+  }
+
+  private transitionOptionsToMainMenu(
+    transaction: OptionsNavigationTransaction,
+  ): boolean {
+    const oldPresenter = this.activeOptions;
+    if (
+      oldPresenter === null
+      || transaction.root !== oldPresenter.root
+      || transaction.destination !== 'MainMenuLayer'
+      || transaction.timing !== 'immediate'
+      || transaction.zOrder !== 1
+    ) {
+      return false;
+    }
+    return this.runTransition('options', 'main-menu', () => {
+      const sharedScene = this.requireSharedScene();
+      const nextPresenter = this.createMainMenuPresenter();
+      try {
+        const previous = sharedScene.replaceCurrentScreen(nextPresenter.root);
+        if (previous !== oldPresenter.root || !oldPresenter.suspendForTransition()) {
+          throw new Error('Options did not surrender its transition lease');
+        }
+        nextPresenter.activate();
+      } catch (error) {
+        this.compensateFailedMenuOptionsReplacement(
+          oldPresenter,
+          nextPresenter,
+          error,
+          'Options',
+          'Main Menu',
+        );
+      }
+      this.activeOptions = null;
+      this.activeMainMenu = nextPresenter;
+      this.stateValue = 'main-menu';
+      disposeCommittedPresenter(oldPresenter, 'Options');
       return true;
     });
   }
@@ -2098,6 +2229,92 @@ export class RecoveredAppShellController extends Component {
     throw error;
   }
 
+  private compensateFailedMenuOptionsReplacement(
+    oldPresenter: MainMenuPresenter | OptionsPresenter,
+    nextPresenter: MainMenuPresenter | OptionsPresenter,
+    error: unknown,
+    source: 'Main Menu' | 'Options',
+    destination: 'Main Menu' | 'Options',
+  ): never {
+    const rollbackFailures: unknown[] = [];
+    try {
+      this.restorePreviousScreen(oldPresenter.root, nextPresenter.root);
+    } catch (rollbackError) {
+      rollbackFailures.push(rollbackError);
+    }
+    if (rollbackFailures.length === 0) {
+      try {
+        nextPresenter.dispose();
+      } catch (rollbackError) {
+        rollbackFailures.push(rollbackError);
+      }
+    }
+    if (rollbackFailures.length === 0) {
+      throw error;
+    }
+
+    const fatalCleanupFailures: unknown[] = [];
+    try {
+      this.releaseFailedMenuOptionsScreenOwnership(
+        oldPresenter.root,
+        nextPresenter.root,
+      );
+    } catch (cleanupError) {
+      fatalCleanupFailures.push(cleanupError);
+    }
+    try {
+      nextPresenter.dispose();
+    } catch (cleanupError) {
+      fatalCleanupFailures.push(cleanupError);
+    }
+    try {
+      oldPresenter.dispose();
+    } catch (cleanupError) {
+      fatalCleanupFailures.push(cleanupError);
+    }
+    if (this.activeMainMenu === oldPresenter) {
+      this.activeMainMenu = null;
+    }
+    if (this.activeOptions === oldPresenter) {
+      this.activeOptions = null;
+    }
+
+    throw new ModeSelectFatalNavigationError(
+      `${source} to ${destination} rollback is incomplete`,
+      aggregateWithPrimaryError(
+        `${source} to ${destination} rollback failed`,
+        error,
+        [...rollbackFailures, ...fatalCleanupFailures],
+      ),
+    );
+  }
+
+  private releaseFailedMenuOptionsScreenOwnership(
+    previous: Node,
+    attempted: Node,
+  ): void {
+    const sharedScene = this.requireSharedScene();
+    const current = sharedScene.currentScreen;
+    if (current !== null) {
+      if (current !== previous && current !== attempted) {
+        throw new Error(
+          'Menu/Options fatal cleanup cannot release an unexpected current screen',
+        );
+      }
+      const detached = sharedScene.detachCurrentScreen(current);
+      if (detached !== current) {
+        throw new Error(
+          'Menu/Options fatal cleanup detached an unexpected current screen',
+        );
+      }
+    }
+    if (sharedScene.currentScreen !== null) {
+      throw new Error(
+        'Menu/Options fatal cleanup could not release current-screen ownership',
+      );
+    }
+  }
+
   private captureModeSelectFatalScreenRelease(root: Node): () => void {
     const screen = this.requireSharedScene();
     return () => {
@@ -2161,14 +2378,19 @@ export class RecoveredAppShellController extends Component {
       if (restored !== attempted) {
         throw new Error('Screen rollback detached an unexpected attempted destination');
       }
-      return;
-    }
-    if (sharedScene.currentScreen === null && previous.parent === null) {
+    } else if (sharedScene.currentScreen === null && previous.parent === null) {
       sharedScene.attachCurrentScreen(previous);
-      return;
-    }
-    if (sharedScene.currentScreen !== previous) {
+    } else if (sharedScene.currentScreen !== previous) {
       throw new Error('Screen rollback cannot recover the previous foreground owner');
+    }
+    if (
+      sharedScene.currentScreen !== previous
+      || !isValid(previous, true)
+      || previous.parent === null
+      || !isValid(previous.parent, true)
+      || !previous.parent.activeInHierarchy
+    ) {
+      throw new Error('Screen rollback did not restore a usable source-screen host');
     }
   }
 
@@ -2200,6 +2422,7 @@ export class RecoveredAppShellController extends Component {
       return;
     }
     try {
+      this.activeOptions?.reconcileSelectionsForPersistence();
       this.gameplayController.sharedSettingsRuntime.save();
     } catch (error) {
       const failure = normalizeError(error, 'Recovered settings save failed');

@@ -108,7 +108,7 @@ export interface MainMenuSettingsPort {
 }
 
 export type MainMenuUnsupportedDestination =
-  | MainMenuImmediateDestinationLayer
+  | Exclude<MainMenuImmediateDestinationLayer, 'OptionsLayer'>
   | Exclude<MainMenuDestinationLayer, 'ModeSelectLayer'>;
 
 export interface MainMenuNavigationTransaction {
@@ -121,6 +121,10 @@ export interface MainMenuNavigationTransaction {
 export interface MainMenuPresenterLifecycle {
   /** `false` reports a rolled-back host transaction; `void` means success. */
   readonly onModeSelectRequested: (
+    transaction: MainMenuNavigationTransaction,
+  ) => boolean | void;
+  /** Explicit recovered immediate route; About remains on the unsupported boundary. */
+  readonly onOptionsRequested: (
     transaction: MainMenuNavigationTransaction,
   ) => boolean | void;
   readonly onUnsupportedDestinationRequested: (
@@ -897,17 +901,27 @@ export class MainMenuPresenter {
       if (command.type === 'attach-immediate-destination-to-captured-parent') {
         let succeeded: boolean | void;
         try {
-          succeeded = this.input.lifecycle.onUnsupportedDestinationRequested(
-            command.destination,
-            Object.freeze({
-              destination: command.destination,
-              root: this.root,
-              timing: 'immediate' as const,
-              zOrder: command.zOrder,
-            }),
-          );
+          const transaction = Object.freeze({
+            destination: command.destination,
+            root: this.root,
+            timing: 'immediate' as const,
+            zOrder: command.zOrder,
+          });
+          succeeded = command.destination === 'OptionsLayer'
+            ? this.input.lifecycle.onOptionsRequested(transaction)
+            : this.input.lifecycle.onUnsupportedDestinationRequested(
+              command.destination,
+              transaction,
+            );
         } catch (error) {
-          this.rearmNavigationAfterFailure();
+          try {
+            this.rearmNavigationAfterFailure();
+          } catch (rearmError) {
+            throw new MainMenuCleanupError(
+              'Main Menu immediate destination transaction and rollback failed',
+              [error, rearmError],
+            );
+          }
           throw error;
         }
         if (succeeded === false) {
@@ -1502,6 +1516,7 @@ function assertInput(input: MainMenuPresenterInput): void {
   assertFunctions(input.lifecycle, [
     'onExitRequested',
     'onModeSelectRequested',
+    'onOptionsRequested',
     'onPlatformReviewRequested',
     'onUnsupportedDestinationRequested',
   ], 'lifecycle');

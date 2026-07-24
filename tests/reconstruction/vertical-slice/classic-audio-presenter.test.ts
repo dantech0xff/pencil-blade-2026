@@ -324,7 +324,7 @@ test('preload requests the exact recovered core batch and excludes electric-only
     cc.loadedBundlePaths,
     CLASSIC_CORE_AUDIO_PATHS.map(canonicalResourceToBundlePath),
   );
-  assert.equal(cc.loadedBundlePaths.length, 29);
+  assert.equal(cc.loadedBundlePaths.length, 31);
   assert.equal(
     cc.loadedBundlePaths.includes(
       canonicalResourceToBundlePath(CLASSIC_ELECTRIC_BOMB_HIT_AUDIO_PATH),

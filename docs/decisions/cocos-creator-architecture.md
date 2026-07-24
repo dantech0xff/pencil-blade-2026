@@ -91,7 +91,7 @@ must not.
   shape: 50 integers, 4 booleans, 18 blade prices, 8 background prices, storage-first
   price-0 purchase transitions, and recovery behavior that disables writes after any load
   failure.
-- `tests/reconstruction/vertical-slice/` contains the current `1157/1157`
+- `tests/reconstruction/vertical-slice/` contains the current `1212/1212`
   all-route/menu regression suite.
 - `scripts/audit-creator-build.mjs` contains the post-build archive audit.
 - `game/library/` is generated Creator cache and is not hand-authored gameplay source.
@@ -219,8 +219,9 @@ all six route leaderboards, objective state, music/effect flags, network sentine
 state in recovered relative order. The bulk schema is exact: 50 integers and 4 booleans,
 including 18 blade price keys/defaults and 8 background price keys/defaults. Indexed Mode
 Select unlocks use their separate immediate keys. Price `0` remains the ownership sentinel; the
-storage-first purchase transition is idempotent, writes the selected price key to `0`, and does
-not yet include affordability/coin debit or the Options UI. Field-isolated recovery preserves
+Options transition applies exact affordability, persists ownership before committing one
+in-memory debit, and stays idempotent for owned items. Back and app-hide reconcile unpaid
+background/blade previews before persistence. Field-isolated recovery preserves
 any valid `totalCoins`, including `0`; only missing, corrupt, or unreadable coin storage falls
 back to `999999`, and any recovery disables writes. Result mutations remain memory-only until
 the app-hide save checkpoint. Main Menu exit-save and app-hide save are implemented; the
@@ -243,7 +244,7 @@ first-launch `flag` bootstrap remains open.
    archive entry, parses exact ZIP records, recurses through bounded nested archives, and
    permits ELF only at the pinned Creator 3.8.8 `libcocos.so` boundary.
 
-Current checkpoint: full vertical slice `1157/1157`, `tests/*.mjs` `43/43`,
+Current checkpoint: full vertical slice `1212/1212`, `tests/*.mjs` `43/43`,
 inventory/source/staging/archive workflow `14/14` in `217s`, reconstruction policy positive
 plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and
 clean diff hygiene. Metadata reports zero structural errors and zero duplicate UUIDs; fidelity
@@ -251,7 +252,10 @@ remains blocked only by preserved unsupported `Fonts/CooperBlackStd.otf`. A fres
 Creator-served Browser Preview confirms Main Menu → Mode Select → GN Style → intro → live
 cuts/score/music/particles → Pause/Resume/Replay → Pause Quit → Main Menu → repeated entry →
 natural Time Up → Result Retry → Result Menu. DevTools reports zero application/runtime
-errors; one unrelated Chrome extension error remains outside the game.
+errors; one unrelated Chrome extension error remains outside the game. Compact `360x800`
+and high `720x1280` Preview profiles also confirm Main Menu → Options selection/purchase/Back
+with an empty Cocos Editor console. App-hide ordering is certified by executable tests because
+browser focus changes did not reliably deliver the Cocos lifecycle event.
 
 ## Current Blockers
 
@@ -300,3 +304,6 @@ errors; one unrelated Chrome extension error remains outside the game.
 - `../../plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-cosmetic-economy-native-contract.md`
 - `../../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-gn-style-final-checkpoint.md`
 - `../../plans/260721-2253-pencil-blade-restoration/reports/reviewer-2026-07-24-gn-style-gameplay-shell.md`
+- `../../plans/260721-2253-pencil-blade-restoration/reports/implementer-2026-07-24-options-runtime.md`
+- `../../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-options-final-checkpoint.md`
+- `../../plans/260721-2253-pencil-blade-restoration/reports/reviewer-2026-07-24-options-runtime.md`

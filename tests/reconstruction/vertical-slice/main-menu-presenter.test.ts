@@ -480,6 +480,79 @@ test('immediate route false and throw both reacquire input after host suspension
   }
 });
 
+test('immediate Options host and rearm failures are retained together', () => {
+  fruitStub.resetFruitPresenters();
+  const bladeInput = bladeInputHarness({ failReactivate: true });
+  let presenter: InstanceType<typeof MainMenuPresenter>;
+  const hostFailure = new Error('injected Options host failure');
+  const lifecycle = defaultLifecycle();
+  lifecycle.onOptionsRequested = () => {
+    presenter.suspendForTransition();
+    throw hostFailure;
+  };
+  presenter = MainMenuPresenter.create(input(bladeInput, lifecycle));
+  const host = new cc.Node('SharedGameSceneRoot');
+  presenter.root.setParent(host as never);
+  presenter.activate();
+  const controls = presenter as unknown as {
+    readonly controls: { readonly options: { readonly node: StubNode } };
+  };
+
+  assert.throws(
+    () => controls.controls.options.node.emit('touch-end'),
+    (error: unknown) => {
+      assert.ok(error instanceof Error);
+      assert.equal(error.name, 'MainMenuCleanupError');
+      const failures = (error as Error & { readonly failures: readonly unknown[] }).failures;
+      assert.equal(failures[0], hostFailure);
+      assert.match(String(failures[1]), /injected reactivate failure/);
+      return true;
+    },
+  );
+  assert.deepEqual(bladeInput.events.slice(-4), [
+    'cut:true',
+    'cut:false',
+    'deactivate',
+    'activate',
+  ]);
+  presenter.dispose();
+});
+
+test('Options uses its explicit immediate route instead of the unsupported boundary', () => {
+  fruitStub.resetFruitPresenters();
+  const bladeInput = bladeInputHarness();
+  const transactions: unknown[] = [];
+  let unsupportedCalls = 0;
+  const lifecycle = defaultLifecycle();
+  lifecycle.onOptionsRequested = (transaction: unknown) => {
+    transactions.push(transaction);
+    return true;
+  };
+  lifecycle.onUnsupportedDestinationRequested = () => {
+    unsupportedCalls += 1;
+    return false;
+  };
+  const presenter = MainMenuPresenter.create(input(bladeInput, lifecycle));
+  const host = new cc.Node('SharedGameSceneRoot');
+  presenter.root.setParent(host as never);
+  presenter.activate();
+  const controls = presenter as unknown as {
+    readonly controls: { readonly options: { readonly node: StubNode } };
+  };
+
+  controls.controls.options.node.emit('touch-end');
+
+  assert.equal(unsupportedCalls, 0);
+  assert.equal(transactions.length, 1);
+  assert.deepEqual(transactions[0], {
+    destination: 'OptionsLayer',
+    root: presenter.root,
+    timing: 'immediate',
+    zOrder: 1,
+  });
+  presenter.dispose();
+});
+
 test('extreme deltas fail before action mutation and completed retained hearts stop updating', () => {
   fruitStub.resetFruitPresenters();
   const presenter = MainMenuPresenter.create(input(bladeInputHarness()));
@@ -544,6 +617,7 @@ test('runtime source preserves detached construction, exact append order, and se
     assert.ok(source.indexOf(order[index - 1]) < source.indexOf(order[index]));
   }
   assert.match(source, /onModeSelectRequested/);
+  assert.match(source, /onOptionsRequested/);
   assert.match(source, /onUnsupportedDestinationRequested/);
   assert.match(source, /callAfterStep: \(mutation\) => input\.raycast\.callAfterStep\(mutation\)/);
   assert.match(source, /if \(this\.inputLeaseHeld\)/);
@@ -622,13 +696,21 @@ function input(
 }
 
 function bladeInputHarness(options: Readonly<{
+  failReactivate?: boolean;
   failDeactivate?: boolean;
   failDisableOnce?: boolean;
 }> = {}): BladeInputHarness {
   const events: string[] = [];
+  let activationCount = 0;
   let disableFailed = false;
   return {
-    activateForClassicLayer: () => events.push('activate'),
+    activateForClassicLayer: () => {
+      events.push('activate');
+      activationCount += 1;
+      if (options.failReactivate === true && activationCount > 1) {
+        throw new Error('injected reactivate failure');
+      }
+    },
     deactivateForNonClassicScreen: () => {
       events.push('deactivate');
       if (options.failDeactivate === true) {
@@ -651,6 +733,7 @@ function defaultLifecycle() {
   return {
     onExitRequested() {},
     onModeSelectRequested() { return true; },
+    onOptionsRequested() { return true; },
     onPlatformReviewRequested() { return true; },
     onUnsupportedDestinationRequested() { return false; },
   };

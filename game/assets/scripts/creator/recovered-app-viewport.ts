@@ -7,6 +7,10 @@ import type {
   ModeSelectPoint,
   ModeSelectViewport,
 } from '../domain/mode-select-presentation';
+import type {
+  OptionsPoint,
+  OptionsViewport,
+} from '../domain/options-presentation';
 
 export interface RecoveredAppViewportSource {
   readonly profile: Readonly<{
@@ -21,7 +25,7 @@ export interface RecoveredAppViewportSource {
   }>;
 }
 
-export type RecoveredAppViewport = MainMenuViewport & ModeSelectViewport;
+export type RecoveredAppViewport = MainMenuViewport & ModeSelectViewport & OptionsViewport;
 
 /**
  * Converts the recovered Classic resolution into the shared viewport contract used by
@@ -78,7 +82,7 @@ export function createRecoveredAppViewport(
   });
 }
 
-function point(x: number, y: number): MainMenuPoint & ModeSelectPoint {
+function point(x: number, y: number): MainMenuPoint & ModeSelectPoint & OptionsPoint {
   return Object.freeze({
     x: finiteFloat32(x, 'point.x'),
     y: finiteFloat32(y, 'point.y'),

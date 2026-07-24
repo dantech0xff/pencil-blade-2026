@@ -12,6 +12,8 @@ export const CLASSIC_ELECTRIC_BOMB_HIT_AUDIO_PATH = 'Sounds/boomhit.wav';
 export const CLASSIC_MENU_BUTTON_AUDIO_PATH = 'Sounds/menubuttonclick.wav';
 export const CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH = 'Sounds/cheer.wav';
 export const MAIN_MENU_MUSIC_AUDIO_PATH = 'Sounds/mainmenumusic.mp3';
+export const OPTIONS_BLADE_ROW_AUDIO_PATH = 'Sounds/mono1.wav';
+export const OPTIONS_THEME_ROW_AUDIO_PATH = 'Sounds/mono2.wav';
 
 export const CLASSIC_RESULT_RANK_AUDIO_PATHS: Readonly<
   Record<ClassicResultRankSoundIndex, string>
@@ -74,6 +76,8 @@ export const CLASSIC_CORE_AUDIO_PATHS: readonly string[] = Object.freeze([
   CLASSIC_COMBO_AUDIO_PATHS[2],
   CLASSIC_COMBO_AUDIO_PATHS[3],
   CLASSIC_MENU_BUTTON_AUDIO_PATH,
+  OPTIONS_BLADE_ROW_AUDIO_PATH,
+  OPTIONS_THEME_ROW_AUDIO_PATH,
   CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH,
   MAIN_MENU_MUSIC_AUDIO_PATH,
   CLASSIC_RESULT_RANK_AUDIO_PATHS[1],

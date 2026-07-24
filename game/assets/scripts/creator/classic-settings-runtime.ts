@@ -23,6 +23,26 @@ export interface ClassicStringStorage {
   setItem(key: string, value: string): void;
 }
 
+export type ClassicCosmeticPurchaseWithCoins =
+  | Readonly<{
+      readonly kind: 'already-owned';
+      readonly index: number;
+      readonly price: 0;
+      readonly totalCoins: number;
+    }>
+  | Readonly<{
+      readonly kind: 'insufficient-coins';
+      readonly index: number;
+      readonly price: number;
+      readonly totalCoins: number;
+    }>
+  | Readonly<{
+      readonly kind: 'purchased';
+      readonly index: number;
+      readonly price: number;
+      readonly totalCoins: number;
+    }>;
+
 /**
  * Adapts Creator's string storage to the recovered Settings subset.
  * Target booleans use only the canonical lowercase strings `true` and `false`.
@@ -134,6 +154,36 @@ export class ClassicSettingsRuntime {
     return this.state.markBackgroundPurchased(index);
   }
 
+  /**
+   * Commits ownership before applying the in-memory coin debit.
+   *
+   * Native code debits memory and then persists the zero-price sentinel. Reversing those two
+   * operations preserves the successful observable result while avoiding a partial debit when
+   * the durable ownership write fails.
+   */
+  purchaseBladeWithCoins(index: number): ClassicCosmeticPurchaseWithCoins {
+    const price = this.state.bladePriceAt(index);
+    return this.purchaseCosmeticWithCoins(
+      index,
+      price,
+      classicBladePriceStorageKey(index),
+      () => this.state.markBladePurchased(index),
+      'blade purchase',
+    );
+  }
+
+  /** See {@link purchaseBladeWithCoins} for the storage-first transaction contract. */
+  purchaseBackgroundWithCoins(index: number): ClassicCosmeticPurchaseWithCoins {
+    const price = this.state.backgroundPriceAt(index);
+    return this.purchaseCosmeticWithCoins(
+      index,
+      price,
+      classicBackgroundPriceStorageKey(index),
+      () => this.state.markBackgroundPurchased(index),
+      'background purchase',
+    );
+  }
+
   createObjectivesManager(
     onPopup: ObjectiveAchievementPopupCallback,
   ): ObjectivesManagerState {
@@ -207,6 +257,46 @@ export class ClassicSettingsRuntime {
     assertSignedInt32(value, 'objective value');
     this.assertWritesEnabled('objective value persistence');
     this.port.writeInt32(key, value);
+  }
+
+  private purchaseCosmeticWithCoins(
+    index: number,
+    price: number,
+    storageKey: string,
+    markPurchased: () => ClassicCosmeticPurchase,
+    operation: string,
+  ): ClassicCosmeticPurchaseWithCoins {
+    const totalCoins = this.state.snapshot.totalCoins;
+    if (price === 0) {
+      return Object.freeze({
+        index,
+        kind: 'already-owned' as const,
+        price: 0 as const,
+        totalCoins,
+      });
+    }
+    if (totalCoins < price) {
+      return Object.freeze({
+        index,
+        kind: 'insufficient-coins' as const,
+        price,
+        totalCoins,
+      });
+    }
+
+    this.assertWritesEnabled(operation);
+    this.port.writeInt32(storageKey, 0);
+    const purchase = markPurchased();
+    if (!purchase.changed || purchase.previousPrice !== price) {
+      throw new Error(`Classic settings ${operation} ownership transition changed unexpectedly`);
+    }
+    const debit = this.state.addTotalCoins(-price);
+    return Object.freeze({
+      index,
+      kind: 'purchased' as const,
+      price,
+      totalCoins: debit.nextTotalCoins,
+    });
   }
 
   private assertWritesEnabled(operation: string): void {

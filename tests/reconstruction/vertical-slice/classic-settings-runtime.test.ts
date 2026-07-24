@@ -227,6 +227,58 @@ test('failed cosmetic ownership persistence leaves the in-memory price unchanged
   assert.equal(runtime.loadFailure, null);
 });
 
+test('atomic cosmetic purchase persists ownership before applying the in-memory coin debit', () => {
+  const storage = new MemoryStorage();
+  storage.values.set('total_coins', '1000');
+  const runtime = new ClassicSettingsRuntime(
+    new ClassicCreatorInt32PreferencePort(storage),
+  );
+
+  assert.deepEqual(runtime.purchaseBladeWithCoins(10), {
+    index: 10,
+    kind: 'purchased',
+    price: 1000,
+    totalCoins: 0,
+  });
+  assert.equal(storage.values.get('blade_price_10'), '0');
+  assert.equal(storage.values.get('total_coins'), '1000');
+  assert.equal(runtime.state.bladePriceAt(10), 0);
+  assert.equal(runtime.state.snapshot.totalCoins, 0);
+  assert.deepEqual(runtime.purchaseBladeWithCoins(10), {
+    index: 10,
+    kind: 'already-owned',
+    price: 0,
+    totalCoins: 0,
+  });
+  assert.deepEqual(runtime.purchaseBackgroundWithCoins(7), {
+    index: 7,
+    kind: 'insufficient-coins',
+    price: 4500,
+    totalCoins: 0,
+  });
+  assert.deepEqual(storage.writes, [['blade_price_10', '0']]);
+});
+
+test('atomic cosmetic purchase never debits coins when ownership persistence fails', () => {
+  const writeFailure = new Error('ownership storage unavailable');
+  const storage = new MemoryStorage();
+  storage.values.set('total_coins', '5000');
+  const port = new ClassicCreatorInt32PreferencePort(storage);
+  const runtime = new ClassicSettingsRuntime({
+    readInt32: port.readInt32.bind(port),
+    readBoolean: port.readBoolean.bind(port),
+    writeBoolean: port.writeBoolean.bind(port),
+    writeInt32() {
+      throw writeFailure;
+    },
+  });
+
+  assert.throws(() => runtime.purchaseBackgroundWithCoins(7), writeFailure);
+  assert.equal(runtime.state.backgroundPriceAt(7), 4500);
+  assert.equal(runtime.state.snapshot.totalCoins, 5000);
+  assert.equal(runtime.loadFailure, null);
+});
+
 test('runtime preserves immediate rated and indexed unlock writes while coin changes stay in memory', () => {
   const storage = new MemoryStorage();
   storage.values.set('total_coins', '3000');

@@ -53,6 +53,7 @@ test('destroyed shell never starts delayed Classic Bird preparation', async () =
     createRecoveredAppViewport: () => Object.freeze({}),
     loadMainMenuResources: async () => Object.freeze({}),
     loadModeSelectResources: async () => Object.freeze({}),
+    loadOptionsResources: async () => Object.freeze({}),
     loadSharedGameSceneResources: async () => Object.freeze({}),
   });
   let resolveCrazyPreparation: (() => void) | null = null;
@@ -160,6 +161,113 @@ test('Main Menu and Mode Select replacement acquires new input before committed 
     assert.match(method, /nextPresenter\.dispose\(\)/);
   }
 });
+
+test('Main Menu and Options use explicit transactional replacement without stopping menu music', () => {
+  const createMainMenu = extractMethod(SOURCE, 'createMainMenuPresenter');
+  const createOptions = extractMethod(SOURCE, 'createOptionsPresenter');
+  const toOptions = extractMethod(SOURCE, 'transitionMainMenuToOptions');
+  const toMenu = extractMethod(SOURCE, 'transitionOptionsToMainMenu');
+
+  assert.match(
+    createMainMenu,
+    /onOptionsRequested: \(transaction\) => \([\s\S]*?this\.transitionMainMenuToOptions\(transaction\)/,
+  );
+  assertOrderedSubstrings(createOptions, [
+    'OptionsPresenter.create({',
+    'audio: gameplay.sharedAudioPresenter',
+    'onMainMenuRequested: (transaction)',
+    'this.transitionOptionsToMainMenu(transaction)',
+    'resources: resources.options',
+    'settings: gameplay.sharedSettingsRuntime',
+    'currentBackgroundIndex',
+    'sharedScene.background.selectedIndex',
+    'currentThemeIndex',
+    'sharedScene.theme.selectedIndex',
+    'selectBackground:',
+    'sharedScene.background.select(index)',
+    'selectTheme:',
+    'sharedScene.theme.select(index)',
+  ]);
+  for (const method of [toOptions, toMenu]) {
+    assertOrderedSubstrings(method, [
+      'replaceCurrentScreen(nextPresenter.root)',
+      'oldPresenter.suspendForTransition()',
+      'nextPresenter.activate()',
+      'compensateFailedMenuOptionsReplacement(',
+      'this.stateValue =',
+      'disposeCommittedPresenter(oldPresenter',
+    ]);
+    assert.doesNotMatch(method, /stopBackgroundMusic/);
+  }
+  const compensation = extractMethod(
+    SOURCE,
+    'compensateFailedMenuOptionsReplacement',
+  );
+  assertOrderedSubstrings(compensation, [
+    'this.restorePreviousScreen(oldPresenter.root, nextPresenter.root)',
+    'nextPresenter.dispose()',
+    'this.releaseFailedMenuOptionsScreenOwnership(',
+    'oldPresenter.dispose()',
+    'new ModeSelectFatalNavigationError(',
+  ]);
+  assert.match(toOptions, /transaction\.root !== oldPresenter\.root/);
+  assert.match(toOptions, /transaction\.destination !== 'OptionsLayer'/);
+  assert.match(toOptions, /transaction\.timing !== 'immediate'/);
+  assert.match(toOptions, /transaction\.zOrder !== 1/);
+  assert.match(toOptions, /this\.activeOptions = nextPresenter/);
+  assert.match(toOptions, /this\.stateValue = 'options'/);
+  assert.match(toMenu, /transaction\.root !== oldPresenter\.root/);
+  assert.match(toMenu, /transaction\.destination !== 'MainMenuLayer'/);
+  assert.match(toMenu, /transaction\.timing !== 'immediate'/);
+  assert.match(toMenu, /transaction\.zOrder !== 1/);
+  assert.match(toMenu, /this\.activeMainMenu = nextPresenter/);
+  assert.match(toMenu, /this\.stateValue = 'main-menu'/);
+});
+
+for (const route of ['main-menu-to-options', 'options-to-main-menu'] as const) {
+  const label = route === 'main-menu-to-options'
+    ? 'Main Menu to Options'
+    : 'Options to Main Menu';
+
+  test(`${label} activation failure restores the source host and permits caller rearm`, () => {
+    const outcome = executeMenuOptionsReplacementFailure(route, false);
+
+    assert.equal(outcome.thrown, null);
+    assert.equal(outcome.result, false);
+    assert.equal(outcome.state, outcome.sourceState);
+    assert.equal(outcome.currentScreen, outcome.sourceRoot);
+    assert.equal(outcome.sourceRoot.parent?.activeInHierarchy, true);
+    assert.equal(outcome.sourcePresenter.disposed, false);
+    assert.equal(outcome.sourcePresenter.suspended, false);
+    assert.equal(outcome.sourcePresenter.inputLeaseHeld, true);
+    assert.equal(outcome.sourcePresenter.rearmSuccessCount, 1);
+    assert.equal(outcome.destinationPresenter.disposed, true);
+    assert.equal(outcome.transitionFailureCount, 1);
+  });
+
+  test(`${label} incomplete rollback fails closed and keeps the source lease quiescent`, () => {
+    const outcome = executeMenuOptionsReplacementFailure(route, true);
+
+    assert.ok(outcome.thrown instanceof ExecutableModeSelectFatalNavigationError);
+    assert.equal(outcome.result, null);
+    assert.equal(outcome.state, 'failed');
+    assert.equal(outcome.currentScreen, null);
+    assert.equal(outcome.sourceRoot.parent, null);
+    assert.equal(outcome.sourcePresenter.disposed, true);
+    assert.equal(outcome.sourcePresenter.suspended, true);
+    assert.equal(outcome.sourcePresenter.inputLeaseHeld, false);
+    assert.equal(outcome.sourcePresenter.rearmAttemptCount, 1);
+    assert.equal(outcome.sourcePresenter.rearmSuccessCount, 0);
+    assert.equal(outcome.destinationPresenter.disposed, true);
+    assert.equal(outcome.activeMainMenu, null);
+    assert.equal(outcome.activeOptions, null);
+    assert.equal(outcome.transitionFailureCount, 1);
+    assert.match(
+      String(outcome.thrown),
+      /rollback is incomplete[\s\S]*injected screen restoration failure/,
+    );
+  });
+}
 
 test('Mode Select enters Classic only through an empty shared current-screen host', () => {
   const transition = extractMethod(SOURCE, 'transitionModeSelectToClassic');
@@ -2615,8 +2723,98 @@ test('app shell owns the single application-hide settings save boundary', () => 
 
   assert.match(onEnable, /game\.on\(Game\.EVENT_HIDE, this\.onApplicationHidden, this\)/);
   assert.match(onDisable, /game\.off\(Game\.EVENT_HIDE, this\.onApplicationHidden, this\)/);
-  assert.match(onHidden, /sharedSettingsRuntime\.save\(\)/);
+  assertOrderedSubstrings(onHidden, [
+    'this.activeOptions?.reconcileSelectionsForPersistence()',
+    'this.gameplayController.sharedSettingsRuntime.save()',
+  ]);
   assert.match(onHidden, /CLASSIC_SETTINGS_SAVE_FAILED_EVENT/);
+});
+
+test('application hide persists only reconciled Options selections and retries fail closed', () => {
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const logged: unknown[] = [];
+  const onHidden = compileSourceArrowMember<
+    (this: Record<string, unknown>) => void
+  >('onApplicationHidden', {
+    CLASSIC_SETTINGS_SAVE_FAILED_EVENT: 'settings-save-failed',
+    console: { error: (error: unknown) => logged.push(error) },
+    normalizeError,
+  });
+  const selections = {
+    selectedBackground: 3,
+    selectedBlade: 4,
+    selectedTheme: 5,
+  };
+  const failures: unknown[] = [];
+  const saved: Array<Readonly<typeof selections>> = [];
+  let reconcileAttempts = 0;
+  let saveAttempts = 0;
+  const shell = {
+    activeOptions: {
+      reconcileSelectionsForPersistence() {
+        reconcileAttempts += 1;
+        if (reconcileAttempts === 1) {
+          throw new Error('injected reconciliation failure');
+        }
+        selections.selectedBackground = 0;
+        selections.selectedBlade = 0;
+      },
+    },
+    destroyedValue: false,
+    gameplayController: {
+      sharedSettingsRuntime: {
+        save() {
+          saveAttempts += 1;
+          if (saveAttempts === 1) {
+            throw new Error('injected save failure');
+          }
+          saved.push(Object.freeze({ ...selections }));
+        },
+      },
+    },
+    node: {
+      emit(event: string, payload: unknown) {
+        failures.push(Object.freeze({ event, payload }));
+      },
+    },
+  };
+
+  onHidden.call(shell);
+  assert.equal(reconcileAttempts, 1);
+  assert.deepEqual(saved, []);
+  assert.equal(failures.length, 1);
+  assert.equal(logged.length, 1);
+
+  onHidden.call(shell);
+  assert.equal(reconcileAttempts, 2);
+  assert.equal(saveAttempts, 1);
+  assert.deepEqual(selections, {
+    selectedBackground: 0,
+    selectedBlade: 0,
+    selectedTheme: 5,
+  });
+  assert.deepEqual(saved, []);
+  assert.equal(failures.length, 2);
+  assert.equal(logged.length, 2);
+
+  onHidden.call(shell);
+  assert.equal(reconcileAttempts, 3);
+  assert.equal(saveAttempts, 2);
+  assert.deepEqual(saved, [{
+    selectedBackground: 0,
+    selectedBlade: 0,
+    selectedTheme: 5,
+  }]);
+
+  onHidden.call(shell);
+  assert.equal(reconcileAttempts, 4);
+  assert.equal(saveAttempts, 3);
+  assert.deepEqual(saved, [
+    { selectedBackground: 0, selectedBlade: 0, selectedTheme: 5 },
+    { selectedBackground: 0, selectedBlade: 0, selectedTheme: 5 },
+  ]);
 });
 
 test('teardown and failed boot cannot skip shared Physics2D filter restoration', () => {
@@ -2677,9 +2875,15 @@ function assertOrderedSubstrings(source: string, values: readonly string[]): voi
 class ExecutableSharedScene {
   currentScreen: ExecutableScreenNode | null;
   private readonly host = new ExecutableScreenNode();
+  private readonly rollbackFailure: Error | null;
+  private replaceCount = 0;
 
-  constructor(currentScreen: ExecutableScreenNode | null = null) {
+  constructor(
+    currentScreen: ExecutableScreenNode | null = null,
+    rollbackFailure: Error | null = null,
+  ) {
     this.currentScreen = currentScreen;
+    this.rollbackFailure = rollbackFailure;
     if (currentScreen !== null) {
       currentScreen.parent = this.host;
     }
@@ -2704,6 +2908,10 @@ class ExecutableSharedScene {
   }
 
   replaceCurrentScreen(nextScreen: ExecutableScreenNode): ExecutableScreenNode {
+    this.replaceCount += 1;
+    if (this.replaceCount > 1 && this.rollbackFailure !== null) {
+      throw this.rollbackFailure;
+    }
     const previous = this.currentScreen;
     if (previous === null) {
       throw new Error('Executable shared scene has no current screen to replace');
@@ -2716,6 +2924,7 @@ class ExecutableSharedScene {
 }
 
 class ExecutableScreenNode {
+  activeInHierarchy = true;
   destroyed = false;
   parent: ExecutableScreenNode | null = null;
 }
@@ -2730,6 +2939,237 @@ class ExecutableModeSelectFatalNavigationError extends Error {
   constructor(message: string, cause: unknown) {
     super(`${message}: ${String(cause)}`);
     this.cause = cause;
+  }
+}
+
+function executeMenuOptionsReplacementFailure(
+  route: 'main-menu-to-options' | 'options-to-main-menu',
+  incompleteRollback: boolean,
+): Readonly<{
+  readonly activeMainMenu: ExecutableMenuOptionsPresenter | null;
+  readonly activeOptions: ExecutableMenuOptionsPresenter | null;
+  readonly currentScreen: ExecutableScreenNode | null;
+  readonly destinationPresenter: ExecutableMenuOptionsPresenter;
+  readonly result: boolean | null;
+  readonly sourcePresenter: ExecutableMenuOptionsPresenter;
+  readonly sourceRoot: ExecutableScreenNode;
+  readonly sourceState: 'main-menu' | 'options';
+  readonly state: unknown;
+  readonly thrown: unknown;
+  readonly transitionFailureCount: number;
+}> {
+  const transitionMethod = route === 'main-menu-to-options'
+    ? 'transitionMainMenuToOptions'
+    : 'transitionOptionsToMainMenu';
+  const sourceState = route === 'main-menu-to-options' ? 'main-menu' : 'options';
+  const destinationState = route === 'main-menu-to-options' ? 'options' : 'main-menu';
+  const sourceRoot = new ExecutableScreenNode();
+  const sourcePresenter = new ExecutableMenuOptionsPresenter(sourceRoot, false);
+  const destinationPresenter = new ExecutableMenuOptionsPresenter(
+    new ExecutableScreenNode(),
+    true,
+  );
+  const sharedScene = new ExecutableSharedScene(
+    sourceRoot,
+    incompleteRollback
+      ? new Error('injected screen restoration failure')
+      : null,
+  );
+  const isValid = (value: unknown): boolean => (
+    value instanceof ExecutableScreenNode && !value.destroyed
+  );
+  const errorMessage = compileSourceFunction<(error: unknown) => string>('errorMessage');
+  const aggregateWithPrimaryError = compileSourceFunction<
+    (label: string, primary: unknown, secondary: readonly unknown[]) => Error
+  >('aggregateWithPrimaryError', { errorMessage });
+  const normalizeError = compileSourceFunction<
+    (error: unknown, fallback: string) => Error
+  >('normalizeError');
+  const restorePreviousScreen = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      previous: ExecutableScreenNode,
+      attempted: ExecutableScreenNode,
+    ) => void
+  >('restorePreviousScreen', { isValid });
+  const releaseFailedMenuOptionsScreenOwnership = compileSourceMethod<
+    (
+      this: Readonly<{ requireSharedScene(): ExecutableSharedScene }>,
+      previous: ExecutableScreenNode,
+      attempted: ExecutableScreenNode,
+    ) => void
+  >('releaseFailedMenuOptionsScreenOwnership');
+  const compensateFailedMenuOptionsReplacement = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      oldPresenter: ExecutableMenuOptionsPresenter,
+      nextPresenter: ExecutableMenuOptionsPresenter,
+      error: unknown,
+      source: 'Main Menu' | 'Options',
+      destination: 'Main Menu' | 'Options',
+    ) => never
+  >('compensateFailedMenuOptionsReplacement', {
+    aggregateWithPrimaryError,
+    ModeSelectFatalNavigationError: ExecutableModeSelectFatalNavigationError,
+  });
+  const runTransition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      from: string,
+      to: string,
+      operation: () => boolean,
+    ) => boolean
+  >('runTransition', {
+    console: { error() {} },
+    ModeSelectFatalNavigationError: ExecutableModeSelectFatalNavigationError,
+    normalizeError,
+  });
+  const transition = compileSourceMethod<
+    (
+      this: Record<string, unknown>,
+      transaction: Readonly<{
+        readonly destination: 'MainMenuLayer' | 'OptionsLayer';
+        readonly root: ExecutableScreenNode;
+        readonly timing: 'immediate';
+        readonly zOrder: 1;
+      }>,
+    ) => boolean
+  >(transitionMethod);
+  let transitionFailureCount = 0;
+  const shell: Record<string, unknown> = {
+    activeMainMenu: route === 'main-menu-to-options' ? sourcePresenter : null,
+    activeOptions: route === 'options-to-main-menu' ? sourcePresenter : null,
+    compensateFailedMenuOptionsReplacement(
+      oldPresenter: ExecutableMenuOptionsPresenter,
+      nextPresenter: ExecutableMenuOptionsPresenter,
+      error: unknown,
+      source: 'Main Menu' | 'Options',
+      destination: 'Main Menu' | 'Options',
+    ) {
+      return compensateFailedMenuOptionsReplacement.call(
+        this,
+        oldPresenter,
+        nextPresenter,
+        error,
+        source,
+        destination,
+      );
+    },
+    createMainMenuPresenter: () => destinationPresenter,
+    createOptionsPresenter: () => destinationPresenter,
+    destroyedValue: false,
+    emitTransitionFailure() {
+      transitionFailureCount += 1;
+    },
+    releaseFailedMenuOptionsScreenOwnership(
+      previous: ExecutableScreenNode,
+      attempted: ExecutableScreenNode,
+    ) {
+      return releaseFailedMenuOptionsScreenOwnership.call(
+        this as never,
+        previous,
+        attempted,
+      );
+    },
+    requireSharedScene: () => sharedScene,
+    restorePreviousScreen(
+      previous: ExecutableScreenNode,
+      attempted: ExecutableScreenNode,
+    ) {
+      return restorePreviousScreen.call(this as never, previous, attempted);
+    },
+    runTransition(from: string, to: string, operation: () => boolean) {
+      return runTransition.call(this, from, to, operation);
+    },
+    stateValue: sourceState,
+    transitioning: false,
+  };
+
+  let result: boolean | null = null;
+  let thrown: unknown = null;
+  try {
+    result = transition.call(shell, {
+      destination: route === 'main-menu-to-options'
+        ? 'OptionsLayer'
+        : 'MainMenuLayer',
+      root: sourceRoot,
+      timing: 'immediate',
+      zOrder: 1,
+    });
+  } catch (error) {
+    thrown = error;
+  }
+  if (result === false || thrown !== null) {
+    sourcePresenter.rearmNavigationAfterFailure();
+  }
+
+  assert.notEqual(destinationState, sourceState);
+  return Object.freeze({
+    activeMainMenu: shell.activeMainMenu as ExecutableMenuOptionsPresenter | null,
+    activeOptions: shell.activeOptions as ExecutableMenuOptionsPresenter | null,
+    currentScreen: sharedScene.currentScreen,
+    destinationPresenter,
+    result,
+    sourcePresenter,
+    sourceRoot,
+    sourceState,
+    state: shell.stateValue,
+    thrown,
+    transitionFailureCount,
+  });
+}
+
+class ExecutableMenuOptionsPresenter {
+  private readonly activationFails: boolean;
+  disposed = false;
+  inputLeaseHeld = true;
+  rearmAttemptCount = 0;
+  rearmSuccessCount = 0;
+  readonly root: ExecutableScreenNode;
+  suspended = false;
+
+  constructor(
+    root: ExecutableScreenNode,
+    activationFails: boolean,
+  ) {
+    this.activationFails = activationFails;
+    this.root = root;
+  }
+
+  activate(): void {
+    if (this.activationFails) {
+      throw new Error('injected destination activation failure');
+    }
+  }
+
+  dispose(): boolean {
+    if (this.disposed) {
+      return false;
+    }
+    this.disposed = true;
+    this.inputLeaseHeld = false;
+    this.root.destroyed = true;
+    return true;
+  }
+
+  rearmNavigationAfterFailure(): boolean {
+    this.rearmAttemptCount += 1;
+    if (this.disposed || this.root.parent === null) {
+      return false;
+    }
+    this.suspended = false;
+    this.inputLeaseHeld = true;
+    this.rearmSuccessCount += 1;
+    return true;
+  }
+
+  suspendForTransition(): boolean {
+    if (this.disposed || this.suspended || !this.inputLeaseHeld) {
+      return false;
+    }
+    this.suspended = true;
+    this.inputLeaseHeld = false;
+    return true;
   }
 }
 

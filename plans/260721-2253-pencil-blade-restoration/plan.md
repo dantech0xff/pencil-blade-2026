@@ -143,7 +143,12 @@ Verified starting point:
   `2.60`-second intro, non-looping `GangnamStyle.mp3`, all 439 source-ordered particle parents,
   the three-second late-cut Time Up tail, objectives `6`/`2`, `gnstyle_best_1..3`, float32
   `0.6` reward, and transactional Replay/Retry/Quit/Menu lifecycles.
-  The current checkpoint reaches `1157/1157` full vertical-slice tests and `43/43`
+  Options now owns the recovered eight-background, eighteen-blade, and ten-theme selectors,
+  exact two-tree resources, row timing/audio, live preview, affordability, storage-first
+  ownership plus one debit, 45-particle purchase burst, transactional Main Menu handoff, and
+  unpaid-selection reconciliation on Back and before app-hide save. Missing/corrupt save
+  continues to default to `999999` coins while any valid persisted balance, including `0`, wins.
+  The current checkpoint reaches `1212/1212` full vertical-slice tests and `43/43`
   resource/build/catalog tests. The unchanged
   source/staging/archive inventory remains `14/14` in `217s`; strict Creator TypeScript,
   reconstruction-policy positive plus `4/4` negative fixtures, native static analysis `7/7`,
@@ -152,12 +157,11 @@ Verified starting point:
   `Fonts/CooperBlackStd.otf` is unsupported as a Creator Font consumer.
   Project completion still requires the remaining resource consumers and scene/prefab map,
   a pinned integration/toolchain policy, and build validation.
-- Phase 6 continues after all six production gameplay routes reached their contract and fresh
-  Creator Preview gates. The remaining scope is full cosmetics/content, progression and save
-  coverage, menu/settings fidelity, global asset-consumer and scene/prefab reconciliation,
-  Android build validation, and release-rights clearance. Main Menu exit-save and app-hide save
-  are closed; first-launch `flag` bootstrap, full options UI, and blade IDs `1`-`17`
-  presentation remain open.
+- Phase 6 continues after all six production gameplay routes and the recovered Options screen
+  reached their contract and fresh Creator Preview gates. The remaining scope is blade IDs
+  `1`-`17` gameplay rendering/particles, the other menu/progression states, first-launch `flag`
+  bootstrap, global asset-consumer and scene/prefab reconciliation, Android build validation,
+  and release-rights clearance.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
 
@@ -217,6 +221,12 @@ Verified starting point:
 - [GN Style production checkpoint](./reports/implementer-2026-07-24-gn-style-runtime.md)
 - [GN Style final verification](./reports/tester-2026-07-24-gn-style-final-checkpoint.md)
 - [GN Style runtime review](./reports/reviewer-2026-07-24-gn-style-gameplay-shell.md)
+- [Options native contract](./reports/researcher-2026-07-24-options-native-contract.md)
+- [Options integration map](./reports/explorer-2026-07-24-options-integration-map.md)
+- [Options resource audit](./reports/explorer-2026-07-24-options-resource-audit.md)
+- [Options production checkpoint](./reports/implementer-2026-07-24-options-runtime.md)
+- [Options final verification](./reports/tester-2026-07-24-options-final-checkpoint.md)
+- [Options runtime review](./reports/reviewer-2026-07-24-options-runtime.md)
 - [Remaining mode implementation order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 - [Creator readiness audit](./reports/creator-readiness-2026-07-22.md)
 - [Android toolchain readiness audit](./reports/android-toolchain-readiness-2026-07-22.md)

@@ -28,8 +28,11 @@ owns the standard BasicBlade, `150`-second Free/Wave/Concurrent ordinary-fruit g
 late-cut tail, `gnstyle_best_1..3`, float32 `0.6` reward, and transactional navigation. The
 implemented Settings slice is now exact: 50 integers, 4 booleans, 18 blade prices, 8 background
 prices, price `0` ownership persistence, field-isolated totalCoins recovery, and write-disable
-on any load recovery. Main Menu exit-save and app-hide save are closed; first-launch `flag`
-bootstrap and the remaining cosmetic presentation consumers stay open.
+on any load recovery. The recovered Options screen now provides eight backgrounds, eighteen
+blades, ten themes, exact resources/audio/timing, affordability and debit, purchase particles,
+transactional Main Menu navigation, and unpaid-selection reconciliation before Back or app-hide
+save. First-launch `flag`, blade gameplay rendering/particles, and the remaining cosmetic
+presentation consumers stay open.
 
 ## Context Links
 
@@ -49,6 +52,12 @@ bootstrap and the remaining cosmetic presentation consumers stay open.
 - [GN Style production checkpoint](./reports/implementer-2026-07-24-gn-style-runtime.md)
 - [GN Style final verification](./reports/tester-2026-07-24-gn-style-final-checkpoint.md)
 - [GN Style runtime review](./reports/reviewer-2026-07-24-gn-style-gameplay-shell.md)
+- [Options native contract](./reports/researcher-2026-07-24-options-native-contract.md)
+- [Options integration map](./reports/explorer-2026-07-24-options-integration-map.md)
+- [Options resource audit](./reports/explorer-2026-07-24-options-resource-audit.md)
+- [Options production checkpoint](./reports/implementer-2026-07-24-options-runtime.md)
+- [Options final verification](./reports/tester-2026-07-24-options-final-checkpoint.md)
+- [Options runtime review](./reports/reviewer-2026-07-24-options-runtime.md)
 - [Remaining mode order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 
 ## Requirements
@@ -106,12 +115,16 @@ save schema and include reproducible fixtures for progression states.
   `GangnamStyle.mp3`, direct 439-call particle choreography, Time Up late-cut tail,
   objectives `6`/`2`, `gnstyle_best_1..3`, float32 `0.6` reward, and transactional
   Replay/Retry/Quit/Menu ownership.
+- **Complete:** recovered Options with eight backgrounds, eighteen blades, ten themes,
+  exact per-tree 51-raster set plus font/audio, staged row entry, selectors, live preview,
+  affordability, storage-first ownership plus one debit, Buy state, 45-particle purchase
+  burst, Back rollback, and pre-save app-hide reconciliation.
 - All six production gameplay routes are complete. Phase 6 remains in progress for full
-  content/cosmetics, progression, menu/settings fidelity, and global resource reconciliation.
+  blade rendering/particles, remaining menu/progression states, and global resource reconciliation.
 
 Current certification checkpoint:
 
-- Full deterministic vertical slice: `1157/1157` final clean checkpoint
+- Full deterministic vertical slice: `1212/1212` final clean checkpoint
 - Resource/build/catalog tests: `43/43`
 - Static inventory/source/staging/archive workflow: `14/14` in `217s`
 - Reconstruction policy: positive checkpoint and `4/4` negative fixtures
@@ -123,6 +136,10 @@ Current certification checkpoint:
   intro -> live fruit cuts/score/particles -> Pause/Resume/Replay -> Pause Quit -> Main Menu ->
   repeated entry -> natural Time Up -> Result Retry -> Result Menu. DevTools records zero
   application/runtime errors; one unrelated Chrome extension error is outside the game.
+- Creator Preview also reaches Main Menu -> Options -> selection/Buy/purchase/Back in compact
+  `360x800` and high `720x1280` profiles with zero Cocos Editor console entries. Browser focus
+  did not reliably emit Cocos app-hide, so that ordering is certified by executable tests and
+  source review rather than claimed as direct Preview evidence.
 - Missing or corrupt coin storage still falls back to `999999` coins; a valid persisted balance
   wins, including `0`
 
@@ -131,6 +148,7 @@ Current certification checkpoint:
 - [x] Shared Classic/Crazy systems required by the first two production modes
 - [x] Shared BaseBird/BirdBlade systems
 - [x] Six modes (`6/6` production routes complete)
+- [x] Options selection, purchase economy, rollback, and exact screen resources
 - [ ] Full content/cosmetics
 - [ ] Progression and saves
 - [ ] Full menus/settings/results/objectives fidelity

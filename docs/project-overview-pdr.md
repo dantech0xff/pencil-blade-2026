@@ -63,10 +63,11 @@ replay, and device comparison are unavailable and are not project gates.
   score service seeded from persisted `classic_best_1`; app hide saves the expanded
   implemented Settings subset, including all six route leaderboards and objective state.
   Missing or corrupt save falls back to `999999` coins while a valid persisted balance wins.
-  Full first-launch/Main Menu Settings behavior remains open.
+  Options now applies the recovered selectors, affordability, debit, purchase effects, and
+  unpaid-selection reconciliation. First-launch Settings behavior remains open.
 - The current implementation checkpoint covers all six production gameplay routes: `0`, `1`,
   `2`, `3`, `4`, and `5`.
-- The GN Style checkpoint passes `1151/1151` deterministic vertical-slice tests and `43/43`
+- The Options checkpoint passes `1212/1212` deterministic vertical-slice tests and `43/43`
   resource/build/catalog tests. The unchanged
   inventory/evidence workflow remains `14/14` in `217s`; reconstruction policy positive plus
   `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and diff
@@ -77,6 +78,8 @@ replay, and device comparison are unavailable and are not project gates.
   score, music, and particles → Pause/Resume/Replay → Pause Quit → Main Menu → repeated entry →
   natural Time Up → Result Retry → Result Menu. DevTools reports zero application/runtime
   errors; one unrelated Chrome extension error remains outside the game.
+- Compact `360x800` and high `720x1280` Creator Preview profiles also pass Main Menu →
+  Options selection/purchase/Back with an empty Cocos Editor console.
 - Presentation restoration is complete only when the canonical user-supplied sample project
   has 100% inventory, staging, and consumer coverage for every resource actually present.
 - No canonical graphics, animation frame, sound, music, font, shader/material, level/layout,
