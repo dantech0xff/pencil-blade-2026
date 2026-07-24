@@ -52,15 +52,15 @@ const SUITE_ROOT = fs.mkdtempSync(path.join(
 
 const EXPECTED_SUMMARY = Object.freeze({
   consumers: {
-    consumed: 743,
+    consumed: 761,
     total: 862,
-    coveragePercent: 86.19,
+    coveragePercent: 88.28,
     status: 'partial',
   },
   reconciliation: {
     classified: 862,
-    consumed: 743,
-    unknown: 108,
+    consumed: 761,
+    unknown: 90,
     excluded: 10,
     unsupported: 1,
     total: 862,
@@ -292,14 +292,14 @@ test('production CLI writes absent outputs and verifies them without mutation', 
   expectCliSuccess(write, 'production write');
   assert.match(
     write.stdout,
-    /WRITE OK staged=862 consumed=743 unknown=108 excluded=10 unsupported=1 reconciliation_coverage=100%/,
+    /WRITE OK staged=862 consumed=761 unknown=90 excluded=10 unsupported=1 reconciliation_coverage=100%/,
   );
   assert.ok(fs.existsSync(paths.ledgerPath));
   const before = fs.readFileSync(paths.ledgerPath, 'utf8');
 
   const verify = runCli('verify', paths);
   expectCliSuccess(verify, 'production verify');
-  assert.match(verify.stdout, /VERIFY OK staged=862 consumed=743/);
+  assert.match(verify.stdout, /VERIFY OK staged=862 consumed=761/);
   assert.equal(fs.readFileSync(paths.ledgerPath, 'utf8'), before);
   assert.deepEqual(
     fs.readdirSync(caseRoot).sort(),
@@ -349,7 +349,7 @@ test('omitted disposition paths fail instead of defaulting to unknown', async ()
 
   await assert.rejects(
     generateOutputs(directOptions(fixturePath)),
-    /resource disposition map must expand to exactly 119 paths/,
+    /resource disposition map must expand to exactly 101 paths/,
   );
 });
 

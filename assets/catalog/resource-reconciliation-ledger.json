@@ -5,21 +5,21 @@
     "resourceMapSha256": "165238f13f4186a9ab429c9c5a8bab07b4a42e941d0608f757d9e41a44d2ce67",
     "sourceManifestSha256": "0143473b21e56525cde92163f72fd49b2a898ab70ef2b224cdad00eaba9238e3",
     "consumerRegistry": "game/assets/scripts/domain/resource-consumer-registry.ts",
-    "consumerRegistrySha256": "3198f8cd4cb549514ed4f20dc64aa027d44a981ebfb6927a8c4c2602522e6bc6",
+    "consumerRegistrySha256": "d4fb8486b10f245fdf6b9883453fa8b9a8c0d3cff2a5778d86ac4a8643c5913f",
     "dispositions": "forensics/resources/resource-disposition-map.json",
-    "dispositionsSha256": "9b519fec076e60a8760db3d5e768acb7892f950edfb09a98370515bd02d0d3d6"
+    "dispositionsSha256": "03dbad33cb8b0696c7766df7cc2a8b0698b2b0032a29e56f8849047af3447932"
   },
   "summary": {
     "consumers": {
-      "consumed": 743,
+      "consumed": 761,
       "total": 862,
-      "coveragePercent": 86.19,
+      "coveragePercent": 88.28,
       "status": "partial"
     },
     "reconciliation": {
       "classified": 862,
-      "consumed": 743,
-      "unknown": 108,
+      "consumed": 761,
+      "unknown": 90,
       "excluded": 10,
       "unsupported": 1,
       "total": 862,
@@ -3583,43 +3583,47 @@
     },
     {
       "canonicalPath": "480x800/Loading/backgroundLogo.png",
-      "dispositionId": "loading-surface-not-yet-restored",
-      "evidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "Exact native strings exist, but LoadingLayer composition, progress semantics, visibility interval, and shell handoff are not yet recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "480x800/Loading/loadbkback.png",
-      "dispositionId": "loading-surface-not-yet-restored",
-      "evidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "Exact native strings exist, but LoadingLayer composition, progress semantics, visibility interval, and shell handoff are not yet recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "480x800/Loading/loadbkfront.png",
-      "dispositionId": "loading-surface-not-yet-restored",
-      "evidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "Exact native strings exist, but LoadingLayer composition, progress semantics, visibility interval, and shell handoff are not yet recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "480x800/Loading/loadprocess.png",
-      "dispositionId": "loading-surface-not-yet-restored",
-      "evidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "Exact native strings exist, but LoadingLayer composition, progress semantics, visibility interval, and shell handoff are not yet recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "480x800/Objectives/button-skip-selected.png",
@@ -7596,43 +7600,47 @@
     },
     {
       "canonicalPath": "720x1280/Loading/backgroundLogo.png",
-      "dispositionId": "loading-surface-not-yet-restored",
-      "evidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "Exact native strings exist, but LoadingLayer composition, progress semantics, visibility interval, and shell handoff are not yet recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "720x1280/Loading/loadbkback.png",
-      "dispositionId": "loading-surface-not-yet-restored",
-      "evidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "Exact native strings exist, but LoadingLayer composition, progress semantics, visibility interval, and shell handoff are not yet recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "720x1280/Loading/loadbkfront.png",
-      "dispositionId": "loading-surface-not-yet-restored",
-      "evidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "Exact native strings exist, but LoadingLayer composition, progress semantics, visibility interval, and shell handoff are not yet recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "720x1280/Loading/loadprocess.png",
-      "dispositionId": "loading-surface-not-yet-restored",
-      "evidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "Exact native strings exist, but LoadingLayer composition, progress semantics, visibility interval, and shell handoff are not yet recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "720x1280/Objectives/button-skip-selected.png",
@@ -8222,10 +8230,13 @@
       "canonicalPath": "Sounds/GangnamStyle.mp3",
       "status": "consumed",
       "consumerIds": [
-        "gn-style"
+        "gn-style",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/gn-style-resource-contract.ts"
+        "game/assets/scripts/domain/gn-style-resource-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
@@ -8233,11 +8244,14 @@
       "status": "consumed",
       "consumerIds": [
         "classic-audio",
+        "loading",
         "mode-select"
       ],
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "game/assets/scripts/domain/mode-select-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
@@ -8245,91 +8259,118 @@
       "status": "consumed",
       "consumerIds": [
         "classic-audio",
+        "loading",
         "mode-select"
       ],
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "game/assets/scripts/domain/mode-select-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/boomexplosion.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/boomhit.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/boomsound.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/boomtoss.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/cheer.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/compo1.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/compo2.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/compo3.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
@@ -8337,263 +8378,327 @@
       "status": "consumed",
       "consumerIds": [
         "classic-audio",
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/doublepoint.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/doubletoss.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/doubletosstrum.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/eapplecut.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/ehit1.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/ehit2.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/ehit3.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/ehit4.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/electric.mp3",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/electricexplose.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/finishhitmusic.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/firstplace.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/freeze.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/fruitfail.wav",
-      "dispositionId": "orphan-audio-play-sites-unrecovered",
-      "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "The files and native strings are preserved, but exact event owners, play order, and overlap policies are not recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "Sounds/gameplayselected.wav",
       "status": "consumed",
       "consumerIds": [
         "classic-audio",
+        "loading",
         "mode-select"
       ],
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "game/assets/scripts/domain/mode-select-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/get_coins.wav",
-      "dispositionId": "orphan-audio-play-sites-unrecovered",
-      "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "The files and native strings are preserved, but exact event owners, play order, and overlap policies are not recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "Sounds/hitmusic.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/juice1.wav",
-      "dispositionId": "orphan-audio-play-sites-unrecovered",
-      "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "The files and native strings are preserved, but exact event owners, play order, and overlap policies are not recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "Sounds/juice2.wav",
-      "dispositionId": "orphan-audio-play-sites-unrecovered",
-      "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "The files and native strings are preserved, but exact event owners, play order, and overlap policies are not recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "Sounds/juice3.wav",
-      "dispositionId": "orphan-audio-play-sites-unrecovered",
-      "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "The files and native strings are preserved, but exact event owners, play order, and overlap policies are not recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "Sounds/juice4.wav",
-      "dispositionId": "orphan-audio-play-sites-unrecovered",
-      "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "The files and native strings are preserved, but exact event owners, play order, and overlap policies are not recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "Sounds/kiwi.wav",
-      "dispositionId": "orphan-audio-play-sites-unrecovered",
-      "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "The files and native strings are preserved, but exact event owners, play order, and overlap policies are not recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "Sounds/lightning1.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/lightning2.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/magnet.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
@@ -8601,11 +8706,14 @@
       "status": "consumed",
       "consumerIds": [
         "classic-audio",
+        "loading",
         "main-menu"
       ],
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/main-menu-resource-contract.ts"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "game/assets/scripts/domain/main-menu-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
@@ -8614,14 +8722,17 @@
       "consumerIds": [
         "classic-audio",
         "crazy-audio",
+        "loading",
         "main-menu",
         "mode-select"
       ],
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
         "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
         "game/assets/scripts/domain/main-menu-resource-contract.ts",
-        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+        "game/assets/scripts/domain/mode-select-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
@@ -8631,6 +8742,7 @@
         "about",
         "classic-audio",
         "leaderboard",
+        "loading",
         "main-menu",
         "mode-select",
         "objectives",
@@ -8640,10 +8752,12 @@
         "game/assets/scripts/domain/about-resource-contract.ts",
         "game/assets/scripts/domain/classic-audio-contract.ts",
         "game/assets/scripts/domain/leaderboard-resource-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
         "game/assets/scripts/domain/main-menu-resource-contract.ts",
         "game/assets/scripts/domain/mode-select-resource-contract.ts",
         "game/assets/scripts/domain/objectives-screen-resource-contract.ts",
-        "game/assets/scripts/domain/options-resource-contract.ts"
+        "game/assets/scripts/domain/options-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
@@ -8651,11 +8765,14 @@
       "status": "consumed",
       "consumerIds": [
         "classic-audio",
+        "loading",
         "options"
       ],
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/options-resource-contract.ts"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "game/assets/scripts/domain/options-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
@@ -8663,61 +8780,73 @@
       "status": "consumed",
       "consumerIds": [
         "classic-audio",
+        "loading",
         "options"
       ],
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/options-resource-contract.ts"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "game/assets/scripts/domain/options-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/orange.wav",
-      "dispositionId": "orphan-audio-play-sites-unrecovered",
-      "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "The files and native strings are preserved, but exact event owners, play order, and overlap policies are not recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "Sounds/pineapple.wav",
-      "dispositionId": "orphan-audio-play-sites-unrecovered",
-      "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "The files and native strings are preserved, but exact event owners, play order, and overlap policies are not recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "Sounds/powerup.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/scorescreen.wav",
-      "dispositionId": "orphan-audio-play-sites-unrecovered",
-      "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+      "status": "consumed",
+      "consumerIds": [
+        "loading"
       ],
-      "reason": "The files and native strings are preserved, but exact event owners, play order, and overlap policies are not recovered.",
-      "status": "unknown"
+      "evidenceRefs": [
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
+      ]
     },
     {
       "canonicalPath": "Sounds/secondplace.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
@@ -8726,134 +8855,173 @@
       "consumerIds": [
         "classic-audio",
         "crazy-audio",
+        "loading",
         "main-menu",
         "mode-select"
       ],
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
         "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
         "game/assets/scripts/domain/main-menu-resource-contract.ts",
-        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+        "game/assets/scripts/domain/mode-select-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/swoosh1.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/swoosh2.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/swoosh3.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/swoosh4.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/swoosh5.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/swoosh6.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/swoosh7.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/swoosh8.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/swoosh9.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/thirdplace.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/timetick.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/timeup.wav",
       "status": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
@@ -8861,21 +9029,27 @@
       "status": "consumed",
       "consumerIds": [
         "classic-audio",
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "evidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     },
     {
       "canonicalPath": "Sounds/waterfruit.wav",
       "status": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "evidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ]
     }
   ]

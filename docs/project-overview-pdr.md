@@ -28,8 +28,8 @@ Replay/Retry/Quit/Menu ownership. The standard-blade runtime checkpoint is also 
 IDs `0`-`17` now route transactionally through Main Menu, Mode Select, Classic, the Crazy
 standard branch, and GN Style with exact Basic textures, particle plans, Dragon multipart
 behavior, and Centipede multipart behavior. This is a bounded six-route production checkpoint,
-not presentation completion: most resource consumers, leaderboard/progression wiring, and the
-full scene/prefab map remain open.
+not presentation completion: the remaining unknown resource consumers and the full
+scene/prefab map remain open.
 
 ## Authority and evidence
 
@@ -59,9 +59,14 @@ replay, and device comparison are unavailable and are not project gates.
   and 16 fonts; 107 additional Android `res/` PNG are classified separately.
 - The full recovered APK game-asset corpus is copied unchanged under `game/assets/game/` and
   its current Creator raster/audio imports are covered by staging and metadata validators.
-  The generated resource ledger now measures runtime consumer coverage at `743/862`
-  (`86.19%`) and classifies the full staging inventory as `862/862` with `108 unknown`,
+  The generated resource ledger now measures runtime consumer coverage at `761/862`
+  (`88.28%`) and classifies the full staging inventory as `862/862` with `90 unknown`,
   `10 excluded`, and `1 unsupported`.
+- The recovered Loading boot surface uses the exact four selected-profile rasters, the exact
+  source-ordered 62-audio preload sequence, the native incremented-counter `/61` clamped fill,
+  and the recovered `0.5`-second finish tail. Creator waits for real bundle readiness and
+  commits Main Menu beneath the overlay before retiring it; it does not reproduce the obsolete
+  native cache purge.
 - The Classic score HUD now uses the exact recovered score icon, best-score cup,
   double-score panel, and `Fonts/Linds.ttf`. Best-score display follows the authoritative
   score service seeded from persisted `classic_best_1`; app hide saves the expanded
@@ -88,9 +93,12 @@ replay, and device comparison are unavailable and are not project gates.
   errors; one unrelated Chrome extension error remains outside the game.
 - Compact `360x800` and high `720x1280` Creator Preview profiles also pass Main Menu →
   Options selection/purchase/Back with an empty Cocos Editor console.
+- The Loading checkpoint passes `1520/1520` full vertical-slice tests, `61/61` top-level
+  resource/build/catalog/tooling tests, Creator 3.8.8 strict TypeScript with zero diagnostics,
+  and compact logical `480x800` plus high `720x1280` Preview with zero Cocos console counters.
 - Presentation restoration is complete only when the canonical user-supplied sample project
   has 100% inventory, staging, and reconciliation classification for every resource actually
-  present. That is separate from the current `743/862` runtime consumer coverage target.
+  present. That is separate from the current `761/862` runtime consumer coverage target.
 - No canonical graphics, animation frame, sound, music, font, shader/material, level/layout,
   progression, or other game resource may be silently omitted or substituted.
 - Creator's Android API 21+ floor is an explicit platform-envelope change from the original

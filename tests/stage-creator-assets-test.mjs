@@ -774,7 +774,7 @@ test('production CLI stages the canonical corpus into a fresh temporary project'
   assert.match(stage.stdout, /assets=862\/862/);
   assert.match(stage.stdout, /bytes=32945747/);
   assert.match(stage.stdout, new RegExp(`source_manifest_sha256=${EXPECTED_REAL_DIGEST}`));
-  assert.match(stage.stdout, /consumer_coverage=86.19%/);
+  assert.match(stage.stdout, /consumer_coverage=88.28%/);
   assert.match(stage.stdout, /reconciliation_coverage=100%/);
   assert.match(stage.stdout, /creator_meta_sidecars=0\/934/);
   const verify = runCli('verify', fixture);

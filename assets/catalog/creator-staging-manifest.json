@@ -6,7 +6,7 @@
     "authority": "resource-usage-map.json",
     "reconciliationAuthority": {
       "file": "resource-reconciliation-ledger.json",
-      "sha256": "df1e39eb9f3e333ad95bc07d2a7661f49864800865bea47be471b92d8bccfa9c"
+      "sha256": "2985194b3fd6611228e18b3947c0c307538b98b54507da221d0f048b4faaefc6"
     },
     "root": "assets",
     "manifestSha256": "0143473b21e56525cde92163f72fd49b2a898ab70ef2b224cdad00eaba9238e3",
@@ -31,15 +31,15 @@
       "status": "byte-verified"
     },
     "consumers": {
-      "consumed": 743,
+      "consumed": 761,
       "total": 862,
-      "coveragePercent": 86.19,
+      "coveragePercent": 88.28,
       "status": "partial"
     },
     "reconciliation": {
       "classified": 862,
-      "consumed": 743,
-      "unknown": 108,
+      "consumed": 761,
+      "unknown": 90,
       "excluded": 10,
       "unsupported": 1,
       "total": 862,
@@ -9839,11 +9839,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "loading-surface-not-yet-restored",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -9866,11 +9868,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "loading-surface-not-yet-restored",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -9893,11 +9897,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "loading-surface-not-yet-restored",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -9920,11 +9926,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "loading-surface-not-yet-restored",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -20857,11 +20865,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "loading-surface-not-yet-restored",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -20884,11 +20894,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "loading-surface-not-yet-restored",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -20911,11 +20923,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "loading-surface-not-yet-restored",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -20938,11 +20952,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "loading-surface-not-yet-restored",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22534,10 +22550,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "gn-style"
+        "gn-style",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/gn-style-resource-contract.ts"
+        "game/assets/scripts/domain/gn-style-resource-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22562,11 +22581,14 @@
       "consumerStatus": "consumed",
       "consumerIds": [
         "classic-audio",
+        "loading",
         "mode-select"
       ],
       "consumerEvidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "game/assets/scripts/domain/mode-select-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22591,11 +22613,14 @@
       "consumerStatus": "consumed",
       "consumerIds": [
         "classic-audio",
+        "loading",
         "mode-select"
       ],
       "consumerEvidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "game/assets/scripts/domain/mode-select-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22619,10 +22644,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22646,10 +22674,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22673,10 +22704,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22700,10 +22734,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22727,10 +22764,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22754,10 +22794,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22781,10 +22824,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22808,10 +22854,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22836,11 +22885,14 @@
       "consumerStatus": "consumed",
       "consumerIds": [
         "classic-audio",
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22864,10 +22916,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22891,10 +22946,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22918,10 +22976,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22945,10 +23006,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22972,10 +23036,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -22999,10 +23066,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23026,10 +23096,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23053,10 +23126,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23080,10 +23156,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23107,10 +23186,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23134,10 +23216,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23161,10 +23246,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23188,10 +23276,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23213,11 +23304,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "orphan-audio-play-sites-unrecovered",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23242,11 +23335,14 @@
       "consumerStatus": "consumed",
       "consumerIds": [
         "classic-audio",
+        "loading",
         "mode-select"
       ],
       "consumerEvidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "game/assets/scripts/domain/mode-select-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23268,11 +23364,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "orphan-audio-play-sites-unrecovered",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23296,10 +23394,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23321,11 +23422,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "orphan-audio-play-sites-unrecovered",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23347,11 +23450,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "orphan-audio-play-sites-unrecovered",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23373,11 +23478,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "orphan-audio-play-sites-unrecovered",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23399,11 +23506,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "orphan-audio-play-sites-unrecovered",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23425,11 +23534,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "orphan-audio-play-sites-unrecovered",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23453,10 +23564,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23480,10 +23594,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23507,10 +23624,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23535,11 +23655,14 @@
       "consumerStatus": "consumed",
       "consumerIds": [
         "classic-audio",
+        "loading",
         "main-menu"
       ],
       "consumerEvidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/main-menu-resource-contract.ts"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "game/assets/scripts/domain/main-menu-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23565,14 +23688,17 @@
       "consumerIds": [
         "classic-audio",
         "crazy-audio",
+        "loading",
         "main-menu",
         "mode-select"
       ],
       "consumerEvidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
         "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
         "game/assets/scripts/domain/main-menu-resource-contract.ts",
-        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+        "game/assets/scripts/domain/mode-select-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23599,6 +23725,7 @@
         "about",
         "classic-audio",
         "leaderboard",
+        "loading",
         "main-menu",
         "mode-select",
         "objectives",
@@ -23608,10 +23735,12 @@
         "game/assets/scripts/domain/about-resource-contract.ts",
         "game/assets/scripts/domain/classic-audio-contract.ts",
         "game/assets/scripts/domain/leaderboard-resource-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
         "game/assets/scripts/domain/main-menu-resource-contract.ts",
         "game/assets/scripts/domain/mode-select-resource-contract.ts",
         "game/assets/scripts/domain/objectives-screen-resource-contract.ts",
-        "game/assets/scripts/domain/options-resource-contract.ts"
+        "game/assets/scripts/domain/options-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23636,11 +23765,14 @@
       "consumerStatus": "consumed",
       "consumerIds": [
         "classic-audio",
+        "loading",
         "options"
       ],
       "consumerEvidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/options-resource-contract.ts"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "game/assets/scripts/domain/options-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23665,11 +23797,14 @@
       "consumerStatus": "consumed",
       "consumerIds": [
         "classic-audio",
+        "loading",
         "options"
       ],
       "consumerEvidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/options-resource-contract.ts"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "game/assets/scripts/domain/options-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23691,11 +23826,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "orphan-audio-play-sites-unrecovered",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23717,11 +23854,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "orphan-audio-play-sites-unrecovered",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23745,10 +23884,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23770,11 +23912,13 @@
         "creatorMetadata": "pending"
       },
       "rightsStatus": "unresolved",
-      "consumerStatus": "unknown",
-      "consumerDispositionId": "orphan-audio-play-sites-unrecovered",
+      "consumerStatus": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
       "consumerEvidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23798,10 +23942,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23827,14 +23974,17 @@
       "consumerIds": [
         "classic-audio",
         "crazy-audio",
+        "loading",
         "main-menu",
         "mode-select"
       ],
       "consumerEvidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
         "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
         "game/assets/scripts/domain/main-menu-resource-contract.ts",
-        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+        "game/assets/scripts/domain/mode-select-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23858,10 +24008,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23885,10 +24038,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23912,10 +24068,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23939,10 +24098,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23966,10 +24128,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -23993,10 +24158,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -24020,10 +24188,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -24047,10 +24218,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -24074,10 +24248,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -24101,10 +24278,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -24128,10 +24308,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -24155,10 +24338,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -24183,11 +24369,14 @@
       "consumerStatus": "consumed",
       "consumerIds": [
         "classic-audio",
-        "crazy-audio"
+        "crazy-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
         "game/assets/scripts/domain/classic-audio-contract.ts",
-        "game/assets/scripts/domain/crazy-audio-contract.ts"
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"
@@ -24211,10 +24400,13 @@
       "rightsStatus": "unresolved",
       "consumerStatus": "consumed",
       "consumerIds": [
-        "classic-audio"
+        "classic-audio",
+        "loading"
       ],
       "consumerEvidenceRefs": [
-        "game/assets/scripts/domain/classic-audio-contract.ts"
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md"
       ],
       "creatorMetaStatus": "pending",
       "creatorUuidStatus": "pending"

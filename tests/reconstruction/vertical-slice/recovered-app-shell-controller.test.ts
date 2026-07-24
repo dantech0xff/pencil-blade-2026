@@ -16,7 +16,14 @@ test('app shell boots the shared scene into Main Menu before any Classic activat
   assertOrderedSubstrings(initialize, [
     'sceneController.prepareSceneResolution()',
     'createRecoveredAppViewport(appliedResolution)',
-    'await gameplayController.prepareRecoveredRuntime()',
+    'loadLoadingResources(',
+    'appliedResolution.profile.assetTree',
+    'LoadingAudioPreloader.create()',
+    'LoadingPresenter.create({',
+    'this.activeLoading = loading',
+    'loading.activate()',
+    'gameplayController.prepareRecoveredRuntime()',
+    'loading.failure',
     'this.requireCrazyGameplayController()',
     '.prepareCrazyRuntime()',
     'const classicBirdPreparation = crazyPreparation',
@@ -30,10 +37,14 @@ test('app shell boots the shared scene into Main Menu before any Classic activat
     'const gnStylePreparation = comboBirdPreparation',
     'this.requireGnStyleGameplayController()',
     '.prepareGnStyleRuntime()',
-    'await Promise.all([',
+    'const optionalPreparation = Promise.all([',
     'crazyBirdPreparation,',
     'comboBirdPreparation,',
     'gnStylePreparation,',
+    'void optionalPreparation.catch',
+    '] = await Promise.race([',
+    'optionalPreparation,',
+    'loading.completion',
     'SharedLeafPresenter.create({',
     'SharedGameScenePresenter.create({',
     'nonClassicPhysics.activateCollisionFilter()',
@@ -42,6 +53,9 @@ test('app shell boots the shared scene into Main Menu before any Classic activat
     'mainMenu.activate()',
     'this.activeMainMenu = mainMenu',
     "this.stateValue = 'main-menu'",
+    'this.activeLoading = null',
+    "runBestEffortCleanup('Committed Loading retirement'",
+    'loading?.dispose()',
   ]);
   assert.doesNotMatch(initialize, /activateClassicFromAppShell|activateInitialClassic/);
   assert.match(
@@ -54,18 +68,121 @@ test('app shell boots the shared scene into Main Menu before any Classic activat
   );
 });
 
+test('Loading remains a boot sub-owner and teardown/update stay shell-owned', () => {
+  const update = extractMethod(SOURCE, 'update');
+  const destroy = extractMethod(SOURCE, 'onDestroy');
+  const initialize = extractMethod(SOURCE, 'initializeRecoveredApp');
+
+  assert.doesNotMatch(SOURCE, /[| ]'loading'/);
+  assertOrderedSubstrings(update, [
+    'this.sharedLeaf?.update(deltaSeconds)',
+    'this.activeLoading?.update(deltaSeconds)',
+    'this.activeMainMenu?.update(deltaSeconds)',
+  ]);
+  assert.match(destroy, /this\.activeLoading\?\.dispose\(\)/);
+  assert.match(destroy, /this\.activeLoading = null/);
+  assertOrderedSubstrings(initialize, [
+    'await Promise.race([',
+    'gameplayController.prepareRecoveredRuntime()',
+    'loading.failure',
+    'await Promise.race([loading.completion, loading.failure])',
+    "this.stateValue = 'main-menu'",
+    'this.activeLoading = null',
+    "runBestEffortCleanup('Committed Loading retirement'",
+  ]);
+});
+
+test('Loading update failure disposes the transient owner before boot rejects', async () => {
+  const failure = new Error('injected Loading update failure');
+  let activateCount = 0;
+  let disposeCount = 0;
+  const initialize = compileAsyncSourceMethod<
+    (this: Record<string, unknown>) => Promise<void>
+  >('initializeRecoveredApp', {
+    LoadingAudioPreloader: {
+      async create() {
+        return Object.freeze({});
+      },
+    },
+    LoadingPresenter: {
+      create() {
+        return {
+          activate() {
+            activateCount += 1;
+          },
+          completion: new Promise<void>(() => {}),
+          dispose() {
+            disposeCount += 1;
+          },
+          failure: Promise.reject(failure),
+        };
+      },
+    },
+    createRecoveredAppViewport: () => Object.freeze({}),
+    loadLoadingResources: async () => Object.freeze({}),
+    runBestEffortCleanup(_label: string, cleanups: readonly (() => void)[]) {
+      for (const cleanup of cleanups) {
+        try {
+          cleanup();
+        } catch {
+          // Production cleanup is best-effort.
+        }
+      }
+      return Object.freeze([]);
+    },
+  });
+  const shell: Record<string, unknown> = {
+    activeLoading: null,
+    assertBootStillCurrent() {},
+    node: Object.freeze({}),
+    requireGameplayController: () => ({
+      prepareRecoveredRuntime: () => new Promise<void>(() => {}),
+    }),
+    requireSceneController: () => ({
+      prepareSceneResolution: () => Object.freeze({
+        profile: Object.freeze({ assetTree: '480x800' }),
+      }),
+    }),
+  };
+
+  await assert.rejects(
+    initialize.call(shell),
+    (error) => error === failure,
+  );
+  assert.equal(activateCount, 1);
+  assert.equal(disposeCount, 1);
+  assert.equal(shell.activeLoading, null);
+});
+
 test('destroyed shell never starts delayed Classic Bird preparation', async () => {
   const initialize = compileAsyncSourceMethod<
     (this: Record<string, unknown>) => Promise<void>
   >('initializeRecoveredApp', {
+    LoadingAudioPreloader: {
+      async create() {
+        return Object.freeze({});
+      },
+    },
+    LoadingPresenter: {
+      create() {
+        return {
+          activate() {},
+          completion: Promise.resolve(),
+          dispose() {},
+          failure: new Promise<never>(() => {}),
+        };
+      },
+    },
     createRecoveredAppViewport: () => Object.freeze({}),
     loadAboutResources: async () => Object.freeze({}),
     loadLeaderboardResources: async () => Object.freeze({}),
+    loadLoadingResources: async () => Object.freeze({}),
     loadMainMenuResources: async () => Object.freeze({}),
     loadModeSelectResources: async () => Object.freeze({}),
     loadObjectivesScreenResources: async () => Object.freeze({}),
     loadOptionsResources: async () => Object.freeze({}),
     loadSharedGameSceneResources: async () => Object.freeze({}),
+    runBestEffortCleanup: () => Object.freeze([]),
   });
   let resolveCrazyPreparation: (() => void) | null = null;
   let markCrazyPreparationStarted: (() => void) | null = null;
@@ -83,6 +200,7 @@ test('destroyed shell never starts delayed Classic Bird preparation', async () =
       }
     },
     destroyedValue: false,
+    node: Object.freeze({}),
     requireClassicBirdGameplayController: () => ({
       async prepareClassicBirdRuntime() {
         classicBirdPreparationCount += 1;
@@ -170,7 +288,9 @@ test('destroyed shell never starts delayed Classic Bird preparation', async () =
       },
     }),
     requireSceneController: () => ({
-      prepareSceneResolution: () => Object.freeze({}),
+      prepareSceneResolution: () => Object.freeze({
+        profile: Object.freeze({ assetTree: '480x800' }),
+      }),
     }),
   };
 
@@ -184,6 +304,111 @@ test('destroyed shell never starts delayed Classic Bird preparation', async () =
     /Recovered app shell boot completed after destruction/,
   );
   assert.equal(classicBirdPreparationCount, 0);
+});
+
+test('optional preparation rejection is observed while foreground loading is still pending', async () => {
+  let resolveCrazyPreparation: (() => void) | null = null;
+  let resolveForegroundLoading: (() => void) | null = null;
+  let markForegroundLoadingStarted: (() => void) | null = null;
+  const crazyPreparation = new Promise<void>((resolve) => {
+    resolveCrazyPreparation = resolve;
+  });
+  const foregroundLoading = new Promise<void>((resolve) => {
+    resolveForegroundLoading = resolve;
+  });
+  const foregroundLoadingStarted = new Promise<void>((resolve) => {
+    markForegroundLoadingStarted = resolve;
+  });
+  const loadForegroundResource = async () => {
+    markForegroundLoadingStarted?.();
+    await foregroundLoading;
+    return Object.freeze({});
+  };
+  const initialize = compileAsyncSourceMethod<
+    (this: Record<string, unknown>) => Promise<void>
+  >('initializeRecoveredApp', {
+    LoadingAudioPreloader: {
+      async create() {
+        return Object.freeze({});
+      },
+    },
+    LoadingPresenter: {
+      create() {
+        return {
+          activate() {},
+          completion: Promise.resolve(),
+          dispose() {},
+          failure: new Promise<never>(() => {}),
+        };
+      },
+    },
+    createRecoveredAppViewport: () => Object.freeze({}),
+    loadAboutResources: loadForegroundResource,
+    loadLeaderboardResources: loadForegroundResource,
+    loadLoadingResources: async () => Object.freeze({}),
+    loadMainMenuResources: loadForegroundResource,
+    loadModeSelectResources: loadForegroundResource,
+    loadObjectivesScreenResources: loadForegroundResource,
+    loadOptionsResources: loadForegroundResource,
+    loadSharedGameSceneResources: loadForegroundResource,
+    runBestEffortCleanup: () => Object.freeze([]),
+  });
+  const shell: Record<string, unknown> = {
+    activeLoading: null,
+    assertBootStillCurrent() {
+      if (this.destroyedValue === true) {
+        throw new Error('Recovered app shell boot completed after destruction');
+      }
+    },
+    destroyedValue: false,
+    node: Object.freeze({}),
+    requireCrazyGameplayController: () => ({
+      prepareCrazyRuntime() {
+        return crazyPreparation;
+      },
+    }),
+    requireGameplayController: () => ({
+      async prepareRecoveredRuntime() {},
+      sharedResourceCatalog: {
+        assetTree: Object.freeze({}),
+      },
+    }),
+    requireSceneController: () => ({
+      prepareSceneResolution: () => Object.freeze({
+        profile: Object.freeze({ assetTree: '480x800' }),
+      }),
+    }),
+  };
+  const unhandled: unknown[] = [];
+  const onUnhandled = (reason: unknown) => {
+    unhandled.push(reason);
+  };
+  process.on('unhandledRejection', onUnhandled);
+
+  try {
+    const initialization = initialize.call(shell);
+    await foregroundLoadingStarted;
+    shell.destroyedValue = true;
+    resolveCrazyPreparation?.();
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    assert.deepEqual(
+      unhandled,
+      [],
+      'optional destruction rejection must be observed before foreground loading settles',
+    );
+
+    resolveForegroundLoading?.();
+    await assert.rejects(
+      initialization,
+      /Recovered app shell boot completed after destruction/,
+    );
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    assert.deepEqual(unhandled, []);
+  } finally {
+    process.off('unhandledRejection', onUnhandled);
+    resolveCrazyPreparation?.();
+    resolveForegroundLoading?.();
+  }
 });
 
 test('serialized shell binds every recovered gameplay navigation event and owner', () => {

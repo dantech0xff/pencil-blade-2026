@@ -40,7 +40,9 @@ notifications across every production route, and transactional Main Menu ownersh
 storage is now reconciled: the recovered persisted sentinel is `network_available`, while the
 app-shell first activation gate is in memory, so no new save field or migration is justified.
 The global resource ledger now classifies all 862 recovered assets without treating unknown
-files as live consumers; the remaining cosmetic/presentation and scene-composition work stays open.
+files as live consumers. The recovered Loading surface now owns its exact four selected-profile
+rasters, 62-step audio preload sequence, `/61` clamped progress, and half-second handoff to
+Main Menu; the remaining cosmetic/presentation and scene-composition work stays open.
 
 ## Context Links
 
@@ -85,6 +87,10 @@ files as live consumers; the remaining cosmetic/presentation and scene-compositi
 - [Resource ledger implementation map](./reports/explorer-2026-07-24-resource-ledger-implementation-map.md)
 - [Resource ledger integration review](./reports/reviewer-2026-07-24-resource-ledger-checkpoint.md)
 - [Resource ledger final verification](./reports/tester-2026-07-24-resource-ledger-final-checkpoint.md)
+- [Loading static contract](./reports/researcher-2026-07-24-loading-static-contract.md)
+- [Loading architecture map](./reports/explorer-2026-07-24-loading-architecture-map.md)
+- [Loading checkpoint review](./reports/reviewer-2026-07-24-loading-checkpoint.md)
+- [Loading final verification](./reports/tester-2026-07-24-loading-final-checkpoint.md)
 - [Remaining mode order](./reports/explorer-2026-07-23-remaining-mode-order.md)
 
 ## Requirements
@@ -159,19 +165,23 @@ save schema and include reproducible fixtures for progression states.
 - **Complete:** first-launch storage/lifecycle reconciliation. `network_available` remains the
   recovered persisted launch sentinel and `initialClassicRuntimeActivated` remains an in-memory
   shell gate; current evidence does not justify a new persisted `flag`.
-- **Complete:** resource-ledger scaffold. Exact live contract roots account for `743/862`
-  assets (`86.19%` runtime consumption); reviewed dispositions close classification to
-  `862/862` with `108` unknown, `10` excluded, and `1` unsupported. Classification does not
+- **Complete:** recovered Loading surface with the exact selected-profile background/bar
+  composition, 62 source-ordered audio preloads issued one per update, native `/61` clamped
+  progress, `0.5`-second tail, and commit-before-retirement Main Menu handoff. Creator waits
+  for real bundle readiness and intentionally does not reproduce the obsolete native cache purge.
+- **Complete:** resource-ledger scaffold. Exact live contract roots account for `761/862`
+  assets (`88.28%` runtime consumption); reviewed dispositions close classification to
+  `862/862` with `90` unknown, `10` excluded, and `1` unsupported. Classification does not
   promote unknown files into runtime consumers.
 - All six production gameplay routes, Leaderboard, Options, standard blades, save/economy,
   Objectives, About/offline, first-launch behavior, and global resource classification are
-  complete. Phase 6 remains in progress for the `108` unknown resource consumers and the
+  complete. Phase 6 remains in progress for the `90` unknown resource consumers and the
   scene/prefab/composition map.
 
 Current certification checkpoint:
 
 - Focused About/Main Menu/shell integration suite: `169/169`
-- Full deterministic vertical slice: `1498/1498`
+- Full deterministic vertical slice: `1520/1520`
 - Top-level resource/build/catalog/tooling tests: `61/61`
 - Resource-ledger generator/registry focused tests: `18/18`
 - Staging/metadata focused tests: `33/33`
@@ -179,6 +189,8 @@ Current certification checkpoint:
 - Reconstruction policy: positive checkpoint and `4/4` negative fixtures
 - Native static analysis: `7/7`
 - Cocos Creator 3.8.8 bundled strict TypeScript: zero diagnostics
+- Loading follow-up review: approved with no open P0-P2 finding after slow-foreground,
+  partial-construction, same-Canvas, and retirement-failure regressions
 - Creator metadata audit: zero structural errors and zero duplicate UUIDs; still
   `fidelity-blocked` only by the preserved unsupported `Fonts/CooperBlackStd.otf`
 - Fresh Creator-served Browser Preview reaches Main Menu -> Mode Select -> GN Style -> exact
@@ -194,6 +206,9 @@ Current certification checkpoint:
   in both profiles with zero game/Cocos browser errors.
 - The same two profiles pass Main Menu -> About -> Main Menu. Review, Email, and Social stay
   local/offline, preserve the `999999` balance, and emit zero Preview errors or warnings.
+- The same profile pair renders recovered Loading and reaches a stable Main Menu. Compact
+  physical `360x800` selects logical/resource tree `480x800`; high selects `720x1280`.
+  Cocos Editor log, warning, and error counters remain zero.
 - Missing or corrupt coin storage still falls back to `999999` coins; a valid persisted balance
   wins, including `0`
 
@@ -207,7 +222,7 @@ Current certification checkpoint:
 - [ ] Full content/cosmetics
 - [x] First-launch persisted-sentinel and in-memory activation-gate reconciliation
 - [x] Global `862`-asset consumer/disposition ledger and schema-v2 staging manifest
-- [ ] Remaining results fidelity, `108` unknown resource consumers, and scene composition
+- [ ] Remaining results fidelity, `90` unknown resource consumers, and scene composition
 - [x] About screen fidelity and offline behavior for retired services
 
 ## Success Criteria
@@ -235,8 +250,8 @@ leaderboards, if retained, require new approved implementations.
 
 ## Next Steps
 
-Recover the Loading surface first, then the remaining advanced blade/particle, result, audio,
-font, and packaged-test families without converting filename guesses into consumers. Build the
+Continue with the remaining advanced blade/particle, result, audio, font, and packaged-test
+families without converting filename guesses into consumers. Build the
 scene/prefab/composition map in parallel where ownership does not overlap. Freeze content and
 enter Phase 7 only when all identified states/contracts are reconciled and the impact of any
 remaining unknowns is explicit.

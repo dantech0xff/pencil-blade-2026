@@ -168,22 +168,6 @@
       ]
     },
     {
-      "id": "loading-surface-not-yet-restored",
-      "status": "unknown",
-      "treePairLogicalPaths": [
-        "Loading/backgroundLogo.png",
-        "Loading/loadbkback.png",
-        "Loading/loadbkfront.png",
-        "Loading/loadprocess.png"
-      ],
-      "canonicalPaths": [],
-      "reason": "Exact native strings exist, but LoadingLayer composition, progress semantics, visibility interval, and shell handoff are not yet recovered.",
-      "evidenceRefs": [
-        "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
-      ]
-    },
-    {
       "id": "packaged-test-family-unclassified",
       "status": "unknown",
       "treePairLogicalPaths": [
@@ -195,28 +179,6 @@
       "reason": "Static strings do not yet prove whether these assets are reachable production content, debug-only content, or dead packaging.",
       "evidenceRefs": [
         "forensics/resources/resource-usage-map.json",
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
-      ]
-    },
-    {
-      "id": "orphan-audio-play-sites-unrecovered",
-      "status": "unknown",
-      "treePairLogicalPaths": [],
-      "canonicalPaths": [
-        "Sounds/fruitfail.wav",
-        "Sounds/get_coins.wav",
-        "Sounds/juice1.wav",
-        "Sounds/juice2.wav",
-        "Sounds/juice3.wav",
-        "Sounds/juice4.wav",
-        "Sounds/kiwi.wav",
-        "Sounds/orange.wav",
-        "Sounds/pineapple.wav",
-        "Sounds/scorescreen.wav"
-      ],
-      "reason": "The files and native strings are preserved, but exact event owners, play order, and overlap policies are not recovered.",
-      "evidenceRefs": [
-        "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-22-classic-audio-contract.md",
         "plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-resource-reconciliation-gap-map.md"
       ]
     },

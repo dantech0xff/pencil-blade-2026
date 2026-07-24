@@ -162,14 +162,18 @@ Verified starting point:
   focused tests, `1494/1494` full vertical-slice tests, `43/43` resource/build tests, Creator
   3.8.8 bundled strict TypeScript, clean diff hygiene, and real pointer
   Main Menu -> About -> Main Menu Preview in internal `480x800` plus high `720x1280`.
-  The resource-ledger scaffold now maps `743/862` exact live consumers (`86.19%`) and
-  classifies all `862/862` assets as `743` consumed, `108` unknown, `10` excluded, or `1`
+  The recovered Loading checkpoint now owns the exact four selected-profile rasters, exact
+  62-step audio preload order, `/61` clamped progress, and half-second Main Menu handoff.
+  It passes `1520/1520` full vertical-slice tests, `61/61` top-level tests, strict Creator
+  TypeScript, and compact/high Preview with zero Cocos console counters.
+  The resource-ledger scaffold now maps `761/862` exact live consumers (`88.28%`) and
+  classifies all `862/862` assets as `761` consumed, `90` unknown, `10` excluded, or `1`
   unsupported. Unknown classification is not a runtime consumer. Project completion still
   requires recovery or explicit retention of those unknown families and the scene/prefab map,
   a pinned integration/toolchain policy, and build validation.
-- Phase 6 continues after all six production gameplay routes, Options, Leaderboard, Objectives,
-  About/offline, first-launch behavior, and global resource classification reached their
-  contract gates. The remaining scope is the `108` unknown asset consumers plus
+- Phase 6 continues after all six production gameplay routes, Loading, Options, Leaderboard,
+  Objectives, About/offline, first-launch behavior, and global resource classification reached
+  their contract gates. The remaining scope is the `90` unknown asset consumers plus
   scene/prefab/composition reconciliation.
   Android build validation and release-rights clearance remain Phase 7 gates.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and

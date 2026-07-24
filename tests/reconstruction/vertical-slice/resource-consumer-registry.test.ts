@@ -46,14 +46,14 @@ const DISPOSITION_MAP = JSON.parse(readFileSync(
   }[];
 };
 
-test('resource consumer registry is sorted, frozen, and deduped to 743 manifest-backed records', () => {
+test('resource consumer registry is sorted, frozen, and deduped to 761 manifest-backed records', () => {
   const registry = listResourceConsumerRecords();
 
   assert.equal(registry, RESOURCE_CONSUMER_REGISTRY);
-  assert.equal(registry.length, 743);
+  assert.equal(registry.length, 761);
   assert.equal(Object.isFrozen(registry), true);
   assert.deepEqual(listResourceConsumerRecords(), registry);
-  assert.equal(new Set(registry.map((entry) => entry.canonicalPath)).size, 743);
+  assert.equal(new Set(registry.map((entry) => entry.canonicalPath)).size, 761);
   assert.deepEqual([...registry].map((entry) => entry.canonicalPath), [...registry]
     .map((entry) => entry.canonicalPath)
     .sort());
@@ -71,7 +71,7 @@ test('resource consumer registry is sorted, frozen, and deduped to 743 manifest-
   }
 });
 
-test('resource consumer registry covers both staged tree profiles and excludes all 119 reviewed gaps', () => {
+test('resource consumer registry covers both staged tree profiles and excludes all 101 reviewed gaps', () => {
   const registry = listResourceConsumerRecords();
   const registryPaths = new Set(registry.map((entry) => entry.canonicalPath));
   const registryByPath = new Map(registry.map((entry) => [entry.canonicalPath, entry] as const));
@@ -84,11 +84,28 @@ test('resource consumer registry covers both staged tree profiles and excludes a
   assert.equal(registryPaths.has('Fonts/SlabThing.ttf'), true);
   assert.equal(registryPaths.has('Sounds/boomhit.wav'), true);
   assert.equal(registryPaths.has('Fonts/Razing.ttf'), true);
-  assert.deepEqual(registryByPath.get('Sounds/boomhit.wav')?.consumerIds, ['crazy-audio']);
+  assert.deepEqual(
+    registryByPath.get('Sounds/boomhit.wav')?.consumerIds,
+    ['crazy-audio', 'loading'],
+  );
   assert.deepEqual(registryByPath.get('Fonts/Razing.ttf')?.consumerIds, ['crazy-dragon-counter']);
+  assert.deepEqual(
+    registryByPath.get('480x800/Loading/backgroundLogo.png')?.consumerIds,
+    ['loading'],
+  );
+  assert.deepEqual(
+    registryByPath.get('Sounds/fruitfail.wav')?.consumerIds,
+    ['loading'],
+  );
+  assert.equal(
+    [...registryByPath.values()].filter(({ consumerIds }) => (
+      consumerIds.includes('loading')
+    )).length,
+    70,
+  );
 
   const gapPaths = expandDispositionPaths(DISPOSITION_MAP);
-  assert.equal(gapPaths.size, 119);
+  assert.equal(gapPaths.size, 101);
   for (const gapPath of gapPaths) {
     assert.equal(registryPaths.has(gapPath), false, gapPath);
   }

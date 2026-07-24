@@ -8,6 +8,10 @@ import type {
   LeaderboardViewport,
 } from '../domain/leaderboard-presentation';
 import type {
+  LoadingPoint,
+  LoadingViewport,
+} from '../domain/loading-presentation';
+import type {
   MainMenuPoint,
   MainMenuViewport,
 } from '../domain/main-menu-presentation';
@@ -40,6 +44,7 @@ export interface RecoveredAppViewportSource {
 export type RecoveredAppViewport =
   & AboutViewport
   & LeaderboardViewport
+  & LoadingViewport
   & MainMenuViewport
   & ModeSelectViewport
   & ObjectivesScreenViewport
@@ -106,6 +111,7 @@ function point(
   y: number,
 ): AboutPoint
   & LeaderboardPoint
+  & LoadingPoint
   & MainMenuPoint
   & ModeSelectPoint
   & ObjectivesScreenPoint

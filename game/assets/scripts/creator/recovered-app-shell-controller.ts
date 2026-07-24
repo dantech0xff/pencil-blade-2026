@@ -79,6 +79,9 @@ import {
   loadLeaderboardResources,
   type LoadedLeaderboardResources,
 } from './leaderboard-resource-loader';
+import { LoadingAudioPreloader } from './loading-audio-preloader';
+import { LoadingPresenter } from './loading-presenter';
+import { loadLoadingResources } from './loading-resource-loader';
 import {
   ModeSelectFatalNavigationError,
   ModeSelectPresenter,
@@ -225,6 +228,7 @@ interface CapturedCrazyMainMenuNavigationRequest {
 export class RecoveredAppShellController extends Component {
   private activeAbout: AboutPresenter | null = null;
   private activeLeaderboard: LeaderboardPresenter | null = null;
+  private activeLoading: LoadingPresenter | null = null;
   private activeMainMenu: MainMenuPresenter | null = null;
   private activeModeSelect: ModeSelectPresenter | null = null;
   private activeObjectives: ObjectivesScreenPresenter | null = null;
@@ -361,6 +365,7 @@ export class RecoveredAppShellController extends Component {
     }
     this.objectiveAchievementHost?.update(deltaSeconds);
     this.sharedLeaf?.update(deltaSeconds);
+    this.activeLoading?.update(deltaSeconds);
     this.activeAbout?.update(deltaSeconds);
     this.activeLeaderboard?.update(deltaSeconds);
     this.activeMainMenu?.update(deltaSeconds);
@@ -433,6 +438,7 @@ export class RecoveredAppShellController extends Component {
     this.stateValue = 'destroyed';
     this.onDisable();
     runBestEffortCleanup('Recovered app shell teardown', [
+      () => this.activeLoading?.dispose(),
       () => this.activeAbout?.dispose(),
       () => this.activeLeaderboard?.dispose(),
       () => this.activeMainMenu?.dispose(),
@@ -444,6 +450,7 @@ export class RecoveredAppShellController extends Component {
       () => this.nonClassicPhysics?.dispose(),
     ]);
     this.activeAbout = null;
+    this.activeLoading = null;
     this.activeLeaderboard = null;
     this.activeMainMenu = null;
     this.activeModeSelect = null;
@@ -484,170 +491,213 @@ export class RecoveredAppShellController extends Component {
     const gameplayController = this.requireGameplayController();
     const appliedResolution = sceneController.prepareSceneResolution();
     const viewport = createRecoveredAppViewport(appliedResolution);
-
-    // Classic performs the first bundle load. Optional foreground loaders then reuse the
-    // registered bundle instead of racing multiple Creator first-load requests.
-    await gameplayController.prepareRecoveredRuntime();
-    this.assertBootStillCurrent();
-    const assetTree = gameplayController.sharedResourceCatalog.assetTree;
-    // Crazy supplements the already-loaded Classic catalog. Its failure is isolated: Menu and
-    // Classic remain available while the Crazy transaction stays fail-closed.
-    const crazyPreparation = this.requireCrazyGameplayController()
-      .prepareCrazyRuntime()
-      .catch(() => undefined);
-    // Classic Bird reuses the process-owned Classic/Crazy catalogs but remains an independent
-    // fail-closed destination. Its preparation waits for Crazy to settle so both modes never race
-    // the same supplemental bundle on first load.
-    const classicBirdPreparation = crazyPreparation.then(async () => {
-      this.assertBootStillCurrent();
-      try {
-        await this.requireClassicBirdGameplayController().prepareClassicBirdRuntime();
-      } catch {
-        // Menu and the prepared modes remain available when Classic Bird cannot prepare.
-      }
-      this.assertBootStillCurrent();
-    });
-    // Crazy Bird is another independent optional destination. It shares the settled Crazy
-    // supplement, then loads the exact Bird type-2 profile after the type-1 request has settled
-    // so Creator never receives competing first-load batches for the same game bundle.
-    const crazyBirdPreparation = classicBirdPreparation.then(async () => {
-      this.assertBootStillCurrent();
-      try {
-        await this.requireCrazyGameplayController().prepareCrazyBirdRuntime();
-      } catch {
-        // Menu, Crazy, and Classic Bird stay available when only type-2 preparation fails.
-      }
-      this.assertBootStillCurrent();
-    });
-    // Combo Bird owns its mode-5 resources and can prepare even when an earlier optional
-    // destination failed. Waiting for the chain only serializes first access to the game bundle.
-    const comboBirdPreparation = crazyBirdPreparation.then(async () => {
-      this.assertBootStillCurrent();
-      try {
-        await this.requireComboBirdGameplayController().prepareComboBirdRuntime();
-      } catch {
-        // Every previously prepared destination remains available when only Combo Bird fails.
-      }
-      this.assertBootStillCurrent();
-    });
-    // GN Style is the final optional destination. It waits for every preceding supplemental
-    // load to settle before loading its exact resources, TimeManager audio, and dedicated track.
-    const gnStylePreparation = comboBirdPreparation.then(async () => {
-      this.assertBootStillCurrent();
-      try {
-        await this.requireGnStyleGameplayController().prepareGnStyleRuntime();
-      } catch {
-        // All previously prepared destinations remain available when only GN Style fails.
-      }
-      this.assertBootStillCurrent();
-    });
-    const [
-      sharedResources,
-      aboutResources,
-      leaderboardResources,
-      mainMenuResources,
-      modeSelectResources,
-      objectivesResources,
-      optionsResources,
-    ] = await Promise.all([
-      loadSharedGameSceneResources(assetTree),
-      loadAboutResources(assetTree),
-      loadLeaderboardResources(assetTree),
-      loadMainMenuResources(assetTree),
-      loadModeSelectResources(assetTree),
-      loadObjectivesScreenResources(assetTree),
-      loadOptionsResources(assetTree),
-    ]);
-    await Promise.all([
-      crazyPreparation,
-      classicBirdPreparation,
-      crazyBirdPreparation,
-      comboBirdPreparation,
-      gnStylePreparation,
-    ]);
-    this.assertBootStillCurrent();
-
-    const settings = gameplayController.sharedSettingsRuntime.state.snapshot;
-    const sharedLeaf = SharedLeafPresenter.create({
-      assetTree,
-      random: gameplayController.sharedGameplayRandom,
-      resources: sharedResources.leaves,
-      viewport: appliedResolution.visibleRect,
-    });
-    let sharedScene: SharedGameScenePresenter | null = null;
-    let mainMenu: MainMenuPresenter | null = null;
-    let objectiveAchievementHost: ObjectiveAchievementHost | null = null;
+    let loading: LoadingPresenter | null = null;
     try {
-      sharedScene = SharedGameScenePresenter.create({
-        backgroundIndex: settings.selectedBackground,
-        leafFactory: { create: () => sharedLeaf },
-        parent: this.node,
-        resources: sharedResources,
-        themeIndex: settings.selectedTheme,
+      const loadingResources = await loadLoadingResources(
+        appliedResolution.profile.assetTree,
+      );
+      this.assertBootStillCurrent();
+      const loadingAudioPreloader = await LoadingAudioPreloader.create();
+      this.assertBootStillCurrent();
+      loading = LoadingPresenter.create({
+        audioPreloader: loadingAudioPreloader,
+        canvas: this.node,
+        resources: loadingResources,
+        viewport,
       });
-      const nonClassicPhysics = new NonClassicPhysicsAdapter();
-      nonClassicPhysics.activateCollisionFilter();
-      this.viewport = viewport;
-      this.nonClassicPhysics = nonClassicPhysics;
-      this.resources = Object.freeze({
-        about: aboutResources,
-        leaderboard: leaderboardResources,
-        mainMenu: mainMenuResources,
-        modeSelect: modeSelectResources,
-        objectives: objectivesResources,
-        options: optionsResources,
-      });
-      this.sharedLeaf = sharedLeaf;
-      this.sharedScene = sharedScene;
+      this.activeLoading = loading;
+      loading.activate();
 
-      objectiveAchievementHost = ObjectiveAchievementHost.create({
-        createPresenter: (event) => ObjectiveAchievementPresenter.create({
-          event,
-          random: gameplayController.sharedGameplayRandom,
-          resources: gameplayController.sharedBaseGameplayResources,
-          viewport: appliedResolution.visibleRect,
-        }),
-        effectsEnabled: () => (
-          gameplayController.sharedSettingsRuntime.state.snapshot.effectsEnabled
-        ),
-        onFailure: this.onObjectiveAchievementFailure,
-        parent: this.node,
-        playCheer: () => gameplayController.sharedAudioPresenter.playOneShot(
-          CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH,
-        ),
-      });
-      const objectivesManager = gameplayController.sharedSettingsRuntime
-        .createObjectivesManager(objectiveAchievementHost.onPopup);
-      this.objectiveAchievementHost = objectiveAchievementHost;
-      this.objectivesManager = objectivesManager;
-
-      mainMenu = this.createMainMenuPresenter();
-      sharedScene.attachCurrentScreen(mainMenu.root);
-      mainMenu.activate();
-      this.activeMainMenu = mainMenu;
-      this.stateValue = 'main-menu';
-    } catch (error) {
-      runBestEffortCleanup('Recovered app shell failed-boot cleanup', [
-        () => mainMenu?.dispose(),
-        () => objectiveAchievementHost?.dispose(),
-        () => sharedScene?.dispose(),
-        () => {
-          if (sharedScene === null) {
-            sharedLeaf.dispose();
-          }
-        },
-        () => this.nonClassicPhysics?.dispose(),
-        () => gameplayController.sharedAudioPresenter.stop(),
+      // Loading establishes the game bundle first. Classic and every optional destination then
+      // prepare beneath the exact native overlay without racing bundle registration.
+      await Promise.race([
+        gameplayController.prepareRecoveredRuntime(),
+        loading.failure,
       ]);
-      this.activeAbout = null;
-      this.activeMainMenu = null;
-      this.objectiveAchievementHost = null;
-      this.objectivesManager = null;
-      this.sharedScene = null;
-      this.sharedLeaf = null;
-      this.resources = null;
-      this.viewport = null;
-      this.nonClassicPhysics = null;
+      this.assertBootStillCurrent();
+      const assetTree = gameplayController.sharedResourceCatalog.assetTree;
+      // Crazy supplements the already-loaded Classic catalog. Its failure is isolated: Menu and
+      // Classic remain available while the Crazy transaction stays fail-closed.
+      const crazyPreparation = this.requireCrazyGameplayController()
+        .prepareCrazyRuntime()
+        .catch(() => undefined);
+      // Classic Bird reuses the process-owned Classic/Crazy catalogs but remains an independent
+      // fail-closed destination. Its preparation waits for Crazy to settle so both modes never
+      // race the same supplemental bundle on first load.
+      const classicBirdPreparation = crazyPreparation.then(async () => {
+        this.assertBootStillCurrent();
+        try {
+          await this.requireClassicBirdGameplayController().prepareClassicBirdRuntime();
+        } catch {
+          // Menu and the prepared modes remain available when Classic Bird cannot prepare.
+        }
+        this.assertBootStillCurrent();
+      });
+      // Crazy Bird is another independent optional destination. It shares the settled Crazy
+      // supplement, then loads the exact Bird type-2 profile after the type-1 request has settled
+      // so Creator never receives competing first-load batches for the same game bundle.
+      const crazyBirdPreparation = classicBirdPreparation.then(async () => {
+        this.assertBootStillCurrent();
+        try {
+          await this.requireCrazyGameplayController().prepareCrazyBirdRuntime();
+        } catch {
+          // Menu, Crazy, and Classic Bird stay available when only type-2 preparation fails.
+        }
+        this.assertBootStillCurrent();
+      });
+      // Combo Bird owns its mode-5 resources and can prepare even when an earlier optional
+      // destination failed. Waiting for the chain serializes first access to the game bundle.
+      const comboBirdPreparation = crazyBirdPreparation.then(async () => {
+        this.assertBootStillCurrent();
+        try {
+          await this.requireComboBirdGameplayController().prepareComboBirdRuntime();
+        } catch {
+          // Every previously prepared destination remains available when only Combo Bird fails.
+        }
+        this.assertBootStillCurrent();
+      });
+      // GN Style is the final optional destination. It waits for every preceding supplemental
+      // load to settle before loading its exact resources, TimeManager audio, and dedicated track.
+      const gnStylePreparation = comboBirdPreparation.then(async () => {
+        this.assertBootStillCurrent();
+        try {
+          await this.requireGnStyleGameplayController().prepareGnStyleRuntime();
+        } catch {
+          // All previously prepared destinations remain available when only GN Style fails.
+        }
+        this.assertBootStillCurrent();
+      });
+      const optionalPreparation = Promise.all([
+        crazyPreparation,
+        classicBirdPreparation,
+        crazyBirdPreparation,
+        comboBirdPreparation,
+        gnStylePreparation,
+      ]);
+      // The foreground catalog may still be loading when shell destruction invalidates this
+      // optional chain. Observe that rejection immediately, then await the original promise at
+      // the ordered boot boundary so failure still propagates without an unhandled-rejection gap.
+      void optionalPreparation.catch(() => undefined);
+      const [
+        sharedResources,
+        aboutResources,
+        leaderboardResources,
+        mainMenuResources,
+        modeSelectResources,
+        objectivesResources,
+        optionsResources,
+      ] = await Promise.race([
+        Promise.all([
+          loadSharedGameSceneResources(assetTree),
+          loadAboutResources(assetTree),
+          loadLeaderboardResources(assetTree),
+          loadMainMenuResources(assetTree),
+          loadModeSelectResources(assetTree),
+          loadObjectivesScreenResources(assetTree),
+          loadOptionsResources(assetTree),
+        ]),
+        loading.failure,
+      ]);
+      await Promise.race([
+        optionalPreparation,
+        loading.failure,
+      ]);
+      this.assertBootStillCurrent();
+      await Promise.race([loading.completion, loading.failure]);
+      this.assertBootStillCurrent();
+
+      const settings = gameplayController.sharedSettingsRuntime.state.snapshot;
+      const sharedLeaf = SharedLeafPresenter.create({
+        assetTree,
+        random: gameplayController.sharedGameplayRandom,
+        resources: sharedResources.leaves,
+        viewport: appliedResolution.visibleRect,
+      });
+      let sharedScene: SharedGameScenePresenter | null = null;
+      let mainMenu: MainMenuPresenter | null = null;
+      let objectiveAchievementHost: ObjectiveAchievementHost | null = null;
+      try {
+        sharedScene = SharedGameScenePresenter.create({
+          backgroundIndex: settings.selectedBackground,
+          leafFactory: { create: () => sharedLeaf },
+          parent: this.node,
+          resources: sharedResources,
+          themeIndex: settings.selectedTheme,
+        });
+        const nonClassicPhysics = new NonClassicPhysicsAdapter();
+        nonClassicPhysics.activateCollisionFilter();
+        this.viewport = viewport;
+        this.nonClassicPhysics = nonClassicPhysics;
+        this.resources = Object.freeze({
+          about: aboutResources,
+          leaderboard: leaderboardResources,
+          mainMenu: mainMenuResources,
+          modeSelect: modeSelectResources,
+          objectives: objectivesResources,
+          options: optionsResources,
+        });
+        this.sharedLeaf = sharedLeaf;
+        this.sharedScene = sharedScene;
+
+        objectiveAchievementHost = ObjectiveAchievementHost.create({
+          createPresenter: (event) => ObjectiveAchievementPresenter.create({
+            event,
+            random: gameplayController.sharedGameplayRandom,
+            resources: gameplayController.sharedBaseGameplayResources,
+            viewport: appliedResolution.visibleRect,
+          }),
+          effectsEnabled: () => (
+            gameplayController.sharedSettingsRuntime.state.snapshot.effectsEnabled
+          ),
+          onFailure: this.onObjectiveAchievementFailure,
+          parent: this.node,
+          playCheer: () => gameplayController.sharedAudioPresenter.playOneShot(
+            CLASSIC_OBJECTIVE_CHEER_AUDIO_PATH,
+          ),
+        });
+        const objectivesManager = gameplayController.sharedSettingsRuntime
+          .createObjectivesManager(objectiveAchievementHost.onPopup);
+        this.objectiveAchievementHost = objectiveAchievementHost;
+        this.objectivesManager = objectivesManager;
+
+        mainMenu = this.createMainMenuPresenter();
+        sharedScene.attachCurrentScreen(mainMenu.root);
+        mainMenu.activate();
+        this.activeMainMenu = mainMenu;
+        this.stateValue = 'main-menu';
+      } catch (error) {
+        runBestEffortCleanup('Recovered app shell failed-boot cleanup', [
+          () => mainMenu?.dispose(),
+          () => objectiveAchievementHost?.dispose(),
+          () => sharedScene?.dispose(),
+          () => {
+            if (sharedScene === null) {
+              sharedLeaf.dispose();
+            }
+          },
+          () => this.nonClassicPhysics?.dispose(),
+          () => gameplayController.sharedAudioPresenter.stop(),
+        ]);
+        this.activeAbout = null;
+        this.activeMainMenu = null;
+        this.objectiveAchievementHost = null;
+        this.objectivesManager = null;
+        this.sharedScene = null;
+        this.sharedLeaf = null;
+        this.resources = null;
+        this.viewport = null;
+        this.nonClassicPhysics = null;
+        throw error;
+      }
+      this.activeLoading = null;
+      runBestEffortCleanup('Committed Loading retirement', [
+        () => loading?.dispose(),
+      ]);
+    } catch (error) {
+      runBestEffortCleanup('Recovered Loading failed-boot cleanup', [
+        () => loading?.dispose(),
+      ]);
+      this.activeLoading = null;
       throw error;
     }
   }

@@ -30,11 +30,11 @@ const TREE_PROFILES = Object.freeze(['480x800', '720x1280']);
 const DISPOSITION_STATUSES = new Set(['unknown', 'excluded', 'unsupported']);
 const EXPECTED_COUNTS = Object.freeze({
   staged: 862,
-  consumed: 743,
-  unknown: 108,
+  consumed: 761,
+  unknown: 90,
   excluded: 10,
   unsupported: 1,
-  dispositions: 119,
+  dispositions: 101,
 });
 
 class ResourceReconciliationError extends Error {}

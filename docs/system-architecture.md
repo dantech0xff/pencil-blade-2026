@@ -6,8 +6,10 @@ Pencil Blade is being rebuilt as a static-evidence, clean-room Cocos Creator 3.8
 The workspace now contains a Creator foundation under `game/`, pure TypeScript domain modules,
 Creator-facing adapters, deterministic contract tests, and an Editor-authored `classic.scene`.
 All 862 recovered APK game assets are staged byte-for-byte in the Creator `game` bundle.
-The Canvas now hosts a persistent application shell that constructs the exact shared
-Background/Leaf/Theme stack, boots Main Menu, replaces it with Mode Select, and enters the
+The Canvas now hosts a persistent application shell that first presents the recovered
+four-sprite Loading overlay and exact 62-step audio preload sequence, commits Main Menu beneath
+that overlay, then constructs the exact shared Background/Leaf/Theme stack, replaces Main Menu
+with Mode Select, and enters the
 bounded Classic loop through recovered mode `0`, the production Crazy loop through mode `1`,
 the production Classic Bird loop through mode `3`, or the production Crazy Bird loop through
 mode `4`, the independent production Combo Bird loop through mode `5`, or the independent
@@ -26,7 +28,7 @@ GN Style owns the standard BasicBlade, `150`-second Free/Wave/Concurrent graph, 
 three-second late-cut Time Up tail, objectives `6`/`2`, `gnstyle_best_1..3`, and a
 float32 `0.6` result reward.
 
-Automated verification reaches `1354/1354` full vertical-slice tests and `43/43`
+Automated verification reaches `1520/1520` full vertical-slice tests and `61/61`
 resource/build/catalog tests. The unchanged
 inventory/evidence workflow remains `14/14` in `217s`; reconstruction policy positive plus
 `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and diff
@@ -39,9 +41,9 @@ and rollback flows in compact `360x800` and high `720x1280` Preview profiles wit
 Cocos Editor console. The current Leaderboard checkpoint is verified at 139/139 focused
 Main Menu + Leaderboard + shell/viewport tests. Preview passes physical cut entry, aligned
 labels/scores, drag/flick board selection, and Back in the internal compact `480x800` branch
-and high `720x1280` profile. The full product remains incomplete because Objectives/progression wiring, global
-consumer coverage, full progression/menu/settings fidelity, and a real Android build are still
-open.
+and high `720x1280` profile. Recovered Loading also passes both branches and hands off to a
+stable Main Menu with zero Cocos console counters. The full product remains incomplete because
+90 resource consumers, the scene/prefab/composition map, and a real Android build remain open.
 
 ## Dependency Direction
 
@@ -78,9 +80,9 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 | Layer | Owned By | Notes |
 |---|---|---|
 | Evidence and docs | `docs/`, `forensics/`, `reference/`, `plans/` | Static evidence, contracts, and progress records. |
-| Pure gameplay domain | `game/assets/scripts/domain/` | Session, physics, score, combo, fail, toss, random, input, bird, GN choreography/music/result, and shared result logic. |
-| Creator boundary | `game/assets/scripts/creator/` | Unit conversion, manual variable-step lifecycle, standard/Bird input and ray handling, per-route scene/gameplay/resource/audio presenters, Options presenters, and Creator-specific integration. |
-| Creator resource bundle | `game/assets/game/` | Exact staged bytes for all 862 recovered APK game assets; reviewed Classic, menu/shared-scene, Options, Crazy, Combo, GN, and Bird type-1/type-2/type-3 subsets have production consumers while full consumer coverage remains open. |
+| Pure gameplay domain | `game/assets/scripts/domain/` | Loading state/presentation/resources plus session, physics, score, combo, fail, toss, random, input, bird, GN choreography/music/result, and shared result logic. |
+| Creator boundary | `game/assets/scripts/creator/` | Loading, unit conversion, manual variable-step lifecycle, standard/Bird input and ray handling, per-route scene/gameplay/resource/audio presenters, Options presenters, and Creator-specific integration. |
+| Creator resource bundle | `game/assets/game/` | Exact staged bytes for all 862 recovered APK game assets; reviewed Loading, Classic, menu/shared-scene, Options, Crazy, Combo, GN, and Bird type-1/type-2/type-3 subsets have production consumers while full consumer coverage remains open. |
 | Initial scene bridge | `game/assets/scenes/classic.scene` | Editor-serialized Canvas with blade input, passive Classic, shared Crazy modes `1`/`4`, Classic Bird, Combo Bird, and GN Style runtime components, and the persistent recovered app shell. |
 | Verification | `tests/reconstruction/vertical-slice/` | Deterministic contract tests, executable controller lifecycle/fault tests, and boundary audits. |
 | Build audit | `scripts/audit-creator-build.mjs` | Post-build APK/AAB inspection for prohibited payloads. |
@@ -89,6 +91,7 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 
 | Boundary | Current rule |
 |---|---|
+| Loading boot | Pure state owns the exact 62 one-per-update audio preload order, incremented-counter `/61` clamped progress, next-update delay entry, and `0.5`-second finish tail. The Creator presenter owns the four selected-profile sprites and keeps the overlay visible until the shell has activated Main Menu. The shell races every asynchronous boot boundary against the Loading failure channel, rolls back all pre-commit owners, and retires Loading best-effort only after Main Menu commits. Creator bundle readiness replaces native `SpriteFrameCache::purgeSharedSpriteFrameCache()`; no original runtime is linked or emulated. |
 | Physics2D | Recovered gravity, body and fixture values, ray-order behavior, and variable `frameDt * worldSpeed` stepping are encoded in pure modules. Automatic simulation stays off during Classic; a project-owned `System.postUpdate` performs one synchronized manual step and flushes project lifecycle mutations only after Box2D unlocks. Result replacement idempotently unregisters that system and restores the prior automatic-simulation, gravity, and fruit/bomb collision-matrix state. |
 | Spawn and toss | Spawn ordering, intervals, fruit selection, and controller sequencing live in pure modules. Flattened Concurrent output is accepted only as ordered, contiguous, complete per-entity plans. |
 | Score HUD, combo, fail | Score, combo window, double-score behavior, best-score updates/state, the shared `ComboItem` banner, and the three-miss state are pure. Dedicated Creator presenters own the exact score icon, best-score cup, double-score panel, `Fonts/Linds.ttf`, the shared `ComboItem` label via `Fonts/GroBold.ttf`, recovered entry fade, score-icon pulse, overlapping double-score actions, and the normal/filled marker rasters with their action timings and completion callbacks. The HUD baseline loads from `classic_best_1`. |
@@ -107,9 +110,9 @@ opacity; the Creator adapter intentionally preserves the effective frame rather 
 | Shared scene | `SharedLeafLayerModel` owns both exact seven-leaf profiles, creation-order RNG, body/fixture/world values, strict respawn threshold, and display mapping. `SharedLeafPhysicsAdapter` owns the independent world and receives `Step(dt,5,5)` plus each same-frame respawn as an ordered frozen `wake → add angular velocity → set transform → zero linear velocity` command before display synchronization. `SharedGameScenePresenter` appends Background → Leaf → Theme → current screen at equal recovered z-order `1`; Background/Theme remain immediately opaque because their queued native fades are paused. |
 | Cut presentation | Ordinary cuts instantiate exact bottom/top rasters, recovered body/fixture/impulse values, action-clock fade, and deferred disposal. Critical halves may emit exact recovered particle rasters with shared RNG ordering. |
 | Audio | Creator adapters preload the reviewed Classic/menu, Options, Bird, Crazy, Combo, and GN clip sets and interpret toss, swish, cut, critical, combo, timer, result-rank, bonus/electric, objective, pause, selector-row, and menu-button commands without moving draw/order rules out of the domain. Independent retained voices model ordinary-bomb and Crazy effect ownership; the electric-only `boomhit` path remains separate from ordinary-bomb audio. GN's dedicated non-looping source is mutually exclusive with shared background music and pauses/resumes/stops with its transactional owner; TimeManager effects use the shared exact presenter. |
-| Resource import | Staging and metadata validators prove exact bytes and current Creator raster/audio import geometry for the recovered APK corpus. Options directly consumes 51 rasters per tree plus its exact font and three sounds. Per-asset consumer and UUID coverage is not yet backfilled into the manifest. |
+| Resource import | Staging and metadata validators prove exact bytes and current Creator raster/audio import geometry for the recovered APK corpus. The generated registry/ledger assigns exact live ownership to `761/862` paths (`88.28%`), including Loading's 70-path closure, while all `862/862` paths are classified as consumed, unknown, excluded, or unsupported. UUID extraction remains separate from consumer accounting. |
 | Resolution and input | The recovered `720` physical-width profile branch is pure; Creator applies its Show All policy and routes scene-wide touch input into four blade slots or the single Bird blade. |
-| Build boundary | Source-boundary tests reject trackable legacy integration. The separate fail-closed archive audit hashes every entry, parses ZIP records exactly, recurses through bounded nested archives, and inspects ELF payloads; the unchanged inventory/source/staging/archive workflow is `14/14`, `tests/*.mjs` are `43/43`, the full vertical slice is `1354/1354`, the focused Main Menu + Leaderboard + shell/viewport checkpoint is `139/139`, and strict Creator TypeScript is green. |
+| Build boundary | Source-boundary tests reject trackable legacy integration. The separate fail-closed archive audit hashes every entry, parses ZIP records exactly, recurses through bounded nested archives, and inspects ELF payloads; the unchanged inventory/source/staging/archive workflow is `14/14`, `tests/*.mjs` are `61/61`, the full vertical slice is `1520/1520`, and strict Creator TypeScript is green. |
 
 ## Checkpoint Evidence
 

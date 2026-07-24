@@ -52,6 +52,10 @@ import {
   LEADERBOARD_SHARED_RESOURCES,
 } from './leaderboard-resource-contract';
 import {
+  LOADING_AUDIO_PRELOAD_STEPS,
+  LOADING_RASTER_RESOURCES,
+} from './loading-resource-contract';
+import {
   MAIN_MENU_FRUIT_BUTTON_DEFINITIONS,
   MAIN_MENU_FRUIT_CUT_AUDIO_BY_ID,
   MAIN_MENU_RASTER_RESOURCES,
@@ -92,6 +96,7 @@ export type ResourceConsumerId =
   | 'crazy-dragon-counter'
   | 'gn-style'
   | 'leaderboard'
+  | 'loading'
   | 'main-menu'
   | 'mode-select'
   | 'objectives'
@@ -180,6 +185,14 @@ const RESOURCE_CONSUMER_SOURCES: readonly Readonly<{
     consumerId: 'leaderboard',
     evidenceRefs: ['game/assets/scripts/domain/leaderboard-resource-contract.ts'],
     values: [LEADERBOARD_SHARED_RESOURCES, LEADERBOARD_RASTER_RESOURCES],
+  },
+  {
+    consumerId: 'loading',
+    evidenceRefs: [
+      'game/assets/scripts/domain/loading-resource-contract.ts',
+      'plans/260721-2253-pencil-blade-restoration/reports/researcher-2026-07-24-loading-static-contract.md',
+    ],
+    values: [LOADING_RASTER_RESOURCES, LOADING_AUDIO_PRELOAD_STEPS],
   },
   {
     consumerId: 'main-menu',
