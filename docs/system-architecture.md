@@ -116,9 +116,12 @@ remain ignored. The verified artifact is a local/internal debug APK, not a store
 The Web path builds the same scene as `web-mobile`, audits the complete generated tree, and
 serves every eager and statically discoverable lazy file under `/pencil-blade-2026/`.
 The manual GitHub workflow separates a read-only self-hosted Creator build job from the
-permissioned Pages deploy job. Artifact upload cannot occur until the public-rights manifest
-passes. As of 2026-07-24 the local H5 artifact passes, but Pages, the runner/environment, the
-Creator signature preflight, and release rights do not.
+permissioned Pages deploy job. Artifact upload cannot occur until tests and build audits pass.
+As of 2026-07-25 `main` is protected and the correctly labeled repository runner service
+is configured and active. It was online at the captured API checkpoint; after a later GitHub
+broker incident required a listener restart, a final REST read reconfirmed it online and idle.
+The workflow accepts the reviewed Creator bundle through exact version `3.8.8` and executable
+SHA-256 pinning. Pages/environment configuration and production deployment remain pending.
 
 ## Current Domain Boundaries
 
@@ -146,7 +149,7 @@ Creator signature preflight, and release rights do not.
 | Audio | Creator adapters preload the reviewed Classic/menu, Options, Bird, Crazy, Combo, and GN clip sets and interpret toss, swish, cut, critical, combo, timer, result-rank, bonus/electric, objective, pause, selector-row, and menu-button commands without moving draw/order rules out of the domain. Independent retained voices model ordinary-bomb and Crazy effect ownership; the electric-only `boomhit` path remains separate from ordinary-bomb audio. GN's dedicated non-looping source is mutually exclusive with shared background music and pauses/resumes/stops with its transactional owner; TimeManager effects use the shared exact presenter. |
 | Resource import | Staging and metadata validators prove exact bytes and current Creator raster/audio import geometry for the recovered APK corpus. The generated registry/ledger assigns exact live ownership to `761/862` paths (`88.28%`), including Loading's 70-path closure, while all `862/862` paths are classified as `761` consumed, `0` unknown, `100` excluded, and `1` unsupported. UUID extraction remains separate from consumer accounting. |
 | Resolution and input | The recovered `720` physical-width profile branch is pure; Creator applies its Show All policy and routes scene-wide touch input into four blade slots or the single Bird blade. |
-| Build boundary | Source-boundary tests reject trackable legacy integration. The fail-closed archive audit hashes every entry, parses ZIP records exactly, recurses through bounded nested archives, and inspects ELF payloads; inventory is `14/14`, native analysis is `7/7`, top-level Node tests are `129/129`, the full vertical slice is `1568/1568`, focused pause/composition is `218/218`, strict Creator TypeScript is green, and the latest Node-suite checkpoint records `1697/1697`. |
+| Build boundary | Source-boundary tests reject trackable legacy integration. The fail-closed archive audit hashes every entry, parses ZIP records exactly, recurses through bounded nested archives, and inspects ELF payloads; inventory is `14/14`, native analysis is `7/7`, top-level Node tests are `192/192`, the full vertical slice is `1568/1568`, focused pause/composition is `218/218`, strict Creator TypeScript is green, and the latest Node-suite checkpoint records `1760/1760`. |
 
 ## Checkpoint Evidence
 

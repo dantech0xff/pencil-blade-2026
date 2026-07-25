@@ -49,18 +49,23 @@ Snapshot generated from a temporary local Repomix XML export on 2026-07-24; `rep
 - Staging all 862 recovered APK game assets byte-for-byte in the Creator bundle.
 - Tracking 761 live consumer paths, 100 reviewed exclusions, 1 unsupported font path, and 0 unknowns for the recovered APK corpus.
 - Preserving six production gameplay routes: Classic, Crazy, GN Style, Classic Bird, Crazy Bird, and Combo Bird.
-- Separating preservation from distribution: the recovered-reconstruction manifest is non-shipping, and the public-release variant manifest keeps web publication blocked pending rights approval.
+- Recording preservation separately from the academic Pages demo; per-asset legal clearance is owner-waived/out-of-scope and no license conclusion is made.
 - Producing an audited Android debug APK and an audited local H5 tree without executing the original application.
-- Current closeout records `129/129` top-level Node tests, `1568/1568` vertical-slice tests, and `1697/1697` total, alongside Creator `3.8.8` strict TypeScript, artifact audits, runtime matrices, and the frozen fidelity suite.
+- Current closeout records `192/192` top-level Node tests, `1568/1568` vertical-slice tests, and `1760/1760` total, alongside Creator `3.8.8` strict TypeScript, artifact audits, runtime matrices, and the frozen fidelity suite.
 - The Android wrapper now binds the APK signer SHA-256 to a trusted debug keystore and requires the singleton `arm64-v8a` ABI; the release validator rejects pending exceptions and impossible calendar dates.
 
 ## Current Gates
 
-- Physics2D trajectory, ray-order, contact, and lifecycle equivalence remain open.
-- The sole-source APK corpus is the approved canonical resource denominator; final five-domain
-  contract units, weighting, and residual scoring remain unresolved.
-- Android runtime-device compatibility remains open even though the debug build and artifact audit pass.
-- Public Pages deployment, the frozen H5 browser/device matrix, valid Creator runner signature, and public-rights approval remain open.
+- Physics2D trajectory, ray-order, contact, and lifecycle equivalence pass the frozen backend
+  probe and Creator adapter fixtures.
+- The sole-source APK corpus is the approved canonical resource denominator; the frozen
+  five-domain no-weighting metric passes `100%` of recovered units with residual scope disclosed.
+- Android API 33 arm64 and the two pinned Chrome runtime rows pass.
+- Protected `main` plus the repository runner registration, labels, and active service are
+  configured. The runner was online at capture; a later GitHub broker incident required a
+  listener restart, and a final REST read reconfirmed it online and idle. Creator `3.8.8` is
+  pinned by exact executable SHA-256. Public Pages deployment and the `github-pages`
+  environment remain open.
 
 ## Checkpoint Evidence
 

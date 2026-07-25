@@ -24,6 +24,7 @@ jobs:
     env:
       COCOS_CREATOR_APP: /Applications/Cocos/Creator/3.8.8/CocosCreator.app
       COCOS_CREATOR_BIN: /Applications/Cocos/Creator/3.8.8/CocosCreator.app/Contents/MacOS/CocosCreator
+      COCOS_CREATOR_BIN_SHA256: 3a8452496c03e85f2784e64679a1fd203701b0b245125efee02c7923f2bd3464
       WEB_BUILD_DIR: game/build/web-mobile-pages
 
     steps:
@@ -39,9 +40,16 @@ jobs:
           test "$GITHUB_REF" = "refs/heads/main"
           test -x "$COCOS_CREATOR_BIN"
           test -x /opt/homebrew/bin/gtar
-          creator_version=$(/usr/bin/defaults read "$COCOS_CREATOR_APP/Contents/Info" CFBundleShortVersionString)
+          creator_version=$(
+            /usr/bin/plutil \
+              -extract CFBundleShortVersionString \
+              raw \
+              -o - \
+              "$COCOS_CREATOR_APP/Contents/Info.plist"
+          )
           test "$creator_version" = "3.8.8"
-          /usr/bin/codesign --verify --deep --strict "$COCOS_CREATOR_APP"
+          creator_sha256=$(/usr/bin/shasum -a 256 "$COCOS_CREATOR_BIN" | /usr/bin/cut -d ' ' -f 1)
+          test "$creator_sha256" = "$COCOS_CREATOR_BIN_SHA256"
           node_version=$(node --version)
           case "$node_version" in
             v22.*|v23.*|v24.*|v25.*|v26.*) ;;
@@ -57,7 +65,7 @@ jobs:
           set -euo pipefail
           node scripts/audit-creator-iterable-spreads.mjs \
             --typescript "$COCOS_CREATOR_APP/Contents/Resources/app.asar.unpacked/node_modules/typescript/lib/typescript.js"
-          node --test tests/*.mjs
+          node --test --test-concurrency=1 tests/*.mjs
           node --test tests/reconstruction/vertical-slice/*.test.ts
           node "$COCOS_CREATOR_APP/Contents/Resources/app.asar.unpacked/node_modules/typescript/lib/tsc.js" \
             -p game/tsconfig.json \
@@ -65,14 +73,6 @@ jobs:
             --noEmit
           sh tests/reconstruction-policy-test.sh
           sh tests/reconstruction-policy-negative-test.sh
-
-      - name: Require public-distribution approval
-        shell: bash
-        run: |
-          set -euo pipefail
-          node scripts/verify-release-rights.mjs \
-            --manifest release/public-release-variant-manifest.json \
-            --root .
 
       - name: Build Web Mobile with Cocos Creator 3.8.8
         shell: bash

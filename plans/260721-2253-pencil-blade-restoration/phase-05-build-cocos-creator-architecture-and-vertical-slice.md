@@ -43,7 +43,8 @@ Classic scheduling remains separate. First-launch Settings behavior, Main Menu e
 resource disposition coverage, and the scene/dynamic-composition map are now reconciled.
 `classic.scene` is the one required persistent bridge; all screen descendants are intentionally
 code-built from recovered constructor/add-child evidence, so no prefab is required. Android
-toolchain/build validation and pinned-backend Physics2D equivalence remain open Phase 5/7 gates.
+toolchain/build validation and pinned-backend Physics2D equivalence are closed by the current
+artifact/runtime matrix and frozen backend probe.
 
 ## Context Links
 

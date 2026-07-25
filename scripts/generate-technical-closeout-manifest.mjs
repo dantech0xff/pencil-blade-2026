@@ -66,6 +66,7 @@ export function validateWorkspaceArtifacts(android, h5, workspaceRoot = ROOT) {
   const webPath = resolve(workspaceRoot, h5.build.directory);
   requireCondition(existsSync(webPath), 'H5 artifact directory is missing');
   const audit = inspectWebBuildDirectory(webPath);
+  requireCondition(audit.findings.length === 0, 'H5 artifact audit failed');
   requireCondition(audit.files.length === h5.build.files, 'H5 file count drifted');
   requireCondition(
     audit.files.reduce((sum, file) => sum + file.size, 0) === h5.build.bytes,
@@ -144,14 +145,13 @@ export function generateTechnicalCloseoutManifest(options = {}) {
       },
     },
     blockers: [
-      'two-external-offline-apk-backups-unverified',
-      'public-rights-unapproved',
-      'cooper-black-treatment-undecided',
-      'protected-runner-pages-environment-and-production-url-unavailable',
+      'pages-environment-and-production-url-unavailable',
     ],
     publicReleaseManifest: fileRecord(PATHS.publicRelease),
   };
-  writeFileSync(resolve(ROOT, PATHS.output), `${JSON.stringify(manifest, null, 2)}\n`);
+  if (options.writeOutput !== false) {
+    writeFileSync(resolve(ROOT, PATHS.output), `${JSON.stringify(manifest, null, 2)}\n`);
+  }
   return manifest;
 }
 

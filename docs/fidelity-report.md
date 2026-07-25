@@ -38,7 +38,7 @@ event linkage or implementation detail remains an inference. This is disclosed, 
 25 inference/unknown/exception/divergence/release records are
 listed in `forensics/fidelity/residual-gap-ledger.json`. None can raise recovered coverage.
 0 unexplained divergences remain.
-4 external/rights/user-decision blockers remain; they do not
+1 external/rights/user-decision blockers remain; they do not
 lower the technical contract score, but they keep the public-release and program closeout
 gates closed.
 

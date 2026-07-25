@@ -144,5 +144,5 @@ approval exists.
 - The six production modes and sole-source APK 862-resource catalog are technically complete.
   The pinned Physics2D backend passes trajectory/raycast/contact/lifecycle probes and the
   five-domain maximal-recoverable metric passes. Exact original pixel/waveform identity,
-  unsupported OTF treatment, public rights, backup custody, and Pages deployment remain open
+  unsupported OTF treatment and backup redundancy are owner-waived; Pages deployment remains open
   and are itemized in `forensics/fidelity/residual-gap-ledger.json`.

@@ -33,7 +33,7 @@ date unless the provenance record explicitly says so.
 | Legacy-policy note | The certificate uses SHA256withRSA, while the v1 JAR digest uses SHA-1; Java 20 disables that digest and therefore treats the JAR as unsigned under its policy |
 | Confidence | 1.0 — directly measured from the immutable bytes with independent ZIP, Android, and signing tools |
 | Workspace custody | Present and hash-verified; ignored by the proposed `.gitignore` boundary |
-| Offline backup verification | Pending: 0 of 2 required external copies have registered paths and matching hashes |
+| Offline backup redundancy | Owner-waived on 2026-07-25: only one source APK was supplied; no backup is asserted and the sole-artifact risk is accepted |
 | Rights | Unknown / not cleared for redistribution |
 
 The workspace file must never be overwritten, patched, aligned, re-signed, installed, or
@@ -68,8 +68,9 @@ restoration method. A duplicate inside this workspace does not satisfy the offli
 | DER-PRESENTATION-CATALOG-001 | DER-CREATOR-STAGING-001 + DER-RESOURCE-RECONCILIATION-LEDGER-001 + DER-FUNCMAP-001 | `assets/catalog/asset-catalog.json` plus animation/audio/screen/rendering maps | 2026-07-25 | asset catalog `726c3d6f729778476b62ebc75b381a9cde4b0a87f50ccba84c9a50756a64862a` | 1,862,760 catalog bytes | `scripts/generate-presentation-catalog.mjs`; exact per-entry Creator metadata/UUID, rights record, consumer/disposition, 50 indexed sequences, 62 audio cues, 18 presentation consumers, and rendering/progression contracts | 1.0 | Technical catalog complete; public rights remain unresolved and fail-closed |
 | DER-PHYSICS2D-EQUIVALENCE-001 | DER-CLASSIC-PHYSICS-001 | `forensics/runtime/physics2d-backend-equivalence.json` | 2026-07-25 | `a1aaa73727f800153a0b187177d67855a7f05cf2a305fb68a547883bd08c8efa` | 7,420 | Executable probe against pinned `@cocos/box2d@1.0.2`: trajectory at three deltas, forward/reverse raycast, bilateral contact filtering, world lock, and deferred destroy | 1.0 | Proves recovered-contract/backend equivalence; explicitly does not claim original-runtime observation |
 | DER-RUNTIME-MATRIX-001 | Clean-room Android/H5 builds | Android and H5 runtime reports under `plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/` | 2026-07-25 | Android `c6d36330ae76b38ab7588500d4c157e2f346f4e19a48a8806fd67486e4a80688`; H5 `1f4454e919790f76d46cd7c47372793c46f7f25b82f13e5da3e817cd491cd8d0` | 11,418 | `scripts/run-android-runtime-matrix.mjs` and `scripts/run-h5-runtime-matrix.mjs`; input, graphics/audio, storage, lifecycle, orientation, offline, and runtime errors | 1.0 | Android internal emulator and local Chrome evidence; not public deployment evidence |
-| DER-FIDELITY-001 | All registered technical authorities above | `forensics/fidelity/fidelity-report-v1.json`, `forensics/fidelity/residual-gap-ledger.json`, and `forensics/fidelity/frozen-evidence-fixture-manifest.json` | 2026-07-25 | report `e04e1eeb7796855b92b46c27a01384af42cc36252d3a3d9154a185eae9ee2b96`; residuals `8e09174e2963786919573e185656f5139cc0ec35d51954a98e129188c6280a37`; frozen suite `081d0004d239a1eb33b1f567bc55be3769c516e9b0d1596bf43b439d995edb9e` | 78,143 | `scripts/generate-fidelity-report.mjs`; metric `1.1.0` uses minimum-domain/no-weighting scoring, explicit recovered-unit eligibility, catalog-vs-scored scope disclosure, a separate residual ledger, and deterministic evidence/fixture hashes | 1.0 | Maximal recoverable technical fidelity passes 100%; 12 non-recovered assertions remain visible outside score; rights, custody, and Pages blockers remain separate |
-| DER-TECHNICAL-CLOSEOUT-001 | DER-RUNTIME-MATRIX-001 + DER-FIDELITY-001 | `plans/260721-2253-pencil-blade-restoration/reports/technical-closeout-manifest.json` | 2026-07-25 | `c2397f07a899ed8704f19a45437a3c4e214020b6266ba2352231918eaf6125c4` | 2,997 | strict-default `scripts/generate-technical-closeout-manifest.mjs`; requires both current workspace artifacts and binds the APK, H5 tree, runtime reports, fidelity artifacts, frozen aggregates, and fail-closed public manifest (`--report-only` is explicit metadata-only mode) | 1.0 | Technical reconstruction passes; program/public closeout remains blocked by backup custody, rights/Cooper decision, protected runner, Pages environment, and production URL |
+| DER-FIDELITY-001 | All registered technical authorities above | `forensics/fidelity/fidelity-report-v1.json`, `forensics/fidelity/residual-gap-ledger.json`, and `forensics/fidelity/frozen-evidence-fixture-manifest.json` | 2026-07-25 | report `e04e1eeb7796855b92b46c27a01384af42cc36252d3a3d9154a185eae9ee2b96`; residuals `ef56251e2cc089357f81786f073ce69106aabf5ec4d5574084040fd046a7589e`; frozen suite `ba3a6a1680c89a393a18cb0d3af0b1fabfb24d486f488efd4cd490b335ea7ea8` | 78,846 | `scripts/generate-fidelity-report.mjs`; metric `1.1.0` uses minimum-domain/no-weighting scoring, explicit recovered-unit eligibility, catalog-vs-scored scope disclosure, a separate residual ledger, and deterministic evidence/fixture hashes; the frozen fixture boundary also binds the Pages workflow and both closeout generators | 1.0 | Maximal recoverable technical fidelity passes 100%; backup and rights records are owner-waived/out-of-scope; Pages remains the closeout blocker |
+| DER-TECHNICAL-CLOSEOUT-001 | DER-RUNTIME-MATRIX-001 + DER-FIDELITY-001 | `plans/260721-2253-pencil-blade-restoration/reports/technical-closeout-manifest.json` | 2026-07-25 | `7bcc8328c26fbcb941792a70c7fe587dc28718922fbfeaf11e7f9f4152add8bb` | 2,857 | strict-default `scripts/generate-technical-closeout-manifest.mjs`; requires both current workspace artifacts and binds the APK, H5 tree, runtime reports, fidelity artifacts, frozen aggregates, and scope record (`--report-only` is explicit metadata-only mode) | 1.0 | Technical reconstruction and owner waivers pass; Pages environment, deployment, and production URL remain |
+| DER-GITHUB-INFRASTRUCTURE-001 | Repository and local runner service | `plans/260721-2253-pencil-blade-restoration/reports/github-infrastructure-2026-07-25.md` | 2026-07-25 | `b1a9c3b933280df67e8dd3834892642298d765147c52b866ddf49698c75b3321` | 5,115 | Authenticated GitHub REST queries plus local runner/version/service and Creator preflight probes; no credentials or registration tokens retained | 1.0 for captured state | `main` protected and labeled runner online; Creator strict signature, rights, Pages, and deployment gates remain fail-closed |
 
 The checksum manifest records the source APK hash and 2,490 derived files. A full checksum
 verification completed successfully after generation. Derived files are evidence, not clean
@@ -107,19 +108,19 @@ The curated inventory script is now version 2. It preserves the same baseline ch
 writes only the APK basename to new checksum manifests, even when invoked with an absolute
 source path, so derived manifests remain machine-independent.
 
-## Backup custody gate
+## Sole-source custody waiver
 
-Phase 1 cannot be marked complete until two external offline copy paths are supplied and each
-produces the `SRC-APK-001` SHA-256. Register each copy without publishing sensitive volume or
-account details: storage class, custodian, verification date, hash, and whether the medium is
-offline. Git is initialized, but version control does not satisfy this backup control.
+The project owner confirmed on 2026-07-25 that only one source APK was supplied and formally
+waived the two-copy offline redundancy requirement for this academic restoration. Phase 1 may
+therefore close without claiming that backups exist. The owner accepts the sole-artifact loss
+risk. Any future copy should still be independently hash-verified against `SRC-APK-001`.
 
 ## Rights and release boundary
 
-Possession and analysis do not grant publication rights. Until separate evidence is
-registered, the APK, native binary, artwork, audio, fonts, product name, and trademarks are
-`unknown / not cleared`. Private preservation, source publication, and public web release
-remain separate decisions.
+Per-asset legal clearance is outside this project owner's academic restoration acceptance
+scope. The repository records that waiver without asserting ownership, license, or a legal
+conclusion. Technical byte preservation, resource disposition, and executable-code boundaries
+remain enforced independently.
 
 ## Release records
 
@@ -139,11 +140,14 @@ them directly:
   `14,070` bytes. It records the audited Android APK digest and local Web tree digest while
   keeping runtime-device proof, public deployment, rights, and final fidelity unclaimed.
 
-The GitHub repository was public when checked on 2026-07-24. Repository visibility is not
-license evidence and must not be treated as approval for a Pages deployment.
+The GitHub repository remains public. On 2026-07-25 `main` protection was enabled and the
+repository-scoped macOS ARM64 Actions runner was registered with the pinned Creator label.
+The reviewed Creator executable is pinned by version `3.8.8` and SHA-256
+`3a8452496c03e85f2784e64679a1fd203701b0b245125efee02c7923f2bd3464`.
+No Pages site or environment had been created at this checkpoint. Repository visibility and
+infrastructure access are not presented as license evidence.
 
 ## Unresolved questions
 
 - What was the APK's original acquisition date and upstream URL or custody record?
-- Where are the two external offline backup copies, and when can their hashes be verified?
-- What redistribution rights exist for the original content and product identity?
+- Will two independently held offline copies be created and supplied for verification?

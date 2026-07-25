@@ -21,17 +21,23 @@ rights decision, custody blocker, and release blocker together with its score ef
 | Electric contact | Native `PreSolve` uses an incompatible object layout | Preserve recovered filters/activation with type-safe Creator handling; never reproduce memory-unsafe access |
 | Leaf/rope solvers | Exact legacy solver/RNG/frame sampling and framebuffer trajectories are not observable | Preserve the recovered separate boundaries and disclosed compatibility implementations |
 
-## External closeout blockers
+## Scope waivers and external closeout blockers
 
-- Two independently held offline APK backup copies have not been supplied for hash verification.
-- Public-distribution evidence is absent for code, 784 PNG, 62 audio files, 16 fonts, the
-  Pencil Blade identity, and the generated Cocos Web runtime.
-- `Fonts/CooperBlackStd.otf` needs an explicit authorized exclude/replace/convert decision.
-- GitHub authentication, protected runner/branch settings, the `github-pages` environment,
-  Pages source, and production deployment remain unavailable while the rights gate is closed.
+- The project owner confirmed on 2026-07-25 that only one source APK was supplied and waived
+  two-copy offline redundancy. No backup is claimed; the sole-source preservation risk is accepted.
+- Per-asset rights clearance is outside the owner-approved academic restoration acceptance
+  scope. This records project scope only and makes no ownership or legal conclusion.
+- `Fonts/CooperBlackStd.otf` remains byte-preserved and excluded from runtime consumption
+  because Creator 3.8.8 has no supported consumer.
+- GitHub authentication is restored, `main` protection is enabled, and a repository-scoped
+  macOS ARM64 runner is registered with the required Creator label and active LaunchAgent.
+  It was online at the captured API checkpoint; a later GitHub broker incident required a
+  listener restart, and a final REST read reconfirmed it online and idle. The workflow now pins
+  Creator version `3.8.8` plus the reviewed executable SHA-256. The `github-pages` environment,
+  Pages source, and production deployment remain to be configured and verified.
 
-These blockers do not alter the technical fidelity numerator. They keep evidence-custody and
-public-release completion closed.
+The waivers do not alter the technical fidelity numerator. Pages configuration/deployment
+remains the only external closeout blocker.
 
 ## Resolved technical facts
 

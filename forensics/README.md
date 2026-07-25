@@ -10,11 +10,12 @@ remain outside the versionable evidence surface.
 - Workspace source: `../Pencil+Blade_1.5_APKPure.apk`
 - Required hash:
   `95225733d46473f2b155737e8c83b567e028342257c747c0faac6ed4ab87e7aa`
-- Required external copies: at least two offline backups whose hashes match the source.
+- External-copy redundancy: unavailable and owner-waived for this sole-source academic restoration.
 
 Never overwrite, patch, align, re-sign, install, or execute the APK during Phase 1. The root
-APK and any local backup directory are ignored by `.gitignore`. External backup destinations
-must be supplied and verified by the user; a second workspace copy is not an offline backup.
+APK and any local backup directory are ignored by `.gitignore`. No external backup is asserted
+to exist; the owner accepted the sole-artifact risk. A future copy should still be hash-verified
+against the source and stored outside the workspace.
 
 ### Working
 

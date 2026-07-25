@@ -185,7 +185,7 @@ and queue destruction until after the physics callback boundary.
 | BombElectric unsafe `PreSolve` layout | unresolved; never reproduce unsafe pointer behavior |
 | BombElectric zero-height fixture | unresolved Creator compatibility policy |
 | Native variable step on Creator scheduler | resolved as `public-manual-variable-step-post-update` on pinned 3.8.8 |
-| Creator Physics2D runtime equivalence | pending trajectory, ray-order, contact, and lifecycle validation |
+| Creator Physics2D runtime equivalence | resolved by frozen trajectory, ray-order, contact, and lifecycle backend probes plus adapter fixtures |
 
 Each unresolved row blocks only the affected behavior from being labeled recovered.
 
@@ -255,7 +255,7 @@ in-memory shell gate, so no additional persisted `flag` or migration is justifie
    permits ELF only at the pinned Creator 3.8.8 `libcocos.so` boundary.
 
 Current checkpoint: full vertical slice `1568/1568`, focused pause/composition `218/218`,
-`tests/*.mjs` `129/129`,
+`tests/*.mjs` `192/192`,
 inventory/source/staging/archive workflow `14/14` in `217s`, reconstruction policy positive
 plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and
 clean diff hygiene. Metadata reports zero structural errors and zero duplicate UUIDs.
