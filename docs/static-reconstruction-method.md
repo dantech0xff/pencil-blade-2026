@@ -137,6 +137,6 @@ approval exists.
 - The native RNG formulas are recovered, but exact draw interleaving with engine/VFX users
   and libc sequence parity cannot be measured without the original runtime; the Creator
   rewrite uses injectable deterministic fixtures without claiming an observed native trace.
-- The six production modes and APK-only 862-resource disposition ledger are implemented, but
-  the absent external sample-project denominator, unsupported OTF, final five-domain metric,
-  public rights, and pinned Physics2D equivalence remain open.
+- The six production modes and sole-source APK 862-resource disposition ledger are
+  implemented and the corpus is the approved canonical resource denominator. The unsupported
+  OTF, final five-domain metric, public rights, and pinned Physics2D equivalence remain open.

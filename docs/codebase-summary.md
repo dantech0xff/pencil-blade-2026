@@ -57,7 +57,8 @@ Snapshot generated from a temporary local Repomix XML export on 2026-07-24; `rep
 ## Current Gates
 
 - Physics2D trajectory, ray-order, contact, and lifecycle equivalence remain open.
-- The canonical sample-project root and final five-domain fidelity denominator remain unresolved.
+- The sole-source APK corpus is the approved canonical resource denominator; final five-domain
+  contract units, weighting, and residual scoring remain unresolved.
 - Android runtime-device compatibility remains open even though the debug build and artifact audit pass.
 - Public Pages deployment, the frozen H5 browser/device matrix, valid Creator runner signature, and public-rights approval remain open.
 

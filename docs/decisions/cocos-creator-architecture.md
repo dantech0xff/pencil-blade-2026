@@ -2,7 +2,7 @@
 
 Status: in progress; Phase 6 content/progression checkpoint complete, Phase 7 gates open
 Date: 2026-07-22
-Updated: 2026-07-24
+Updated: 2026-07-25
 
 ## Decision
 
@@ -93,8 +93,8 @@ must not.
   descendant is intentionally code-built from recovered composition evidence.
 - `game/assets/game/` contains byte-identical copies of all 862 recovered APK game assets.
   Exact live consumers account for 761 paths; reviewed static reachability classifies the other
-  100 as excluded and 1 as unsupported, leaving 0 unknown. The canonical sample-project root
-  and release rights remain unresolved separately.
+  100 as excluded and 1 as unsupported, leaving 0 unknown. The project owner approved this
+  sole-source APK corpus as canonical; release rights remain unresolved separately.
 - `game/assets/scripts/domain/classic-settings-state.ts` and
   `game/assets/scripts/creator/classic-settings-runtime.ts` own the recovered bulk Settings
   shape: 50 integers, 4 booleans, 18 blade prices, 8 background prices, storage-first
@@ -293,8 +293,9 @@ unrelated Chrome extension.
   Result Retry, and Result Menu. Its transaction harness covers detached construction,
   activation/result rollback, stale requests, fatal ownership, late-tail callbacks, music,
   ranking/objective commit, and cleanup.
-- The canonical sample-project resource manifest/root remains unresolved; presentation
-  completion and the `99%` metric both stay blocked on that source.
+- The sole-source APK resource manifest/root is the approved canonical denominator.
+  Presentation-contract completion and the `99%` metric remain blocked on domain weighting,
+  residual scoring, and the open technical parity gates rather than a missing source.
 - BombElectric runs through the memory-safe target adapter, but exact pinned-backend
   contact-count/direction equivalence remains unresolved.
 - Original content rights remain unknown.

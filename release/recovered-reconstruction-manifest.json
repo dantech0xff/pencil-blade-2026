@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "manifestId": "pencil-blade-recovered-reconstruction",
-  "manifestVersion": "1.0.0",
-  "asOf": "2026-07-24",
+  "manifestVersion": "1.1.0",
+  "asOf": "2026-07-25",
   "purpose": "Preservation manifest for the static-evidence reconstruction. This is not a public-distribution approval.",
   "evidenceMode": "static-only",
   "originalRuntime": {
@@ -23,12 +23,13 @@
   },
   "resourceCorpus": {
     "scope": "recovered-apk-assets",
+    "sourceApkSha256": "95225733d46473f2b155737e8c83b567e028342257c747c0faac6ed4ab87e7aa",
     "canonicalRoot": ".forensics-work/phase-01/jadx/resources/assets",
     "canonicalRootDistribution": "local-evidence-only",
     "resourceMap": "forensics/resources/resource-usage-map.json",
     "resourceMapSha256": "165238f13f4186a9ab429c9c5a8bab07b4a42e941d0608f757d9e41a44d2ce67",
     "stagingManifest": "assets/catalog/creator-staging-manifest.json",
-    "stagingManifestSha256": "a2697c58152451e8a234a39404191263c9d60c2eba1fb1f352722816b1cdd606",
+    "stagingManifestSha256": "5d8fd3761906eaf5c568e0bb215ba838f78bf8268a97009dff97421dd5ab6fc2",
     "reconciliationLedger": "assets/catalog/resource-reconciliation-ledger.json",
     "reconciliationLedgerSha256": "18ea8ef7ae3fb3751d530dd89426979d601fd8e918d5e9b539a1b8d969daacae",
     "sourceManifestSha256": "0143473b21e56525cde92163f72fd49b2a898ab70ef2b224cdad00eaba9238e3",
@@ -47,10 +48,27 @@
       "ttf": 15,
       "otf": 1
     },
+    "canonicalDenominator": {
+      "status": "approved",
+      "sourceType": "sole-source-apk",
+      "approvedBy": "project-owner",
+      "approvedAt": "2026-07-25",
+      "decisionRecord": "docs/decisions/apk-corpus-canonical-denominator.md",
+      "decisionSha256": "43295ebd992918146239515547389a9e47f0d8364dc1fbe6ebf18cf5bf161018",
+      "assetCount": 862,
+      "byteCount": 32945747
+    },
     "externalSampleProject": {
       "provided": false,
       "includedInDenominator": false,
-      "status": "not-available"
+      "status": "confirmed-not-existent"
+    },
+    "androidResPng": {
+      "total": 107,
+      "launcher": 3,
+      "vendorUi": 104,
+      "game": 0,
+      "includedInGameResourceDenominator": false
     }
   },
   "implementation": {
@@ -72,12 +90,6 @@
       "scope": "Fonts/CooperBlackStd.otf",
       "status": "byte-preserved-not-consumed",
       "effect": "Does not count as recovered runtime coverage and remains visible in the resource ledger."
-    },
-    {
-      "id": "external-sample-project-not-provided",
-      "scope": "canonical resource denominator",
-      "status": "open",
-      "effect": "The frozen denominator is complete only for the recovered APK resource corpus."
     }
   ]
 }

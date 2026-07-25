@@ -32,7 +32,8 @@ HarmonyOS/OpenHarmony, Web Desktop as a separate build, mini-game channels, and 
 | Android debug artifact | Technical pass | Clean wrapper run produced the debug-signed `arm64-v8a` APK for package `io.github.dantech0xff.pencilblade.debug`; SHA-256 `1a4d96c71e53572fe86ce7bf73e73990df1a777a8fe33315cd1b9f6fd2705f4d` |
 | Private Web Mobile artifact | Technical pass | Fresh Creator build, prohibited-content audit, exact `/pencil-blade-2026/` prefix verification for 2,539 files, and six-mode browser smoke pass |
 | Public GitHub Pages deployment | Blocked | Public-rights manifest is unapproved; the public repository has no Pages site, protected Creator runner, or `github-pages` environment |
-| Final static fidelity decision | Pending | The verified 862-entry APK resource corpus is not an approved substitute for the absent external sample-project denominator; the five-domain score is therefore not computable |
+| Canonical resource denominator | Approved | The project owner confirmed the APK is the sole source; the verified `862`-asset corpus and `862/862` disposition ledger are final |
+| Final static fidelity decision | Pending | Resource scope is frozen, but five-domain weighting, Physics2D equivalence, and residual scoring are not complete |
 
 The current policy remains a limited Classic/menu reconstruction policy. Passing it and the
 full internal test suite does not establish whole-product runtime identity or the Phase 7
@@ -46,6 +47,7 @@ full internal test suite does not establish whole-product runtime identity or th
 - [Cocos Creator Android build options](https://docs.cocos.com/creator/3.8/manual/en/editor/publish/android/build-options-android.html)
 - [Cocos Creator Web Mobile publishing](https://docs.cocos.com/creator/3.8/manual/en/editor/publish/publish-web.html)
 - [GitHub Pages custom workflow](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
+- [Canonical APK corpus decision](../../docs/decisions/apk-corpus-canonical-denominator.md)
 - [Phase 7 completion traceability audit](./reports/explorer-2026-07-24-phase7-completion-traceability.md)
 
 ## Requirements
@@ -59,10 +61,9 @@ full internal test suite does not establish whole-product runtime identity or th
 - Audit licensing/ownership for game name, artwork, music, fonts, code, and third-party services.
 - Produce recovered-reconstruction and public-release-variant manifests separately.
 - Inferred behavior and release substitutions remain visible and never count as recovered coverage.
-- Resolve the canonical sample-project resource manifest/root, preserve the existing
-  `862/862` disposition ledger, merge any canonical additions losslessly, and close every
-  exact-consumer or reviewed unknown/excluded/unsupported record. Freeze the final denominator
-  before scoring and never adjust it to hide gaps.
+- Use the approved sole-source APK resource denominator and preserve the existing `862/862`
+  disposition ledger. Never add a hypothetical external corpus or adjust the frozen resource
+  denominator to hide gaps.
 - Compute the versioned cross-domain fidelity metric across visuals/layout/animation, audio,
   shaders/materials/rendering, levels/progression, and gameplay/physics/timing/input/state.
   Reach at least `99%` and list every residual gap without hiding it through weighting.
@@ -188,8 +189,8 @@ Artifact audits independently verify the Creator build boundary and absence of t
    environment; require the public-rights gate before the deploy job.
 8. Trigger the workflow, verify the returned Pages URL and all eager/lazy asset requests, then
    repeat the supported browser/viewport smoke matrix.
-9. Resolve the canonical sample-project manifest/root, reconcile the complete resource ledger,
-   and freeze the fidelity-metric denominator before scoring.
+9. Use the approved sole-source APK manifest/root and reconciled resource ledger as the frozen
+   resource denominator before defining the remaining domain score units and weights.
 10. Verify asset bytes/geometry and recovered layout/animation constraints; record human review
     against user memory or historical media as supporting evidence, not recovered runtime proof.
 11. Verify spawn/cut/contact/score/failure invariants, repeatable timelines, recovered
@@ -236,7 +237,7 @@ Artifact audits independently verify the Creator build boundary and absence of t
 - [ ] Repository Pages source and `github-pages` environment configured after public-rights approval
 - [ ] Production Pages URL verified after public-rights approval
 - [ ] Frozen static-evidence and reconstruction-fixture suite
-- [ ] Canonical sample-project manifest/root resolved and full resource ledger reconciled
+- [x] Sole-source APK manifest/root approved and full resource ledger reconciled
 - [ ] Versioned cross-domain fidelity score reaches at least `99%` with every residual gap listed
 - [x] Contract/traceability, visual, timing, physics, and audio reports
 - [x] Android/H5 compatibility matrix created with runtime/browser rows explicitly pending
@@ -257,8 +258,8 @@ Artifact audits independently verify the Creator build boundary and absence of t
 - [ ] GitHub Pages serves the audited Web Mobile build at
       `https://dantech0xff.github.io/pencil-blade-2026/` with no broken eager/lazy assets,
       root-prefix errors, or browser console failures in the supported matrix
-- [ ] The canonical sample-project resource manifest/root is resolved and the complete resource
-      denominator has no unreviewed record
+- [x] The sole-source APK manifest/root is the approved canonical resource denominator and all
+      `862` entries have a reviewed consumed/excluded/unsupported disposition
 - [ ] The versioned cross-domain fidelity score reaches at least `99%`, with every residual
       gap visible rather than hidden through weighting, omission, or substitution
 - [x] All recovered contracts pass the current versioned reconstruction policy (limited to

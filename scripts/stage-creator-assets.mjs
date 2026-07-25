@@ -760,7 +760,7 @@ function buildManifest(
   return {
     schemaVersion: 2,
     scope: 'recovered-apk-assets',
-    scopeLimit: 'Complete for recovered APK assets only; canonical sample-project completeness is unresolved.',
+    scopeLimit: 'Canonical and complete for the sole-source recovered APK game-asset corpus; no external sample project exists.',
     source: {
       authority: 'resource-usage-map.json',
       reconciliationAuthority: hasReconciliationAuthority
@@ -785,7 +785,8 @@ function buildManifest(
       creatorMetadata: { captured: 0, total: entries.length, coveragePercent: 0, status: 'pending' },
       creatorUuids: { captured: 0, total: entries.length, coveragePercent: 0, status: 'pending' },
       rights: { resolved: 0, unresolved: entries.length, status: 'unresolved' },
-      canonicalSampleProjectCompleteness: 'unresolved',
+      canonicalSampleProjectCompleteness: 'not-applicable-no-external-sample-project',
+      canonicalCorpusCompleteness: 'complete',
     },
     entries,
   };

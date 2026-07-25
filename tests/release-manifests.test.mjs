@@ -14,8 +14,49 @@ const ledger = readJson('assets/catalog/resource-reconciliation-ledger.json');
 test('recovered manifest pins the current APK-only authority chain', () => {
   assert.equal(recovered.evidenceMode, 'static-only');
   assert.equal(recovered.originalRuntime.executed, false);
+  assert.equal(recovered.manifestVersion, '1.1.0');
   assert.equal(recovered.resourceCorpus.scope, 'recovered-apk-assets');
+  assert.equal(
+    recovered.resourceCorpus.sourceApkSha256,
+    '95225733d46473f2b155737e8c83b567e028342257c747c0faac6ed4ab87e7aa',
+  );
+  assert.deepEqual(
+    recovered.resourceCorpus.canonicalDenominator,
+    {
+      status: 'approved',
+      sourceType: 'sole-source-apk',
+      approvedBy: 'project-owner',
+      approvedAt: '2026-07-25',
+      decisionRecord: 'docs/decisions/apk-corpus-canonical-denominator.md',
+      decisionSha256: '43295ebd992918146239515547389a9e47f0d8364dc1fbe6ebf18cf5bf161018',
+      assetCount: 862,
+      byteCount: 32945747,
+    },
+  );
+  assert.equal(
+    recovered.resourceCorpus.canonicalDenominator.decisionSha256,
+    sha256(recovered.resourceCorpus.canonicalDenominator.decisionRecord),
+  );
   assert.equal(recovered.resourceCorpus.externalSampleProject.includedInDenominator, false);
+  assert.equal(
+    recovered.resourceCorpus.externalSampleProject.status,
+    'confirmed-not-existent',
+  );
+  assert.deepEqual(
+    recovered.resourceCorpus.androidResPng,
+    {
+      total: 107,
+      launcher: 3,
+      vendorUi: 104,
+      game: 0,
+      includedInGameResourceDenominator: false,
+    },
+  );
+  assert.equal(staging.summary.canonicalCorpusCompleteness, 'complete');
+  assert.equal(
+    staging.summary.canonicalSampleProjectCompleteness,
+    'not-applicable-no-external-sample-project',
+  );
   assert.equal(
     recovered.resourceCorpus.resourceMapSha256,
     sha256('forensics/resources/resource-usage-map.json'),

@@ -36,8 +36,9 @@ not final release completion: every packaged resource now has a reviewed recover
 disposition, and the exact one-scene/13-controller bridge plus all code-built production
 surfaces are composition-reconciled. Standard Classic now owns the recovered shared
 Pause/Resume/Replay/Quit surface and rollback-safe session/Physics2D/input handoffs. Android
-build validation, release rights, and the external sample-project completeness denominator
-remain separate gates.
+build validation, release rights, Physics2D equivalence, and final fidelity scoring remain
+separate gates. The project owner confirmed on 2026-07-25 that the APK is the only extant
+source, so its verified `862`-asset game corpus is the canonical resource denominator.
 
 ## Authority and evidence
 
@@ -114,9 +115,9 @@ replay, and device comparison are unavailable and are not project gates.
   tests, and Creator 3.8.8 strict TypeScript with zero diagnostics. Recovered Loading remains
   Preview-clean in compact logical `480x800` plus high `720x1280`. The final Cocos counters
   are `0/0/0`; DevTools has no project error, and its only error comes from a Chrome extension.
-- Presentation restoration is complete only when the canonical user-supplied sample project
-  has 100% inventory, staging, and reconciliation classification for every resource actually
-  present. That is separate from the current `761/862` runtime consumer coverage target.
+- Presentation restoration uses the sole-source APK corpus. It has `100%` inventory,
+  exact-byte staging, and reconciliation classification for all `862` game assets. That is
+  separate from the current `761/862` runtime consumer coverage and final fidelity score.
 - No canonical graphics, animation frame, sound, music, font, shader/material, level/layout,
   progression, or other game resource may be silently omitted or substituted.
 - Creator's Android API 21+ floor is an explicit platform-envelope change from the original
@@ -140,8 +141,9 @@ replay, and device comparison are unavailable and are not project gates.
   whose use is permitted for the chosen release scope.
 - `99%` is the future acceptance target for a versioned static-contract/resource fidelity
   metric covering visuals/layout/animation, audio, shaders/materials/rendering,
-  levels/progression, and gameplay/physics/timing/input/state. Its denominator, weighting, and
-  residual-gap list stay unresolved until the canonical sample-project manifest/root is resolved.
+  levels/progression, and gameplay/physics/timing/input/state. The canonical resource
+  denominator is frozen; domain weighting, contract-unit denominators, and the residual-gap
+  score remain open.
 
 ## Non-goals
 
@@ -176,8 +178,9 @@ replay, and device comparison are unavailable and are not project gates.
   pending an explicit user decision; assets must not be silently omitted or substituted.
 - Public release requires documented permission or measured replacements for the product
   name, artwork, fonts, music, trademarks, and other third-party material.
-- The canonical sample-project resource manifest/root remains unresolved; until it is resolved,
-  the `99%` metric cannot be finalized and residual gaps cannot be enumerated completely.
+- The sole-source APK corpus is the approved canonical resource denominator. The `99%` metric
+  still cannot be finalized until domain weights, contract units, Physics2D equivalence, and
+  residual scoring are versioned.
 - Crazy Bird's exact native combo callback operand/order remains a disclosed static
   inference gap and is not counted as recovered behavior.
 - Git is initialized on `main` with a committed foundation. The curated/ignored boundary remains

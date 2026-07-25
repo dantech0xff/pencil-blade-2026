@@ -174,8 +174,9 @@ Creator signature preflight, and release rights do not.
   rendering, legacy numeric blend factors, sampler behavior, and pixel output remain unresolved
   at the adapter boundary.
 - Exact recovered APK resources are imported and all `862/862` paths have reviewed
-  consumed/excluded/unsupported dispositions. The canonical sample-project root remains
-  unresolved, so external corpus completeness and the final fidelity denominator are still open.
+  consumed/excluded/unsupported dispositions. The project owner approved this sole-source APK
+  corpus as the canonical resource denominator; final cross-domain weighting and scoring remain
+  open.
 - Standard-bomb entry/cut state, fuse smoke, procedural full-quad/triangle explosion, completion,
   and Crazy registry/controller activation are implemented. Classic scheduling and any distinct
   native lower-bound bomb side effect remain open; the entity does not reuse Fruit's miss

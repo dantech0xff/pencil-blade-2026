@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "scope": "recovered-apk-assets",
-  "scopeLimit": "Complete for recovered APK assets only; canonical sample-project completeness is unresolved.",
+  "scopeLimit": "Canonical and complete for the sole-source recovered APK game-asset corpus; no external sample project exists.",
   "source": {
     "authority": "resource-usage-map.json",
     "reconciliationAuthority": {
@@ -63,7 +63,8 @@
       "unresolved": 862,
       "status": "unresolved"
     },
-    "canonicalSampleProjectCompleteness": "unresolved"
+    "canonicalSampleProjectCompleteness": "not-applicable-no-external-sample-project",
+    "canonicalCorpusCompleteness": "complete"
   },
   "entries": [
     {

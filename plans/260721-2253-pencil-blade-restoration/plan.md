@@ -52,14 +52,18 @@ Verified starting point:
   min SDK 9 remains a documented platform-envelope change. Android AAB/store release, iOS,
   desktop, mini-game, HarmonyOS/OpenHarmony, and XR builds are out of scope.
 - Keep archival/decompiled material separate from ship-ready content and rights status.
-- Presentation restoration is complete only after 100% inventory, staging, and consumer
-  coverage for every resource actually present in the canonical user-supplied sample project.
+- The project owner confirmed on 2026-07-25 that the APK is the only extant source. The
+  verified `862`-asset APK game corpus is therefore the canonical resource denominator; no
+  external sample-project root or manifest remains an input or gate.
+- Presentation restoration requires 100% inventory, exact-byte staging, and reviewed
+  disposition coverage for that canonical corpus. Runtime consumption, fidelity scoring, and
+  release rights remain separate measures.
 - No canonical graphics, animation, audio, font, shader/material, level/layout, progression,
   or other game resource may be silently omitted or substituted.
 - `99%` is the future acceptance target for a versioned fidelity metric spanning
   visuals/layout/animation, audio, shader/material/rendering, level/progression, and
-  gameplay/physics/timing/input/state. Its denominator, weighting, and residual gaps stay
-  unresolved until the canonical sample-project resource manifest/root is resolved.
+  gameplay/physics/timing/input/state. The resource denominator is frozen; domain weighting,
+  contract-unit denominators, and the final residual-gap scoring remain open.
 - Technical fidelity and release rights are separate gates. If rights block exact reuse,
   release blocks pending an explicit user decision; do not silently omit or substitute assets.
 - Recreate no ads, analytics, review, or social dependency in the gameplay core.
@@ -165,8 +169,8 @@ Verified starting point:
   now passes `182/182` top-level Node tests, `1567/1567` vertical-slice tests, and `1749/1749`
   combined, with strict Creator TypeScript/audits still green and the Android debug APK plus
   private Web Mobile artifact still verified; public GitHub Pages, runtime-device coverage,
-  the canonical denominator, Physics2D equivalence, the final five-domain fidelity score, and
-  release-rights clearance remain open gates.
+  Physics2D equivalence, the final five-domain fidelity score, and release-rights clearance
+  remain open gates.
   The recovered Loading checkpoint now owns the exact four selected-profile rasters, exact
   62-step audio preload order, `/61` clamped progress, and half-second Main Menu handoff.
   It passes `1520/1520` full vertical-slice tests, `61/61` top-level tests, strict Creator
@@ -187,8 +191,8 @@ Verified starting point:
   with Cocos counters `0/0/0` and no project DevTools error. Phase 7 has now produced and
   audited the pinned Android debug APK and privately built, prefix-verified, and smoke-tested
   the Web Mobile H5 output across all six modes. Public GitHub Pages deployment, pinned
-  Physics2D equivalence, canonical external-corpus closure, the final five-domain fidelity
-  score, and release-rights clearance remain open gates.
+  Physics2D equivalence, the final five-domain fidelity score, and release-rights clearance
+  remain open gates. The sole-source APK corpus is the approved canonical denominator.
 - Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
   do not prevent read-only static analysis from continuing against the verified workspace copy.
 
@@ -205,8 +209,8 @@ Verified starting point:
   progression; they validate internal consistency, not identity with an unobservable runtime.
 - Static corroboration, resource/layout checks, and user-memory or historical-media review
   are explicit, with uncertainty never counted as recovered coverage.
-- The canonical sample-project resource manifest/root is resolved so coverage can be
-  finalized without guessing at the denominator.
+- The sole-source APK corpus is the approved canonical resource denominator, so coverage
+  cannot be expanded or reduced by assuming an unavailable external project.
 - The versioned cross-domain fidelity score reaches at least `99%`, with every residual gap
   listed rather than hidden by weighting or silent substitution.
 - `./scripts/build-android-debug.sh` produces an audited debug APK from the pinned Creator

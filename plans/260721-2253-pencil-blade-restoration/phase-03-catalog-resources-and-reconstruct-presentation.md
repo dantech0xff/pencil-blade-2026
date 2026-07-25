@@ -14,7 +14,9 @@ effort: "1-2 weeks"
 Turn APK resources and static usage evidence into a searchable presentation specification:
 dimensions, variants, UI placement, animation, audio cues, fonts, uncertainty, and rights.
 The recovered APK corpus is now fully staged into Creator with exact-byte and import-metadata
-validation. Runtime consumer mapping and canonical sample-project completeness remain open.
+validation. The project owner confirmed that no external sample project exists, so the
+verified `862`-asset APK game corpus is the canonical denominator. Runtime consumer mapping,
+full presentation contracts, rights, and final fidelity scoring remain open.
 
 ## Context Links
 
@@ -23,28 +25,30 @@ validation. Runtime consumer mapping and canonical sample-project completeness r
 - [Static resource usage map](../../forensics/resources/resource-usage-map.json)
 - [Classic presentation contract](../../forensics/contracts/classic-presentation-contract.md)
 - [Reconstruction policy](../../reference/reconstruction-policy.yaml)
+- [Canonical APK corpus decision](../../docs/decisions/apk-corpus-canonical-denominator.md)
 
 ## Requirements
 
 - Catalog all 862 packaged game assets: 784 PNG under assets/, 59 WAV, 3 MP3, and 16 fonts.
 - Inventory and classify the additional 107 PNG under Android res/ as game, launcher,
   vendor UI, or excluded-with-reason.
-- No separate shader or level manifest has been identified; the canonical sample-project
-  resource root/manifest remains unresolved.
+- No separate shader or level manifest has been identified. The APK is the sole source, so
+  no external project manifest is assumed.
 - Pair 480x800 and 720x1280 variants by logical asset ID.
 - Record dimensions, alpha bounds, hashes, duplicates, frames, states, and recovered or
   inferred usage.
 - Separate exact archival assets from assets cleared for public redistribution; the coverage
-  catalog still records every exact canonical sample-project resource regardless of release
+  catalog still records every exact canonical APK resource regardless of release
   status.
-- Presentation restoration is complete only after 100% inventory, staging, and consumer
-  coverage for every resource actually present in the canonical sample project.
+- Presentation restoration is complete only after 100% inventory, staging, and reviewed
+  disposition coverage for the canonical APK game corpus. Runtime consumption remains a
+  separate fidelity measure.
 - No canonical graphics, animation, audio, font, shader/material, level/layout, progression,
   or other game resource may be silently omitted or substituted.
 - `99%` is the future acceptance target for a versioned fidelity metric spanning
   visuals/layout/animation, audio, shader/material/rendering, level/progression, and
-  gameplay/physics/timing/input/state. Its denominator, weighting, and residual-gap list stay
-  unresolved until the canonical sample-project resource manifest/root is resolved.
+  gameplay/physics/timing/input/state. The resource denominator is frozen; domain weighting,
+  contract-unit denominators, and the residual-gap score remain open.
 - Define a lossless mapping from every canonical game resource to its Cocos Creator asset type,
   import settings, logical ID, generated UUID/meta record, and runtime consumer.
 
@@ -116,7 +120,7 @@ remain immutable; Creator receives verified copies without source recompression.
 - [x] The vertical-slice subset imports into Creator with exact source bytes, untrimmed raster
       geometry, audio metadata, and live Preview loading; original extraction remains untouched
 - [x] No unknown-rights asset is silently marked ship-ready
-- [ ] Canonical sample-project resource manifest/root resolved before final coverage claims
+- [x] Sole-source APK corpus approved as the canonical resource denominator
 - [ ] Every canonical game-resource manifest entry is byte-verified, staged, and linked to a
       Cocos consumer: 100% technical coverage with zero silent omissions or substitutions
 - [ ] The versioned cross-domain fidelity score reaches at least 99%, with a complete residual-gap ledger

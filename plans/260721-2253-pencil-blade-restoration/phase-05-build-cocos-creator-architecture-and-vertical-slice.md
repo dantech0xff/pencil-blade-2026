@@ -308,7 +308,8 @@ Current Editor integration:
   checkpoint remains pending.
 - The recovered APK corpus is presentation-disposition complete: all `862/862` assets are
   classified as `761` live consumers, `100` reviewed exclusions, and `1` unsupported path.
-  Canonical external sample-project completeness and release rights remain separate gates.
+  The project owner approved this sole-source corpus as canonical; release rights remain a
+  separate gate.
 - The historical Phase 5 deterministic baseline passes `739/739`, including the focused
   Crazy/TimeManager regressions; the complete inventory workflow passes `14/14`; reconstruction policy
   positive and `4/4` negative fixtures pass; Creator 3.8.8's bundled strict TypeScript compiler
@@ -318,8 +319,8 @@ Current Editor integration:
 
 - Deterministic trajectory, contact, exact ray-order, and deferred lifecycle validation on
   the custom variable-step boundary.
-- Canonical sample-project resource manifest/root resolution so the presentation coverage gate
-  and `99%` metric can be finalized.
+- Five-domain fidelity weighting, residual reconciliation, and final `>=99%` scoring against
+  the approved sole-source APK corpus.
 - Classic controller scheduling for the now-recovered standard-bomb presentation and the
   unresolved native lower-bound side effect; no Fruit-miss substitution is accepted.
 - Electric-field compatibility decisions.
