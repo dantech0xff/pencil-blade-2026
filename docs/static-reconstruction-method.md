@@ -8,7 +8,7 @@ project never installs or executes it. Restoration uses only the immutable APK,
 user memory may support an inference but cannot become recovered runtime evidence.
 Phase 7 now validates exactly two supported build outputs: an Android debug APK and a Web
 Mobile H5 build. The preservation record lives in `release/recovered-reconstruction-manifest.json`;
-the blocked public-web path lives in `release/public-release-variant-manifest.json`.
+the separate out-of-scope rights ledger lives in `release/public-release-variant-manifest.json`.
 
 ## Immutable Inputs
 
@@ -129,9 +129,8 @@ The shipped Creator project must not contain the source APK, `libgame.so`, Cocos
 application runtime, decompiler output, native compatibility bridge, or emulation layer.
 Recovered behavior is rewritten from reviewed contracts; native instructions are never
 mechanically translated into production code.
-Public distribution is a separate approval path from preservation. The repository can
-validate a Web Mobile artifact without claiming that public Pages deployment or rights
-approval exists.
+The owner-approved academic Pages deployment remains separate from preservation and does not
+claim rights approval or a license.
 
 ## Open Analysis Limits
 
@@ -144,5 +143,5 @@ approval exists.
 - The six production modes and sole-source APK 862-resource catalog are technically complete.
   The pinned Physics2D backend passes trajectory/raycast/contact/lifecycle probes and the
   five-domain maximal-recoverable metric passes. Exact original pixel/waveform identity,
-  unsupported OTF treatment and backup redundancy are owner-waived; Pages deployment remains open
-  and are itemized in `forensics/fidelity/residual-gap-ledger.json`.
+  unsupported OTF treatment and backup redundancy are owner-waived; all limits are itemized in
+  `forensics/fidelity/residual-gap-ledger.json`.

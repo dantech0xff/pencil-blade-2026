@@ -11,8 +11,8 @@ Classic scene. All 862 recovered APK game assets are staged byte-for-byte and im
 the Creator bundle. Phase 7 now supports exactly two technical outputs: an Android debug APK
 and a Web Mobile H5 build. The sanitized build-panel exports live in `game/build-configs/`;
 `release/recovered-reconstruction-manifest.json` keeps preservation non-shipping, and
-`release/public-release-variant-manifest.json` keeps public web release blocked until rights
-approval. The current playable loop consumes the exact paper background,
+`release/public-release-variant-manifest.json` retains the separate out-of-scope rights
+ledger. The current playable loop consumes the exact paper background,
 intro/terminal/fail-marker art, score icon, best-score cup, double-score panel, Linds font,
 ordinary intact/cut fruit, critical particles, and 23 reviewed core/ordinary-bomb audio clips.
 The exact standard-bomb raster, body, fixture, cut guard, and retained-audio seam are also
@@ -32,12 +32,12 @@ Replay/Retry/Quit/Menu ownership. The standard-blade runtime checkpoint is also 
 IDs `0`-`17` now route transactionally through Main Menu, Mode Select, Classic, the Crazy
 standard branch, and GN Style with exact Basic textures, particle plans, Dragon multipart
 behavior, and Centipede multipart behavior. This is a bounded six-route production checkpoint,
-not final release completion: every packaged resource now has a reviewed recovered-runtime
+and is now technically complete: every packaged resource has a reviewed recovered-runtime
 disposition, and the exact one-scene/13-controller bridge plus all code-built production
 surfaces are composition-reconciled. Standard Classic now owns the recovered shared
 Pause/Resume/Replay/Quit surface and rollback-safe session/Physics2D/input handoffs. Android
-build validation, release rights, Physics2D equivalence, and final fidelity scoring remain
-separate gates. The project owner confirmed on 2026-07-25 that the APK is the only extant
+build validation, rights records, Physics2D equivalence, and fidelity scoring remain
+separate decisions. The project owner confirmed on 2026-07-25 that the APK is the only extant
 source, so its verified `862`-asset game corpus is the canonical resource denominator.
 
 ## Authority and evidence
@@ -66,8 +66,8 @@ replay, and device comparison are unavailable and are not project gates.
 - The current workspace contains the Creator 3.8.8 project under `game/`, a `720x1280`
   default, the first Editor-authored `classic.scene` Canvas bridge, the sanitized Android
   and Web Mobile build configs, and the two release manifests.
-- Web Mobile H5 uses the repository prefix `/pencil-blade-2026/` and the intended URL
-  `https://dantech0xff.github.io/pencil-blade-2026/`; public deployment remains rights-gated.
+- Web Mobile H5 uses the repository prefix `/pencil-blade-2026/` and is deployed at
+  `https://dantech0xff.github.io/pencil-blade-2026/` under the owner-approved academic scope.
 - The current static catalog accounts for 862 packaged game assets: 784 PNG, 59 WAV, 3 MP3,
   and 16 fonts; 107 additional Android `res/` PNG are classified separately.
 - The full recovered APK game-asset corpus is copied unchanged under `game/assets/game/` and
@@ -141,11 +141,10 @@ replay, and device comparison are unavailable and are not project gates.
   remaining Settings fields and Main Menu save checkpoints remain separate tasks.
 - The Android build contains only the clean-room TypeScript/Creator implementation and assets
   whose use is permitted for the chosen release scope.
-- `99%` is the future acceptance target for a versioned static-contract/resource fidelity
+- `99%` is the acceptance target for a versioned static-contract/resource fidelity
   metric covering visuals/layout/animation, audio, shaders/materials/rendering,
-  levels/progression, and gameplay/physics/timing/input/state. The canonical resource
-  denominator is frozen; domain weighting, contract-unit denominators, and the residual-gap
-  score remain open.
+  levels/progression, and gameplay/physics/timing/input/state. Metric `1.1.0` passes every
+  recovered domain at `100%` without weighting and keeps all residuals outside recovered credit.
 
 ## Non-goals
 
@@ -174,15 +173,12 @@ replay, and device comparison are unavailable and are not project gates.
   or captured original trace may be introduced as an implicit dependency.
 - Maximal recoverable fidelity is measurable as recovered-contract coverage. It is not a
   claim of empirically proven 100% runtime identity.
-- Private preservation, source publication, and public web release are distinct outcomes.
-  The intended release scope remains unresolved.
-- Technical fidelity does not authorize release. If rights block exact reuse, release blocks
-  pending an explicit user decision; assets must not be silently omitted or substituted.
-- Public release requires documented permission or measured replacements for the product
-  name, artwork, fonts, music, trademarks, and other third-party material.
-- The sole-source APK corpus is the approved canonical resource denominator. The `99%` metric
-  still cannot be finalized until domain weights, contract units, Physics2D equivalence, and
-  residual scoring are versioned.
+- Private preservation, source publication, and the academic Pages release are distinct
+  outcomes. The owner approved the academic deployment and no commercial-clearance claim.
+- Technical fidelity does not create a license. The separate rights ledger is retained for
+  any future commercial release and cannot raise fidelity.
+- The sole-source APK corpus is the approved canonical resource denominator. Metric `1.1.0`,
+  Physics2D equivalence, and the residual ledger are final for this restoration.
 - Crazy Bird's exact native combo callback operand/order remains a disclosed static
   inference gap and is not counted as recovered behavior.
 - Git is initialized on `main` with a committed foundation. The curated/ignored boundary remains

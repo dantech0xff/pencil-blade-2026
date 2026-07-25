@@ -1,6 +1,6 @@
 # Cocos Creator Architecture Decision
 
-Status: in progress; Phase 6 content/progression checkpoint complete, Phase 7 gates open
+Status: completed; phases 1-7 and the academic Pages release are closed
 Date: 2026-07-22
 Updated: 2026-07-25
 
@@ -29,10 +29,9 @@ still win. The serialized/dynamic composition map and all recovered APK resource
 are complete. Phase 7 now separates technical preservation from public web release through
 `release/recovered-reconstruction-manifest.json` and
 `release/public-release-variant-manifest.json`, and the supported technical outputs are the
-Android debug APK and Web Mobile H5 build. The Android artifact and local H5 tree now pass
-their technical build and prohibited-content gates. Android runtime-device coverage, public
-Pages deployment, runtime physics-equivalence, canonical external-corpus completeness, and
-release-rights gates keep the architecture decision in progress.
+Android debug APK and Web Mobile H5 build. The Android artifact, local H5 tree, Android runtime,
+Physics2D equivalence, sole-source corpus, fidelity metric, and production Pages matrix pass.
+Rights clearance remains a separate out-of-scope record and is not represented as a license.
 
 ## Dependency Direction
 
@@ -259,8 +258,8 @@ Current checkpoint: full vertical slice `1568/1568`, focused pause/composition `
 inventory/source/staging/archive workflow `14/14` in `217s`, reconstruction policy positive
 plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and
 clean diff hygiene. Metadata reports zero structural errors and zero duplicate UUIDs.
-Technical fidelity passes metric `1.1.0`; public release remains blocked by preserved
-unsupported `Fonts/CooperBlackStd.otf` and unresolved rights. A fresh
+Technical fidelity passes metric `1.1.0`; the owner-approved academic Pages deployment passes,
+while `Fonts/CooperBlackStd.otf` and rights remain disclosed outside acceptance. A fresh
 Creator-served Browser Preview confirms Main Menu → Mode Select → GN Style → intro → live
 cuts/score/music/particles → Pause/Resume/Replay → Pause Quit → Main Menu → repeated entry →
 natural Time Up → Result Retry → Result Menu. DevTools reports zero application/runtime
@@ -274,13 +273,14 @@ in high `720x1280` plus compact physical `360x800` (logical/resource tree `480x8
 counters remain `0/0/0`; DevTools contains no project error. Its only error comes from an
 unrelated Chrome extension.
 
-## Current Blockers
+## Disclosed Limits
 
 - Creator Preview has exercised exact ordinary-fruit presentation, trajectories, cut halves,
   core audio, cut/score, three-miss game over, and two same-parent Result->Retry cycles without
   a reload or game/Cocos console error. The executable Retry harness covers construction,
-  early/late physics, post-parent attachment, commit, and Result-cleanup failures. Exact contact,
-  ray traversal order, deferred destruction, and deterministic trajectory equivalence remain open.
+  early/late physics, post-parent attachment, commit, and Result-cleanup failures. Contact,
+  ray traversal order, deferred destruction, and deterministic trajectory equivalence pass
+  the frozen backend and Creator adapter probes.
 - Crazy Preview has exercised production entry, live entity spawning, Replay, Quit, re-entry,
   natural Time-Up -> Result, and Result Retry with zero Creator Console errors. Its transaction
   harness covers command-listener, provisional Result, cleanup, and observer failures.
@@ -295,12 +295,10 @@ unrelated Chrome extension.
   activation/result rollback, stale requests, fatal ownership, late-tail callbacks, music,
   ranking/objective commit, and cleanup.
 - The sole-source APK resource manifest/root is the approved canonical denominator.
-  Presentation-contract completion and the `99%` metric remain blocked on domain weighting,
-  residual scoring, and the open technical parity gates rather than a missing source.
-- BombElectric runs through the memory-safe target adapter, but exact pinned-backend
-  contact-count/direction equivalence remains unresolved.
-- Original content rights remain unknown.
-- Public web release remains blocked until the rights approval record is populated.
+  Presentation contracts and metric `1.1.0` pass without weighting; residuals remain disclosed.
+- BombElectric runs through the memory-safe target adapter and pinned-backend contact probes.
+- Original content rights remain outside the academic acceptance scope.
+- The academic Pages release passes; no commercial-clearance or license claim is made.
 
 ## References
 

@@ -2,14 +2,15 @@
 
 ## Current Verdict
 
-**Public Web release blocked.**
+**Commercial clearance unresolved; academic Pages release owner-approved.**
 
-This checklist mirrors [`release/public-release-variant-manifest.json`](../release/public-release-variant-manifest.json) and keeps the fail-closed release gate explicit.
+This checklist mirrors [`release/public-release-variant-manifest.json`](../release/public-release-variant-manifest.json)
+and preserves a fail-closed record for any future commercial clearance. The project owner
+removed it from the academic restoration acceptance gates; this is not a license conclusion.
 
 The GitHub repository was verified as public on 2026-07-24. That existing repository
-visibility is not rights evidence and does not authorize a Pages deployment. The gate below
-prevents creating the additional public H5 distribution surface; it does not retroactively
-make already-published repository content private.
+visibility is not rights evidence. The owner separately approved the academic Pages deployment;
+that decision does not make the records below ship-ready for a commercial release.
 
 ## Current Records
 
@@ -54,22 +55,22 @@ The overall release decision also needs a separately approved manifest-level ver
 |---|---|
 | `Fonts/CooperBlackStd.otf` | Byte-preserved but unsupported; it needs an explicit release decision. |
 | Approved release exceptions | None. The manifest's `releaseExceptions.approved` list is empty. |
-| Public Pages deployment | Blocked until the public release variant is approved. |
+| Public Pages deployment | Deployed under the owner-approved academic waiver; no commercial-clearance claim. |
 | Clean-room source | Still unreviewed for public distribution purposes. |
 | Cocos-generated Web runtime | Unreviewed; engine runtime is not implicitly cleared by technical build success. |
 
-## Required Decision Flow
+## Future Commercial Decision Flow
 
 1. Keep the release manifest blocked until every included record has documented approval.
 2. Attach evidence files for each approval, not just a generic statement.
 3. Record the approver and approval date at the manifest level and for each included record when required.
 4. Re-run `scripts/verify-release-rights.mjs` against the approved manifest.
-5. Only then allow the Pages deploy job to consume the artifact.
+5. Only then mark a future commercial/public variant as rights-cleared.
 
-## Current Blockers
+## Current Commercial-Clearance Gaps
 
 - rights evidence is missing for the recovered art, audio, fonts, and identity
 - the overall public decision is blocked
-- the public Pages deployment has not been approved
+- the academic Pages deployment is complete, but it is not commercial-clearance evidence
 - `CooperBlackStd.otf` still lacks an authorized release treatment
 - the public repository itself does not supply or replace any missing license evidence

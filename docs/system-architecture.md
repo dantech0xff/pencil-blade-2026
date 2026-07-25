@@ -9,8 +9,8 @@ All 862 recovered APK game assets are staged byte-for-byte in the Creator `game`
 Phase 7 now splits the technical release surface into exactly two supported outputs:
 Android debug APK and Web Mobile H5. The sanitized build configs live in
 `game/build-configs/android-debug.json` and `game/build-configs/web-mobile-pages.json`.
-Preservation lives in `release/recovered-reconstruction-manifest.json`; the blocked public
-web path lives in `release/public-release-variant-manifest.json`.
+Preservation lives in `release/recovered-reconstruction-manifest.json`; the separate
+out-of-scope rights ledger lives in `release/public-release-variant-manifest.json`.
 The Canvas now hosts a persistent application shell that first presents the recovered
 four-sprite Loading overlay and exact 62-step audio preload sequence, commits Main Menu beneath
 that overlay, then constructs the exact shared Background/Leaf/Theme stack, replaces Main Menu
@@ -59,9 +59,9 @@ stable Main Menu with zero Cocos console counters. Resource reconciliation now h
 recovered Android-runtime unknowns: `761` live consumers, `100` reviewed exclusions, and
 `1` unsupported path. Standard Classic's shared Pause/Resume/Replay/Quit runtime passes fresh
 compact/high Preview for Resume, fresh Replay, Quit, and repeated entry; Cocos counters remain
-`0/0/0` and DevTools has no project error. Phase 6 is complete. Phase 7 now validates the
-Android debug APK and Web Mobile H5 outputs separately; pinned Physics2D equivalence,
-canonical external-corpus closure, and rights approval remain open.
+`0/0/0` and DevTools has no project error. Phases 6 and 7 are complete. The Android debug APK,
+Web Mobile H5 output, pinned Physics2D equivalence, sole-source corpus, fidelity metric, and
+production Pages matrix pass.
 
 ## Dependency Direction
 
@@ -121,7 +121,8 @@ As of 2026-07-25 `main` is protected and the correctly labeled repository runner
 is configured and active. It was online at the captured API checkpoint; after a later GitHub
 broker incident required a listener restart, a final REST read reconfirmed it online and idle.
 The workflow accepts the reviewed Creator bundle through exact version `3.8.8` and executable
-SHA-256 pinning. Pages/environment configuration and production deployment remain pending.
+SHA-256 pinning. Run `30161202889`, attempt `2`, deployed through `github-pages`; production
+verification passed `2,539/2,539` files and both supported Chrome viewports.
 
 ## Current Domain Boundaries
 
@@ -166,20 +167,21 @@ SHA-256 pinning. Pages/environment configuration and production deployment remai
 - [Options final verification](../plans/260721-2253-pencil-blade-restoration/reports/tester-2026-07-24-options-final-checkpoint.md)
 - [Options runtime review](../plans/260721-2253-pencil-blade-restoration/reports/reviewer-2026-07-24-options-runtime.md)
 
-## Open Architectural Gaps
+## Disclosed Architectural Limits
 
 - Main Menu ↔ Options, all selector families, purchase/rollback behavior, and both resource
   profiles are integrated. App-hide reconciliation is certified by executable lifecycle tests
   and source review because browser focus changes did not reliably emit Cocos app-hide.
-- Dynamic-body trajectory, ray ordering, and deferred lifecycle behavior still need live Box2D validation on the custom variable-step boundary.
+- Dynamic-body trajectory, ray ordering, contact, and deferred lifecycle behavior pass the
+  frozen Box2D backend and Creator adapter probes.
 - The exact BasicBlade model/resource/mesh contract is integrated and deterministic tests cover
   four-slot reuse plus asynchronous attachment, but controller-confirmed Preview/device
   rendering, legacy numeric blend factors, sampler behavior, and pixel output remain unresolved
   at the adapter boundary.
 - Exact recovered APK resources are imported and all `862/862` paths have reviewed
   consumed/excluded/unsupported dispositions. The project owner approved this sole-source APK
-  corpus as the canonical resource denominator; final cross-domain weighting and scoring remain
-  open.
+  corpus as the canonical resource denominator; metric `1.1.0` passes without weighting and
+  lists all residuals separately.
 - Standard-bomb entry/cut state, fuse smoke, procedural full-quad/triangle explosion, completion,
   and Crazy registry/controller activation are implemented. Classic scheduling and any distinct
   native lower-bound bomb side effect remain open; the entity does not reuse Fruit's miss

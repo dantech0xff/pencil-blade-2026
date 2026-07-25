@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "status": {
     "technicalReconstruction": "pass",
-    "publicRelease": "blocked",
-    "programCloseout": "blocked"
+    "publicRelease": "academic-scope-pass",
+    "programCloseout": "pass"
   },
   "canonicalArtifacts": {
     "android": {
@@ -59,17 +59,44 @@
     "frozenSuite": {
       "path": "forensics/fidelity/frozen-evidence-fixture-manifest.json",
       "bytes": 52079,
-      "sha256": "325c75c2c796b529df9a4a913d045229453252341fa0fcc2900954e3c6746364",
+      "sha256": "ff5fe8d91261b603c8feb7517ff438421647c697cbb798da5f60ba30a1e63bb4",
       "staticEvidenceAggregateSha256": "c4336f76f1f7bcf4515f053fd42c0de94e14221fd53237a1723fb8735c5ff1be",
-      "reconstructionFixturesAggregateSha256": "ea4abbd891b68448de0bc89561d18922eaff62ca948e9e28b871a6d8cf136121"
+      "reconstructionFixturesAggregateSha256": "f2bb87293fc7116c87f59c140c36be55f036ebfaefea10c141c4dca08a8919b7"
     }
   },
-  "blockers": [
-    "pages-environment-and-production-url-unavailable"
-  ],
+  "productionPages": {
+    "productionUrl": "https://dantech0xff.github.io/pencil-blade-2026/",
+    "deployment": {
+      "runId": 30161202889,
+      "attempt": 2,
+      "commitSha": "c942ba69283c3725856dfce177fb2268939bfbfd",
+      "environment": "github-pages",
+      "deploymentId": 5601989210
+    },
+    "browser": {
+      "product": "Google Chrome",
+      "version": "150.0.7871.182"
+    },
+    "publishedFiles": {
+      "expected": 2539,
+      "checked": 2539,
+      "failures": []
+    },
+    "runtimeRows": [
+      "chrome-480x800",
+      "chrome-720x1280"
+    ],
+    "report": {
+      "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/production-pages-runtime.json",
+      "bytes": 4467,
+      "sha256": "a2e9b67f970eff9eb4c516aa0a94e6ba472af480f3d39838fca3001e5cc8e7e4"
+    }
+  },
+  "blockers": [],
   "publicReleaseManifest": {
     "path": "release/public-release-variant-manifest.json",
     "bytes": 3791,
-    "sha256": "eadf75a39d0d7eb6ee9451718e13452586ffc42683ef6a38534d96a776a1daa6"
+    "sha256": "eadf75a39d0d7eb6ee9451718e13452586ffc42683ef6a38534d96a776a1daa6",
+    "disposition": "Owner-waived and out of scope for the academic restoration deployment."
   }
 }

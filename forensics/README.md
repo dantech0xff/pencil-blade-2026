@@ -113,9 +113,11 @@ and corroborated from the APK is `recovered`; user memory supports only an infer
 
 ## Rights and repository boundary
 
-Possession of the APK is not redistribution permission. All original artwork, audio, fonts,
-code, product names, and trademarks remain `unknown / not cleared` until rights evidence is
-registered. Public release is blocked until every shipped item is cleared or replaced.
+The separate rights ledger keeps original artwork, audio, fonts, code, product names, and
+trademarks `unknown / not cleared`; this workspace does not infer a license from APK custody.
+That ledger remains fail-closed for any future distribution requiring per-asset clearance.
+The project owner's academic Pages deployment is accepted separately and does not use that
+ledger as a technical closeout gate.
 
 The workspace is a Git repository on `main`, initialized after explicit user approval on
 2026-07-22. `.gitignore` defines the active boundary. Review it before every broad staging

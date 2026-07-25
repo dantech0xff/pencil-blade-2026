@@ -7,11 +7,11 @@ File existence alone is not a passing audit. The build and release paths are onl
 | State | Android debug | Web Mobile |
 |---|---|---|
 | configured | yes | yes |
-| tested | yes | yes, locally; workflow dispatch not run |
+| tested | yes | yes, locally and on protected `main` |
 | built | yes | yes |
 | audited | yes | yes |
-| published | no | no |
-| blocked | no | yes, pending Pages configuration and production deployment |
+| published | no | yes |
+| blocked | no | no within academic scope |
 
 ## Android Audit
 
@@ -113,7 +113,10 @@ File existence alone is not a passing audit. The build and release paths are onl
 | Output tree | `39,613,694` file bytes; relative-path, size, and per-file SHA-256 tree digest `90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54` |
 | Browser smoke | pinned Chrome `150.0.7871.182` at `480x800` and `720x1280`; Main Menu → Mode Select → Classic, input, audio, storage, lifecycle, orientation, and post-load offline checks |
 | Console status | zero page errors / request failures |
-| Public Pages deployment | not executed |
+| Public Pages deployment | PASS; run `30161202889`, attempt `2`, deployment `5601989210` |
+| Production URL | `https://dantech0xff.github.io/pencil-blade-2026/` |
+| Production reachability | `2,539/2,539` files |
+| Production browser matrix | PASS at `480x800` and `720x1280`; zero console/page/request/HTTP failures |
 
 ### Web audit result
 
@@ -121,8 +124,8 @@ File existence alone is not a passing audit. The build and release paths are onl
 - tested: pass
 - built: pass
 - audited: pass
-- published: pending
-- blocked: yes, pending Pages configuration and production deployment
+- published: pass
+- blocked: no within the owner-approved academic scope
 
 ### GitHub deployment prerequisites
 
@@ -131,12 +134,12 @@ runner version `2.336.0` with labels `self-hosted`, `macOS`, `ARM64`, and
 `cocos-creator-3.8.8`. The runner was online at the captured API checkpoint; its service is
 installed and active, and a later broker incident required a listener restart. The local
 listener recovered; after transient GitHub `502`/`504` responses, a final REST read reconfirmed
-the runner online and idle. The repository still has no
-configured Pages site (`404` from the Pages API) and zero environments. Cocos Dashboard `2.2.1`
+the runner online and idle. The repository has a workflow-backed Pages site and the
+`github-pages` environment. Cocos Dashboard `2.2.1`
 reinstalled Creator `3.8.8` from its official catalog. The workflow pins that reviewed
 executable by version and SHA-256
 `3a8452496c03e85f2784e64679a1fd203701b0b245125efee02c7923f2bd3464`.
-The remaining gate is the deliberately absent Pages environment/deployment. See the
+Run `30161202889`, attempt `2`, deployed the audited artifact successfully. See the
 [GitHub infrastructure checkpoint](../plans/260721-2253-pencil-blade-restoration/reports/github-infrastructure-2026-07-25.md).
 
 ## Current Audit Boundary
@@ -151,8 +154,8 @@ The repository currently proves:
 - a frozen Chrome `150.0.7871.182` matrix at `480x800` and `720x1280`
 - an Android 13/API 33 arm64 emulator runtime row
 
-The repository does **not** yet prove:
+The repository also proves:
 
-- public Pages deployment
-- final production URL verification
-- a configured `github-pages` environment and production deployment
+- public Pages deployment through the `github-pages` environment
+- final production URL verification at both supported viewports
+- reachability for every one of the `2,539` audited build files

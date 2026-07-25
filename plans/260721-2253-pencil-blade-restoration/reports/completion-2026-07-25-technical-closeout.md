@@ -1,63 +1,61 @@
-# Technical Closeout Completion Report
+# Pencil Blade Restoration Completion Report
 
 - Plan: `plans/260721-2253-pencil-blade-restoration/plan.md`
-- Checkpoint: `123/130` checklist items pass
-- Phase status: Phases `02`-`06` complete; Phases `01` and `07` in progress; plan remains in progress
+- Final checklist: `130/130`
+- Phase status: Phases `01`-`07` completed
+- Completion date: 2026-07-25
 
-## Verified State
+## Scope Decisions
 
-- Phase 2 corpus, Phase 3 resource/presentation catalog, Phase 4 gameplay/physics contracts, Phase 5 vertical slice, and Phase 6 full content/progression are complete.
-- Phase 1 remains open only on external offline-backup custody; the project owner has now
-  confirmed that the two required copies do not exist.
-- Phase 7 remains open on external release gates, not on missing core reconstruction work.
-- Technical reconstruction is verified by the current closeout manifest and audit bundle:
-  - Android debug APK: `game/build/artifacts/android/pencil-blade-debug.apk`
-  - Android APK SHA-256: `e313e149164eec8664b934a16e3c14b3a0f0265f9c7bb6306375a08a7cb5c37d`
-  - Android APK bytes: `57,352,687`
-  - Android runtime matrix: `plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json`
-  - Web Mobile artifact: `game/build/web-mobile-pages`
-  - Web tree digest: `90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54`
-  - Web output files: `2,539`
-  - Web browser matrix: Chrome `150.0.7871.182` at `480x800` and `720x1280`
-  - Fidelity report: `forensics/fidelity/fidelity-report-v1.json`
-  - Residual ledger: `forensics/fidelity/residual-gap-ledger.json`
-  - Frozen evidence suite: `forensics/fidelity/frozen-evidence-fixture-manifest.json`
+- The sole supplied APK is the complete source authority. No second backup is claimed.
+- The owner accepted the preservation risk and waived two-copy backup redundancy.
+- Per-asset rights and `Fonts/CooperBlackStd.otf` clearance are outside the academic
+  restoration acceptance scope. This waiver is not a license or legal conclusion.
 
-## Why `130/130` Is Not Claimable
+## Verified Artifacts
 
-- The closeout manifest records `technicalReconstruction=pass`, but `publicRelease=blocked` and `programCloseout=blocked`.
-- Public release is still blocked by external approvals and remaining infrastructure gates.
-- `main`, the repository-scoped Creator runner registration/labels, and its service are
-  configured. The runner was online at capture; after a later GitHub broker incident required a
-  listener restart, a final REST read reconfirmed it online and idle. A fresh official Creator
-  `3.8.8` reinstall still fails strict signature validation.
-- The current fidelity and runtime evidence are real, but the remaining release gates are not satisfied.
-- The repository also still carries the older and newer artifact provenance trail in the phase-7 closeout record, so the public-deploy claim is not complete enough to state as final public release.
+- Source APK SHA-256:
+  `95225733d46473f2b155737e8c83b567e028342257c747c0faac6ed4ab87e7aa`
+- Restored Android debug APK SHA-256:
+  `e313e149164eec8664b934a16e3c14b3a0f0265f9c7bb6306375a08a7cb5c37d`
+- Android runtime: Android 13/API 33, arm64, pass
+- Web build: `2,539` files, `39,613,694` bytes
+- Web tree digest:
+  `90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54`
+- Fidelity metric `1.1.0`: `100.00%` in every frozen domain, zero unexplained divergences
 
-## Exactly Seven Externally Blocked Checklist Items
+## GitHub Pages
 
-1. Two external offline backups verified by matching SHA-256.
-2. Protected Creator `3.8.8` self-hosted runner ready.
-3. Repository Pages source and `github-pages` environment configured after public-rights approval.
-4. Production Pages URL verified after public-rights approval.
-5. Rights checklist complete.
-6. GitHub Pages serves the audited Web Mobile build at `https://dantech0xff.github.io/pencil-blade-2026/` with no broken eager/lazy assets, root-prefix errors, or browser console failures in the supported matrix.
-7. Public H5 deployment contains only fail-closed ship-ready records with complete rights evidence.
+- Production URL: `https://dantech0xff.github.io/pencil-blade-2026/`
+- Environment: `github-pages`
+- Workflow run: `30161202889`, attempt `2`
+- Deployment ID: `5601989210`
+- Deployed commit: `c942ba69283c3725856dfce177fb2268939bfbfd`
+- Published file reachability: `2,539/2,539`
+- Browser: Chrome `150.0.7871.182`
+- Viewports: `480x800` and `720x1280`
+- Runtime rows: input, audio, storage, lifecycle, orientation, and post-load offline pass
+- Browser diagnostics: zero console errors, page errors, request failures, and bad responses
 
-## Evidence Summary
+Production evidence is stored in
+`reports/runtime-matrix/production-pages/production-pages-runtime.json` with six hashed
+screenshots.
 
-- Focused static analysis, catalog, fidelity, Physics2D equivalence, runtime-matrix, Android build-audit, web prefix audit, and blade/classic vertical-slice tests passed in the closeout reports.
-- The verified artifact identities are the current Android debug APK and current H5 tree listed above.
-- The closeout manifest binds those artifact identities to the runtime reports and fidelity report, which is the correct basis for technical reconstruction status.
-- Public GitHub Pages deployment is not verified and cannot be claimed because the rights gate,
-  Pages source/environment, Creator signature preflight, and production deployment remain unresolved.
+## Validation
+
+- Top-level Node suite: `192/192`
+- Portable Pages runner suite: `152/152`
+- Vertical-slice suite: `1,568/1,568`
+- Combined full local checkpoint: `1,760/1,760`
+- Creator strict TypeScript, reconstruction policies, Android audit, Web build audit, Pages
+  prefix verifier, Physics2D equivalence, and diff hygiene: pass
 
 ## Conclusion
 
-Technical reconstruction is complete enough to support the `123/130` checkpoint, but not enough to claim `130/130`, `completed`, or public release. The remaining seven items are external blockers, and the public H5 deployment must stay fail-closed until those are resolved.
+The sole-source academic reconstruction is complete. All 130 checklist items and all seven
+phases are closed. The technical closeout manifest has no remaining blockers.
 
-Status: DONE_WITH_CONCERNS
-Summary: Report written for the technical closeout checkpoint. It records `123/130`, phases `02`-`06` complete, phases `01` and `07` still open, the verified Android/Web artifact identities, and the seven external blockers.
-Concerns/Blockers: Public release and final program closeout remain blocked by nonexistent
-offline-backup custody, Creator signature readiness, Pages configuration/deployment, rights
-approval, and production URL verification.
+Status: DONE
+Summary: `130/130`; phases `01`-`07` completed; Android, H5, fidelity, Pages deployment, and
+production browser verification pass.
+Concerns/Blockers: None within the owner-approved academic restoration scope.

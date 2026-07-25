@@ -33,11 +33,11 @@ function linkOrCopy(source, destination) {
   }
 }
 
-test('technical closeout binds one canonical artifact set and keeps public release blocked', () => {
+test('technical closeout binds canonical artifacts and the passing academic Pages release', () => {
   const manifest = generateTechnicalCloseoutManifest({ writeOutput: false });
   assert.equal(manifest.status.technicalReconstruction, 'pass');
-  assert.equal(manifest.status.publicRelease, 'blocked');
-  assert.equal(manifest.status.programCloseout, 'blocked');
+  assert.equal(manifest.status.publicRelease, 'academic-scope-pass');
+  assert.equal(manifest.status.programCloseout, 'pass');
   assert.equal(
     manifest.canonicalArtifacts.android.sha256,
     'e313e149164eec8664b934a16e3c14b3a0f0265f9c7bb6306375a08a7cb5c37d',
@@ -49,9 +49,18 @@ test('technical closeout binds one canonical artifact set and keeps public relea
   assert.equal(manifest.fidelity.metricVersion, '1.1.0');
   assert.equal(manifest.fidelity.overallScorePercent, 100);
   assert.equal(manifest.fidelity.unexplainedDivergences, 0);
-  assert.deepEqual(manifest.blockers, [
-    'pages-environment-and-production-url-unavailable',
+  assert.equal(
+    manifest.productionPages.productionUrl,
+    'https://dantech0xff.github.io/pencil-blade-2026/',
+  );
+  assert.equal(manifest.productionPages.deployment.environment, 'github-pages');
+  assert.equal(manifest.productionPages.publishedFiles.checked, 2539);
+  assert.deepEqual(manifest.productionPages.publishedFiles.failures, []);
+  assert.deepEqual(manifest.productionPages.runtimeRows, [
+    'chrome-480x800',
+    'chrome-720x1280',
   ]);
+  assert.deepEqual(manifest.blockers, []);
 
   for (const path of [
     'docs/cocos-creator-build-audit.md',
