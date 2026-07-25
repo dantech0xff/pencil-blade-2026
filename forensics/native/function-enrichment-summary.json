@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "scope": "application-owned-native-functions",
+  "totalFunctions": 713,
+  "functionsWithDirectCalls": 553,
+  "functionsWithNumericConstants": 684,
+  "functionsWithStringXrefs": 91,
+  "reviewStates": {
+    "auto-indexed": 713
+  },
+  "stringXrefPolicy": "exact little-endian literal pointer to an indexed printable string"
+}

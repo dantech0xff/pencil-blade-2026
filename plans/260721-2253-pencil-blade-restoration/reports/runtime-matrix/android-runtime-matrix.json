@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T03:48:02.458Z",
+  "artifact": {
+    "path": "game/build/artifacts/android/pencil-blade-debug.apk",
+    "bytes": 57352687,
+    "sha256": "e313e149164eec8664b934a16e3c14b3a0f0265f9c7bb6306375a08a7cb5c37d",
+    "package": "io.github.dantech0xff.pencilblade.debug",
+    "activity": "io.github.dantech0xff.pencilblade.debug/com.cocos.game.AppActivity"
+  },
+  "device": {
+    "serial": "emulator-5554",
+    "model": "sdk_gphone64_arm64",
+    "product": "sdk_gphone64_arm64",
+    "abi": "arm64-v8a",
+    "apiLevel": 33,
+    "release": "13"
+  },
+  "input": {
+    "newGameGestureChangedFrame": true,
+    "classicGestureChangedFrame": true,
+    "gameplaySwipeCompleted": true
+  },
+  "graphics": {
+    "physicalSize": {
+      "width": 1080,
+      "height": 2340
+    },
+    "screenshots": [
+      {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-main-menu.png",
+        "bytes": 1590222,
+        "sha256": "3c3bc0607d67846fe90bf007854238049d6e6514043b0247b2a2d03346822a60",
+        "width": 1080,
+        "height": 2340
+      },
+      {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-mode-select.png",
+        "bytes": 1107667,
+        "sha256": "3b83048bdb19de8a201dc912cce9825a18f5c1f14eeb7ed2e8a0fc80dfc138d7",
+        "width": 1080,
+        "height": 2340
+      },
+      {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-classic.png",
+        "bytes": 982588,
+        "sha256": "eebb95aa1775179cc572de2902022257b17ca161947732cb2137466c1114e67a",
+        "width": 1080,
+        "height": 2340
+      },
+      {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-offline-cold-start.png",
+        "bytes": 1596413,
+        "sha256": "af0ce156546ea6ccb98ff145c6ba63538980c8e632ec536d4f13c06825236b7b",
+        "width": 1080,
+        "height": 2340
+      },
+      {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-landscape-request-portrait-lock.png",
+        "bytes": 1598877,
+        "sha256": "32bf5cca576738decdbdf256ab01b43135f0356264f7398d0ca76bbff3fa428c",
+        "width": 1080,
+        "height": 2340
+      }
+    ]
+  },
+  "audio": {
+    "focus": "pass",
+    "usage": "USAGE_GAME",
+    "evidence": [
+      "07-25 11:43:38:903 requestAudioFocus() from uid/pid 10174/8376 AA=USAGE_GAME/CONTENT_TYPE_MUSIC clientId=android.media.AudioManager@147a44bcom.cocos.lib.CocosAudioFocusManager$$ExternalSyntheticLambda0@c91fe28 callingPack=io.github.dantech0xff.pencilblade.debug req=3 flags=0x2 sdk=36",
+      "07-25 11:46:36:814 requestAudioFocus() from uid/pid 10174/9318 AA=USAGE_GAME/CONTENT_TYPE_MUSIC clientId=android.media.AudioManager@147a44bcom.cocos.lib.CocosAudioFocusManager$$ExternalSyntheticLambda0@c91fe28 callingPack=io.github.dantech0xff.pencilblade.debug req=3 flags=0x2 sdk=36",
+      "07-25 11:47:25:765 requestAudioFocus() from uid/pid 10174/9581 AA=USAGE_GAME/CONTENT_TYPE_MUSIC clientId=android.media.AudioManager@147a44bcom.cocos.lib.CocosAudioFocusManager$$ExternalSyntheticLambda0@c91fe28 callingPack=io.github.dantech0xff.pencilblade.debug req=3 flags=0x2 sdk=36"
+    ]
+  },
+  "storage": {
+    "status": "pass",
+    "appSandboxFiles": [
+      ".",
+      "./cache",
+      "./databases",
+      "./databases/jsb.sqlite",
+      "./databases/jsb.sqlite-journal",
+      "./files",
+      "./files/gamecaches",
+      "./files/gamecaches/cacheList.json",
+      "./files/temp"
+    ],
+    "database": "./databases/jsb.sqlite"
+  },
+  "lifecycle": {
+    "coldStart": "pass",
+    "hotResume": "pass",
+    "processIdBeforeBackground": "9581",
+    "processIdAfterResume": "9581",
+    "topResumedActivity": "topResumedActivity=ActivityRecord{5348b32 u0 io.github.dantech0xff.pencilblade.debug/com.cocos.game.AppActivity} t14}"
+  },
+  "orientation": {
+    "policy": "portrait",
+    "landscapeRequest": "ignored-by-activity-policy",
+    "screenshotSize": {
+      "width": 1080,
+      "height": 2340
+    },
+    "activityConfiguration": "overrideConfig={1.0 310mcc260mnc [en_US] ldltr sw393dp w393dp h777dp 440dpi nrml long port finger -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 136 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2340) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.4 s.146 fontWeightAdjustment=0}"
+  },
+  "offline": {
+    "coldStart": "pass",
+    "airplaneMode": "enabled",
+    "wifi": "disabled",
+    "mobileData": "disabled",
+    "validatedNetworks": []
+  },
+  "errors": [],
+  "status": "pass"
+}

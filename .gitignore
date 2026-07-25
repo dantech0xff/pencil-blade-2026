@@ -13,6 +13,7 @@
 # Raw historical/supporting media; keep only curated provenance and review notes
 /reference/historical-media/raw/
 /reference/external-material/
+/plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/*.png
 
 # Cocos Creator generated state and builds
 /game/library/

@@ -100,7 +100,7 @@ must not.
   shape: 50 integers, 4 booleans, 18 blade prices, 8 background prices, storage-first
   price-0 purchase transitions, and recovery behavior that disables writes after any load
   failure.
-- `tests/reconstruction/vertical-slice/` contains the current `1547/1547`
+- `tests/reconstruction/vertical-slice/` contains the current `1568/1568`
   all-route/menu/composition regression suite.
 - `scripts/audit-creator-build.mjs` contains the post-build archive audit.
 - `game/library/` is generated Creator cache and is not hand-authored gameplay source.
@@ -254,12 +254,13 @@ in-memory shell gate, so no additional persisted `flag` or migration is justifie
    archive entry, parses exact ZIP records, recurses through bounded nested archives, and
    permits ELF only at the pinned Creator 3.8.8 `libcocos.so` boundary.
 
-Current checkpoint: full vertical slice `1547/1547`, focused pause/composition `218/218`,
-`tests/*.mjs` `61/61`,
+Current checkpoint: full vertical slice `1568/1568`, focused pause/composition `218/218`,
+`tests/*.mjs` `129/129`,
 inventory/source/staging/archive workflow `14/14` in `217s`, reconstruction policy positive
 plus `4/4` negative fixtures, native static analysis `7/7`, strict Creator TypeScript, and
-clean diff hygiene. Metadata reports zero structural errors and zero duplicate UUIDs; fidelity
-remains blocked only by preserved unsupported `Fonts/CooperBlackStd.otf`. A fresh
+clean diff hygiene. Metadata reports zero structural errors and zero duplicate UUIDs.
+Technical fidelity passes metric `1.1.0`; public release remains blocked by preserved
+unsupported `Fonts/CooperBlackStd.otf` and unresolved rights. A fresh
 Creator-served Browser Preview confirms Main Menu → Mode Select → GN Style → intro → live
 cuts/score/music/particles → Pause/Resume/Replay → Pause Quit → Main Menu → repeated entry →
 natural Time Up → Result Retry → Result Menu. DevTools reports zero application/runtime

@@ -1,0 +1,1235 @@
+{
+  "schemaVersion": 1,
+  "metricId": "pencil-blade-maximal-recoverable-fidelity",
+  "metricVersion": "1.1.0",
+  "policy": "Any evidence or fixture byte change changes its entry digest and aggregate digest. The version-controlled manifest must be regenerated and reviewed explicitly.",
+  "staticEvidence": {
+    "files": 26,
+    "bytes": 4546863,
+    "aggregateSha256": "dfb544d91b6d8898fb74b8ab917072d5cc310b8775bfe1e76997a55a51e13791",
+    "entries": [
+      {
+        "path": "assets/catalog/animation-frame-map.json",
+        "bytes": 129958,
+        "sha256": "89413003638f027979ebbb370fae2b9068d1edf27d4ce6223f68967f5dee96c0"
+      },
+      {
+        "path": "assets/catalog/asset-catalog.json",
+        "bytes": 1862760,
+        "sha256": "726c3d6f729778476b62ebc75b381a9cde4b0a87f50ccba84c9a50756a64862a"
+      },
+      {
+        "path": "assets/catalog/audio-cue-map.json",
+        "bytes": 55444,
+        "sha256": "4c700e80d08556abbdc94a1588ea3179399aaa4a902ef5c0c63325a3a6dbcd01"
+      },
+      {
+        "path": "assets/catalog/presentation-contract-map.json",
+        "bytes": 4818,
+        "sha256": "e80d51ae5d58977e1c52c362ce71e6889f299934e61bc16f28a8730bd4af022a"
+      },
+      {
+        "path": "assets/catalog/screen-element-map.json",
+        "bytes": 182408,
+        "sha256": "fd13642bd17f2752ef42424b3abd66c00a25b12f9339b57e69524615de5530dd"
+      },
+      {
+        "path": "forensics/claims.jsonl",
+        "bytes": 27286,
+        "sha256": "40ebb9ce4fa15bfd0a513f0d1e461985a989f8f05b074cc17a284f77ded630a0"
+      },
+      {
+        "path": "forensics/claims.schema.json",
+        "bytes": 2050,
+        "sha256": "a85388b9cc03ca5f3e432cf5fd8e567aec4a9bcf2487b77226e4af2e051f36ec"
+      },
+      {
+        "path": "forensics/contracts/basic-blade-presentation-contract.md",
+        "bytes": 10970,
+        "sha256": "e15d12196cdf6d0e8cc764d4b5aafa4346154754de7b61f9d9e5a69a3fd05556"
+      },
+      {
+        "path": "forensics/contracts/classic-cut-score-contract.md",
+        "bytes": 19418,
+        "sha256": "be9e4afb0449d2eadb821e6bca3c289b9d2aa5f162dcc86e0fd3d21fc0ad56d5"
+      },
+      {
+        "path": "forensics/contracts/classic-physics-contract.md",
+        "bytes": 33475,
+        "sha256": "a654a1292a670d234abce032f0ddfc4a8443ea09007e22b22ed140726e940028"
+      },
+      {
+        "path": "forensics/contracts/classic-presentation-contract.md",
+        "bytes": 41233,
+        "sha256": "71b8659d1574bb8123520931bfe208593e17c63956fc49b1f9ad5aa7a7221e9b"
+      },
+      {
+        "path": "forensics/contracts/classic-time-state-contract.md",
+        "bytes": 39563,
+        "sha256": "b72e910d47e19fe04b22c9fa048ce1a0a48c3b81318d3f2675b62867558f737f"
+      },
+      {
+        "path": "forensics/contracts/classic-toss-contract.md",
+        "bytes": 27952,
+        "sha256": "7c74b6f2473ded9acf1e7aa7e50961296267b09570949d039106cc0498da878f"
+      },
+      {
+        "path": "forensics/contracts/crazy-mode-contract.md",
+        "bytes": 20702,
+        "sha256": "51aed58c9c276bbc82332a0120ef946a549d5e0b3c8a735f31c463b6de724989"
+      },
+      {
+        "path": "forensics/contracts/gn-style-mode-contract.md",
+        "bytes": 8786,
+        "sha256": "a76695607d76905ac8c165e8cae991b2599c0dab04f6e71604f32ac6ee5b0ec4"
+      },
+      {
+        "path": "forensics/contracts/main-menu-presentation-contract.md",
+        "bytes": 34666,
+        "sha256": "14e3d9a8eecbd82c6a0750d8816b433d321fc0b8322033d9c37a4eef772fd9ec"
+      },
+      {
+        "path": "forensics/contracts/mode-select-presentation-contract.md",
+        "bytes": 43539,
+        "sha256": "18673a78c9784257098026464c1cb6ae701f4126fe5303b340957c08b7094323"
+      },
+      {
+        "path": "forensics/contracts/shared-game-scene-presentation-contract.md",
+        "bytes": 32365,
+        "sha256": "0c0192338fd50d653fe504801e2c463cbbfe74f3f685b72ef526afeaccda740a"
+      },
+      {
+        "path": "forensics/native/function-enrichment-summary.json",
+        "bytes": 349,
+        "sha256": "d72cbdaf8306286ead76145db8beca7b30a0bafbbc66b18af37bc8ea57ab8d24"
+      },
+      {
+        "path": "forensics/native/function-map.csv",
+        "bytes": 1062158,
+        "sha256": "77446589cd0c8793a86f27ef2d5d38ee7365a4a8cc3835cd4d627642f06f059a"
+      },
+      {
+        "path": "forensics/native/java-jni-boundary.md",
+        "bytes": 18100,
+        "sha256": "776cca95fb1e8a8d18c1e8c16a4755cab391107d2bd0da7076b935d680f90451"
+      },
+      {
+        "path": "forensics/native/subsystem-map.md",
+        "bytes": 5718,
+        "sha256": "6224ffe8a5ff2ee4e0ff76d5232a5cf11a5198cbaf9051cf5744e31e2fe4fbd7"
+      },
+      {
+        "path": "forensics/resources/resource-disposition-map.json",
+        "bytes": 10392,
+        "sha256": "0f35b71edf6ad61c2d2d12259ca6ee10f454dc3f281a2aae899fd5f5cdf9b81f"
+      },
+      {
+        "path": "forensics/resources/resource-usage-map.json",
+        "bytes": 843788,
+        "sha256": "165238f13f4186a9ab429c9c5a8bab07b4a42e941d0608f757d9e41a44d2ce67"
+      },
+      {
+        "path": "reference/fidelity-metric-v1.json",
+        "bytes": 19781,
+        "sha256": "adb1d458722b85d548f8feb7341f23ceb412406de275542dd83796029b51cefa"
+      },
+      {
+        "path": "reference/reconstruction-policy.yaml",
+        "bytes": 9184,
+        "sha256": "869cda53189ef598455ea98d41501831968871821eb45ca5493875553d560219"
+      }
+    ]
+  },
+  "reconstructionFixtures": {
+    "files": 217,
+    "bytes": 3361102,
+    "aggregateSha256": "9e7b93974c9b6c01760f14ff609711e7dc20e00307f61af1a8025372b808ee3f",
+    "entries": [
+      {
+        "path": "tests/analyze-native-static-test.sh",
+        "bytes": 13050,
+        "sha256": "92cbb594bdc936d80265e5b1a34da32a6cd066f0ba568b7ff269b27d8eca57f5"
+      },
+      {
+        "path": "tests/audit-creator-build-test.mjs",
+        "bytes": 7797,
+        "sha256": "f2646858a3883bc1d229e35b7cdb5c29ec5ac9deb43725f18a1b6ae81dcc1f32"
+      },
+      {
+        "path": "tests/audit-creator-iterable-spreads.test.mjs",
+        "bytes": 6707,
+        "sha256": "29f61fc16c607c429d4f5b1cb04a49742546db9e8d437936e1d235fb821a5ed0"
+      },
+      {
+        "path": "tests/audit-web-build.test.mjs",
+        "bytes": 19912,
+        "sha256": "11a1b5a30421d525d2ccc74dfaf0215f907b04574f94e7b4906b09e9efb4cce8"
+      },
+      {
+        "path": "tests/build-android-debug-script.test.mjs",
+        "bytes": 37047,
+        "sha256": "cfd0a42c0dc1429d64547e77bb58b0187c790ee82a3d64d03afa5b1dad0dda4e"
+      },
+      {
+        "path": "tests/catalog-static-resources-test.mjs",
+        "bytes": 9732,
+        "sha256": "25fd79b7c5078630fc91ce782b8a8d3652a73db2a97a00937031c9ceaef164cb"
+      },
+      {
+        "path": "tests/extract-gn-style-particle-choreography-test.mjs",
+        "bytes": 9899,
+        "sha256": "cdc3b9f87466cd87c2bb5bc3c2b849611684eceda4f8e2a63f4f7a956b43957c"
+      },
+      {
+        "path": "tests/generate-fidelity-report.test.mjs",
+        "bytes": 5104,
+        "sha256": "ffd8c9bed015fd9c685e9462bad1d4118c848972de05bdc48b310b9414d0befd"
+      },
+      {
+        "path": "tests/generate-presentation-catalog-test.mjs",
+        "bytes": 4283,
+        "sha256": "d32ec5374c10dd90406a99bfbc9b913000656c0bf25c195153290614979c1fe1"
+      },
+      {
+        "path": "tests/generate-resource-reconciliation-ledger-test.mjs",
+        "bytes": 14955,
+        "sha256": "830949c5f916a3fcd5ceea34f4eaa4ce4127f3085ef97038d50414f4283ed231"
+      },
+      {
+        "path": "tests/generate-technical-closeout-manifest.test.mjs",
+        "bytes": 2929,
+        "sha256": "ebcf456cbe6f88092b78e7f37b2c7f14e0cbff9d36b64853987a11c6163aa10d"
+      },
+      {
+        "path": "tests/github-pages-workflow.test.mjs",
+        "bytes": 3003,
+        "sha256": "7ec197296d518a7116db9837b95218308542db56b350cb5c30c74fe8553ad248"
+      },
+      {
+        "path": "tests/inventory-apk-test.sh",
+        "bytes": 17582,
+        "sha256": "7af9cced7e96c2698ca358b2657242164e369c2cb2fdd6e30399b13e65ef8ff5"
+      },
+      {
+        "path": "tests/physics2d-backend-equivalence.test.mjs",
+        "bytes": 1252,
+        "sha256": "a36396728f316709a1c9a3441e3a3d2670bafa8661982bcf9d372017222ed5e6"
+      },
+      {
+        "path": "tests/reconstruction-policy-negative-test.sh",
+        "bytes": 1346,
+        "sha256": "2dd56249575edefe2711b2d894a0cbb8f277c0ab8b315c0c85deca5804774c5c"
+      },
+      {
+        "path": "tests/reconstruction-policy-test.sh",
+        "bytes": 10317,
+        "sha256": "f63780a0fa7b0e8244c6c8c49c9fb028b71b4570ece4f8e9236bce00a916a804"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/about-presentation.test.ts",
+        "bytes": 14224,
+        "sha256": "52b769feb9cc65a5ef82725c392e4773b2197b98c3122d614c468d8ed73de672"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/about-presenter.test.ts",
+        "bytes": 32927,
+        "sha256": "e1e48619294de81496c2c3c1eeadd8f9dc0b784cd1fc5289f3c6396a73b7a260"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/about-resource-contract.test.ts",
+        "bytes": 10474,
+        "sha256": "4f5b673ce4a032f9685707e302ca0331def125ca4da34eb593abde5366212478"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/about-resource-loader.test.ts",
+        "bytes": 9938,
+        "sha256": "96e6bb1667d9d3c8d44bdd3e6c9ef94f9b0757b5e8dbe0f44e858e93ef3cc98a"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/base-gameplay-pause-presenter.test.ts",
+        "bytes": 36448,
+        "sha256": "8fe516b50b029ff0676642afd0fbdb660e5321c6ca84564b0d347eec810e8fe8"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/base-gameplay-pause-state.test.ts",
+        "bytes": 8775,
+        "sha256": "b37e222555fb29e7ae59822898dd13a45042fa620de8712cbeec14398364a447"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/base-gameplay-resource-contract.test.ts",
+        "bytes": 7370,
+        "sha256": "e875503484b3a7e135c17b2286d50533487d6d45d88676efb849e4ccacbda2e7"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/base-gameplay-resource-loader.test.ts",
+        "bytes": 8528,
+        "sha256": "5cb99668443daec6b6964baae0d2af5839b1d0fe7b2795d4ebcaebc331d31258"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/basic-blade-trail.test.ts",
+        "bytes": 7705,
+        "sha256": "faa993282a23aef960ffc03f8ec3e2eaa166e52bac410e3bbf162d6beba5cecc"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/bird-blade-particle-plan.test.ts",
+        "bytes": 8220,
+        "sha256": "7306d9886b5dadb6ab3c26f0095bf7b0ee71efae9f8165faf63e16664c17c8d0"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/bird-blade-presenter.test.ts",
+        "bytes": 27623,
+        "sha256": "43393cd2629e5b859f737885cda2273628fc6ad11d7810a763d5d5cf516ec343"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/bird-blade-ray-adapter.test.ts",
+        "bytes": 6181,
+        "sha256": "ed2a2311cf5c7351fdc537a5a2012bc01a10a17ce98bf8a0a93643a9515ac382"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/bird-blade-state.test.ts",
+        "bytes": 11037,
+        "sha256": "08184715ed66837ba94b55d5bd3796936503abbcf747be71fd314701fa94b29f"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/bird-input-controller.test.ts",
+        "bytes": 7410,
+        "sha256": "4ebde5cb4537564c4243e67fe4ba9659aebca033651bb0d78062d9f1956fd32c"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/bird-resource-contract.test.ts",
+        "bytes": 19115,
+        "sha256": "dea53e97f4b9f62e3374c6a24d9a285712272f4cef38d30b0095828dc1f22e91"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/bird-resource-loader.test.ts",
+        "bytes": 11179,
+        "sha256": "51bcc722f367f00847ad3412123b6930aba6ca1babcb79e84ebf138383563177"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/bonus-manager-state.test.ts",
+        "bytes": 2015,
+        "sha256": "e384d201610d0fabdb221b7a150d7541202875df9670881aa39eeb4078ee85da"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-app-shell-boundary.test.ts",
+        "bytes": 44405,
+        "sha256": "97a8ed91219127eef46fd17f56891b20d83cad6858c132db5d506e28218cd12a"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-audio-contract.test.ts",
+        "bytes": 5775,
+        "sha256": "749c109f5acf5b1f876681c9d55566b3762410a2c0797a21557b73ca99a2b47a"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-audio-presenter.test.ts",
+        "bytes": 26727,
+        "sha256": "7bb24f70bb0498e0232c5048b100d17a7743881995328f03136ec81ea48b69c8"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-bird-gameplay-controller.test.ts",
+        "bytes": 51959,
+        "sha256": "44274e0b58861c3e0bdd75a4a01a602019c3848e0620f3ef03c35904e3a500fa"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-bird-result-navigation.test.ts",
+        "bytes": 3446,
+        "sha256": "6fcc68ffa3ab5cd38bbbf4095ec49bc8534dd2b1ceb6836c7c99dc184ab62123"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-bird-result-ranking.test.ts",
+        "bytes": 3274,
+        "sha256": "664ab23d55353b793d696ce8b9e0d229cff1149721a38ddae3ce2cdaa4bbc690"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-bird-scene-controller.test.ts",
+        "bytes": 30532,
+        "sha256": "ea72ee2e763ddbed8728e82a46bd5081af3965ffdb819e5588fe0aa26894c17e"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-bird-session.test.ts",
+        "bytes": 14974,
+        "sha256": "4ddae46007f3ad28b2e8fe607becc5f7b47151a0e8e0496ef07c62f6049fbb69"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-bird-toss-config.test.ts",
+        "bytes": 7275,
+        "sha256": "3c346811358d3f2288a48a99af9c2778401993df0be4b3913d6acd069f882dbc"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-bird-toss-coordinator.test.ts",
+        "bytes": 12813,
+        "sha256": "84c713d870ee326e16ac27e545259e5127b2b444d9d8cd6a9bdae3b4c0f0d3c1"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-bird-word-presenter.test.ts",
+        "bytes": 8306,
+        "sha256": "70d14c80f368d65faf066f032b50fa2643e97e0c15ffd76286a3dd5fcf8e23b9"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-blade-physics.test.ts",
+        "bytes": 4481,
+        "sha256": "ae527d0f028f1ac8fc0fd4d3baa8384263275dac6cc010b30e19531c761f43a7"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-blade-presenter.test.ts",
+        "bytes": 24768,
+        "sha256": "e79f35a585cc484004c7f479f64777d08ca75f8dd76997c300970eb059de4840"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-critical-particle-plan.test.ts",
+        "bytes": 5060,
+        "sha256": "6fb2922d33235d0041cfe1db62914ebd51ad6c45fe488a97e69f3fcc7ae5ec00"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-critical-particle-presenter.test.ts",
+        "bytes": 15759,
+        "sha256": "ef2f999d8ceda44364b8e022200902e30ef091d6d5c1d21f698fd75602008eb5"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-cut-half-motion.test.ts",
+        "bytes": 5806,
+        "sha256": "31c7d4e06fd4b2d4692aa410839f3f3697237673eb1cabd50e51aa27f5eea707"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-cut-half-presenter.test.ts",
+        "bytes": 22776,
+        "sha256": "6ff8b1b0032feeb305f4ffa7a048f76319e96c59d25f22e42018f16e1a72e7be"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-cut-session.test.ts",
+        "bytes": 6722,
+        "sha256": "951f9bb505f8ae57b16a147e798d55127ad128df1d49eb2796b65aae85294934"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-entity-registry.test.ts",
+        "bytes": 5258,
+        "sha256": "64b6409dc96dc67552728aaa63a8ad605159828884c32e4df4cc8f7ea79add55"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-fail-presentation.test.ts",
+        "bytes": 3023,
+        "sha256": "820116029f0123d98d4b5d3484e90ee01db1c7044f91007ccad84084f1b4f920"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-fail-presenter.test.ts",
+        "bytes": 16217,
+        "sha256": "c2f6e967b54c3a305e151a4c3ca91984f00d91c7f1b90adb9b884dbf31390a02"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-fixtures-bounds.test.ts",
+        "bytes": 8716,
+        "sha256": "38444f0a5667e44c20ba6a6c267ae7f8ee928febe914e000903d2bce11bc48a1"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-generated-bomb.test.ts",
+        "bytes": 21534,
+        "sha256": "ccafad9223c2400554528760b244ea376a32d3a378ce4849e36e262d94aee877"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-physics-adapter.test.ts",
+        "bytes": 15257,
+        "sha256": "28b518c3d01bfb10e778123a6da0888a422407d781ae40649a0be4b9c0d8c804"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-resource-contract.test.ts",
+        "bytes": 30254,
+        "sha256": "307835c33c7f04f5c6535f0e9c1758d57e412bdf05009bf66b63bec8c785bf62"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-result-navigation.test.ts",
+        "bytes": 4951,
+        "sha256": "4c2a7cbc7b0bbf883c5b0e6e36d2721bf8fe8c358be73d2d8819703eb3cbe1e3"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-result-particle-explosion-presenter.test.ts",
+        "bytes": 22294,
+        "sha256": "c4ef45da3726d407a3152fe51bbf8f71d1b68c105dac2ad5e5a02a88abf97fe5"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-result-particle-explosion.test.ts",
+        "bytes": 8271,
+        "sha256": "b194e288372a7dc0c103ba3d131fbd228ba4faa10e47768ac6860918f10ad0f5"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-result-presentation.test.ts",
+        "bytes": 12693,
+        "sha256": "587306c81d11482362f7c28626182674f33e8ebe1bf5ea93bcc67b1956fb7992"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-result-presenter.test.ts",
+        "bytes": 36356,
+        "sha256": "5b2653bbb1702621240808ea6d62da207dc23aad9eea85a0f92ab876b3f9ae62"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-result-ranking.test.ts",
+        "bytes": 3418,
+        "sha256": "0e3377182b648f98831a02f085fb8e3354a42ebb678bce8b34daf2e7784e7834"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-result-reward-presentation.test.ts",
+        "bytes": 10762,
+        "sha256": "f4cf5aca876bfbbe897184a69d00f884d9e1b509336db0d91f19a6c4dbdc2cf8"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-result-reward-presenter.test.ts",
+        "bytes": 27607,
+        "sha256": "a5c19f6e87071218fc58d3432396657c470b50272ac2da9a3b4b5f5dcdddbb56"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-retry-lifecycle-executable.test.ts",
+        "bytes": 58057,
+        "sha256": "5bfaf6ffdc3af17a1ff8380acba24ef5be2fb70cada0477b831608308be2e4d0"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-scene-restart.test.ts",
+        "bytes": 21311,
+        "sha256": "d7415a15f11974f3ae64d2f0c5d68533520b55a03df42664d84e2064241b6c2b"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-score-fail.test.ts",
+        "bytes": 14716,
+        "sha256": "28d52ddca168439d38b379da6d96ae37636521a88605f4c205f3fdb6f6d793fd"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-score-hud-presentation.test.ts",
+        "bytes": 6092,
+        "sha256": "9dd5ad57469eb243d04f1a84b813a2543382d0995d5fcb2823f94b8bffdf18fc"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-score-hud-presenter.test.ts",
+        "bytes": 29706,
+        "sha256": "252cb7d04b4e000a0bdd44f44f3062ceb9aab3b549c05c208396c864b9a7e70a"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-settings-runtime.test.ts",
+        "bytes": 22140,
+        "sha256": "b3ae3ad0dffb1f0f9ba983ec53d349ca6b2712ad598bdb13ee45939642e09a83"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-settings-state.test.ts",
+        "bytes": 27434,
+        "sha256": "298277e9c4ee5102bbeb6e39667b70294bc5e40fe0bb305c5d0cbb2c731efbfe"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-spawn-plan-batch.test.ts",
+        "bytes": 4636,
+        "sha256": "8a013cf7253bf4bf5e90d24b59759f9ef1ffd0099dc7b58255ee3c11548fcd51"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-spawn-strategies.test.ts",
+        "bytes": 11980,
+        "sha256": "9039e37ab52996082913642792dba203e1c58c3451425fd46f9e2a0aa063aed9"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-swish-audio-gate.test.ts",
+        "bytes": 4744,
+        "sha256": "b68d0ea220977d497fa9368765e4f4d847e5b0c92ae7f6e1c1188ded6effee95"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-toss-foundation.test.ts",
+        "bytes": 11144,
+        "sha256": "f00f1fabc523ff0f9ec5dca146a71df34f0aabceb7a499d2fd900770c77ac7b5"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-variable-step.test.ts",
+        "bytes": 4095,
+        "sha256": "65fd83cb47aeaada4615517a55b7b88a37aafae664221bb6492992a2dc239e2e"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/classic-world-speed.test.ts",
+        "bytes": 2862,
+        "sha256": "182c2ea5709bc5314bc91a765d174ea1c3f4c54977ffa5f923012afa40b6d286"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-bird-gameplay-controller.test.ts",
+        "bytes": 24619,
+        "sha256": "f31512eb8467e0e8621b12230cee2345738221d6f0e13dec2bc221cb8bb67906"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-bird-intro-presentation.test.ts",
+        "bytes": 5016,
+        "sha256": "d21c082f7d3acdca3d4a5fcf3f78ea1f3adcaf2a50ebf1ba37589aaa32227043"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-bird-intro-presenter.test.ts",
+        "bytes": 11568,
+        "sha256": "ce14a34a47f86404f50f62965da1fc7ef683ebc0add1d26e152b5d1b3474610f"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-bird-resource-contract.test.ts",
+        "bytes": 4727,
+        "sha256": "8f1071468e4151dfc54991c0f4275a6a18469253d316c8bb1c95fe273ba84937"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-bird-resource-loader.test.ts",
+        "bytes": 8173,
+        "sha256": "97bb267a109a474047ec0f02c1ebf80763e8c7094a52936729ea232486ba4e12"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-bird-result-menu-lifecycle-executable.test.ts",
+        "bytes": 10690,
+        "sha256": "4621ef16c5e9f1548e07e07959316e4d4929c75f715873343d2bf7377a337906"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-bird-result-navigation.test.ts",
+        "bytes": 3625,
+        "sha256": "bd4c061ab12a9b7e9dfb3bc741358679fb9f41a2e3b4c04a1e7bc2c68262f34c"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-bird-result-ranking.test.ts",
+        "bytes": 3194,
+        "sha256": "0651a2b8c3c6edef3d9aaf145ad44fa45e2582db4fce150a4d8f999f1fb93466"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-bird-retry-lifecycle-executable.test.ts",
+        "bytes": 20556,
+        "sha256": "fbf16cf34d5399c3b523baff7b0753ef088b26ada08155aa71ea9b04641251c8"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-bird-scene-controller.test.ts",
+        "bytes": 31852,
+        "sha256": "f1f88d5e8b6b9433063930243a2c1cd538ed41c9235b73f2068021d0cea1f851"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-bird-session.test.ts",
+        "bytes": 12215,
+        "sha256": "491d3998593440622961e47577b8b8f6075f8ca2df88cf29bd3efb4ce7dd8e62"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-bird-toss-config.test.ts",
+        "bytes": 4642,
+        "sha256": "f6406f6ef9f6619ad6ab3c9ca9056244f7df20bb3c8c64a308480d015cc2e973"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-bird-toss-coordinator.test.ts",
+        "bytes": 8055,
+        "sha256": "b9834106e5937828d6f416dd1beb8fadd05048c53f06558ee2ad90b01bd91aa1"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-item-presentation.test.ts",
+        "bytes": 4631,
+        "sha256": "8be606664c4a5d26b6b077a0e65732191574738329f933ec2cfb9d63fac7095a"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/combo-item-presenter.test.ts",
+        "bytes": 6219,
+        "sha256": "dc1953ce3c1b1fe42f54b43437e412f2e37139adad647b1c09181078444bf455"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-audio-contract.test.ts",
+        "bytes": 24850,
+        "sha256": "7aa340797366d26395dc0db467ff918315befc42306360106e5033c9e4f469aa"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-audio-presenter.test.ts",
+        "bytes": 28671,
+        "sha256": "4d27f1d9d697dacbc3dc61b40daebc273e0509eee0477b12bcec40cd6d2f9587"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-bird-gameplay-profile.test.ts",
+        "bytes": 12812,
+        "sha256": "16c257fd77914ddd31ea09fea78d2e2d5048a99701ddea6f081c2f8a88f000e7"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-bird-mode-domain.test.ts",
+        "bytes": 6001,
+        "sha256": "0de165aa4e4c61909ebf5c68a442bf4cc8dd88396603accb763cbde5ae2a0d2c"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-bird-result-navigation.test.ts",
+        "bytes": 3599,
+        "sha256": "d4382121c74fe15bd764e066ce87ba06a8fa9e5514fd96381933963cfecb4993"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-bird-result-ranking.test.ts",
+        "bytes": 3194,
+        "sha256": "c0e18f8a66e335de9d8016cfba7de4b5e77daeb0c845dccfccaad402ed351cdf"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-bomb-electric-presenter.test.ts",
+        "bytes": 17197,
+        "sha256": "5fe0ab3263d7a4bd46faf7455916c6c8a06b67665accceaf8c5ee3fdebfd6c50"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-bomb-recovery-executable.test.ts",
+        "bytes": 13063,
+        "sha256": "b79685bfa5b3961d5d28839302d6bf72e607daf56a5a6a19ac240f51aa008434"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-double-bonus-toss.test.ts",
+        "bytes": 16986,
+        "sha256": "020acd3b2076aa9683868f05227960598b368cd3afdc928609293f9bc0d3c1da"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-dragon-fruit-state.test.ts",
+        "bytes": 16004,
+        "sha256": "66bda0d38cb6fbf1ba068240642d095aa8f130ff89b0dc72c45a270761afe1f0"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-electric-contact-adapter.test.ts",
+        "bytes": 10913,
+        "sha256": "e4623e00aac7e508276007f5dc4845af5e889cc1fa22da252cf63b91f159e107"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-entity-registry.test.ts",
+        "bytes": 56546,
+        "sha256": "b5d62e3a690f868e48bba5110f27f1c35359602ee9d931695d66fbbfc7df3ffe"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-gameplay-controller.test.ts",
+        "bytes": 67252,
+        "sha256": "c4dbd7a7961a104a33acc38e7cca569c2dab88ed34c2968133fdb4ccfd66876c"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-generated-dragon-fruit.test.ts",
+        "bytes": 23785,
+        "sha256": "0d5ad89416aa8b3faec82d30156377372f16f4bd1068157b48f4b1a425243f54"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-generated-special-fruit.test.ts",
+        "bytes": 27895,
+        "sha256": "f37a5adfa9602f6592bd46b5b4de4cb57d9509c193dc92e6c18841443bee945f"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-intro-presentation.test.ts",
+        "bytes": 4211,
+        "sha256": "f57634744fd451a68ff2f968707d7d73365bd77cf9cf78e2c55cbeef19aa674b"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-intro-presenter.test.ts",
+        "bytes": 8342,
+        "sha256": "51e2e56284bbd578b0ffb6e352d3bdf2a98c7554c57ac7cef36515ce8e1ae662"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-magnet-presenter.test.ts",
+        "bytes": 8790,
+        "sha256": "96cd6b8cd693ed2824319bf6b095b0b7d0cf83b8005a839c82e7d672acda97ba"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-mode-domain.test.ts",
+        "bytes": 12859,
+        "sha256": "028ab5017458291b866e0e2c70292d126f8be51b465269239ee06507ef214a39"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-physics-adapter.test.ts",
+        "bytes": 7921,
+        "sha256": "43456a95f2e5647c15f47915f6fcdecff7b9f23c445191e160d2905e9b0fd011"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-resource-contract.test.ts",
+        "bytes": 6655,
+        "sha256": "9191214e5c8bbb1b39ceddf62ddc2577a2451039577a195afbe2119749482f52"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-resource-loader.test.ts",
+        "bytes": 6939,
+        "sha256": "e1da6998adf8504ec7e44559d40008ca86bf1efbe17207e3b04045bcba0d133b"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-result-menu-lifecycle-executable.test.ts",
+        "bytes": 23585,
+        "sha256": "e9b9151256816dc8a82ec6e5b0b26eec3a9060c8ffb6ed31eff56a22a796e440"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-result-navigation.test.ts",
+        "bytes": 3430,
+        "sha256": "65e8b48f991223cf8e89860565b582d2d32b507874062179c8f9fff618a7b487"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-result-ranking.test.ts",
+        "bytes": 4145,
+        "sha256": "8208be5c51d1330556467c5040b6002f114b90d9f907578e63db98f0d1008e72"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-runtime-command-batches.test.ts",
+        "bytes": 5475,
+        "sha256": "cb4112759c5f74d6ac2917e6de802afae8535822580d33d9b73a1422f158c3f6"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-scene-controller.test.ts",
+        "bytes": 37110,
+        "sha256": "0e2789577c7f3437e054d7cd18d4adcf86010d7de99762402f80557eb288532c"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/crazy-toss-coordinator.test.ts",
+        "bytes": 9434,
+        "sha256": "9040ac527ad50bb152ea31d8422632487464f73a341ceac657c0b0e467a505f2"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/creator-composition-reconciliation.test.ts",
+        "bytes": 18368,
+        "sha256": "2eeef9db38716af7d7ba1e9331c6ac2c91d9cc32cec996fc8a9590fdf73b0a0f"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/creator-scene-integration.test.ts",
+        "bytes": 40323,
+        "sha256": "82ff2a1dbfc76d4f1630ed9b50f3c2bdb050c7261439be82c7a738ea7ccedb4d"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/detached-screen-root.test.ts",
+        "bytes": 839,
+        "sha256": "f4681660fcc2c355e5c98d5e2d64bb2afe0a3e50dab7d4093c35d1c14caac4bc"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-background-music-presenter.test.ts",
+        "bytes": 15341,
+        "sha256": "9e71ce111ba9303dfd8d0c906bb8cadcad6e78eecdba936ab78d3a78d643f36f"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-gameplay-controller.test.ts",
+        "bytes": 78194,
+        "sha256": "9cd1ec711c46b06a2a3eb227a28cfd7cf1a4bccb90fcf23bfc87d2e3f71c286e"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-intro-presentation.test.ts",
+        "bytes": 5981,
+        "sha256": "88cd0b05397b0ac2bf7bf6e91aeb08357617f6d0347ceb7b0bd7b9927c7ed5e0"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-intro-presenter.test.ts",
+        "bytes": 16052,
+        "sha256": "16b522e46a8045f687de7c176b040046aa14d2e8126742acefb254c73703a609"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-particle-choreography.test.ts",
+        "bytes": 7374,
+        "sha256": "2a47ac959ef224b5b921066fbfe0467e54660e85cb0b90171295650ec53c189c"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-particle-explosion.test.ts",
+        "bytes": 6963,
+        "sha256": "e28d5724b7eea9829b5c37cbd0a3cc1f331950136d0fdcb3650f3370848a9d85"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-particle-presenter.test.ts",
+        "bytes": 22533,
+        "sha256": "97066e51825d72baa5e547d85308aeda3d9e693803ee26b5126201e84b21973b"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-resource-contract.test.ts",
+        "bytes": 6095,
+        "sha256": "cd26321c144c9d514b7ff29abb4017b2c3cada178009a5e981bc0d0d42434846"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-resource-loader.test.ts",
+        "bytes": 5753,
+        "sha256": "ea9238b6bf5c63f26e26c0131034e7c750edefec9bf5c6e7942656c752f70c56"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-result-navigation.test.ts",
+        "bytes": 3581,
+        "sha256": "25577200e7f9821ae521fdbfc511263fa133a79d3f3ff3f2bb970bd597a0442d"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-result-ranking.test.ts",
+        "bytes": 3035,
+        "sha256": "4bebd310b000c85c897897b23762843478d46ee011f3ebc31b84be98e9859223"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-scene-controller.test.ts",
+        "bytes": 41235,
+        "sha256": "674efda606bfdf812aaa5ea7003e163f3e4add6f81996cd647e14512c5595bb0"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-session.test.ts",
+        "bytes": 8969,
+        "sha256": "be606960a2bd626c3060a078a67db1b4063d6175f81cabb64bcfd2bccf66b919"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-toss-config.test.ts",
+        "bytes": 4510,
+        "sha256": "2170a48a8a56ca0f4ce65eee8a9bed50245f6e6fb2385800e8150755eefd5ab9"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/gn-style-toss-coordinator.test.ts",
+        "bytes": 10678,
+        "sha256": "9cf8528027c2ff9517b00ac6a7c3216e1affe41daf46ffdbd60a3a27db208aff"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/leaderboard-presentation.test.ts",
+        "bytes": 20824,
+        "sha256": "83af14b241b1f14f3136e55761d5984c0fcc69688d7702ac594c0e6c7cc95226"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/leaderboard-presenter.test.ts",
+        "bytes": 46462,
+        "sha256": "c4acc62501048ed03e203ad2408a1ec653dd276fb57d156e08929b6e7cf9cd61"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/leaderboard-resource-contract.test.ts",
+        "bytes": 12895,
+        "sha256": "7e9c541c4af49ea249867ddc66219c85b8e1e0a6fad58c6faca1f5dad91a303e"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/leaderboard-resource-loader.test.ts",
+        "bytes": 9489,
+        "sha256": "3167376dbf4e989413b45693f948aa583f280a28ba151f325373594452335d15"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/leaderboard-state.test.ts",
+        "bytes": 14454,
+        "sha256": "084d6cde6890b6d0e54caa7fe7e4b6707e1aa2254efcc1275957fba21bd4ea88"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/loading-audio-preloader.test.ts",
+        "bytes": 2719,
+        "sha256": "07129a0b79918417f84a6c269dfbfd54f053a6a96a06f118579afd487a62d211"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/loading-presentation.test.ts",
+        "bytes": 3174,
+        "sha256": "58c7bfe74197804fbbb05dd5f8f4bbfe6b69a60071a9fd17b789d3cc5a20385f"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/loading-presenter.test.ts",
+        "bytes": 15198,
+        "sha256": "4d5122afb4342b5607f862d7e7e5570440894293159f7d29df0a7b7c265f0a42"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/loading-resource-contract.test.ts",
+        "bytes": 7548,
+        "sha256": "de1e8f39c2c15d06dbd8db25fb31a605de6e5ebaa76ca1a47ac7f86c75e685cc"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/loading-resource-loader.test.ts",
+        "bytes": 3607,
+        "sha256": "302b1401a69b9eda2b09a209e5587171e206d5e669840cd1d0aae21cbb4fb304"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/loading-state.test.ts",
+        "bytes": 2565,
+        "sha256": "be9982ee5708b999421693203785bef8376ac2b73445f55cfe6fae3f0a047298"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/main-menu-cut-half-presenter.test.ts",
+        "bytes": 2920,
+        "sha256": "a69e3e8925abd63f46138b7fddc0b91a1afb363a43ffc926f65185f1165d4e5c"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/main-menu-fruit-presenter.test.ts",
+        "bytes": 13609,
+        "sha256": "e7e3f8d12c529db0f42a60abb601ba67ff76085c7f117d2caf2aca332cac614d"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/main-menu-presentation.test.ts",
+        "bytes": 24749,
+        "sha256": "8252cf369d9e9009e569a39f97d362be256e55acc4b829c9559138ac4c857920"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/main-menu-presenter.test.ts",
+        "bytes": 41265,
+        "sha256": "075afffadbb5011f9774410073de28835c145a5b125ce0a3a74c60d903a04e8b"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/main-menu-resource-contract.test.ts",
+        "bytes": 13567,
+        "sha256": "b27ad77a01c76a7740ea6bde65da817f4ff00fc67cca38651647444cc3a959d4"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/main-menu-resource-loader.test.ts",
+        "bytes": 1943,
+        "sha256": "d4826d34f1f693f34e03ab0b21f2622e1d289fe063d4419d38713c397eec9232"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/main-menu-state.test.ts",
+        "bytes": 17666,
+        "sha256": "cd0aa415f6e91249cb419a698ca91158c6f7c09f5d7faba234fc8ee087e116c0"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/mode-select-presentation.test.ts",
+        "bytes": 30375,
+        "sha256": "076850a1716b7a55ed121b6f7408bb7ea2218aa754ea09566958538d0d0baf65"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/mode-select-presenter.test.ts",
+        "bytes": 58130,
+        "sha256": "412fe36d11f3351ce69168cab154f589449b007269d2042180e90fb760b688f4"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/mode-select-resource-contract.test.ts",
+        "bytes": 16559,
+        "sha256": "0ecc78bff464eecdc3b498372809f02ea91f90913cb5f027eb81c84e014403be"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/mode-select-resource-loader.test.ts",
+        "bytes": 4626,
+        "sha256": "b23c186d7a18cefb58f82ed38092c3d0947d02290c2ab8dfbc3120f9ffe90fde"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/mode-select-rope-button-presenter.test.ts",
+        "bytes": 14145,
+        "sha256": "a7cbe4c0ee00e428564cda895d4766b6463c141ebb89c02109de41e9c6f111fe"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/mode-select-state.test.ts",
+        "bytes": 27376,
+        "sha256": "873a4b0b88c0868463f51c5398e8845f88c71a1e7622f1e05f43334f8c4f5527"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/non-classic-physics-adapter.test.ts",
+        "bytes": 9105,
+        "sha256": "34ad8cce24897d5e280bdd29c69928e71fd8ba260ebcea94380c060da59b2a52"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/objective-achievement-host.test.ts",
+        "bytes": 9394,
+        "sha256": "f86298d479edefb7063d5cc3f9a835df9aa0f061b2cd5023b43cf1fd56293308"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/objective-achievement-popup-hosts.test.ts",
+        "bytes": 11642,
+        "sha256": "3c03452308b14235878405b55b31f8b5bfa445df1e4647917375f2e0ca43af59"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/objective-achievement-presentation.test.ts",
+        "bytes": 8181,
+        "sha256": "14d47e0df4aa25c35750a3fc0332a9ad692459618ebe414cea692494ccb78027"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/objective-achievement-presenter.test.ts",
+        "bytes": 6053,
+        "sha256": "a4371c4e56be065239e0a32c00cf026cd7951141e98f56efe5a036954f1127f9"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/objectives-fruit-cut-integration.test.ts",
+        "bytes": 6118,
+        "sha256": "c4520df42f3805e76441188b8ba8f3c9cd4208df0bafb645c711c0e58c3d46ab"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/objectives-manager-state.test.ts",
+        "bytes": 19699,
+        "sha256": "ae4a0603c95d59b141dfb1fc1103d836be4d9675c80be37b39b0c99fe58ec5f9"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/objectives-screen-presentation.test.ts",
+        "bytes": 17725,
+        "sha256": "911b6cc312b754f6b78055f5a83bdc8470befaa01cd1c278fbf3f44567a42cbb"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/objectives-screen-presenter.test.ts",
+        "bytes": 32529,
+        "sha256": "9381d55057172a75982782b79aa42f3cb0f49f63d2d890e2529c988562d8b071"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/objectives-screen-resource-contract.test.ts",
+        "bytes": 10457,
+        "sha256": "70763878aad07f7ec62974d3915a440a1ccfbdad4284bfe4b5e6be3543f2062e"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/objectives-screen-resource-loader.test.ts",
+        "bytes": 9428,
+        "sha256": "3c36fa92f0233003a752f7acf0cfd7e3d6ddacfc6987b90c336b4fa911d244f6"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/objectives-screen-state.test.ts",
+        "bytes": 14073,
+        "sha256": "30c2bad2c4769fac21900e4e64fe1af3b551a6d34a11130d7b021a5390044366"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/options-item-selector-presenter.test.ts",
+        "bytes": 9965,
+        "sha256": "97a38612a35608e0bd1da9f9dc8a74e197d9ef0cf3f6545be588da56b47b5784"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/options-presentation.test.ts",
+        "bytes": 19274,
+        "sha256": "816dec5a3d1ee6d201ca419a24c944a366839d40c292d3cff4c68aef415d8885"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/options-presenter.test.ts",
+        "bytes": 43024,
+        "sha256": "cd1a6757e516b9dbd79604bf762b5d988bf20273c8b8dcb68e0661813d8e2a88"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/options-purchase-particle-presenter.test.ts",
+        "bytes": 6806,
+        "sha256": "fe95a7a24294e05be8db560ee04c927cf22bf5b105a63695c73fc8c860917774"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/options-resource-contract.test.ts",
+        "bytes": 12651,
+        "sha256": "8d24e6977ec1f21c28277ef44bf3ec4fc9ccd0707fe5864e24db940f78ea77a1"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/options-resource-loader.test.ts",
+        "bytes": 4276,
+        "sha256": "2fc9a076439af2cd3f7f401578b7645df7b6d3825e140e71be782b605db1a433"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/options-state.test.ts",
+        "bytes": 14156,
+        "sha256": "d6938480e00290e2fa276ba96448ebab9ba379894c3fad9af28fa46290f20be8"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/recovered-app-shell-controller.test.ts",
+        "bytes": 210590,
+        "sha256": "c292f5b2b8d5b5f40e8eb9396c313518ed59025c050d75e4d97e2db1d23a6933"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/recovered-app-viewport.test.ts",
+        "bytes": 3663,
+        "sha256": "5ece607e593ba568d74e281607e08371ffc42e1f6c216a7a3f2972f7c69b3553"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/recovered-result-objective.test.ts",
+        "bytes": 1704,
+        "sha256": "f42d4d76e600c66f8c78a7f940643577916ac708973815700fd5e151a2de91b3"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/resolution-profile-service.test.ts",
+        "bytes": 1360,
+        "sha256": "ec50c7aa2f68e99ee7132b9c289a5d8bc7d5c2e0e04d82c691a6db4cb2d2d70b"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/resource-consumer-registry.test.ts",
+        "bytes": 8030,
+        "sha256": "a16ea78eddac99055244fdfe04bd64c23bea0104e0789996e1709f8688d82333"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/shared-game-scene-presenter.test.ts",
+        "bytes": 5343,
+        "sha256": "d50f8325cdce08837bcfa043cfa0575fed60092d5bb72fa305815736c3d25df3"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/shared-game-scene-resources.test.ts",
+        "bytes": 4233,
+        "sha256": "24d956fc91461194549aa420e5f05c8919b2d3f47270ffad2a883b50cc7d7e9b"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/shared-leaf-layer.test.ts",
+        "bytes": 28622,
+        "sha256": "442572747f5c64f38d3a132c691180c37e209d9fe37ad8e56bd65c4fba728cc6"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/shared-leaf-physics-adapter.test.ts",
+        "bytes": 4212,
+        "sha256": "901454ff8b1c545d997d1f309db17e84c0808e2206db8a10cf78685ca6dd0d37"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/shared-leaf-presenter.test.ts",
+        "bytes": 2675,
+        "sha256": "45b55c01035c3270b31e5f6fd96d9a0388bf9dd66a835884c00a5cf77888c228"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/source-boundary-audit.ts",
+        "bytes": 3686,
+        "sha256": "acd5d15a2b8cfcfa3d1bba01d52e94adec0137b122412b6e00b408b57388ea53"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/source-boundary.test.ts",
+        "bytes": 2198,
+        "sha256": "2b47edc9166ab9215f20ae4746a389a80058c427cc07273be191896c0f2d399d"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/standard-advanced-blade-presenter.test.ts",
+        "bytes": 27033,
+        "sha256": "8690f8445226d8cea3e82fbf7ebd355d4ece954ea0197af3e44a4f640810a285"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/standard-advanced-blade-state.test.ts",
+        "bytes": 13607,
+        "sha256": "774990b7fe97f5c78b92310a338e70aa856255d5138c031a41711e26caae1166"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/standard-basic-blade-presenter.test.ts",
+        "bytes": 25680,
+        "sha256": "4076b9a2c7f9b32e26f09b8cf88fce9b0ce19b8fa6b6b365f8dd7d88cf8ab6cf"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/standard-blade-particle-plan.test.ts",
+        "bytes": 22398,
+        "sha256": "7a8bf81baf1944fbfe38f5f79c7ee900a3facba92e5b03094a270a8ba5437da7"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/standard-blade-particle-presenter.test.ts",
+        "bytes": 31831,
+        "sha256": "49af85141a4363d3ea368d374de8cbdb96269c0d613219d354fb76cd93a1a2e2"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/standard-blade-presenter.test.ts",
+        "bytes": 19780,
+        "sha256": "a16c5a8ef7efcc88b1ff4e34d523d6ccbe4ee69ac49eb411b5c9a322acf349d6"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/standard-blade-resource-contract.test.ts",
+        "bytes": 17024,
+        "sha256": "a990b8f6fdee31e78143623fe3daac0a275745db7905eb7c650a34ddb360910a"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/standard-blade-resource-loader.test.ts",
+        "bytes": 11809,
+        "sha256": "1437cb13bfe49de4c404135d21cc0ff6ff55ec5cb1be7c0646ab4dc8644159d8"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/standard-bomb-explosion-completion.test.ts",
+        "bytes": 5190,
+        "sha256": "bf0679b003065b92cd7d635ba08e190b71f9e6fbbe5c91be17132cd2a111e925"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/standard-bomb-explosion-presenter.test.ts",
+        "bytes": 14087,
+        "sha256": "dfed0fa1572dda6cf379b760db5fbb1ee6d7ce3a1851908e54564ba1a956a79b"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/standard-bomb-explosion-state.test.ts",
+        "bytes": 8237,
+        "sha256": "2f0b160294a1b68f04d8089f51904205d19944ecab4467b2896786998550daf3"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/standard-bomb-fuse-smoke-presenter.test.ts",
+        "bytes": 20249,
+        "sha256": "d79122101385b8088f7cc2fb300e0325a3211b6130ea20a0a10a889f26fd6863"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/standard-bomb-fuse-smoke-state.test.ts",
+        "bytes": 4649,
+        "sha256": "397698b24c8383b54f39305856ca365a4445f835b2af088554c3ebdc02552729"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/time-manager-audio-presenter.test.ts",
+        "bytes": 13045,
+        "sha256": "c7c7658d6a354348cc2bd9bb8c9f616ff5b23cde7743b1f8d237c50838f1d831"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/time-manager-presenter.test.ts",
+        "bytes": 31964,
+        "sha256": "fd844c3c5b2cbf14ca9858191de0d52c11a2a143b9b56aa0b2b347f92f355f9d"
+      },
+      {
+        "path": "tests/reconstruction/vertical-slice/time-manager-service.test.ts",
+        "bytes": 12068,
+        "sha256": "8e17fd5801bfb7c9fdc25a173b6d81669e85f8dc5736d5039316814a7b3adb6a"
+      },
+      {
+        "path": "tests/release-manifests.test.mjs",
+        "bytes": 5960,
+        "sha256": "b6926ce9009d4677ba97eb73f0f23b89ce8fe826ca09c9b84a9fba0410a2feee"
+      },
+      {
+        "path": "tests/runtime-matrix-runner.test.mjs",
+        "bytes": 1086,
+        "sha256": "b2814aefa0107e70223caab1758d236fe40d11a530678fe01417b260357cc7da"
+      },
+      {
+        "path": "tests/stage-creator-assets-test.mjs",
+        "bytes": 33963,
+        "sha256": "1e8df32befae569ac2f76df84b9b0f8cc1e2ca0431a71a5244d2c0a06968eaf1"
+      },
+      {
+        "path": "tests/validate-creator-resource-meta-test.mjs",
+        "bytes": 9052,
+        "sha256": "85ad9ad987f229cd7f20c32a10af354b8bf8fe8ac969e3bb3b3ea52e2bfeef11"
+      },
+      {
+        "path": "tests/verify-release-rights.test.mjs",
+        "bytes": 11952,
+        "sha256": "387484a5f00ff72c067f46a1530fdfeafc98565e05cac815708c583400d34401"
+      },
+      {
+        "path": "tests/verify-web-mobile-build.test.mjs",
+        "bytes": 15961,
+        "sha256": "01efa42633e72127ff2fcd3536a3d18d88972970e6f7f3c1c734515f80b5297e"
+      }
+    ]
+  }
+}

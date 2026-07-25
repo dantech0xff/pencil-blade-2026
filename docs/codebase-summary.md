@@ -51,7 +51,7 @@ Snapshot generated from a temporary local Repomix XML export on 2026-07-24; `rep
 - Preserving six production gameplay routes: Classic, Crazy, GN Style, Classic Bird, Crazy Bird, and Combo Bird.
 - Separating preservation from distribution: the recovered-reconstruction manifest is non-shipping, and the public-release variant manifest keeps web publication blocked pending rights approval.
 - Producing an audited Android debug APK and an audited local H5 tree without executing the original application.
-- Repository checkpoint reports record `182/182` top-level Node tests, `1567/1567` vertical-slice tests, and `1749/1749` total, alongside Creator `3.8.8` strict TypeScript and artifact audits.
+- Current closeout records `129/129` top-level Node tests, `1568/1568` vertical-slice tests, and `1697/1697` total, alongside Creator `3.8.8` strict TypeScript, artifact audits, runtime matrices, and the frozen fidelity suite.
 - The Android wrapper now binds the APK signer SHA-256 to a trusted debug keystore and requires the singleton `arm64-v8a` ABI; the release validator rejects pending exceptions and impossible calendar dates.
 
 ## Current Gates

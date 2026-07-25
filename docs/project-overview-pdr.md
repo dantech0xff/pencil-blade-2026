@@ -110,14 +110,16 @@ replay, and device comparison are unavailable and are not project gates.
   errors; one unrelated Chrome extension error remains outside the game.
 - Compact `360x800` and high `720x1280` Creator Preview profiles also pass Main Menu →
   Options selection/purchase/Back with an empty Cocos Editor console.
-- The current composition/Classic-Pause checkpoint passes `218/218` focused tests,
-  `1547/1547` full vertical-slice tests, `61/61` top-level resource/build/catalog/tooling
-  tests, and Creator 3.8.8 strict TypeScript with zero diagnostics. Recovered Loading remains
+- The current closeout passes `218/218` focused tests, `1568/1568` full vertical-slice tests,
+  `129/129` top-level Node tests, and Creator 3.8.8 strict TypeScript with zero diagnostics.
+  Recovered Loading remains
   Preview-clean in compact logical `480x800` plus high `720x1280`. The final Cocos counters
   are `0/0/0`; DevTools has no project error, and its only error comes from a Chrome extension.
 - Presentation restoration uses the sole-source APK corpus. It has `100%` inventory,
   exact-byte staging, and reconciliation classification for all `862` game assets. That is
-  separate from the current `761/862` runtime consumer coverage and final fidelity score.
+  separate from the current `761/862` runtime consumer coverage and the recovered-unit
+  fidelity score. Metric `1.1.0` reports every domain at `100%` while disclosing 12
+  non-recovered assertions outside the score.
 - No canonical graphics, animation frame, sound, music, font, shader/material, level/layout,
   progression, or other game resource may be silently omitted or substituted.
 - Creator's Android API 21+ floor is an explicit platform-envelope change from the original

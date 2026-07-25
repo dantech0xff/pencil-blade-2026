@@ -7,6 +7,7 @@ export LC_ALL
 EXPECTED_SHA256="55385c170f08c45c6a36358c6cac6f4b82104475ae8d2efd22c9187d1038500e"
 EXPECTED_BYTES="4734880"
 LLVM_THUMB_TRIPLE="thumbv5te-none-linux-android"
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 usage() {
   cat <<'EOF'
@@ -15,10 +16,7 @@ Usage:
 
 Optional tool overrides:
   GNU_READELF_BIN, GNU_OBJDUMP_BIN, LLVM_READOBJ_BIN, LLVM_OBJDUMP_BIN,
-  LLVM_NM_BIN, LLVM_CXXFILT_BIN, STRINGS_BIN
-
-Optional output:
-  FULL_GNU_DISASSEMBLY=1 writes disassembly/gnu-full.txt.
+  LLVM_NM_BIN, LLVM_CXXFILT_BIN, STRINGS_BIN, NODE_BIN
 
 This command performs static inspection only. It never executes, loads, links, patches,
 or otherwise modifies the native input.
@@ -225,7 +223,7 @@ generate_function_inventory() {
   raw_tsv="$OUTPUT_DIR/symbols/functions-raw.tsv"
   demangled_txt="$OUTPUT_DIR/symbols/functions-demangled.txt"
   inventory_csv="$OUTPUT_DIR/function-inventory.csv"
-  app_inventory_csv="$OUTPUT_DIR/app-function-inventory.csv"
+  app_inventory_csv="$OUTPUT_DIR/app-function-base.csv"
 
   awk '
     function hex_to_decimal(text, index_value, digit, total) {
@@ -346,6 +344,7 @@ analyze() {
   LLVM_NM=$(resolve_llvm_tool llvm-nm "${LLVM_NM_BIN:-}")
   LLVM_CXXFILT=$(resolve_llvm_tool llvm-cxxfilt "${LLVM_CXXFILT_BIN:-}")
   STRINGS=$(resolve_regular_tool strings "${STRINGS_BIN:-}")
+  NODE_JS=$(resolve_regular_tool node "${NODE_BIN:-}")
   validate_toolchain
   strings_hash=$(sha256_file "$STRINGS")
 
@@ -367,7 +366,7 @@ analyze() {
   } > "$OUTPUT_DIR/input.txt"
 
   {
-    printf 'analyzer-script=2\n'
+    printf 'analyzer-script=3\n'
     printf 'gnu-readelf=%s | %s\n' "$GNU_READELF" "$(first_version_line "$GNU_READELF")"
     printf 'gnu-objdump=%s | %s\n' "$GNU_OBJDUMP" "$(first_version_line "$GNU_OBJDUMP")"
     printf 'llvm-readobj=%s | %s\n' "$LLVM_READOBJ" "$(first_version_line "$LLVM_READOBJ")"
@@ -375,6 +374,7 @@ analyze() {
     printf 'llvm-nm=%s | %s\n' "$LLVM_NM" "$(first_version_line "$LLVM_NM")"
     printf 'llvm-cxxfilt=%s | %s\n' "$LLVM_CXXFILT" "$(first_version_line "$LLVM_CXXFILT")"
     printf 'strings=%s | version=unavailable | executable-sha256=%s\n' "$STRINGS" "$strings_hash"
+    printf 'node=%s | %s\n' "$NODE_JS" "$("$NODE_JS" --version)"
   } > "$OUTPUT_DIR/tool-versions.txt"
 
   {
@@ -386,7 +386,8 @@ analyze() {
     printf 'strings -a -t x <lib>\n'
     printf 'gnu-objdump -d -C --start-address=<normalized> --stop-address=<normalized+size> <lib>\n'
     printf 'llvm-objdump -d -C --triple=%s --start-address=<normalized> --stop-address=<normalized+size> <lib>\n' "$LLVM_THUMB_TRIPLE"
-    printf 'FULL_GNU_DISASSEMBLY=%s\n' "${FULL_GNU_DISASSEMBLY:-0}"
+    printf 'gnu-objdump -d -C <lib> > disassembly/gnu-full.txt\n'
+    printf 'node enrich-native-function-map.mjs <base.csv> <gnu-full.txt> <strings.txt> <lib> <program-headers.txt> <sections.txt> <output.csv> <summary.json>\n'
   } > "$OUTPUT_DIR/commands.txt"
 
   printf '%s\n' "$input_header" > "$OUTPUT_DIR/gnu/elf-header.txt"
@@ -416,9 +417,16 @@ analyze() {
     "$OUTPUT_DIR/strings/all-offsets.txt" > "$OUTPUT_DIR/resource-looking-strings.txt"
 
   generate_disassembly_samples
-  if [ "${FULL_GNU_DISASSEMBLY:-0}" = "1" ]; then
-    "$GNU_OBJDUMP" -d -C "$INPUT_LIB" > "$OUTPUT_DIR/disassembly/gnu-full.txt"
-  fi
+  "$GNU_OBJDUMP" -d -C "$INPUT_LIB" > "$OUTPUT_DIR/disassembly/gnu-full.txt"
+  "$NODE_JS" "$SCRIPT_DIR/enrich-native-function-map.mjs" \
+    "$OUTPUT_DIR/app-function-base.csv" \
+    "$OUTPUT_DIR/disassembly/gnu-full.txt" \
+    "$OUTPUT_DIR/strings/all-offsets.txt" \
+    "$INPUT_LIB" \
+    "$OUTPUT_DIR/gnu/program-headers.txt" \
+    "$OUTPUT_DIR/gnu/sections.txt" \
+    "$OUTPUT_DIR/app-function-inventory.csv" \
+    "$OUTPUT_DIR/function-enrichment-summary.json"
 
   named_symbols=$(wc -l < "$OUTPUT_DIR/symbols/dynamic-raw.txt" | tr -d '[:space:]')
   defined_symbols=$("$LLVM_NM" --dynamic --defined-only "$INPUT_LIB" | wc -l | tr -d '[:space:]')

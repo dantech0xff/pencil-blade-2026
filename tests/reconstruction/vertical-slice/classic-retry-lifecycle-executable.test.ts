@@ -75,6 +75,7 @@ export class Mesh {
       vertexBuffers: [{ update() {} }],
     }];
   }
+  initialize() {}
   destroy() { this.destroyed = true; }
 }
 

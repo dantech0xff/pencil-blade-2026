@@ -59,6 +59,7 @@ export class Mesh {
       }],
     }];
   }
+  initialize() {}
   destroy() { this.destroyed = true; }
 }
 

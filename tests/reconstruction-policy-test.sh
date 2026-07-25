@@ -194,7 +194,13 @@ while IFS="$tab" read -r evidence_id relative_path expected_hash expected_bytes;
   [ "$actual_hash" = "$expected_hash" ] || fail "policy hash mismatch: $evidence_id"
   [ "$actual_bytes" = "$expected_bytes" ] || fail "policy byte count mismatch: $evidence_id"
 
-  row=$(grep -F "| $evidence_id |" "$REGISTER" || true)
+  row=$(awk -F '|' -v id="$evidence_id" '
+    {
+      value=$2
+      gsub(/^[ \t]+|[ \t]+$/, "", value)
+      if (value == id) print
+    }
+  ' "$REGISTER")
   [ -n "$row" ] || fail "contract is not registered: $evidence_id"
   registered_hash=$(printf '%s\n' "$row" | awk -F '|' '{ value=$6; gsub(/[ `]/, "", value); print value }')
   registered_bytes=$(printf '%s\n' "$row" | awk -F '|' '{ value=$7; gsub(/[ ,]/, "", value); print value }')

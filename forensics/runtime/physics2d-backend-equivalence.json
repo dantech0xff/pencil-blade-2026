@@ -1,0 +1,293 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T03:51:11.079Z",
+  "backend": {
+    "package": "@cocos/box2d",
+    "version": "1.0.2",
+    "implementation": "Cocos Creator Web Mobile @cocos/box2d UMD backend",
+    "path": "game/node_modules/@cocos/box2d/build/box2d/box2d.umd.js",
+    "bytes": 971913,
+    "sha256": "5a049f0608085d1e000117368764e7ffea72f5b29869b76d87d8fc94322fa717"
+  },
+  "recoveredContract": {
+    "source": "forensics/contracts/classic-physics-contract.md",
+    "creatorAdapter": "game/assets/scripts/creator/classic-physics-adapter.ts",
+    "unitAndAdapterTests": [
+      "tests/reconstruction/vertical-slice/classic-physics-adapter.test.ts",
+      "tests/reconstruction/vertical-slice/classic-blade-physics.test.ts",
+      "tests/reconstruction/vertical-slice/bird-blade-ray-adapter.test.ts",
+      "tests/reconstruction/vertical-slice/classic-variable-step.test.ts"
+    ]
+  },
+  "trajectory": {
+    "gravityMetresPerSecondSquared": {
+      "x": 0,
+      "y": -10
+    },
+    "creatorGravityWorldUnitsPerSecondSquared": {
+      "x": 0,
+      "y": -320
+    },
+    "rows": [
+      {
+        "deltaSeconds": 0.008333333333333333,
+        "iterations": {
+          "velocity": 10,
+          "position": 10
+        },
+        "initial": {
+          "position": {
+            "x": 0,
+            "y": 10
+          },
+          "velocity": {
+            "x": 2,
+            "y": 4
+          }
+        },
+        "expected": {
+          "position": {
+            "x": 0.016666666666666666,
+            "y": 10.032638888888888
+          },
+          "velocity": {
+            "x": 2,
+            "y": 3.9166666666666665
+          }
+        },
+        "actual": {
+          "position": {
+            "x": 0.01666666753590107,
+            "y": 10.032638549804688
+          },
+          "velocity": {
+            "x": 2,
+            "y": 3.9166667461395264
+          }
+        },
+        "status": "pass"
+      },
+      {
+        "deltaSeconds": 0.016666666666666666,
+        "iterations": {
+          "velocity": 10,
+          "position": 10
+        },
+        "initial": {
+          "position": {
+            "x": 0,
+            "y": 10
+          },
+          "velocity": {
+            "x": 2,
+            "y": 4
+          }
+        },
+        "expected": {
+          "position": {
+            "x": 0.03333333333333333,
+            "y": 10.063888888888888
+          },
+          "velocity": {
+            "x": 2,
+            "y": 3.8333333333333335
+          }
+        },
+        "actual": {
+          "position": {
+            "x": 0.03333333507180214,
+            "y": 10.063888549804688
+          },
+          "velocity": {
+            "x": 2,
+            "y": 3.8333332538604736
+          }
+        },
+        "status": "pass"
+      },
+      {
+        "deltaSeconds": 0.03333333333333333,
+        "iterations": {
+          "velocity": 10,
+          "position": 10
+        },
+        "initial": {
+          "position": {
+            "x": 0,
+            "y": 10
+          },
+          "velocity": {
+            "x": 2,
+            "y": 4
+          }
+        },
+        "expected": {
+          "position": {
+            "x": 0.06666666666666667,
+            "y": 10.122222222222222
+          },
+          "velocity": {
+            "x": 2,
+            "y": 3.6666666666666665
+          }
+        },
+        "actual": {
+          "position": {
+            "x": 0.06666667014360428,
+            "y": 10.122221946716309
+          },
+          "velocity": {
+            "x": 2,
+            "y": 3.6666667461395264
+          }
+        },
+        "status": "pass"
+      }
+    ],
+    "status": "pass"
+  },
+  "raycast": {
+    "publicCreatorBoundary": "world-coordinate endpoints enter ClassicPhysicsAdapter unchanged; Creator applies PTM once before this backend",
+    "start": {
+      "x": -5,
+      "y": 0
+    },
+    "end": {
+      "x": 5,
+      "y": 0
+    },
+    "forward": [
+      {
+        "bodyId": "right",
+        "fraction": 0.55,
+        "point": {
+          "x": 0.5,
+          "y": 0
+        },
+        "normal": {
+          "x": -1,
+          "y": 0
+        }
+      },
+      {
+        "bodyId": "left",
+        "fraction": 0.35,
+        "point": {
+          "x": -1.5,
+          "y": 0
+        },
+        "normal": {
+          "x": -1,
+          "y": 0
+        }
+      }
+    ],
+    "reverse": [
+      {
+        "bodyId": "right",
+        "fraction": 0.35,
+        "point": {
+          "x": 1.5,
+          "y": 0
+        },
+        "normal": {
+          "x": 1,
+          "y": 0
+        }
+      },
+      {
+        "bodyId": "left",
+        "fraction": 0.55,
+        "point": {
+          "x": -0.5,
+          "y": 0
+        },
+        "normal": {
+          "x": 1,
+          "y": 0
+        }
+      }
+    ],
+    "concatenation": [
+      "right",
+      "left",
+      "right",
+      "left"
+    ],
+    "duplicateFixtureOccurrencesPreserved": true,
+    "status": "pass"
+  },
+  "contactAndLifecycle": {
+    "collisionRows": {
+      "fruit": {
+        "categoryBits": 1,
+        "groupIndex": 0,
+        "maskBits": 65532
+      },
+      "bomb": {
+        "categoryBits": 2,
+        "groupIndex": 0,
+        "maskBits": 1
+      },
+      "electric": {
+        "categoryBits": 3,
+        "groupIndex": 0,
+        "maskBits": 2
+      }
+    },
+    "acceptedBombElectric": {
+      "beginContacts": 1,
+      "directDestroyRejectedWhileLocked": true,
+      "lockedDuringCallback": true,
+      "bodyCountBeforeStep": 2,
+      "bodyCountAfterStep": 2,
+      "bodyCountAfterDeferredFlush": 1,
+      "deferredOperations": 1,
+      "lockedAfterStep": false,
+      "status": "pass"
+    },
+    "rejectedFruitBomb": {
+      "beginContacts": 0,
+      "directDestroyRejectedWhileLocked": false,
+      "lockedDuringCallback": false,
+      "bodyCountBeforeStep": 2,
+      "bodyCountAfterStep": 2,
+      "bodyCountAfterDeferredFlush": 2,
+      "deferredOperations": 0,
+      "lockedAfterStep": false,
+      "status": "pass"
+    },
+    "lifecycleRule": "Mutation from a contact callback is rejected while the world is locked; queued destruction succeeds after Step returns.",
+    "status": "pass"
+  },
+  "equivalenceDecision": {
+    "metricScope": "recovered-contract-to-Creator-3.8.8-selected-backend",
+    "originalRuntimeObservation": false,
+    "trajectory": "pass",
+    "raycast": "pass",
+    "contact": "pass",
+    "lifecycle": "pass",
+    "status": "pass"
+  },
+  "residuals": [
+    {
+      "id": "original-runtime-unobservable",
+      "classification": "evidence-limit",
+      "effectOnCoverage": "excluded-from-recovered-credit",
+      "statement": "The original APK runtime is unavailable, so this probe does not claim empirical frame-by-frame identity with the legacy executable."
+    },
+    {
+      "id": "backend-ray-ordering-not-contractual",
+      "classification": "compatibility-boundary",
+      "effectOnCoverage": "ordering-is-recorded-not-assumed",
+      "statement": "Box2D does not promise nearest-first callback order; fidelity preserves actual forward results followed by actual reverse results without sorting or deduplication."
+    },
+    {
+      "id": "electric-native-layout-defect",
+      "classification": "reviewed-exception",
+      "effectOnCoverage": "memory-unsafe-native-access-not-reproduced",
+      "statement": "The recovered invalid electric-contact native layout is replaced by type-safe Creator contact handling while preserving the bilateral filter outcome."
+    }
+  ],
+  "status": "pass"
+}

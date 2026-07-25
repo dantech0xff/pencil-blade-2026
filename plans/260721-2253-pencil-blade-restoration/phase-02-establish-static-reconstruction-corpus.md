@@ -1,7 +1,7 @@
 ---
 phase: 2
 title: "Establish Static Reconstruction Corpus"
-status: in-progress
+status: completed
 priority: P1
 dependencies: []
 effort: "1-3 weeks"
@@ -90,7 +90,7 @@ never raw native code as implementation input.
 - [x] Resource-usage cross-reference
 - [x] Evidence-status and unknowns ledger
 - [x] Contract citation format
-- [ ] Enrich application function records with call, constant, string-xref, and review-state fields
+- [x] Enrich application function records with call, constant, string-xref, and review-state fields
 
 ## Success Criteria
 

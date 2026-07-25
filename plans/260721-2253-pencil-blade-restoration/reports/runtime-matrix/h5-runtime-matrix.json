@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T03:42:49.264Z",
+  "browser": {
+    "product": "Google Chrome",
+    "version": "150.0.7871.182",
+    "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+  },
+  "build": {
+    "directory": "game/build/web-mobile-pages",
+    "files": 2539,
+    "bytes": 39613694,
+    "treeDigestSha256": "90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54",
+    "pagesPrefix": "/pencil-blade-2026/"
+  },
+  "rows": [
+    {
+      "id": "chrome-480x800",
+      "viewport": {
+        "width": 480,
+        "height": 800,
+        "devicePixelRatio": 1
+      },
+      "input": {
+        "newGameGestureChangedFrame": true,
+        "classicGestureChangedFrame": true,
+        "mainMenuSha256": "0d85eb3df2c59a50d9247068e968e89c249ab8d818383a048ff4df8173519b02",
+        "modeSelectSha256": "8509bdc6266717a250db5ecebc6db8ce4acdb5fbf4297647b65dab314b1c78d0",
+        "gameplaySha256": "92ef70011d61f2f61317bf22039c0d927b3e92d67b81f62c40d01434fd31d176"
+      },
+      "audio": {
+        "beforeInput": {
+          "trackedContextStates": [
+            "running"
+          ],
+          "htmlAudioElements": 0
+        },
+        "afterInput": {
+          "trackedContextStates": [
+            "running"
+          ],
+          "htmlAudioElements": 0
+        },
+        "backendAvailable": true
+      },
+      "storage": {
+        "beforeLifecycle": {
+          "count": 1,
+          "keys": [
+            "__pencil_blade_runtime_matrix__"
+          ],
+          "probeValue": "chrome-480x800:pencil-blade-runtime-matrix"
+        },
+        "afterLifecycle": {
+          "count": 1,
+          "keys": [
+            "__pencil_blade_runtime_matrix__"
+          ],
+          "probeValue": "chrome-480x800:pencil-blade-runtime-matrix"
+        },
+        "retainedAcrossLifecycle": true,
+        "probeRemovedAfterTest": true
+      },
+      "lifecycle": {
+        "backgroundForeground": "pass",
+        "canvasVisibleAfterResume": true
+      },
+      "orientation": {
+        "declared": "portrait",
+        "landscapeDiagnostic": {
+          "backingWidth": 800,
+          "backingHeight": 480,
+          "clientWidth": 800,
+          "clientHeight": 480,
+          "left": 0,
+          "top": 0,
+          "viewportWidth": 800,
+          "viewportHeight": 480,
+          "bodyScrollWidth": 800,
+          "bodyScrollHeight": 480,
+          "devicePixelRatio": 1
+        },
+        "restoredPortrait": {
+          "backingWidth": 480,
+          "backingHeight": 800,
+          "clientWidth": 480,
+          "clientHeight": 800,
+          "left": 0,
+          "top": 0,
+          "viewportWidth": 480,
+          "viewportHeight": 800,
+          "bodyScrollWidth": 480,
+          "bodyScrollHeight": 800,
+          "devicePixelRatio": 1
+        }
+      },
+      "offline": {
+        "postLoadGameplay": "pass",
+        "canvasVisible": true
+      },
+      "console": {
+        "messages": [
+          {
+            "type": "timeEnd",
+            "text": "LoadScene db://assets/scenes/classic.scene: 12.2548828125 ms"
+          }
+        ],
+        "pageErrors": [],
+        "requestFailures": []
+      },
+      "screenshots": [
+        "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/chrome-480x800-main-menu.png",
+        "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/chrome-480x800-mode-select.png",
+        "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/chrome-480x800-classic.png"
+      ],
+      "status": "pass"
+    },
+    {
+      "id": "chrome-720x1280",
+      "viewport": {
+        "width": 720,
+        "height": 1280,
+        "devicePixelRatio": 1
+      },
+      "input": {
+        "newGameGestureChangedFrame": true,
+        "classicGestureChangedFrame": true,
+        "mainMenuSha256": "194cbf5feaa5ffc60c46c21435e6a9d4e935a44cb0a2bf1c91006f15dd4cb907",
+        "modeSelectSha256": "93c23e5c748ed068f85342d0c91157774f6db247bb483804ed858e5eb0cd1338",
+        "gameplaySha256": "828e8ff898c3fb0ddddb7730a790102ec27a089102ccb1ca356ce09ccf84fd86"
+      },
+      "audio": {
+        "beforeInput": {
+          "trackedContextStates": [
+            "running"
+          ],
+          "htmlAudioElements": 0
+        },
+        "afterInput": {
+          "trackedContextStates": [
+            "running"
+          ],
+          "htmlAudioElements": 0
+        },
+        "backendAvailable": true
+      },
+      "storage": {
+        "beforeLifecycle": {
+          "count": 1,
+          "keys": [
+            "__pencil_blade_runtime_matrix__"
+          ],
+          "probeValue": "chrome-720x1280:pencil-blade-runtime-matrix"
+        },
+        "afterLifecycle": {
+          "count": 1,
+          "keys": [
+            "__pencil_blade_runtime_matrix__"
+          ],
+          "probeValue": "chrome-720x1280:pencil-blade-runtime-matrix"
+        },
+        "retainedAcrossLifecycle": true,
+        "probeRemovedAfterTest": true
+      },
+      "lifecycle": {
+        "backgroundForeground": "pass",
+        "canvasVisibleAfterResume": true
+      },
+      "orientation": {
+        "declared": "portrait",
+        "landscapeDiagnostic": {
+          "backingWidth": 1280,
+          "backingHeight": 720,
+          "clientWidth": 1280,
+          "clientHeight": 720,
+          "left": 0,
+          "top": 0,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "bodyScrollWidth": 1280,
+          "bodyScrollHeight": 720,
+          "devicePixelRatio": 1
+        },
+        "restoredPortrait": {
+          "backingWidth": 720,
+          "backingHeight": 1280,
+          "clientWidth": 720,
+          "clientHeight": 1280,
+          "left": 0,
+          "top": 0,
+          "viewportWidth": 720,
+          "viewportHeight": 1280,
+          "bodyScrollWidth": 720,
+          "bodyScrollHeight": 1280,
+          "devicePixelRatio": 1
+        }
+      },
+      "offline": {
+        "postLoadGameplay": "pass",
+        "canvasVisible": true
+      },
+      "console": {
+        "messages": [
+          {
+            "type": "timeEnd",
+            "text": "LoadScene db://assets/scenes/classic.scene: 10.9580078125 ms"
+          }
+        ],
+        "pageErrors": [],
+        "requestFailures": []
+      },
+      "screenshots": [
+        "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/chrome-720x1280-main-menu.png",
+        "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/chrome-720x1280-mode-select.png",
+        "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/chrome-720x1280-classic.png"
+      ],
+      "status": "pass"
+    }
+  ],
+  "requestSummary": {
+    "total": 2408,
+    "outsidePagesPrefix": 0
+  },
+  "status": "pass"
+}

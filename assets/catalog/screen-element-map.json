@@ -1,0 +1,5265 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": [
+    "assets/catalog/creator-staging-manifest.json",
+    "forensics/resources/resource-usage-map.json"
+  ],
+  "coordinatePolicy": {
+    "designResolution": "720x1280 portrait",
+    "compactResourceTree": "480x800",
+    "highResourceTree": "720x1280",
+    "anchorPolicy": "Use recovered visible-rectangle coordinates and explicit normalized anchors from the cited presentation sources.",
+    "cropAndScaling": "Select the compact or high exact-byte tree through resolution-profile-service; do not infer layout from physical framebuffer pixels."
+  },
+  "summary": {
+    "consumerContracts": 18,
+    "mappedPhysicalAssets": 761,
+    "generatedPrimitives": 5,
+    "staticScreenSignals": 9,
+    "unclassifiedSignals": 0
+  },
+  "consumers": [
+    {
+      "id": "about",
+      "kind": "screen",
+      "title": "About / offline links",
+      "layoutSources": [
+        "game/assets/scripts/domain/about-presentation.ts",
+        "forensics/contracts/main-menu-presentation-contract.md"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Backgrounds/aboutbackground.png",
+          "logicalId": "image:Backgrounds/aboutbackground",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-email-normal.png",
+          "logicalId": "image:Buttons/button-email-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-email-selected.png",
+          "logicalId": "image:Buttons/button-email-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-like-normal.png",
+          "logicalId": "image:Buttons/button-like-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-like-selected.png",
+          "logicalId": "image:Buttons/button-like-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-menu-normal.png",
+          "logicalId": "image:Buttons/button-menu-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-menu-selected.png",
+          "logicalId": "image:Buttons/button-menu-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-review-normal.png",
+          "logicalId": "image:Buttons/button-review-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-review-selected.png",
+          "logicalId": "image:Buttons/button-review-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/heart.png",
+          "logicalId": "image:Interfaces/heart",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/aboutbackground.png",
+          "logicalId": "image:Backgrounds/aboutbackground",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-email-normal.png",
+          "logicalId": "image:Buttons/button-email-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-email-selected.png",
+          "logicalId": "image:Buttons/button-email-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-like-normal.png",
+          "logicalId": "image:Buttons/button-like-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-like-selected.png",
+          "logicalId": "image:Buttons/button-like-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-menu-normal.png",
+          "logicalId": "image:Buttons/button-menu-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-menu-selected.png",
+          "logicalId": "image:Buttons/button-menu-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-review-normal.png",
+          "logicalId": "image:Buttons/button-review-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-review-selected.png",
+          "logicalId": "image:Buttons/button-review-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/heart.png",
+          "logicalId": "image:Interfaces/heart",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "Sounds/menubuttonclick.wav",
+          "logicalId": "audio:Sounds/menubuttonclick",
+          "elementType": "audio"
+        }
+      ],
+      "generatedPrimitiveIds": []
+    },
+    {
+      "id": "base-gameplay",
+      "kind": "shared-screen",
+      "title": "Gameplay pause and shared overlays",
+      "layoutSources": [
+        "game/assets/scripts/domain/base-gameplay-pause-state.ts",
+        "game/assets/scripts/domain/base-gameplay-resource-contract.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmasfive.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmasfour.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfour",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-pause-normal.png",
+          "logicalId": "image:Buttons/button-pause-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-pause-selected.png",
+          "logicalId": "image:Buttons/button-pause-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-quit-normal.png",
+          "logicalId": "image:Buttons/button-quit-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-quit-selected.png",
+          "logicalId": "image:Buttons/button-quit-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-replay-normal.png",
+          "logicalId": "image:Buttons/button-replay-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-replay-selected.png",
+          "logicalId": "image:Buttons/button-replay-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-resume-normal.png",
+          "logicalId": "image:Buttons/button-resume-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-resume-selected.png",
+          "logicalId": "image:Buttons/button-resume-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Objectives/next_objectives_message.png",
+          "logicalId": "image:Objectives/next_objectives_message",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Objectives/objectives-pause-background.png",
+          "logicalId": "image:Objectives/objectives-pause-background",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Objectives/objectives_message.png",
+          "logicalId": "image:Objectives/objectives_message",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmasfive.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmasfour.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfour",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-pause-normal.png",
+          "logicalId": "image:Buttons/button-pause-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-pause-selected.png",
+          "logicalId": "image:Buttons/button-pause-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-quit-normal.png",
+          "logicalId": "image:Buttons/button-quit-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-quit-selected.png",
+          "logicalId": "image:Buttons/button-quit-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-replay-normal.png",
+          "logicalId": "image:Buttons/button-replay-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-replay-selected.png",
+          "logicalId": "image:Buttons/button-replay-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-resume-normal.png",
+          "logicalId": "image:Buttons/button-resume-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-resume-selected.png",
+          "logicalId": "image:Buttons/button-resume-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Objectives/next_objectives_message.png",
+          "logicalId": "image:Objectives/next_objectives_message",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Objectives/objectives-pause-background.png",
+          "logicalId": "image:Objectives/objectives-pause-background",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Objectives/objectives_message.png",
+          "logicalId": "image:Objectives/objectives_message",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "Fonts/Arial.ttf",
+          "logicalId": "font:Fonts/Arial",
+          "elementType": "font"
+        }
+      ],
+      "generatedPrimitiveIds": []
+    },
+    {
+      "id": "bird",
+      "kind": "gameplay-system",
+      "title": "Bird blade",
+      "layoutSources": [
+        "game/assets/scripts/domain/bird-resource-contract.ts",
+        "game/assets/scripts/creator/bird-blade-presenter.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-0.png",
+          "logicalId": "image:Birds/bird-anim-1-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-1.png",
+          "logicalId": "image:Birds/bird-anim-1-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-2.png",
+          "logicalId": "image:Birds/bird-anim-1-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-3.png",
+          "logicalId": "image:Birds/bird-anim-1-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-4.png",
+          "logicalId": "image:Birds/bird-anim-1-4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-5.png",
+          "logicalId": "image:Birds/bird-anim-1-5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-6.png",
+          "logicalId": "image:Birds/bird-anim-1-6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-7.png",
+          "logicalId": "image:Birds/bird-anim-1-7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-8.png",
+          "logicalId": "image:Birds/bird-anim-1-8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-9.png",
+          "logicalId": "image:Birds/bird-anim-1-9",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-0.png",
+          "logicalId": "image:Birds/bird-anim-2-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-1.png",
+          "logicalId": "image:Birds/bird-anim-2-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-2.png",
+          "logicalId": "image:Birds/bird-anim-2-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-3.png",
+          "logicalId": "image:Birds/bird-anim-2-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-4.png",
+          "logicalId": "image:Birds/bird-anim-2-4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-5.png",
+          "logicalId": "image:Birds/bird-anim-2-5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-6.png",
+          "logicalId": "image:Birds/bird-anim-2-6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-7.png",
+          "logicalId": "image:Birds/bird-anim-2-7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-8.png",
+          "logicalId": "image:Birds/bird-anim-2-8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-9.png",
+          "logicalId": "image:Birds/bird-anim-2-9",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-0.png",
+          "logicalId": "image:Birds/bird-anim-3-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-1.png",
+          "logicalId": "image:Birds/bird-anim-3-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-2.png",
+          "logicalId": "image:Birds/bird-anim-3-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-3.png",
+          "logicalId": "image:Birds/bird-anim-3-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-4.png",
+          "logicalId": "image:Birds/bird-anim-3-4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-5.png",
+          "logicalId": "image:Birds/bird-anim-3-5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-6.png",
+          "logicalId": "image:Birds/bird-anim-3-6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-7.png",
+          "logicalId": "image:Birds/bird-anim-3-7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-8.png",
+          "logicalId": "image:Birds/bird-anim-3-8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-9.png",
+          "logicalId": "image:Birds/bird-anim-3-9",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-left-1.png",
+          "logicalId": "image:Birds/bird-left-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-left-2.png",
+          "logicalId": "image:Birds/bird-left-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-left-3.png",
+          "logicalId": "image:Birds/bird-left-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-right-1.png",
+          "logicalId": "image:Birds/bird-right-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-right-2.png",
+          "logicalId": "image:Birds/bird-right-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-right-3.png",
+          "logicalId": "image:Birds/bird-right-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmascircle.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmascircle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmasfive.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmasfour.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfour",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmashexa.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmashexa",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/testblade7.png",
+          "logicalId": "image:Blades/testblade7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-0.png",
+          "logicalId": "image:Birds/bird-anim-1-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-1.png",
+          "logicalId": "image:Birds/bird-anim-1-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-2.png",
+          "logicalId": "image:Birds/bird-anim-1-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-3.png",
+          "logicalId": "image:Birds/bird-anim-1-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-4.png",
+          "logicalId": "image:Birds/bird-anim-1-4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-5.png",
+          "logicalId": "image:Birds/bird-anim-1-5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-6.png",
+          "logicalId": "image:Birds/bird-anim-1-6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-7.png",
+          "logicalId": "image:Birds/bird-anim-1-7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-8.png",
+          "logicalId": "image:Birds/bird-anim-1-8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-9.png",
+          "logicalId": "image:Birds/bird-anim-1-9",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-0.png",
+          "logicalId": "image:Birds/bird-anim-2-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-1.png",
+          "logicalId": "image:Birds/bird-anim-2-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-2.png",
+          "logicalId": "image:Birds/bird-anim-2-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-3.png",
+          "logicalId": "image:Birds/bird-anim-2-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-4.png",
+          "logicalId": "image:Birds/bird-anim-2-4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-5.png",
+          "logicalId": "image:Birds/bird-anim-2-5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-6.png",
+          "logicalId": "image:Birds/bird-anim-2-6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-7.png",
+          "logicalId": "image:Birds/bird-anim-2-7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-8.png",
+          "logicalId": "image:Birds/bird-anim-2-8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-9.png",
+          "logicalId": "image:Birds/bird-anim-2-9",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-0.png",
+          "logicalId": "image:Birds/bird-anim-3-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-1.png",
+          "logicalId": "image:Birds/bird-anim-3-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-2.png",
+          "logicalId": "image:Birds/bird-anim-3-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-3.png",
+          "logicalId": "image:Birds/bird-anim-3-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-4.png",
+          "logicalId": "image:Birds/bird-anim-3-4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-5.png",
+          "logicalId": "image:Birds/bird-anim-3-5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-6.png",
+          "logicalId": "image:Birds/bird-anim-3-6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-7.png",
+          "logicalId": "image:Birds/bird-anim-3-7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-8.png",
+          "logicalId": "image:Birds/bird-anim-3-8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-9.png",
+          "logicalId": "image:Birds/bird-anim-3-9",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-left-1.png",
+          "logicalId": "image:Birds/bird-left-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-left-2.png",
+          "logicalId": "image:Birds/bird-left-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-left-3.png",
+          "logicalId": "image:Birds/bird-left-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-right-1.png",
+          "logicalId": "image:Birds/bird-right-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-right-2.png",
+          "logicalId": "image:Birds/bird-right-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-right-3.png",
+          "logicalId": "image:Birds/bird-right-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmascircle.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmascircle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmasfive.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmasfour.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfour",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmashexa.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmashexa",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/testblade7.png",
+          "logicalId": "image:Blades/testblade7",
+          "elementType": "raster"
+        }
+      ],
+      "generatedPrimitiveIds": []
+    },
+    {
+      "id": "classic-audio",
+      "kind": "audio-system",
+      "title": "Classic audio",
+      "layoutSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "Sounds/apple.wav",
+          "logicalId": "audio:Sounds/apple",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/banana.wav",
+          "logicalId": "audio:Sounds/banana",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/boomexplosion.wav",
+          "logicalId": "audio:Sounds/boomexplosion",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/boomsound.wav",
+          "logicalId": "audio:Sounds/boomsound",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/boomtoss.wav",
+          "logicalId": "audio:Sounds/boomtoss",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/cheer.wav",
+          "logicalId": "audio:Sounds/cheer",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/compo1.wav",
+          "logicalId": "audio:Sounds/compo1",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/compo2.wav",
+          "logicalId": "audio:Sounds/compo2",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/compo3.wav",
+          "logicalId": "audio:Sounds/compo3",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/critical.wav",
+          "logicalId": "audio:Sounds/critical",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/firstplace.wav",
+          "logicalId": "audio:Sounds/firstplace",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/gameplayselected.wav",
+          "logicalId": "audio:Sounds/gameplayselected",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/mainmenumusic.mp3",
+          "logicalId": "audio:Sounds/mainmenumusic",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/mangosteen.wav",
+          "logicalId": "audio:Sounds/mangosteen",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/menubuttonclick.wav",
+          "logicalId": "audio:Sounds/menubuttonclick",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/mono1.wav",
+          "logicalId": "audio:Sounds/mono1",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/mono2.wav",
+          "logicalId": "audio:Sounds/mono2",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/secondplace.wav",
+          "logicalId": "audio:Sounds/secondplace",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/strawberry.wav",
+          "logicalId": "audio:Sounds/strawberry",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh1.wav",
+          "logicalId": "audio:Sounds/swoosh1",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh2.wav",
+          "logicalId": "audio:Sounds/swoosh2",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh3.wav",
+          "logicalId": "audio:Sounds/swoosh3",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh4.wav",
+          "logicalId": "audio:Sounds/swoosh4",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh5.wav",
+          "logicalId": "audio:Sounds/swoosh5",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh6.wav",
+          "logicalId": "audio:Sounds/swoosh6",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh7.wav",
+          "logicalId": "audio:Sounds/swoosh7",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh8.wav",
+          "logicalId": "audio:Sounds/swoosh8",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh9.wav",
+          "logicalId": "audio:Sounds/swoosh9",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/thirdplace.wav",
+          "logicalId": "audio:Sounds/thirdplace",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/tossfruit.wav",
+          "logicalId": "audio:Sounds/tossfruit",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/waterfruit.wav",
+          "logicalId": "audio:Sounds/waterfruit",
+          "elementType": "audio"
+        }
+      ],
+      "generatedPrimitiveIds": []
+    },
+    {
+      "id": "classic-presentation",
+      "kind": "gameplay-screen",
+      "title": "Classic and Classic Bird gameplay/result",
+      "layoutSources": [
+        "forensics/contracts/classic-presentation-contract.md",
+        "game/assets/scripts/domain/classic-resource-contract.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground0.png",
+          "logicalId": "image:Backgrounds/paperbackground0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade0.png",
+          "logicalId": "image:Blades/blade0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Bomb/bomb_X.png",
+          "logicalId": "image:Bomb/bomb_X",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Bomb/bombsmoke.png",
+          "logicalId": "image:Bomb/bombsmoke",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-menu-score-normal.png",
+          "logicalId": "image:Buttons/button-menu-score-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-menu-score-selected.png",
+          "logicalId": "image:Buttons/button-menu-score-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-retry-normal.png",
+          "logicalId": "image:Buttons/button-retry-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-retry-selected.png",
+          "logicalId": "image:Buttons/button-retry-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Criticles/criticle1.png",
+          "logicalId": "image:Criticles/criticle1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Criticles/criticle2.png",
+          "logicalId": "image:Criticles/criticle2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Criticles/criticle3.png",
+          "logicalId": "image:Criticles/criticle3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Criticles/criticle4.png",
+          "logicalId": "image:Criticles/criticle4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-apple-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-apple-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-apple-cut-top.png",
+          "logicalId": "image:Fruits/fruit-apple-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-apple.png",
+          "logicalId": "image:Fruits/fruit-apple",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-banana-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-banana-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-banana-cut-top.png",
+          "logicalId": "image:Fruits/fruit-banana-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-banana.png",
+          "logicalId": "image:Fruits/fruit-banana",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-kiwi-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-kiwi-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-kiwi-cut-top.png",
+          "logicalId": "image:Fruits/fruit-kiwi-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-kiwi.png",
+          "logicalId": "image:Fruits/fruit-kiwi",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-mangosteen-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-mangosteen-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-mangosteen-cut-top.png",
+          "logicalId": "image:Fruits/fruit-mangosteen-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-mangosteen.png",
+          "logicalId": "image:Fruits/fruit-mangosteen",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-orange-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-orange-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-orange-cut-top.png",
+          "logicalId": "image:Fruits/fruit-orange-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-orange.png",
+          "logicalId": "image:Fruits/fruit-orange",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-papaya-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-papaya-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-papaya-cut-top.png",
+          "logicalId": "image:Fruits/fruit-papaya-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-papaya.png",
+          "logicalId": "image:Fruits/fruit-papaya",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-pineapple-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-pineapple-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-pineapple-cut-top.png",
+          "logicalId": "image:Fruits/fruit-pineapple-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-pineapple.png",
+          "logicalId": "image:Fruits/fruit-pineapple",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-strawberry-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-strawberry-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-strawberry-cut-top.png",
+          "logicalId": "image:Fruits/fruit-strawberry-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-strawberry.png",
+          "logicalId": "image:Fruits/fruit-strawberry",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-watermelon-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-watermelon-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-watermelon-cut-top.png",
+          "logicalId": "image:Fruits/fruit-watermelon-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-watermelon.png",
+          "logicalId": "image:Fruits/fruit-watermelon",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-bonus-coins-effect.png",
+          "logicalId": "image:Interfaces/object-bonus-coins-effect",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-bonus-coins.png",
+          "logicalId": "image:Interfaces/object-bonus-coins",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-bonus-particle.png",
+          "logicalId": "image:Interfaces/object-bonus-particle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-coin.png",
+          "logicalId": "image:Interfaces/object-coin",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-display-score-background.png",
+          "logicalId": "image:Interfaces/object-display-score-background",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-medal-none.png",
+          "logicalId": "image:Interfaces/object-medal-none",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-mode-results.png",
+          "logicalId": "image:Interfaces/object-mode-results",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-score-best-cup.png",
+          "logicalId": "image:Interfaces/object-score-best-cup",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-score-double.png",
+          "logicalId": "image:Interfaces/object-score-double",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-score-sprite.png",
+          "logicalId": "image:Interfaces/object-score-sprite",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-x-filled.png",
+          "logicalId": "image:Interfaces/object-x-filled",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-x-normal.png",
+          "logicalId": "image:Interfaces/object-x-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/total-coins.png",
+          "logicalId": "image:Interfaces/total-coins",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-game.png",
+          "logicalId": "image:Text/text-game",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-good.png",
+          "logicalId": "image:Text/text-good",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-luck.png",
+          "logicalId": "image:Text/text-luck",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-over.png",
+          "logicalId": "image:Text/text-over",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground0.png",
+          "logicalId": "image:Backgrounds/paperbackground0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade0.png",
+          "logicalId": "image:Blades/blade0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Bomb/bomb_X.png",
+          "logicalId": "image:Bomb/bomb_X",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Bomb/bombsmoke.png",
+          "logicalId": "image:Bomb/bombsmoke",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-menu-score-normal.png",
+          "logicalId": "image:Buttons/button-menu-score-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-menu-score-selected.png",
+          "logicalId": "image:Buttons/button-menu-score-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-retry-normal.png",
+          "logicalId": "image:Buttons/button-retry-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-retry-selected.png",
+          "logicalId": "image:Buttons/button-retry-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Criticles/criticle1.png",
+          "logicalId": "image:Criticles/criticle1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Criticles/criticle2.png",
+          "logicalId": "image:Criticles/criticle2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Criticles/criticle3.png",
+          "logicalId": "image:Criticles/criticle3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Criticles/criticle4.png",
+          "logicalId": "image:Criticles/criticle4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-apple-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-apple-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-apple-cut-top.png",
+          "logicalId": "image:Fruits/fruit-apple-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-apple.png",
+          "logicalId": "image:Fruits/fruit-apple",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-banana-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-banana-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-banana-cut-top.png",
+          "logicalId": "image:Fruits/fruit-banana-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-banana.png",
+          "logicalId": "image:Fruits/fruit-banana",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-kiwi-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-kiwi-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-kiwi-cut-top.png",
+          "logicalId": "image:Fruits/fruit-kiwi-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-kiwi.png",
+          "logicalId": "image:Fruits/fruit-kiwi",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-mangosteen-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-mangosteen-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-mangosteen-cut-top.png",
+          "logicalId": "image:Fruits/fruit-mangosteen-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-mangosteen.png",
+          "logicalId": "image:Fruits/fruit-mangosteen",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-orange-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-orange-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-orange-cut-top.png",
+          "logicalId": "image:Fruits/fruit-orange-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-orange.png",
+          "logicalId": "image:Fruits/fruit-orange",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-papaya-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-papaya-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-papaya-cut-top.png",
+          "logicalId": "image:Fruits/fruit-papaya-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-papaya.png",
+          "logicalId": "image:Fruits/fruit-papaya",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-pineapple-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-pineapple-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-pineapple-cut-top.png",
+          "logicalId": "image:Fruits/fruit-pineapple-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-pineapple.png",
+          "logicalId": "image:Fruits/fruit-pineapple",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-strawberry-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-strawberry-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-strawberry-cut-top.png",
+          "logicalId": "image:Fruits/fruit-strawberry-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-strawberry.png",
+          "logicalId": "image:Fruits/fruit-strawberry",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-watermelon-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-watermelon-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-watermelon-cut-top.png",
+          "logicalId": "image:Fruits/fruit-watermelon-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-watermelon.png",
+          "logicalId": "image:Fruits/fruit-watermelon",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-bonus-coins-effect.png",
+          "logicalId": "image:Interfaces/object-bonus-coins-effect",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-bonus-coins.png",
+          "logicalId": "image:Interfaces/object-bonus-coins",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-bonus-particle.png",
+          "logicalId": "image:Interfaces/object-bonus-particle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-coin.png",
+          "logicalId": "image:Interfaces/object-coin",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-display-score-background.png",
+          "logicalId": "image:Interfaces/object-display-score-background",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-medal-none.png",
+          "logicalId": "image:Interfaces/object-medal-none",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-mode-results.png",
+          "logicalId": "image:Interfaces/object-mode-results",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-score-best-cup.png",
+          "logicalId": "image:Interfaces/object-score-best-cup",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-score-double.png",
+          "logicalId": "image:Interfaces/object-score-double",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-score-sprite.png",
+          "logicalId": "image:Interfaces/object-score-sprite",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-x-filled.png",
+          "logicalId": "image:Interfaces/object-x-filled",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-x-normal.png",
+          "logicalId": "image:Interfaces/object-x-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/total-coins.png",
+          "logicalId": "image:Interfaces/total-coins",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-game.png",
+          "logicalId": "image:Text/text-game",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-good.png",
+          "logicalId": "image:Text/text-good",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-luck.png",
+          "logicalId": "image:Text/text-luck",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-over.png",
+          "logicalId": "image:Text/text-over",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "Fonts/AgencyB.ttf",
+          "logicalId": "font:Fonts/AgencyB",
+          "elementType": "font"
+        },
+        {
+          "canonicalPath": "Fonts/GroBold.ttf",
+          "logicalId": "font:Fonts/GroBold",
+          "elementType": "font"
+        },
+        {
+          "canonicalPath": "Fonts/Linds.ttf",
+          "logicalId": "font:Fonts/Linds",
+          "elementType": "font"
+        },
+        {
+          "canonicalPath": "Fonts/SlabThing.ttf",
+          "logicalId": "font:Fonts/SlabThing",
+          "elementType": "font"
+        }
+      ],
+      "generatedPrimitiveIds": [
+        "basic-blade-triangle-strip",
+        "generated-fruit-and-cut-half-colliders",
+        "dynamic-labels-and-score-values"
+      ]
+    },
+    {
+      "id": "combo-bird",
+      "kind": "gameplay-screen",
+      "title": "Combo Bird",
+      "layoutSources": [
+        "game/assets/scripts/domain/combo-bird-intro-presentation.ts",
+        "game/assets/scripts/domain/combo-bird-resource-contract.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Interfaces/object-time-freeze.png",
+          "logicalId": "image:Interfaces/object-time-freeze",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-90s.png",
+          "logicalId": "image:Text/text-90s",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-go.png",
+          "logicalId": "image:Text/text-go",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-juscombo.png",
+          "logicalId": "image:Text/text-juscombo",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-nobomb.png",
+          "logicalId": "image:Text/text-nobomb",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-nolive.png",
+          "logicalId": "image:Text/text-nolive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-time-up.png",
+          "logicalId": "image:Text/text-time-up",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-time-freeze.png",
+          "logicalId": "image:Interfaces/object-time-freeze",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-90s.png",
+          "logicalId": "image:Text/text-90s",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-go.png",
+          "logicalId": "image:Text/text-go",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-justcombo.png",
+          "logicalId": "image:Text/text-justcombo",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-nobomb.png",
+          "logicalId": "image:Text/text-nobomb",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-nolive.png",
+          "logicalId": "image:Text/text-nolive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-time-up.png",
+          "logicalId": "image:Text/text-time-up",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "Fonts/MotorwerkOblique.ttf",
+          "logicalId": "font:Fonts/MotorwerkOblique",
+          "elementType": "font"
+        }
+      ],
+      "generatedPrimitiveIds": [
+        "dynamic-labels-and-score-values"
+      ]
+    },
+    {
+      "id": "crazy-audio",
+      "kind": "audio-system",
+      "title": "Crazy and Crazy Bird audio",
+      "layoutSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "Sounds/boomhit.wav",
+          "logicalId": "audio:Sounds/boomhit",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/critical.wav",
+          "logicalId": "audio:Sounds/critical",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/doublepoint.wav",
+          "logicalId": "audio:Sounds/doublepoint",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/doubletoss.wav",
+          "logicalId": "audio:Sounds/doubletoss",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/doubletosstrum.wav",
+          "logicalId": "audio:Sounds/doubletosstrum",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/eapplecut.wav",
+          "logicalId": "audio:Sounds/eapplecut",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/ehit1.wav",
+          "logicalId": "audio:Sounds/ehit1",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/ehit2.wav",
+          "logicalId": "audio:Sounds/ehit2",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/ehit3.wav",
+          "logicalId": "audio:Sounds/ehit3",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/ehit4.wav",
+          "logicalId": "audio:Sounds/ehit4",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/electric.mp3",
+          "logicalId": "audio:Sounds/electric",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/electricexplose.wav",
+          "logicalId": "audio:Sounds/electricexplose",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/finishhitmusic.wav",
+          "logicalId": "audio:Sounds/finishhitmusic",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/freeze.wav",
+          "logicalId": "audio:Sounds/freeze",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/hitmusic.wav",
+          "logicalId": "audio:Sounds/hitmusic",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/lightning1.wav",
+          "logicalId": "audio:Sounds/lightning1",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/lightning2.wav",
+          "logicalId": "audio:Sounds/lightning2",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/magnet.wav",
+          "logicalId": "audio:Sounds/magnet",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/mangosteen.wav",
+          "logicalId": "audio:Sounds/mangosteen",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/powerup.wav",
+          "logicalId": "audio:Sounds/powerup",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/strawberry.wav",
+          "logicalId": "audio:Sounds/strawberry",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/timetick.wav",
+          "logicalId": "audio:Sounds/timetick",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/timeup.wav",
+          "logicalId": "audio:Sounds/timeup",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/tossfruit.wav",
+          "logicalId": "audio:Sounds/tossfruit",
+          "elementType": "audio"
+        }
+      ],
+      "generatedPrimitiveIds": []
+    },
+    {
+      "id": "crazy-dragon-counter",
+      "kind": "gameplay-element",
+      "title": "Crazy Dragon hit counter",
+      "layoutSources": [
+        "game/assets/scripts/domain/crazy-dragon-fruit-state.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "Fonts/Razing.ttf",
+          "logicalId": "font:Fonts/Razing",
+          "elementType": "font"
+        }
+      ],
+      "generatedPrimitiveIds": []
+    },
+    {
+      "id": "crazy-presentation",
+      "kind": "gameplay-screen",
+      "title": "Crazy and Crazy Bird gameplay/result",
+      "layoutSources": [
+        "forensics/contracts/crazy-mode-contract.md",
+        "game/assets/scripts/domain/crazy-intro-presentation.ts",
+        "game/assets/scripts/domain/crazy-resource-contract.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Electric/electric0.png",
+          "logicalId": "image:Electric/electric0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric1.png",
+          "logicalId": "image:Electric/electric1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric2.png",
+          "logicalId": "image:Electric/electric2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric3.png",
+          "logicalId": "image:Electric/electric3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric4.png",
+          "logicalId": "image:Electric/electric4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric5.png",
+          "logicalId": "image:Electric/electric5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric6.png",
+          "logicalId": "image:Electric/electric6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric7.png",
+          "logicalId": "image:Electric/electric7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Electric/left-electric-node.png",
+          "logicalId": "image:Electric/left-electric-node",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Electric/right-electric-node.png",
+          "logicalId": "image:Electric/right-electric-node",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/dragon-fruit-bottomleft.png",
+          "logicalId": "image:Fruits/dragon-fruit-bottomleft",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/dragon-fruit-bottomright.png",
+          "logicalId": "image:Fruits/dragon-fruit-bottomright",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/dragon-fruit-topleft.png",
+          "logicalId": "image:Fruits/dragon-fruit-topleft",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/dragon-fruit-topright.png",
+          "logicalId": "image:Fruits/dragon-fruit-topright",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/dragon-fruit.png",
+          "logicalId": "image:Fruits/dragon-fruit",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/dragon-splash.png",
+          "logicalId": "image:Fruits/dragon-splash",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-b2toss-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-b2toss-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-b2toss-cut-top.png",
+          "logicalId": "image:Fruits/fruit-b2toss-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-b2toss.png",
+          "logicalId": "image:Fruits/fruit-b2toss",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-bdouble-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-bdouble-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-bdouble-cut-top.png",
+          "logicalId": "image:Fruits/fruit-bdouble-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-bdouble.png",
+          "logicalId": "image:Fruits/fruit-bdouble",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-bfreezy-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-bfreezy-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-bfreezy-cut-top.png",
+          "logicalId": "image:Fruits/fruit-bfreezy-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-bfreezy.png",
+          "logicalId": "image:Fruits/fruit-bfreezy",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-electric-apple-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-electric-apple-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-electric-apple-cut-top.png",
+          "logicalId": "image:Fruits/fruit-electric-apple-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-electric-apple.png",
+          "logicalId": "image:Fruits/fruit-electric-apple",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-magnetstrawberry-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-magnetstrawberry-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-magnetstrawberry-cut-top.png",
+          "logicalId": "image:Fruits/fruit-magnetstrawberry-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-magnetstrawberry.png",
+          "logicalId": "image:Fruits/fruit-magnetstrawberry",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/magnet-line.png",
+          "logicalId": "image:Interfaces/magnet-line",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/magnet.png",
+          "logicalId": "image:Interfaces/magnet",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-time-freeze.png",
+          "logicalId": "image:Interfaces/object-time-freeze",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-60s.png",
+          "logicalId": "image:Text/text-60s",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-go.png",
+          "logicalId": "image:Text/text-go",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-time-up.png",
+          "logicalId": "image:Text/text-time-up",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric0.png",
+          "logicalId": "image:Electric/electric0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric1.png",
+          "logicalId": "image:Electric/electric1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric2.png",
+          "logicalId": "image:Electric/electric2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric3.png",
+          "logicalId": "image:Electric/electric3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric4.png",
+          "logicalId": "image:Electric/electric4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric5.png",
+          "logicalId": "image:Electric/electric5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric6.png",
+          "logicalId": "image:Electric/electric6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric7.png",
+          "logicalId": "image:Electric/electric7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Electric/left-electric-node.png",
+          "logicalId": "image:Electric/left-electric-node",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Electric/right-electric-node.png",
+          "logicalId": "image:Electric/right-electric-node",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/dragon-fruit-bottomleft.png",
+          "logicalId": "image:Fruits/dragon-fruit-bottomleft",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/dragon-fruit-bottomright.png",
+          "logicalId": "image:Fruits/dragon-fruit-bottomright",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/dragon-fruit-topleft.png",
+          "logicalId": "image:Fruits/dragon-fruit-topleft",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/dragon-fruit-topright.png",
+          "logicalId": "image:Fruits/dragon-fruit-topright",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/dragon-fruit.png",
+          "logicalId": "image:Fruits/dragon-fruit",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/dragon-splash.png",
+          "logicalId": "image:Fruits/dragon-splash",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-b2toss-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-b2toss-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-b2toss-cut-top.png",
+          "logicalId": "image:Fruits/fruit-b2toss-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-b2toss.png",
+          "logicalId": "image:Fruits/fruit-b2toss",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-bdouble-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-bdouble-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-bdouble-cut-top.png",
+          "logicalId": "image:Fruits/fruit-bdouble-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-bdouble.png",
+          "logicalId": "image:Fruits/fruit-bdouble",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-bfreezy-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-bfreezy-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-bfreezy-cut-top.png",
+          "logicalId": "image:Fruits/fruit-bfreezy-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-bfreezy.png",
+          "logicalId": "image:Fruits/fruit-bfreezy",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-electric-apple-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-electric-apple-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-electric-apple-cut-top.png",
+          "logicalId": "image:Fruits/fruit-electric-apple-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-electric-apple.png",
+          "logicalId": "image:Fruits/fruit-electric-apple",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-magnetstrawberry-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-magnetstrawberry-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-magnetstrawberry-cut-top.png",
+          "logicalId": "image:Fruits/fruit-magnetstrawberry-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-magnetstrawberry.png",
+          "logicalId": "image:Fruits/fruit-magnetstrawberry",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/magnet-line.png",
+          "logicalId": "image:Interfaces/magnet-line",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/magnet.png",
+          "logicalId": "image:Interfaces/magnet",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-time-freeze.png",
+          "logicalId": "image:Interfaces/object-time-freeze",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-60s.png",
+          "logicalId": "image:Text/text-60s",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-go.png",
+          "logicalId": "image:Text/text-go",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-time-up.png",
+          "logicalId": "image:Text/text-time-up",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "Fonts/MotorwerkOblique.ttf",
+          "logicalId": "font:Fonts/MotorwerkOblique",
+          "elementType": "font"
+        }
+      ],
+      "generatedPrimitiveIds": [
+        "generated-fruit-and-cut-half-colliders",
+        "generated-bomb-flash-and-triangles",
+        "dynamic-labels-and-score-values"
+      ]
+    },
+    {
+      "id": "gn-style",
+      "kind": "gameplay-screen",
+      "title": "Gangnam Style",
+      "layoutSources": [
+        "forensics/contracts/gn-style-mode-contract.md",
+        "game/assets/scripts/domain/gn-style-intro-presentation.ts",
+        "game/assets/scripts/domain/gn-style-resource-contract.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Blades/Particles/VN Flag/vnflagstar.png",
+          "logicalId": "image:Blades/Particles/VN Flag/vnflagstar",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmascircle.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmascircle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmasfive.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmasfour.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfour",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmashexa.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmashexa",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/stars.png",
+          "logicalId": "image:Blades/Particles/stars",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-150s.png",
+          "logicalId": "image:Text/text-150s",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-gnstyle.png",
+          "logicalId": "image:Text/text-gnstyle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-go.png",
+          "logicalId": "image:Text/text-go",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-nobomb.png",
+          "logicalId": "image:Text/text-nobomb",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Text/text-nolive.png",
+          "logicalId": "image:Text/text-nolive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/VN Flag/vnflagstar.png",
+          "logicalId": "image:Blades/Particles/VN Flag/vnflagstar",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmascircle.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmascircle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmasfive.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmasfour.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfour",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmashexa.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmashexa",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/stars.png",
+          "logicalId": "image:Blades/Particles/stars",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-150s.png",
+          "logicalId": "image:Text/text-150s",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-gnstyle.png",
+          "logicalId": "image:Text/text-gnstyle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-go.png",
+          "logicalId": "image:Text/text-go",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-nobomb.png",
+          "logicalId": "image:Text/text-nobomb",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Text/text-nolive.png",
+          "logicalId": "image:Text/text-nolive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "Sounds/GangnamStyle.mp3",
+          "logicalId": "audio:Sounds/GangnamStyle",
+          "elementType": "audio"
+        }
+      ],
+      "generatedPrimitiveIds": [
+        "generated-fruit-and-cut-half-colliders",
+        "gn-style-particle-choreography",
+        "dynamic-labels-and-score-values"
+      ]
+    },
+    {
+      "id": "leaderboard",
+      "kind": "screen",
+      "title": "Leaderboard",
+      "layoutSources": [
+        "game/assets/scripts/domain/leaderboard-presentation.ts",
+        "game/assets/scripts/domain/leaderboard-resource-contract.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Buttons/button-back-selected.png",
+          "logicalId": "image:Buttons/button-back-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-blue-back-normal.png",
+          "logicalId": "image:Buttons/button-blue-back-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaderboard/leaderboard_classic.png",
+          "logicalId": "image:Leaderboard/leaderboard_classic",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaderboard/leaderboard_classic_bird.png",
+          "logicalId": "image:Leaderboard/leaderboard_classic_bird",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaderboard/leaderboard_combo_bird.png",
+          "logicalId": "image:Leaderboard/leaderboard_combo_bird",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaderboard/leaderboard_crazy.png",
+          "logicalId": "image:Leaderboard/leaderboard_crazy",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaderboard/leaderboard_crazy_bird.png",
+          "logicalId": "image:Leaderboard/leaderboard_crazy_bird",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaderboard/leaderboard_gnstyle.png",
+          "logicalId": "image:Leaderboard/leaderboard_gnstyle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaderboard/leaderboard_title.png",
+          "logicalId": "image:Leaderboard/leaderboard_title",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaderboard/leaderboard_view_templete.png",
+          "logicalId": "image:Leaderboard/leaderboard_view_templete",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-back-selected.png",
+          "logicalId": "image:Buttons/button-back-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-blue-back-normal.png",
+          "logicalId": "image:Buttons/button-blue-back-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaderboard/leaderboard_classic.png",
+          "logicalId": "image:Leaderboard/leaderboard_classic",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaderboard/leaderboard_classic_bird.png",
+          "logicalId": "image:Leaderboard/leaderboard_classic_bird",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaderboard/leaderboard_combo_bird.png",
+          "logicalId": "image:Leaderboard/leaderboard_combo_bird",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaderboard/leaderboard_crazy.png",
+          "logicalId": "image:Leaderboard/leaderboard_crazy",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaderboard/leaderboard_crazy_bird.png",
+          "logicalId": "image:Leaderboard/leaderboard_crazy_bird",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaderboard/leaderboard_gnstyle.png",
+          "logicalId": "image:Leaderboard/leaderboard_gnstyle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaderboard/leaderboard_title.png",
+          "logicalId": "image:Leaderboard/leaderboard_title",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaderboard/leaderboard_view_templete.png",
+          "logicalId": "image:Leaderboard/leaderboard_view_templete",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "Fonts/Andyb.ttf",
+          "logicalId": "font:Fonts/Andyb",
+          "elementType": "font"
+        },
+        {
+          "canonicalPath": "Fonts/Century.ttf",
+          "logicalId": "font:Fonts/Century",
+          "elementType": "font"
+        },
+        {
+          "canonicalPath": "Sounds/menubuttonclick.wav",
+          "logicalId": "audio:Sounds/menubuttonclick",
+          "elementType": "audio"
+        }
+      ],
+      "generatedPrimitiveIds": [
+        "dynamic-labels-and-score-values"
+      ]
+    },
+    {
+      "id": "loading",
+      "kind": "screen",
+      "title": "Loading",
+      "layoutSources": [
+        "game/assets/scripts/domain/loading-presentation.ts",
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Loading/backgroundLogo.png",
+          "logicalId": "image:Loading/backgroundLogo",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Loading/loadbkback.png",
+          "logicalId": "image:Loading/loadbkback",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Loading/loadbkfront.png",
+          "logicalId": "image:Loading/loadbkfront",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Loading/loadprocess.png",
+          "logicalId": "image:Loading/loadprocess",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Loading/backgroundLogo.png",
+          "logicalId": "image:Loading/backgroundLogo",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Loading/loadbkback.png",
+          "logicalId": "image:Loading/loadbkback",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Loading/loadbkfront.png",
+          "logicalId": "image:Loading/loadbkfront",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Loading/loadprocess.png",
+          "logicalId": "image:Loading/loadprocess",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "Sounds/GangnamStyle.mp3",
+          "logicalId": "audio:Sounds/GangnamStyle",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/apple.wav",
+          "logicalId": "audio:Sounds/apple",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/banana.wav",
+          "logicalId": "audio:Sounds/banana",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/boomexplosion.wav",
+          "logicalId": "audio:Sounds/boomexplosion",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/boomhit.wav",
+          "logicalId": "audio:Sounds/boomhit",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/boomsound.wav",
+          "logicalId": "audio:Sounds/boomsound",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/boomtoss.wav",
+          "logicalId": "audio:Sounds/boomtoss",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/cheer.wav",
+          "logicalId": "audio:Sounds/cheer",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/compo1.wav",
+          "logicalId": "audio:Sounds/compo1",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/compo2.wav",
+          "logicalId": "audio:Sounds/compo2",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/compo3.wav",
+          "logicalId": "audio:Sounds/compo3",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/critical.wav",
+          "logicalId": "audio:Sounds/critical",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/doublepoint.wav",
+          "logicalId": "audio:Sounds/doublepoint",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/doubletoss.wav",
+          "logicalId": "audio:Sounds/doubletoss",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/doubletosstrum.wav",
+          "logicalId": "audio:Sounds/doubletosstrum",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/eapplecut.wav",
+          "logicalId": "audio:Sounds/eapplecut",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/ehit1.wav",
+          "logicalId": "audio:Sounds/ehit1",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/ehit2.wav",
+          "logicalId": "audio:Sounds/ehit2",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/ehit3.wav",
+          "logicalId": "audio:Sounds/ehit3",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/ehit4.wav",
+          "logicalId": "audio:Sounds/ehit4",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/electric.mp3",
+          "logicalId": "audio:Sounds/electric",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/electricexplose.wav",
+          "logicalId": "audio:Sounds/electricexplose",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/finishhitmusic.wav",
+          "logicalId": "audio:Sounds/finishhitmusic",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/firstplace.wav",
+          "logicalId": "audio:Sounds/firstplace",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/freeze.wav",
+          "logicalId": "audio:Sounds/freeze",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/fruitfail.wav",
+          "logicalId": "audio:Sounds/fruitfail",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/gameplayselected.wav",
+          "logicalId": "audio:Sounds/gameplayselected",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/get_coins.wav",
+          "logicalId": "audio:Sounds/get_coins",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/hitmusic.wav",
+          "logicalId": "audio:Sounds/hitmusic",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/juice1.wav",
+          "logicalId": "audio:Sounds/juice1",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/juice2.wav",
+          "logicalId": "audio:Sounds/juice2",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/juice3.wav",
+          "logicalId": "audio:Sounds/juice3",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/juice4.wav",
+          "logicalId": "audio:Sounds/juice4",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/kiwi.wav",
+          "logicalId": "audio:Sounds/kiwi",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/lightning1.wav",
+          "logicalId": "audio:Sounds/lightning1",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/lightning2.wav",
+          "logicalId": "audio:Sounds/lightning2",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/magnet.wav",
+          "logicalId": "audio:Sounds/magnet",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/mainmenumusic.mp3",
+          "logicalId": "audio:Sounds/mainmenumusic",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/mangosteen.wav",
+          "logicalId": "audio:Sounds/mangosteen",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/menubuttonclick.wav",
+          "logicalId": "audio:Sounds/menubuttonclick",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/mono1.wav",
+          "logicalId": "audio:Sounds/mono1",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/mono2.wav",
+          "logicalId": "audio:Sounds/mono2",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/orange.wav",
+          "logicalId": "audio:Sounds/orange",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/pineapple.wav",
+          "logicalId": "audio:Sounds/pineapple",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/powerup.wav",
+          "logicalId": "audio:Sounds/powerup",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/scorescreen.wav",
+          "logicalId": "audio:Sounds/scorescreen",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/secondplace.wav",
+          "logicalId": "audio:Sounds/secondplace",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/strawberry.wav",
+          "logicalId": "audio:Sounds/strawberry",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh1.wav",
+          "logicalId": "audio:Sounds/swoosh1",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh2.wav",
+          "logicalId": "audio:Sounds/swoosh2",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh3.wav",
+          "logicalId": "audio:Sounds/swoosh3",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh4.wav",
+          "logicalId": "audio:Sounds/swoosh4",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh5.wav",
+          "logicalId": "audio:Sounds/swoosh5",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh6.wav",
+          "logicalId": "audio:Sounds/swoosh6",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh7.wav",
+          "logicalId": "audio:Sounds/swoosh7",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh8.wav",
+          "logicalId": "audio:Sounds/swoosh8",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/swoosh9.wav",
+          "logicalId": "audio:Sounds/swoosh9",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/thirdplace.wav",
+          "logicalId": "audio:Sounds/thirdplace",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/timetick.wav",
+          "logicalId": "audio:Sounds/timetick",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/timeup.wav",
+          "logicalId": "audio:Sounds/timeup",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/tossfruit.wav",
+          "logicalId": "audio:Sounds/tossfruit",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/waterfruit.wav",
+          "logicalId": "audio:Sounds/waterfruit",
+          "elementType": "audio"
+        }
+      ],
+      "generatedPrimitiveIds": []
+    },
+    {
+      "id": "main-menu",
+      "kind": "screen",
+      "title": "Main Menu",
+      "layoutSources": [
+        "forensics/contracts/main-menu-presentation-contract.md",
+        "game/assets/scripts/domain/main-menu-presentation.ts",
+        "game/assets/scripts/domain/main-menu-resource-contract.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Buttons/button-about-normal.png",
+          "logicalId": "image:Buttons/button-about-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-about-selected.png",
+          "logicalId": "image:Buttons/button-about-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-black-wheel-normal.png",
+          "logicalId": "image:Buttons/button-black-wheel-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-blue-wheel-normal.png",
+          "logicalId": "image:Buttons/button-blue-wheel-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-blue-wheel-selected.png",
+          "logicalId": "image:Buttons/button-blue-wheel-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-circle-blur.png",
+          "logicalId": "image:Buttons/button-circle-blur",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-circle-leaderboard.png",
+          "logicalId": "image:Buttons/button-circle-leaderboard",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-circle-newgame.png",
+          "logicalId": "image:Buttons/button-circle-newgame",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-circle-objectives.png",
+          "logicalId": "image:Buttons/button-circle-objectives",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-effects-disable.png",
+          "logicalId": "image:Buttons/button-effects-disable",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-effects-normal.png",
+          "logicalId": "image:Buttons/button-effects-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-effects-selected.png",
+          "logicalId": "image:Buttons/button-effects-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-exit-normal.png",
+          "logicalId": "image:Buttons/button-exit-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-exit-selected.png",
+          "logicalId": "image:Buttons/button-exit-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-music-disable.png",
+          "logicalId": "image:Buttons/button-music-disable",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-music-normal.png",
+          "logicalId": "image:Buttons/button-music-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-music-selected.png",
+          "logicalId": "image:Buttons/button-music-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-orange-wheel-normal.png",
+          "logicalId": "image:Buttons/button-orange-wheel-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-electric-apple-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-electric-apple-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-electric-apple-cut-top.png",
+          "logicalId": "image:Fruits/fruit-electric-apple-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-electric-apple.png",
+          "logicalId": "image:Fruits/fruit-electric-apple",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-orange-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-orange-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-orange-cut-top.png",
+          "logicalId": "image:Fruits/fruit-orange-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-orange.png",
+          "logicalId": "image:Fruits/fruit-orange",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-strawberry-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-strawberry-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-strawberry-cut-top.png",
+          "logicalId": "image:Fruits/fruit-strawberry-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-strawberry.png",
+          "logicalId": "image:Fruits/fruit-strawberry",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/heart.png",
+          "logicalId": "image:Interfaces/heart",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/pencilblade.png",
+          "logicalId": "image:Interfaces/pencilblade",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/pencilbladebk.png",
+          "logicalId": "image:Interfaces/pencilbladebk",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/reviewbutton.png",
+          "logicalId": "image:Interfaces/reviewbutton",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/reviewbuttonselected.png",
+          "logicalId": "image:Interfaces/reviewbuttonselected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/total-coins.png",
+          "logicalId": "image:Interfaces/total-coins",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-about-normal.png",
+          "logicalId": "image:Buttons/button-about-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-about-selected.png",
+          "logicalId": "image:Buttons/button-about-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-black-wheel-normal.png",
+          "logicalId": "image:Buttons/button-black-wheel-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-blue-wheel-normal.png",
+          "logicalId": "image:Buttons/button-blue-wheel-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-blue-wheel-selected.png",
+          "logicalId": "image:Buttons/button-blue-wheel-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-circle-blur.png",
+          "logicalId": "image:Buttons/button-circle-blur",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-circle-leaderboard.png",
+          "logicalId": "image:Buttons/button-circle-leaderboard",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-circle-newgame.png",
+          "logicalId": "image:Buttons/button-circle-newgame",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-circle-objectives.png",
+          "logicalId": "image:Buttons/button-circle-objectives",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-effects-disable.png",
+          "logicalId": "image:Buttons/button-effects-disable",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-effects-normal.png",
+          "logicalId": "image:Buttons/button-effects-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-effects-selected.png",
+          "logicalId": "image:Buttons/button-effects-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-exit-normal.png",
+          "logicalId": "image:Buttons/button-exit-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-exit-selected.png",
+          "logicalId": "image:Buttons/button-exit-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-music-disable.png",
+          "logicalId": "image:Buttons/button-music-disable",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-music-normal.png",
+          "logicalId": "image:Buttons/button-music-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-music-selected.png",
+          "logicalId": "image:Buttons/button-music-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-orange-wheel-normal.png",
+          "logicalId": "image:Buttons/button-orange-wheel-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-electric-apple-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-electric-apple-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-electric-apple-cut-top.png",
+          "logicalId": "image:Fruits/fruit-electric-apple-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-electric-apple.png",
+          "logicalId": "image:Fruits/fruit-electric-apple",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-orange-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-orange-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-orange-cut-top.png",
+          "logicalId": "image:Fruits/fruit-orange-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-orange.png",
+          "logicalId": "image:Fruits/fruit-orange",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-strawberry-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-strawberry-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-strawberry-cut-top.png",
+          "logicalId": "image:Fruits/fruit-strawberry-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-strawberry.png",
+          "logicalId": "image:Fruits/fruit-strawberry",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/heart.png",
+          "logicalId": "image:Interfaces/heart",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/pencilblade.png",
+          "logicalId": "image:Interfaces/pencilblade",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/pencilbladebk.png",
+          "logicalId": "image:Interfaces/pencilbladebk",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/reviewbutton.png",
+          "logicalId": "image:Interfaces/reviewbutton",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/reviewbuttonselected.png",
+          "logicalId": "image:Interfaces/reviewbuttonselected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/total-coins.png",
+          "logicalId": "image:Interfaces/total-coins",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "Fonts/SlabThing.ttf",
+          "logicalId": "font:Fonts/SlabThing",
+          "elementType": "font"
+        },
+        {
+          "canonicalPath": "Sounds/mainmenumusic.mp3",
+          "logicalId": "audio:Sounds/mainmenumusic",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/mangosteen.wav",
+          "logicalId": "audio:Sounds/mangosteen",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/menubuttonclick.wav",
+          "logicalId": "audio:Sounds/menubuttonclick",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/strawberry.wav",
+          "logicalId": "audio:Sounds/strawberry",
+          "elementType": "audio"
+        }
+      ],
+      "generatedPrimitiveIds": [
+        "dynamic-labels-and-score-values"
+      ]
+    },
+    {
+      "id": "mode-select",
+      "kind": "screen",
+      "title": "Mode Select",
+      "layoutSources": [
+        "forensics/contracts/mode-select-presentation-contract.md",
+        "game/assets/scripts/domain/mode-select-presentation.ts",
+        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmasfive.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-back-selected.png",
+          "logicalId": "image:Buttons/button-back-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-blue-back-normal.png",
+          "logicalId": "image:Buttons/button-blue-back-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-circle-blur.png",
+          "logicalId": "image:Buttons/button-circle-blur",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-unlock-selected.png",
+          "logicalId": "image:Buttons/button-unlock-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-unlock.png",
+          "logicalId": "image:Buttons/button-unlock",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-apple-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-apple-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-apple-cut-top.png",
+          "logicalId": "image:Fruits/fruit-apple-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-apple.png",
+          "logicalId": "image:Fruits/fruit-apple",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-banana-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-banana-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-banana-cut-top.png",
+          "logicalId": "image:Fruits/fruit-banana-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-banana.png",
+          "logicalId": "image:Fruits/fruit-banana",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-kiwi-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-kiwi-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-kiwi-cut-top.png",
+          "logicalId": "image:Fruits/fruit-kiwi-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-kiwi.png",
+          "logicalId": "image:Fruits/fruit-kiwi",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-magnetstrawberry-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-magnetstrawberry-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-magnetstrawberry-cut-top.png",
+          "logicalId": "image:Fruits/fruit-magnetstrawberry-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-magnetstrawberry.png",
+          "logicalId": "image:Fruits/fruit-magnetstrawberry",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-orange-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-orange-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-orange-cut-top.png",
+          "logicalId": "image:Fruits/fruit-orange-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-orange.png",
+          "logicalId": "image:Fruits/fruit-orange",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-strawberry-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-strawberry-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-strawberry-cut-top.png",
+          "logicalId": "image:Fruits/fruit-strawberry-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Fruits/fruit-strawberry.png",
+          "logicalId": "image:Fruits/fruit-strawberry",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/mode-classic-bird.png",
+          "logicalId": "image:Interfaces/mode-classic-bird",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/mode-classic.png",
+          "logicalId": "image:Interfaces/mode-classic",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/mode-combo-bird.png",
+          "logicalId": "image:Interfaces/mode-combo-bird",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/mode-crazy-bird.png",
+          "logicalId": "image:Interfaces/mode-crazy-bird",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/mode-crazy.png",
+          "logicalId": "image:Interfaces/mode-crazy",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/mode-gnstyle.png",
+          "logicalId": "image:Interfaces/mode-gnstyle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/modeselect.png",
+          "logicalId": "image:Interfaces/modeselect",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-classic-bird-des.png",
+          "logicalId": "image:Interfaces/object-classic-bird-des",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-classic-des.png",
+          "logicalId": "image:Interfaces/object-classic-des",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-combo-bird-des.png",
+          "logicalId": "image:Interfaces/object-combo-bird-des",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-combo-des.png",
+          "logicalId": "image:Interfaces/object-combo-des",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-crazy-bird-des.png",
+          "logicalId": "image:Interfaces/object-crazy-bird-des",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-crazy-des.png",
+          "logicalId": "image:Interfaces/object-crazy-des",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-des-shader.png",
+          "logicalId": "image:Interfaces/object-des-shader",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-long-rope.png",
+          "logicalId": "image:Interfaces/object-long-rope",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-rope-node.png",
+          "logicalId": "image:Interfaces/object-rope-node",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-wheel-connect.png",
+          "logicalId": "image:Interfaces/object-wheel-connect",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/object-wheel.png",
+          "logicalId": "image:Interfaces/object-wheel",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmasfive.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-back-selected.png",
+          "logicalId": "image:Buttons/button-back-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-blue-back-normal.png",
+          "logicalId": "image:Buttons/button-blue-back-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-circle-blur.png",
+          "logicalId": "image:Buttons/button-circle-blur",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-unlock-selected.png",
+          "logicalId": "image:Buttons/button-unlock-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-unlock.png",
+          "logicalId": "image:Buttons/button-unlock",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-apple-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-apple-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-apple-cut-top.png",
+          "logicalId": "image:Fruits/fruit-apple-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-apple.png",
+          "logicalId": "image:Fruits/fruit-apple",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-banana-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-banana-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-banana-cut-top.png",
+          "logicalId": "image:Fruits/fruit-banana-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-banana.png",
+          "logicalId": "image:Fruits/fruit-banana",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-kiwi-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-kiwi-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-kiwi-cut-top.png",
+          "logicalId": "image:Fruits/fruit-kiwi-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-kiwi.png",
+          "logicalId": "image:Fruits/fruit-kiwi",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-magnetstrawberry-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-magnetstrawberry-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-magnetstrawberry-cut-top.png",
+          "logicalId": "image:Fruits/fruit-magnetstrawberry-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-magnetstrawberry.png",
+          "logicalId": "image:Fruits/fruit-magnetstrawberry",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-orange-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-orange-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-orange-cut-top.png",
+          "logicalId": "image:Fruits/fruit-orange-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-orange.png",
+          "logicalId": "image:Fruits/fruit-orange",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-strawberry-cut-bottom.png",
+          "logicalId": "image:Fruits/fruit-strawberry-cut-bottom",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-strawberry-cut-top.png",
+          "logicalId": "image:Fruits/fruit-strawberry-cut-top",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Fruits/fruit-strawberry.png",
+          "logicalId": "image:Fruits/fruit-strawberry",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/mode-classic-bird.png",
+          "logicalId": "image:Interfaces/mode-classic-bird",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/mode-classic.png",
+          "logicalId": "image:Interfaces/mode-classic",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/mode-combo-bird.png",
+          "logicalId": "image:Interfaces/mode-combo-bird",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/mode-crazy-bird.png",
+          "logicalId": "image:Interfaces/mode-crazy-bird",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/mode-crazy.png",
+          "logicalId": "image:Interfaces/mode-crazy",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/mode-gnstyle.png",
+          "logicalId": "image:Interfaces/mode-gnstyle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/modeselect.png",
+          "logicalId": "image:Interfaces/modeselect",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-classic-bird-des.png",
+          "logicalId": "image:Interfaces/object-classic-bird-des",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-classic-des.png",
+          "logicalId": "image:Interfaces/object-classic-des",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-combo-bird-des.png",
+          "logicalId": "image:Interfaces/object-combo-bird-des",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-combo-des.png",
+          "logicalId": "image:Interfaces/object-combo-des",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-crazy-bird-des.png",
+          "logicalId": "image:Interfaces/object-crazy-bird-des",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-crazy-des.png",
+          "logicalId": "image:Interfaces/object-crazy-des",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-des-shader.png",
+          "logicalId": "image:Interfaces/object-des-shader",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-long-rope.png",
+          "logicalId": "image:Interfaces/object-long-rope",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-rope-node.png",
+          "logicalId": "image:Interfaces/object-rope-node",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-wheel-connect.png",
+          "logicalId": "image:Interfaces/object-wheel-connect",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/object-wheel.png",
+          "logicalId": "image:Interfaces/object-wheel",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "Fonts/SlabThing.ttf",
+          "logicalId": "font:Fonts/SlabThing",
+          "elementType": "font"
+        },
+        {
+          "canonicalPath": "Sounds/apple.wav",
+          "logicalId": "audio:Sounds/apple",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/banana.wav",
+          "logicalId": "audio:Sounds/banana",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/gameplayselected.wav",
+          "logicalId": "audio:Sounds/gameplayselected",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/mangosteen.wav",
+          "logicalId": "audio:Sounds/mangosteen",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/menubuttonclick.wav",
+          "logicalId": "audio:Sounds/menubuttonclick",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/strawberry.wav",
+          "logicalId": "audio:Sounds/strawberry",
+          "elementType": "audio"
+        }
+      ],
+      "generatedPrimitiveIds": []
+    },
+    {
+      "id": "objectives",
+      "kind": "screen",
+      "title": "Objectives and achievement popup",
+      "layoutSources": [
+        "game/assets/scripts/domain/objectives-screen-presentation.ts",
+        "game/assets/scripts/domain/objectives-screen-resource-contract.ts",
+        "game/assets/scripts/domain/objective-achievement-presentation.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Buttons/button-back-selected.png",
+          "logicalId": "image:Buttons/button-back-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-blue-back-normal.png",
+          "logicalId": "image:Buttons/button-blue-back-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Objectives/button-skip-selected.png",
+          "logicalId": "image:Objectives/button-skip-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Objectives/button-skip.png",
+          "logicalId": "image:Objectives/button-skip",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Objectives/objectives-active.png",
+          "logicalId": "image:Objectives/objectives-active",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Objectives/objectives-background.png",
+          "logicalId": "image:Objectives/objectives-background",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Objectives/objectives-inactive.png",
+          "logicalId": "image:Objectives/objectives-inactive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Objectives/objectives-next-background.png",
+          "logicalId": "image:Objectives/objectives-next-background",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Objectives/objectives-next.png",
+          "logicalId": "image:Objectives/objectives-next",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Objectives/objectives-objectives-background.png",
+          "logicalId": "image:Objectives/objectives-objectives-background",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-back-selected.png",
+          "logicalId": "image:Buttons/button-back-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-blue-back-normal.png",
+          "logicalId": "image:Buttons/button-blue-back-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Objectives/button-skip-selected.png",
+          "logicalId": "image:Objectives/button-skip-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Objectives/button-skip.png",
+          "logicalId": "image:Objectives/button-skip",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Objectives/objectives-active.png",
+          "logicalId": "image:Objectives/objectives-active",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Objectives/objectives-background.png",
+          "logicalId": "image:Objectives/objectives-background",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Objectives/objectives-inactive.png",
+          "logicalId": "image:Objectives/objectives-inactive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Objectives/objectives-next-background.png",
+          "logicalId": "image:Objectives/objectives-next-background",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Objectives/objectives-next.png",
+          "logicalId": "image:Objectives/objectives-next",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Objectives/objectives-objectives-background.png",
+          "logicalId": "image:Objectives/objectives-objectives-background",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "Fonts/Arial.ttf",
+          "logicalId": "font:Fonts/Arial",
+          "elementType": "font"
+        },
+        {
+          "canonicalPath": "Sounds/menubuttonclick.wav",
+          "logicalId": "audio:Sounds/menubuttonclick",
+          "elementType": "audio"
+        }
+      ],
+      "generatedPrimitiveIds": [
+        "dynamic-labels-and-score-values"
+      ]
+    },
+    {
+      "id": "options",
+      "kind": "screen",
+      "title": "Options",
+      "layoutSources": [
+        "game/assets/scripts/domain/options-presentation.ts",
+        "game/assets/scripts/domain/options-resource-contract.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmasfive.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-buyitem-normal.png",
+          "logicalId": "image:Buttons/button-buyitem-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Buttons/button-buyitem-selected.png",
+          "logicalId": "image:Buttons/button-buyitem-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/back-button-selected.png",
+          "logicalId": "image:Icons/back-button-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/back-button.png",
+          "logicalId": "image:Icons/back-button",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-0.png",
+          "logicalId": "image:Icons/background-icon-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-1.png",
+          "logicalId": "image:Icons/background-icon-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-2.png",
+          "logicalId": "image:Icons/background-icon-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-3.png",
+          "logicalId": "image:Icons/background-icon-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-4.png",
+          "logicalId": "image:Icons/background-icon-4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-5.png",
+          "logicalId": "image:Icons/background-icon-5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-6.png",
+          "logicalId": "image:Icons/background-icon-6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-7.png",
+          "logicalId": "image:Icons/background-icon-7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-0.png",
+          "logicalId": "image:Icons/blade-icon-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-1.png",
+          "logicalId": "image:Icons/blade-icon-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-10.png",
+          "logicalId": "image:Icons/blade-icon-10",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-11.png",
+          "logicalId": "image:Icons/blade-icon-11",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-12.png",
+          "logicalId": "image:Icons/blade-icon-12",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-13.png",
+          "logicalId": "image:Icons/blade-icon-13",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-14.png",
+          "logicalId": "image:Icons/blade-icon-14",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-15.png",
+          "logicalId": "image:Icons/blade-icon-15",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-16.png",
+          "logicalId": "image:Icons/blade-icon-16",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-17.png",
+          "logicalId": "image:Icons/blade-icon-17",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-2.png",
+          "logicalId": "image:Icons/blade-icon-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-3.png",
+          "logicalId": "image:Icons/blade-icon-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-4.png",
+          "logicalId": "image:Icons/blade-icon-4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-5.png",
+          "logicalId": "image:Icons/blade-icon-5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-6.png",
+          "logicalId": "image:Icons/blade-icon-6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-7.png",
+          "logicalId": "image:Icons/blade-icon-7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-8.png",
+          "logicalId": "image:Icons/blade-icon-8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-9.png",
+          "logicalId": "image:Icons/blade-icon-9",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/icon-button-next-selected.png",
+          "logicalId": "image:Icons/icon-button-next-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/icon-button-next.png",
+          "logicalId": "image:Icons/icon-button-next",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/icon-button-prev-selected.png",
+          "logicalId": "image:Icons/icon-button-prev-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/icon-button-prev.png",
+          "logicalId": "image:Icons/icon-button-prev",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/icon-image-background.png",
+          "logicalId": "image:Icons/icon-image-background",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-0.png",
+          "logicalId": "image:Icons/theme-icon-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-1.png",
+          "logicalId": "image:Icons/theme-icon-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-2.png",
+          "logicalId": "image:Icons/theme-icon-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-3.png",
+          "logicalId": "image:Icons/theme-icon-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-4.png",
+          "logicalId": "image:Icons/theme-icon-4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-5.png",
+          "logicalId": "image:Icons/theme-icon-5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-6.png",
+          "logicalId": "image:Icons/theme-icon-6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-7.png",
+          "logicalId": "image:Icons/theme-icon-7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-8.png",
+          "logicalId": "image:Icons/theme-icon-8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-9.png",
+          "logicalId": "image:Icons/theme-icon-9",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Interfaces/total-coins.png",
+          "logicalId": "image:Interfaces/total-coins",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Options/options-backgrounds.png",
+          "logicalId": "image:Options/options-backgrounds",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Options/options-blade.png",
+          "logicalId": "image:Options/options-blade",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Options/options-themes.png",
+          "logicalId": "image:Options/options-themes",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Options/options-title.png",
+          "logicalId": "image:Options/options-title",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmasfive.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-buyitem-normal.png",
+          "logicalId": "image:Buttons/button-buyitem-normal",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Buttons/button-buyitem-selected.png",
+          "logicalId": "image:Buttons/button-buyitem-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/back-button-selected.png",
+          "logicalId": "image:Icons/back-button-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/back-button.png",
+          "logicalId": "image:Icons/back-button",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-0.png",
+          "logicalId": "image:Icons/background-icon-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-1.png",
+          "logicalId": "image:Icons/background-icon-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-2.png",
+          "logicalId": "image:Icons/background-icon-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-3.png",
+          "logicalId": "image:Icons/background-icon-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-4.png",
+          "logicalId": "image:Icons/background-icon-4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-5.png",
+          "logicalId": "image:Icons/background-icon-5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-6.png",
+          "logicalId": "image:Icons/background-icon-6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-7.png",
+          "logicalId": "image:Icons/background-icon-7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-0.png",
+          "logicalId": "image:Icons/blade-icon-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-1.png",
+          "logicalId": "image:Icons/blade-icon-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-10.png",
+          "logicalId": "image:Icons/blade-icon-10",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-11.png",
+          "logicalId": "image:Icons/blade-icon-11",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-12.png",
+          "logicalId": "image:Icons/blade-icon-12",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-13.png",
+          "logicalId": "image:Icons/blade-icon-13",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-14.png",
+          "logicalId": "image:Icons/blade-icon-14",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-15.png",
+          "logicalId": "image:Icons/blade-icon-15",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-16.png",
+          "logicalId": "image:Icons/blade-icon-16",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-17.png",
+          "logicalId": "image:Icons/blade-icon-17",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-2.png",
+          "logicalId": "image:Icons/blade-icon-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-3.png",
+          "logicalId": "image:Icons/blade-icon-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-4.png",
+          "logicalId": "image:Icons/blade-icon-4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-5.png",
+          "logicalId": "image:Icons/blade-icon-5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-6.png",
+          "logicalId": "image:Icons/blade-icon-6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-7.png",
+          "logicalId": "image:Icons/blade-icon-7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-8.png",
+          "logicalId": "image:Icons/blade-icon-8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-9.png",
+          "logicalId": "image:Icons/blade-icon-9",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/icon-button-next-selected.png",
+          "logicalId": "image:Icons/icon-button-next-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/icon-button-next.png",
+          "logicalId": "image:Icons/icon-button-next",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/icon-button-prev-selected.png",
+          "logicalId": "image:Icons/icon-button-prev-selected",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/icon-button-prev.png",
+          "logicalId": "image:Icons/icon-button-prev",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/icon-image-background.png",
+          "logicalId": "image:Icons/icon-image-background",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-0.png",
+          "logicalId": "image:Icons/theme-icon-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-1.png",
+          "logicalId": "image:Icons/theme-icon-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-2.png",
+          "logicalId": "image:Icons/theme-icon-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-3.png",
+          "logicalId": "image:Icons/theme-icon-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-4.png",
+          "logicalId": "image:Icons/theme-icon-4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-5.png",
+          "logicalId": "image:Icons/theme-icon-5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-6.png",
+          "logicalId": "image:Icons/theme-icon-6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-7.png",
+          "logicalId": "image:Icons/theme-icon-7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-8.png",
+          "logicalId": "image:Icons/theme-icon-8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-9.png",
+          "logicalId": "image:Icons/theme-icon-9",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Interfaces/total-coins.png",
+          "logicalId": "image:Interfaces/total-coins",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Options/options-backgrounds.png",
+          "logicalId": "image:Options/options-backgrounds",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Options/options-blade.png",
+          "logicalId": "image:Options/options-blade",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Options/options-themes.png",
+          "logicalId": "image:Options/options-themes",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Options/options-title.png",
+          "logicalId": "image:Options/options-title",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "Fonts/SlabThing.ttf",
+          "logicalId": "font:Fonts/SlabThing",
+          "elementType": "font"
+        },
+        {
+          "canonicalPath": "Sounds/menubuttonclick.wav",
+          "logicalId": "audio:Sounds/menubuttonclick",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/mono1.wav",
+          "logicalId": "audio:Sounds/mono1",
+          "elementType": "audio"
+        },
+        {
+          "canonicalPath": "Sounds/mono2.wav",
+          "logicalId": "audio:Sounds/mono2",
+          "elementType": "audio"
+        }
+      ],
+      "generatedPrimitiveIds": [
+        "dynamic-labels-and-score-values"
+      ]
+    },
+    {
+      "id": "shared-scene",
+      "kind": "shared-screen",
+      "title": "Shared background, leaf and result scene",
+      "layoutSources": [
+        "forensics/contracts/shared-game-scene-presentation-contract.md",
+        "game/assets/scripts/domain/shared-game-scene-resources.ts",
+        "game/assets/scripts/domain/shared-leaf-layer.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground0.png",
+          "logicalId": "image:Backgrounds/paperbackground0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground1.png",
+          "logicalId": "image:Backgrounds/paperbackground1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground2.png",
+          "logicalId": "image:Backgrounds/paperbackground2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground3.png",
+          "logicalId": "image:Backgrounds/paperbackground3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground4.png",
+          "logicalId": "image:Backgrounds/paperbackground4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground5.png",
+          "logicalId": "image:Backgrounds/paperbackground5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground6.png",
+          "logicalId": "image:Backgrounds/paperbackground6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground7.png",
+          "logicalId": "image:Backgrounds/paperbackground7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground8.png",
+          "logicalId": "image:Backgrounds/paperbackground8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaf/leave1.png",
+          "logicalId": "image:Leaf/leave1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaf/leave2.png",
+          "logicalId": "image:Leaf/leave2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaf/leave3.png",
+          "logicalId": "image:Leaf/leave3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaf/leave4.png",
+          "logicalId": "image:Leaf/leave4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaf/leave5.png",
+          "logicalId": "image:Leaf/leave5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaf/leave6.png",
+          "logicalId": "image:Leaf/leave6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Leaf/leave7.png",
+          "logicalId": "image:Leaf/leave7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme0.png",
+          "logicalId": "image:Themes/theme0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme1.png",
+          "logicalId": "image:Themes/theme1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme2.png",
+          "logicalId": "image:Themes/theme2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme3.png",
+          "logicalId": "image:Themes/theme3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme4.png",
+          "logicalId": "image:Themes/theme4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme5.png",
+          "logicalId": "image:Themes/theme5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme6.png",
+          "logicalId": "image:Themes/theme6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme7.png",
+          "logicalId": "image:Themes/theme7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme8.png",
+          "logicalId": "image:Themes/theme8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme9.png",
+          "logicalId": "image:Themes/theme9",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground0.png",
+          "logicalId": "image:Backgrounds/paperbackground0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground1.png",
+          "logicalId": "image:Backgrounds/paperbackground1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground2.png",
+          "logicalId": "image:Backgrounds/paperbackground2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground3.png",
+          "logicalId": "image:Backgrounds/paperbackground3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground4.png",
+          "logicalId": "image:Backgrounds/paperbackground4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground5.png",
+          "logicalId": "image:Backgrounds/paperbackground5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground6.png",
+          "logicalId": "image:Backgrounds/paperbackground6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground7.png",
+          "logicalId": "image:Backgrounds/paperbackground7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground8.png",
+          "logicalId": "image:Backgrounds/paperbackground8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaf/leave1.png",
+          "logicalId": "image:Leaf/leave1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaf/leave2.png",
+          "logicalId": "image:Leaf/leave2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaf/leave3.png",
+          "logicalId": "image:Leaf/leave3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaf/leave4.png",
+          "logicalId": "image:Leaf/leave4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaf/leave5.png",
+          "logicalId": "image:Leaf/leave5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaf/leave6.png",
+          "logicalId": "image:Leaf/leave6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Leaf/leave7.png",
+          "logicalId": "image:Leaf/leave7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme0.png",
+          "logicalId": "image:Themes/theme0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme1.png",
+          "logicalId": "image:Themes/theme1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme2.png",
+          "logicalId": "image:Themes/theme2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme3.png",
+          "logicalId": "image:Themes/theme3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme4.png",
+          "logicalId": "image:Themes/theme4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme5.png",
+          "logicalId": "image:Themes/theme5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme6.png",
+          "logicalId": "image:Themes/theme6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme7.png",
+          "logicalId": "image:Themes/theme7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme8.png",
+          "logicalId": "image:Themes/theme8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme9.png",
+          "logicalId": "image:Themes/theme9",
+          "elementType": "raster"
+        }
+      ],
+      "generatedPrimitiveIds": []
+    },
+    {
+      "id": "standard-blade",
+      "kind": "gameplay-system",
+      "title": "Standard blade selector and generated blade effects",
+      "layoutSources": [
+        "forensics/contracts/basic-blade-presentation-contract.md",
+        "game/assets/scripts/domain/basic-blade-trail.ts",
+        "game/assets/scripts/domain/standard-blade-resource-contract.ts"
+      ],
+      "layoutCoordinateSpace": "recovered-visible-rectangle",
+      "resolutionProfiles": [
+        "480x800",
+        "720x1280"
+      ],
+      "assets": [
+        {
+          "canonicalPath": "480x800/Blades/Centipede/body.png",
+          "logicalId": "image:Blades/Centipede/body",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Centipede/head.png",
+          "logicalId": "image:Blades/Centipede/head",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Centipede/tail.png",
+          "logicalId": "image:Blades/Centipede/tail",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-body-0.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-body-1.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-body-2.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-body-3.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-head-0.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-head-1.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-head-2.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-head-3.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-tail-0.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-tail-1.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-tail-2.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-tail-3.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Butterfly/butterfly0.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Butterfly/butterfly1.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Butterfly/butterfly2.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Butterfly/butterfly3.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Butterfly/butterfly4.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Butterfly/butterfly5.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Fire/firecircle.png",
+          "logicalId": "image:Blades/Particles/Fire/firecircle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Fire/fireparticle.png",
+          "logicalId": "image:Blades/Particles/Fire/fireparticle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Fire/smoke.png",
+          "logicalId": "image:Blades/Particles/Fire/smoke",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Ice/circle.png",
+          "logicalId": "image:Blades/Particles/Ice/circle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Ice/snowflake.png",
+          "logicalId": "image:Blades/Particles/Ice/snowflake",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Ice/star.png",
+          "logicalId": "image:Blades/Particles/Ice/star",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Rainbow/rainbowstar0.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Rainbow/rainbowstar1.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Rainbow/rainbowstar2.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Rainbow/rainbowstar3.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Rainbow/rainbowstar4.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/VN Flag/vnflagstar.png",
+          "logicalId": "image:Blades/Particles/VN Flag/vnflagstar",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmascircle.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmascircle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmasfive.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmasfour.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfour",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/X-Mas/xmashexa.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmashexa",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade0.png",
+          "logicalId": "image:Blades/blade0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade1.png",
+          "logicalId": "image:Blades/blade1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade10.png",
+          "logicalId": "image:Blades/blade10",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade2.png",
+          "logicalId": "image:Blades/blade2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade3.png",
+          "logicalId": "image:Blades/blade3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade4.png",
+          "logicalId": "image:Blades/blade4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade5.png",
+          "logicalId": "image:Blades/blade5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade6.png",
+          "logicalId": "image:Blades/blade6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade7.png",
+          "logicalId": "image:Blades/blade7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade8.png",
+          "logicalId": "image:Blades/blade8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade9.png",
+          "logicalId": "image:Blades/blade9",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/firebladetexture.png",
+          "logicalId": "image:Blades/firebladetexture",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "480x800/Blades/rainbow.png",
+          "logicalId": "image:Blades/rainbow",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Centipede/body.png",
+          "logicalId": "image:Blades/Centipede/body",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Centipede/head.png",
+          "logicalId": "image:Blades/Centipede/head",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Centipede/tail.png",
+          "logicalId": "image:Blades/Centipede/tail",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-body-0.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-body-1.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-body-2.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-body-3.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-head-0.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-head-1.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-head-2.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-head-3.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-tail-0.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-tail-1.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-tail-2.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-tail-3.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Butterfly/butterfly0.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Butterfly/butterfly1.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Butterfly/butterfly2.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Butterfly/butterfly3.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Butterfly/butterfly4.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Butterfly/butterfly5.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Fire/firecircle.png",
+          "logicalId": "image:Blades/Particles/Fire/firecircle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Fire/fireparticle.png",
+          "logicalId": "image:Blades/Particles/Fire/fireparticle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Fire/smoke.png",
+          "logicalId": "image:Blades/Particles/Fire/smoke",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Ice/circle.png",
+          "logicalId": "image:Blades/Particles/Ice/circle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Ice/snowflake.png",
+          "logicalId": "image:Blades/Particles/Ice/snowflake",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Ice/star.png",
+          "logicalId": "image:Blades/Particles/Ice/star",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Rainbow/rainbowstar0.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Rainbow/rainbowstar1.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Rainbow/rainbowstar2.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Rainbow/rainbowstar3.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Rainbow/rainbowstar4.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/VN Flag/vnflagstar.png",
+          "logicalId": "image:Blades/Particles/VN Flag/vnflagstar",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmascircle.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmascircle",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmasfive.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfive",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmasfour.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmasfour",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/X-Mas/xmashexa.png",
+          "logicalId": "image:Blades/Particles/X-Mas/xmashexa",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade0.png",
+          "logicalId": "image:Blades/blade0",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade1.png",
+          "logicalId": "image:Blades/blade1",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade10.png",
+          "logicalId": "image:Blades/blade10",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade11.png",
+          "logicalId": "image:Blades/blade11",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade12.png",
+          "logicalId": "image:Blades/blade12",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade2.png",
+          "logicalId": "image:Blades/blade2",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade3.png",
+          "logicalId": "image:Blades/blade3",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade4.png",
+          "logicalId": "image:Blades/blade4",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade5.png",
+          "logicalId": "image:Blades/blade5",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade6.png",
+          "logicalId": "image:Blades/blade6",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade7.png",
+          "logicalId": "image:Blades/blade7",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade8.png",
+          "logicalId": "image:Blades/blade8",
+          "elementType": "raster"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade9.png",
+          "logicalId": "image:Blades/blade9",
+          "elementType": "raster"
+        }
+      ],
+      "generatedPrimitiveIds": [
+        "basic-blade-triangle-strip"
+      ]
+    }
+  ],
+  "generatedPrimitives": [
+    {
+      "id": "basic-blade-triangle-strip",
+      "consumers": [
+        "standard-blade",
+        "classic-presentation"
+      ],
+      "type": "textured-triangle-strip",
+      "evidenceStatus": "recovered-with-renderer-compatibility",
+      "sourceRefs": [
+        "forensics/contracts/basic-blade-presentation-contract.md",
+        "game/assets/scripts/domain/basic-blade-trail.ts",
+        "game/assets/scripts/creator/classic-blade-presenter.ts"
+      ]
+    },
+    {
+      "id": "generated-fruit-and-cut-half-colliders",
+      "consumers": [
+        "classic-presentation",
+        "crazy-presentation",
+        "gn-style"
+      ],
+      "type": "sprite-plus-physics-shape",
+      "evidenceStatus": "recovered",
+      "sourceRefs": [
+        "forensics/contracts/classic-physics-contract.md",
+        "game/assets/scripts/domain/classic-fixture-rules.ts",
+        "game/assets/scripts/domain/classic-cut-half-motion.ts"
+      ]
+    },
+    {
+      "id": "generated-bomb-flash-and-triangles",
+      "consumers": [
+        "crazy-presentation"
+      ],
+      "type": "procedural-graphics",
+      "evidenceStatus": "recovered",
+      "sourceRefs": [
+        "game/assets/scripts/domain/standard-bomb-explosion-state.ts",
+        "game/assets/scripts/creator/standard-bomb-explosion-presenter.ts"
+      ]
+    },
+    {
+      "id": "gn-style-particle-choreography",
+      "consumers": [
+        "gn-style"
+      ],
+      "type": "generated-particle-parents",
+      "evidenceStatus": "recovered",
+      "sourceRefs": [
+        "forensics/native/gn-style-particle-choreography.json",
+        "game/assets/scripts/domain/gn-style-particle-choreography.generated.ts"
+      ]
+    },
+    {
+      "id": "dynamic-labels-and-score-values",
+      "consumers": [
+        "main-menu",
+        "leaderboard",
+        "objectives",
+        "options",
+        "classic-presentation",
+        "crazy-presentation",
+        "gn-style",
+        "combo-bird"
+      ],
+      "type": "ttf-label",
+      "evidenceStatus": "recovered-or-explicit-inference-per-source",
+      "sourceRefs": [
+        "docs/cocos-creator-contract-map.md",
+        "forensics/contracts/classic-presentation-contract.md",
+        "forensics/contracts/main-menu-presentation-contract.md"
+      ]
+    }
+  ],
+  "staticScreenSignals": [
+    {
+      "name": "about",
+      "type": "screen",
+      "evidenceStatus": "inferred",
+      "runtimeUsage": "unknown",
+      "evidence": "native:_ZThn228_N10AboutLayerD1Ev",
+      "disposition": "mapped-to-screen-contract",
+      "consumerId": "about"
+    },
+    {
+      "name": "leaderboard",
+      "type": "screen",
+      "evidenceStatus": "inferred",
+      "runtimeUsage": "unknown",
+      "evidence": "asset:Leaderboard/leaderboard_classic.png",
+      "disposition": "mapped-to-screen-contract",
+      "consumerId": "leaderboard"
+    },
+    {
+      "name": "loading",
+      "type": "screen",
+      "evidenceStatus": "inferred",
+      "runtimeUsage": "unknown",
+      "evidence": "asset:Loading/backgroundLogo.png",
+      "disposition": "mapped-to-screen-contract",
+      "consumerId": "loading"
+    },
+    {
+      "name": "main-menu",
+      "type": "screen",
+      "evidenceStatus": "inferred",
+      "runtimeUsage": "unknown",
+      "evidence": "native:_ZN13MainMenuLayerC1Ev",
+      "disposition": "mapped-to-screen-contract",
+      "consumerId": "main-menu"
+    },
+    {
+      "name": "objectives",
+      "type": "screen",
+      "evidenceStatus": "inferred",
+      "runtimeUsage": "unknown",
+      "evidence": "asset:Objectives/button-skip-selected.png",
+      "disposition": "mapped-to-screen-contract",
+      "consumerId": "objectives"
+    },
+    {
+      "name": "options",
+      "type": "screen",
+      "evidenceStatus": "inferred",
+      "runtimeUsage": "unknown",
+      "evidence": "native:_ZN12OptionsLayerC1Ev",
+      "disposition": "mapped-to-screen-contract",
+      "consumerId": "options"
+    },
+    {
+      "name": "score-display",
+      "type": "screen",
+      "evidenceStatus": "inferred",
+      "runtimeUsage": "unknown",
+      "evidence": "native:_ZN17DisplayScoreLayerC1Ev",
+      "disposition": "mapped-to-screen-contract",
+      "consumerId": "classic-presentation"
+    },
+    {
+      "name": "test",
+      "type": "screen",
+      "evidenceStatus": "inferred",
+      "runtimeUsage": "unknown",
+      "evidence": "native:_ZThn228_N18AnimationTestLayerD1Ev",
+      "disposition": "explicit-unknown-or-nonproduction",
+      "consumerId": null
+    },
+    {
+      "name": "text",
+      "type": "screen",
+      "evidenceStatus": "inferred",
+      "runtimeUsage": "unknown",
+      "evidence": "asset:Text/text-150s.png",
+      "disposition": "mapped-to-raster-family",
+      "consumerId": "combo-bird"
+    }
+  ]
+}

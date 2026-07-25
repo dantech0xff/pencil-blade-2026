@@ -495,7 +495,13 @@ test_classic_contract_evidence_hashes() {
         ;;
     esac
 
-    row=$(grep -F "| $evidence_id |" "$ROOT_DIR/docs/evidence-register.md")
+    row=$(awk -F '|' -v id="$evidence_id" '
+      {
+        value=$2
+        gsub(/^[ \t]+|[ \t]+$/, "", value)
+        if (value == id) print
+      }
+    ' "$ROOT_DIR/docs/evidence-register.md")
     [ -n "$row" ] || return 1
     registered_hash=$(printf '%s\n' "$row" | awk -F '|' '{ value=$6; gsub(/[ `]/, "", value); print value }')
     registered_bytes=$(printf '%s\n' "$row" | awk -F '|' '{ value=$7; gsub(/[ ,]/, "", value); print value }')

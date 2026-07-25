@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "rendering": [
+    {
+      "id": "stock-textured-sprite-rendering",
+      "status": "recovered-with-creator-compatibility",
+      "recoveredUnitEligible": true,
+      "rule": "Use exact source rasters without trim, resize, re-encode, atlas synthesis, or substitute material.",
+      "sourceRefs": [
+        "assets/catalog/creator-staging-manifest.json",
+        "scripts/validate-creator-resource-meta.mjs",
+        "docs/cocos-creator-build-audit.md"
+      ],
+      "residuals": []
+    },
+    {
+      "id": "basic-blade-textured-strip",
+      "status": "recovered-with-explicit-inference",
+      "recoveredUnitEligible": false,
+      "rule": "Preserve the recovered 20-byte vertex layout, four persistent meshes, ten-point limit, strip topology, texture, and lifecycle.",
+      "sourceRefs": [
+        "forensics/contracts/basic-blade-presentation-contract.md",
+        "game/assets/scripts/domain/basic-blade-trail.ts",
+        "game/assets/scripts/creator/classic-blade-presenter.ts"
+      ],
+      "residuals": [
+        "Legacy numeric blend factors and sampler state are not recoverable from current static evidence; Creator unlit textured material is the reviewed compatibility decision."
+      ]
+    },
+    {
+      "id": "generated-effects",
+      "status": "recovered",
+      "recoveredUnitEligible": true,
+      "rule": "Bomb, critical, result, leaf, and GN-style effects are code-driven primitives or exact raster sprites; no authored material/effect/atlas resource is invented.",
+      "sourceRefs": [
+        "docs/cocos-creator-contract-map.md",
+        "game/assets/scripts/domain/standard-bomb-explosion-state.ts",
+        "game/assets/scripts/domain/classic-critical-particle-plan.ts",
+        "game/assets/scripts/domain/gn-style-particle-choreography.generated.ts"
+      ],
+      "residuals": []
+    },
+    {
+      "id": "material-artifact-disposition",
+      "status": "recovered-absence",
+      "recoveredUnitEligible": true,
+      "rule": "The canonical APK contains no standalone shader, material, effect, prefab, animation-clip, or atlas manifest; presentation is reconstructed from stock rendering and code composition.",
+      "sourceRefs": [
+        "forensics/resources/resource-usage-map.json",
+        "docs/cocos-creator-contract-map.md"
+      ],
+      "residuals": []
+    }
+  ],
+  "levelLayoutProgression": [
+    {
+      "id": "six-production-modes",
+      "status": "recovered",
+      "recoveredUnitEligible": true,
+      "scope": "Classic, Crazy, Gangnam Style, Classic Bird, Crazy Bird, Combo Bird",
+      "sourceRefs": [
+        "game/assets/scripts/domain/mode-select-state.ts",
+        "docs/cocos-creator-contract-map.md",
+        "plans/260721-2253-pencil-blade-restoration/phase-06-recreate-full-game-content-and-progression.md"
+      ],
+      "residuals": []
+    },
+    {
+      "id": "code-driven-toss-and-timing",
+      "status": "recovered-with-listed-inferences",
+      "recoveredUnitEligible": false,
+      "scope": "Classic toss strategies plus 60s Crazy, 150s GN Style, and 90s Combo Bird owners",
+      "sourceRefs": [
+        "forensics/contracts/classic-toss-contract.md",
+        "game/assets/scripts/domain/crazy-timed-mode-profile.ts",
+        "game/assets/scripts/domain/gn-style-session.ts",
+        "game/assets/scripts/domain/combo-bird-session.ts"
+      ],
+      "residuals": [
+        "Classic bomb scheduler ownership and the exact native Crazy Bird ActionGoCallback operand/order remain disclosed static inference gaps."
+      ]
+    },
+    {
+      "id": "objectives-and-local-progression",
+      "status": "recovered",
+      "recoveredUnitEligible": true,
+      "scope": "52 objectives, ranking, rewards, coins, selector prices, settings defaults, and storage lifecycle",
+      "sourceRefs": [
+        "game/assets/scripts/domain/objectives-manager-state.ts",
+        "game/assets/scripts/domain/classic-settings-state.ts",
+        "game/assets/scripts/domain/recovered-result-ranking.ts",
+        "docs/cocos-creator-contract-map.md"
+      ],
+      "residuals": []
+    },
+    {
+      "id": "level-artifact-disposition",
+      "status": "recovered-absence",
+      "recoveredUnitEligible": true,
+      "scope": "No standalone level/config manifest exists in the canonical APK; all recovered composition/progression is native-code driven.",
+      "sourceRefs": [
+        "forensics/resources/resource-usage-map.json",
+        "forensics/native/function-map.csv",
+        "docs/decisions/apk-corpus-canonical-denominator.md"
+      ],
+      "residuals": []
+    }
+  ],
+  "unresolvedPolicy": "Every residual is listed on its contract and is excluded from recovered fidelity credit.",
+  "summary": {
+    "renderingContracts": 4,
+    "levelLayoutProgressionContracts": 4,
+    "residuals": 2,
+    "unclassifiedRecoveredEvidence": 0
+  }
+}

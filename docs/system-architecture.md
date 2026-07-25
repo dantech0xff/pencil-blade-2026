@@ -40,7 +40,7 @@ census. Separate lifecycle/composite mappings cover every recovered screen, game
 pause, blade, particle, audio, and generated-entity surface. Static evidence requires no
 additional prefab, authored material/effect, animation clip, or atlas.
 
-Automated verification reaches `1547/1547` full vertical-slice tests, `218/218` focused
+Automated verification reaches `1568/1568` full vertical-slice tests, `218/218` focused
 Classic pause/composition tests, and `61/61`
 resource/build/catalog tests. The unchanged
 inventory/evidence workflow remains `14/14` in `217s`; reconstruction policy positive plus
@@ -146,7 +146,7 @@ Creator signature preflight, and release rights do not.
 | Audio | Creator adapters preload the reviewed Classic/menu, Options, Bird, Crazy, Combo, and GN clip sets and interpret toss, swish, cut, critical, combo, timer, result-rank, bonus/electric, objective, pause, selector-row, and menu-button commands without moving draw/order rules out of the domain. Independent retained voices model ordinary-bomb and Crazy effect ownership; the electric-only `boomhit` path remains separate from ordinary-bomb audio. GN's dedicated non-looping source is mutually exclusive with shared background music and pauses/resumes/stops with its transactional owner; TimeManager effects use the shared exact presenter. |
 | Resource import | Staging and metadata validators prove exact bytes and current Creator raster/audio import geometry for the recovered APK corpus. The generated registry/ledger assigns exact live ownership to `761/862` paths (`88.28%`), including Loading's 70-path closure, while all `862/862` paths are classified as `761` consumed, `0` unknown, `100` excluded, and `1` unsupported. UUID extraction remains separate from consumer accounting. |
 | Resolution and input | The recovered `720` physical-width profile branch is pure; Creator applies its Show All policy and routes scene-wide touch input into four blade slots or the single Bird blade. |
-| Build boundary | Source-boundary tests reject trackable legacy integration. The separate fail-closed archive audit hashes every entry, parses ZIP records exactly, recurses through bounded nested archives, and inspects ELF payloads; the unchanged inventory/source/staging/archive workflow is `14/14`, `tests/*.mjs` are `61/61`, the full vertical slice is `1567/1567`, focused pause/composition is `218/218`, strict Creator TypeScript is green, and the latest whole-repo checkpoint records `1749/1749`. |
+| Build boundary | Source-boundary tests reject trackable legacy integration. The fail-closed archive audit hashes every entry, parses ZIP records exactly, recurses through bounded nested archives, and inspects ELF payloads; inventory is `14/14`, native analysis is `7/7`, top-level Node tests are `129/129`, the full vertical slice is `1568/1568`, focused pause/composition is `218/218`, strict Creator TypeScript is green, and the latest Node-suite checkpoint records `1697/1697`. |
 
 ## Checkpoint Evidence
 

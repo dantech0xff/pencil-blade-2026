@@ -321,6 +321,10 @@ function createPersistentLegacyLayoutMesh(
       },
       data: vertexBytes,
     });
+    // JSB does not lazily initialize programmatically reset meshes when the
+    // renderingSubMeshes property is read. Initialize explicitly so Android
+    // native builds create the persistent vertex buffer before the first drag.
+    mesh.initialize();
     return mesh;
   } catch (error) {
     if (isValid(mesh, true)) {
@@ -354,7 +358,14 @@ function updateLegacyLayoutMesh(
   const vertexBundle = mesh.struct.vertexBundles[0];
   const subMesh = mesh.renderingSubMeshes[0];
   const vertexBuffer = subMesh?.vertexBuffers[0];
-  const drawInfo = subMesh?.drawInfo;
+  const drawInfo = subMesh === undefined
+    ? undefined
+    : (
+      subMesh.drawInfo
+      ?? (subMesh as unknown as {
+        getDrawInfo?: () => gfx.DrawInfo | null | undefined;
+      }).getDrawInfo?.()
+    );
   if (vertexBundle === undefined || subMesh === undefined || vertexBuffer === undefined || !drawInfo) {
     throw new Error(`BasicBlade slot ${owner.slot} persistent mesh is incomplete`);
   }

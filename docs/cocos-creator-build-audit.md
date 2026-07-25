@@ -60,8 +60,8 @@ File existence alone is not a passing audit. The build and release paths are onl
 | SDK pins | `21 / 36 / 36` |
 | ABI | `arm64-v8a` only |
 | Signing | Android Debug signer, v1 / v2, trusted debug-keystore SHA-256 match |
-| Artifact size | `55 MiB` |
-| Artifact SHA-256 | `1a4d96c71e53572fe86ce7bf73e73990df1a777a8fe33315cd1b9f6fd2705f4d` |
+| Artifact size | `57,352,687` bytes |
+| Artifact SHA-256 | `e313e149164eec8664b934a16e3c14b3a0f0265f9c7bb6306375a08a7cb5c37d` |
 | Prohibited-runtime audit | PASS |
 
 ### Android audit result
@@ -109,9 +109,9 @@ File existence alone is not a passing audit. The build and release paths are onl
 | Creator exit | `36` |
 | Web build audit | PASS |
 | Prefix verifier | PASS, `2539` files |
-| Output tree | `39,613,544` file bytes; relative-path plus per-file SHA-256 manifest digest `6eda0466b3540c0de29d6ec7125704c5410fe1564f517e68c09d53028abc863f` |
-| Browser smoke | all six modes, menu transitions, unlocks, `999999` coins, particles |
-| Console status | zero warnings / errors |
+| Output tree | `39,613,694` file bytes; relative-path, size, and per-file SHA-256 tree digest `90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54` |
+| Browser smoke | pinned Chrome `150.0.7871.182` at `480x800` and `720x1280`; Main Menu → Mode Select → Classic, input, audio, storage, lifecycle, orientation, and post-load offline checks |
+| Console status | zero page errors / request failures |
 | Public Pages deployment | not executed |
 
 ### Web audit result
@@ -139,12 +139,13 @@ The repository currently proves:
 - a clean local Web Mobile build
 - a successful web tree audit and prefix verifier
 - a fail-closed public release gate
-- whole-repository checkpoint reports at `1749/1749`
+- Node-suite checkpoint reports at `1697/1697`
+- a frozen Chrome `150.0.7871.182` matrix at `480x800` and `720x1280`
+- an Android 13/API 33 arm64 emulator runtime row
 
 The repository does **not** yet prove:
 
 - public Pages deployment
 - final production URL verification
-- a frozen browser/version/device matrix
 - approval to publish uncleared art, audio, fonts, code, identity, or engine runtime
 - a protected labeled Creator runner, `github-pages` environment, and valid Creator bundle signature

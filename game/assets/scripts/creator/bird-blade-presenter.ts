@@ -691,6 +691,9 @@ function createPersistentLegacyLayoutMesh(
     },
     data: vertexBytes,
   });
+  // Native JSB requires explicit initialization for meshes assembled at
+  // runtime; the Web implementation initializes lazily on property access.
+  mesh.initialize();
   return mesh;
 }
 
@@ -706,7 +709,14 @@ function updateLegacyLayoutMesh(
   const vertexBundle = mesh.struct.vertexBundles[0];
   const subMesh = mesh.renderingSubMeshes[0];
   const vertexBuffer = subMesh?.vertexBuffers[0];
-  const drawInfo = subMesh?.drawInfo;
+  const drawInfo = subMesh === undefined
+    ? undefined
+    : (
+      subMesh.drawInfo
+      ?? (subMesh as unknown as {
+        getDrawInfo?: () => gfx.DrawInfo | null | undefined;
+      }).getDrawInfo?.()
+    );
   if (
     vertexBundle === undefined
     || subMesh === undefined

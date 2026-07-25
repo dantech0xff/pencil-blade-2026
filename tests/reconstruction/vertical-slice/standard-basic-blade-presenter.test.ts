@@ -68,6 +68,7 @@ export class Mesh {
       }],
     }];
   }
+  initialize() {}
   destroy() {
     if (this.destroyed) return;
     this.destroyCalls += 1;

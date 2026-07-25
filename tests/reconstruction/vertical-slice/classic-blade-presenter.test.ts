@@ -70,6 +70,7 @@ export class Mesh {
   constructor(name = '') {
     this.data = null;
     this.destroyed = false;
+    this.initializeCalls = 0;
     this.lastReset = null;
     this.name = name;
     this.renderingSubMeshes = [];
@@ -91,11 +92,17 @@ export class Mesh {
       },
     };
     this.renderingSubMeshes = [{
-      drawInfo: { vertexCount: 0 },
+      _drawInfo: { vertexCount: 0 },
+      drawInfo: null,
       geometricInfoInvalidations: 0,
+      getDrawInfo() { return this._drawInfo; },
       invalidateGeometricInfo() { this.geometricInfoInvalidations += 1; },
       vertexBuffers: [vertexBuffer],
     }];
+    this.renderingSubMeshes[0].drawInfo = this.renderingSubMeshes[0]._drawInfo;
+  }
+  initialize() {
+    this.initializeCalls += 1;
   }
   destroy() {
     this.destroyed = true;
@@ -346,6 +353,7 @@ interface StubMaterial {
 interface StubMesh {
   data: Uint8Array | null;
   destroyed: boolean;
+  readonly initializeCalls: number;
   lastReset: {
     readonly data: Uint8Array;
     readonly struct: {
@@ -378,14 +386,17 @@ interface StubMesh {
     };
   } | null;
   readonly renderingSubMeshes: readonly [{
+    readonly _drawInfo: { vertexCount: number };
     readonly drawInfo: { vertexCount: number };
     readonly geometricInfoInvalidations: number;
+    getDrawInfo(): { vertexCount: number };
     readonly vertexBuffers: readonly [{
       readonly updates: readonly Array<{ readonly data: Uint8Array; readonly size: number }>;
     }];
   }];
   readonly struct: NonNullable<StubMesh['lastReset']>['struct'];
   destroy(): void;
+  initialize(): void;
   reset(options: StubMesh['lastReset']): void;
 }
 
@@ -508,6 +519,7 @@ test('presenter creates four mesh owners for every Basic ID and binds each exact
         );
         const mesh = owner.meshRenderer.mesh;
         assert.ok(mesh);
+        assert.equal(mesh.initializeCalls, 1);
         assert.equal(mesh.data?.byteLength, 500);
         assert.equal(mesh.lastReset?.struct.vertexBundles[0].view.length, 500);
         assert.equal(mesh.lastReset?.struct.vertexBundles[0].view.count, 0);
@@ -535,6 +547,31 @@ test('presenter creates four mesh owners for every Basic ID and binds each exact
       presenter.dispose();
     }
   }
+});
+
+test('mesh updates use the native JSB getDrawInfo method when the Web property is absent', () => {
+  cc.resetCreatedNodes();
+  const presenter = ClassicBladePresenter.create({
+    assetTree: '480x800',
+    resource: loadedResource('480x800', 0) as never,
+    selectedBladeId: 0,
+    viewportWidth: 480,
+  });
+  presenter.attach(new cc.Node('Parent') as never);
+
+  const mesh = presenter.owners[0]?.meshRenderer.mesh;
+  assert.ok(mesh);
+  const subMesh = mesh.renderingSubMeshes[0];
+  delete (subMesh as unknown as { drawInfo?: { vertexCount: number } }).drawInfo;
+
+  presenter.begin(0);
+  presenter.move(0, point(0));
+  presenter.move(0, point(10));
+  presenter.move(0, point(20));
+  presenter.move(0, point(30));
+
+  assert.equal(subMesh.getDrawInfo().vertexCount, 6);
+  presenter.dispose();
 });
 
 test('mesh data preserves the 20-byte vertex layout, affine SpriteFrame UV mapping, and native frame disposal', () => {

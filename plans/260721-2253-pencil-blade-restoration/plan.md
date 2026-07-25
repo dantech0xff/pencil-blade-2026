@@ -30,6 +30,13 @@ Verified starting point:
 - Native dynamic symbols retain many game class and method names.
 - No game level/config files found in APK assets; composition and rules likely live in C++.
 
+Current closeout checkpoint (2026-07-25): `123/130` checklist items pass. Phases 2-6 are
+complete. The remaining seven items are deliberately fail-closed: two external offline backup
+copies, rights/Cooper approval, protected Creator runner, Pages source/environment, production
+URL verification, and the rights-clean public H5 deployment. Technical evidence is bound by
+`reports/technical-closeout-manifest.json`; none of these external gates is represented as
+complete without its required evidence or owner decision.
+
 ## Program Decisions
 
 - Target maximal recoverable fidelity: implement every behavior supported by static evidence,
@@ -75,10 +82,10 @@ Verified starting point:
 | Phase | Name | Status |
 |-------|------|--------|
 | 1 | [Preserve Evidence and Establish Baseline](./phase-01-preserve-evidence-and-establish-baseline.md) | In progress |
-| 2 | [Establish Static Reconstruction Corpus](./phase-02-establish-static-reconstruction-corpus.md) | In progress |
-| 3 | [Catalog Resources and Reconstruct Presentation](./phase-03-catalog-resources-and-reconstruct-presentation.md) | In progress |
+| 2 | [Establish Static Reconstruction Corpus](./phase-02-establish-static-reconstruction-corpus.md) | Complete |
+| 3 | [Catalog Resources and Reconstruct Presentation](./phase-03-catalog-resources-and-reconstruct-presentation.md) | Complete |
 | 4 | [Recover Gameplay, Physics, and Progression Contracts](./phase-04-reverse-engineer-native-gameplay-contracts.md) | Complete |
-| 5 | [Build Cocos Creator Architecture and Vertical Slice](./phase-05-build-cocos-creator-architecture-and-vertical-slice.md) | In progress |
+| 5 | [Build Cocos Creator Architecture and Vertical Slice](./phase-05-build-cocos-creator-architecture-and-vertical-slice.md) | Complete |
 | 6 | [Recreate Full Game Content and Progression](./phase-06-recreate-full-game-content-and-progression.md) | Complete |
 | 7 | [Validate Static Reconstruction and Prepare Release](./phase-07-validate-fidelity-and-prepare-release.md) | In progress |
 
@@ -166,7 +173,7 @@ Verified starting point:
   transactional Main Menu ↔ About ownership, direct Menu/Review/Email/Like controls,
   `MOBILE_BACK`, production pulse disabled by `localCompatibilityAvailable=false`, and
   sanitized retired-offline review/feedback/social events. The current repository checkpoint
-  now passes `182/182` top-level Node tests, `1567/1567` vertical-slice tests, and `1749/1749`
+  now passes `129/129` top-level Node tests, `1568/1568` vertical-slice tests, and `1697/1697`
   combined, with strict Creator TypeScript/audits still green and the Android debug APK plus
   private Web Mobile artifact still verified; public GitHub Pages, runtime-device coverage,
   Physics2D equivalence, the final five-domain fidelity score, and release-rights clearance

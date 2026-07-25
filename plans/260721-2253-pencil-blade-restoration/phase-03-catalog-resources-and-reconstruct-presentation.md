@@ -1,7 +1,7 @@
 ---
 phase: 3
 title: "Catalog Resources and Reconstruct Presentation"
-status: in-progress
+status: completed
 priority: P1
 dependencies: [2]
 effort: "1-2 weeks"
@@ -101,29 +101,29 @@ remain immutable; Creator receives verified copies without source recompression.
 - [x] Resolution-pair report
 - [x] Reviewed Classic presentation/layout/audio subset contract
 - [x] Versioned machine-readable reconstruction policy and focused validator
-- [ ] Ship-ready asset schema/catalog and usage enrichment
-- [ ] Animation frame map
-- [ ] UI/layout spec
-- [ ] Audio cue map
-- [ ] Rights status for every logical asset
+- [x] Ship-ready asset schema/catalog and usage enrichment
+- [x] Animation frame map
+- [x] UI/layout spec
+- [x] Audio cue map
+- [x] Rights status for every logical asset
 - [x] Recovered-APK Cocos Creator staging/import manifest and validators
 
 ## Success Criteria
 
 - [x] Catalog reconciles 784 assets/ PNG plus 107 res/ PNG with explicit scope/classification
-- [ ] Every statically identified screen element maps to an asset, generated primitive, or unknown
+- [x] Every statically identified screen element maps to an asset, generated primitive, or unknown
 - [x] 480x800 and 720x1280 scaling/cropping rules are recovered or explicitly inferred
-- [ ] Animation and audio cues cite resource sequences plus native event evidence
-- [ ] Shader/material/rendering and level/layout/progression contracts cover all recovered
+- [x] Animation and audio cues cite resource sequences plus native event evidence
+- [x] Shader/material/rendering and level/layout/progression contracts cover all recovered
       evidence, with every unresolved rule labeled unknown or inferred
 - [x] Reconstruction checks and coverage rules are executable before the vertical slice
 - [x] The vertical-slice subset imports into Creator with exact source bytes, untrimmed raster
       geometry, audio metadata, and live Preview loading; original extraction remains untouched
 - [x] No unknown-rights asset is silently marked ship-ready
 - [x] Sole-source APK corpus approved as the canonical resource denominator
-- [ ] Every canonical game-resource manifest entry is byte-verified, staged, and linked to a
+- [x] Every canonical game-resource manifest entry is byte-verified, staged, and linked to a
       Cocos consumer: 100% technical coverage with zero silent omissions or substitutions
-- [ ] The versioned cross-domain fidelity score reaches at least 99%, with a complete residual-gap ledger
+- [x] The versioned cross-domain fidelity score reaches at least 99%, with a complete residual-gap ledger
 
 ## Risk Assessment
 

@@ -22,8 +22,11 @@ disassembly, analysis databases, and extracted resources stay under ignored work
 Curated maps contain only the evidence needed to review and implement contracts.
 
 Current curated projections are `DER-FUNCMAP-001` (713 explicitly allowlisted application
-functions) and `DER-RESMAP-001` (862 packaged assets plus Android resource and native-string
-correlation). Focused tests regenerate both projections and require byte-for-byte equality.
+functions, each with direct-call, numeric-constant, string-xref, and review-state fields) and
+`DER-RESMAP-001` (862 packaged assets plus Android resource and native-string correlation).
+Analyzer v3 produces a full GNU disassembly, a base application map, then high-confidence
+allocated-data string xrefs. Focused tests regenerate both projections and require
+byte-for-byte equality.
 
 ## Independent Static Views
 
@@ -114,10 +117,11 @@ where static evidence does not support a unique implementation.
 claim gate, clean-room restrictions, Creator physics unit boundary, compatibility decisions,
 asset-fidelity rules, and unresolved scope. Its focused test treats the JSON-syntax file as
 YAML 1.2 and cross-checks it against the evidence register and claims ledger.
-Version `1.0.3` covers only the `classic-vertical-slice` policy scope: 9 registered contracts
-and 21 required claims. It cannot certify the full five-domain Phase 7 fidelity metric.
-See [the reconstruction report](./reconstruction-report.md) for the separate coverage
-definitions and the still-uncomputable final score.
+Version `1.0.3` remains the narrow `classic-vertical-slice` claim gate: 9 registered contracts
+and 21 required claims. The separate `pencil-blade-maximal-recoverable-fidelity@1.1.0`
+metric freezes five whole-product technical domains, forbids weighting, uses the minimum
+domain score, and keeps all inference/unknown/exception/divergence records outside recovered
+credit. See [the reconstruction report](./reconstruction-report.md).
 
 ## Clean-Room Boundary
 
@@ -131,12 +135,14 @@ approval exists.
 
 ## Open Analysis Limits
 
-- Some entity fixture geometry, damping/material fields, contact-listener details, and the
-  semantic name of node tag `1437` remain incomplete or ambiguous.
-- Indirect calls and stripped local functions need call-neighborhood analysis.
+- The player-visible rationale for duplicate blade fixtures and node tag `1437` remains
+  unknown even though the recovered dispatch behavior is implemented.
+- Indirect calls without a statically resolved target remain outside direct-call enrichment.
 - The native RNG formulas are recovered, but exact draw interleaving with engine/VFX users
   and libc sequence parity cannot be measured without the original runtime; the Creator
   rewrite uses injectable deterministic fixtures without claiming an observed native trace.
-- The six production modes and sole-source APK 862-resource disposition ledger are
-  implemented and the corpus is the approved canonical resource denominator. The unsupported
-  OTF, final five-domain metric, public rights, and pinned Physics2D equivalence remain open.
+- The six production modes and sole-source APK 862-resource catalog are technically complete.
+  The pinned Physics2D backend passes trajectory/raycast/contact/lifecycle probes and the
+  five-domain maximal-recoverable metric passes. Exact original pixel/waveform identity,
+  unsupported OTF treatment, public rights, backup custody, and Pages deployment remain open
+  and are itemized in `forensics/fidelity/residual-gap-ledger.json`.

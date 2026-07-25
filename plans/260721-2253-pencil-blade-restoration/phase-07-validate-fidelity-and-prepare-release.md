@@ -29,15 +29,16 @@ HarmonyOS/OpenHarmony, Web Desktop as a separate build, mini-game channels, and 
 
 | Decision | Status | Evidence |
 |----------|--------|----------|
-| Android debug artifact | Technical pass | Clean wrapper run produced the debug-signed `arm64-v8a` APK for package `io.github.dantech0xff.pencilblade.debug`; SHA-256 `1a4d96c71e53572fe86ce7bf73e73990df1a777a8fe33315cd1b9f6fd2705f4d` |
-| Private Web Mobile artifact | Technical pass | Fresh Creator build, prohibited-content audit, exact `/pencil-blade-2026/` prefix verification for 2,539 files, and six-mode browser smoke pass |
+| Android debug artifact | Technical pass | Fresh debug-signed `arm64-v8a` APK for package `io.github.dantech0xff.pencilblade.debug`; `57,352,687` bytes; SHA-256 `e313e149164eec8664b934a16e3c14b3a0f0265f9c7bb6306375a08a7cb5c37d`; Android 13/API 33 runtime matrix pass |
+| Private Web Mobile artifact | Technical pass | Fresh Creator build, prohibited-content audit, exact `/pencil-blade-2026/` prefix verification for 2,539 files, and Chrome `150.0.7871.182` runtime rows at `480x800` and `720x1280`; tree digest `90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54` |
 | Public GitHub Pages deployment | Blocked | Public-rights manifest is unapproved; the public repository has no Pages site, protected Creator runner, or `github-pages` environment |
 | Canonical resource denominator | Approved | The project owner confirmed the APK is the sole source; the verified `862`-asset corpus and `862/862` disposition ledger are final |
-| Final static fidelity decision | Pending | Resource scope is frozen, but five-domain weighting, Physics2D equivalence, and residual scoring are not complete |
+| Final static fidelity decision | Technical pass | Metric `1.1.0` uses minimum-domain scoring with no weighting; every recovered domain is `100.00%`, 12 non-recovered audio/rendering/progression assertions remain disclosed outside scored units, Physics2D equivalence passes, and zero unexplained divergences remain |
 
-The current policy remains a limited Classic/menu reconstruction policy. Passing it and the
-full internal test suite does not establish whole-product runtime identity or the Phase 7
-`>=99%` fidelity score.
+The registered reconstruction policy remains a limited Classic/menu claim gate; the separate
+five-domain metric covers the full recovered product contract. Neither establishes empirical
+identity with an executing original. The canonical local artifact set is bound by
+`reports/technical-closeout-manifest.json`; public release remains a separate blocked gate.
 
 ## Context Links
 
@@ -236,11 +237,11 @@ Artifact audits independently verify the Creator build boundary and absence of t
 - [x] Least-privilege GitHub Pages workflow definition added and locally validated
 - [ ] Repository Pages source and `github-pages` environment configured after public-rights approval
 - [ ] Production Pages URL verified after public-rights approval
-- [ ] Frozen static-evidence and reconstruction-fixture suite
+- [x] Frozen static-evidence and reconstruction-fixture suite
 - [x] Sole-source APK manifest/root approved and full resource ledger reconciled
-- [ ] Versioned cross-domain fidelity score reaches at least `99%` with every residual gap listed
+- [x] Versioned cross-domain fidelity score reaches at least `99%` with every residual gap listed
 - [x] Contract/traceability, visual, timing, physics, and audio reports
-- [x] Android/H5 compatibility matrix created with runtime/browser rows explicitly pending
+- [x] Android/H5 compatibility matrix completed on API 33 arm64 and pinned Chrome at both supported viewports
 - [x] Release-variant exception policy and pending decisions documented separately
 - [ ] Rights checklist complete
 - [x] Recovered-reconstruction and public-release-variant manifests separated
@@ -260,13 +261,13 @@ Artifact audits independently verify the Creator build boundary and absence of t
       root-prefix errors, or browser console failures in the supported matrix
 - [x] The sole-source APK manifest/root is the approved canonical resource denominator and all
       `862` entries have a reviewed consumed/excluded/unsupported disposition
-- [ ] The versioned cross-domain fidelity score reaches at least `99%`, with every residual
+- [x] The versioned cross-domain fidelity score reaches at least `99%`, with every residual
       gap visible rather than hidden through weighting, omission, or substitution
 - [x] All recovered contracts pass the current versioned reconstruction policy (limited to
       the registered Classic/menu scope)
-- [ ] Every inference, unknown, and release exception is reported separately and cannot
+- [x] Every inference, unknown, and release exception is reported separately and cannot
       raise recovered coverage
-- [ ] No unexplained divergence from recovered gameplay, score, physics, progression,
+- [x] No unexplained divergence from recovered gameplay, score, physics, progression,
       presentation, or audio contracts remains
 - [ ] Public H5 deployment contains only fail-closed ship-ready records with complete rights evidence
 - [x] Release gameplay is traceable to TypeScript/Creator source and both builds contain no

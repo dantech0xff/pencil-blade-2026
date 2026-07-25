@@ -1,0 +1,4275 @@
+{
+  "schemaVersion": 2,
+  "generatedFrom": [
+    "forensics/resources/resource-usage-map.json",
+    "forensics/native/function-map.csv"
+  ],
+  "summary": {
+    "groups": 50,
+    "animationGroups": 8,
+    "nativeEventBackedAnimationGroups": 8,
+    "indexedVariantGroups": 42,
+    "members": 348,
+    "unresolvedGroups": 0
+  },
+  "groups": [
+    {
+      "id": "480x800/Backgrounds/paperbackground*.png",
+      "directory": "480x800/Backgrounds",
+      "prefix": "paperbackground",
+      "extension": ".png",
+      "frameOrVariantCount": 9,
+      "members": [
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground0.png",
+          "logicalId": "image:Backgrounds/paperbackground0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-presentation",
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground1.png",
+          "logicalId": "image:Backgrounds/paperbackground1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground2.png",
+          "logicalId": "image:Backgrounds/paperbackground2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground3.png",
+          "logicalId": "image:Backgrounds/paperbackground3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground4.png",
+          "logicalId": "image:Backgrounds/paperbackground4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground5.png",
+          "logicalId": "image:Backgrounds/paperbackground5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground6.png",
+          "logicalId": "image:Backgrounds/paperbackground6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground7.png",
+          "logicalId": "image:Backgrounds/paperbackground7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Backgrounds/paperbackground8.png",
+          "logicalId": "image:Backgrounds/paperbackground8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Birds/bird-anim-1-*.png",
+      "directory": "480x800/Birds",
+      "prefix": "bird-anim-1-",
+      "extension": ".png",
+      "frameOrVariantCount": 10,
+      "members": [
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-0.png",
+          "logicalId": "image:Birds/bird-anim-1-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-1.png",
+          "logicalId": "image:Birds/bird-anim-1-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-2.png",
+          "logicalId": "image:Birds/bird-anim-1-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-3.png",
+          "logicalId": "image:Birds/bird-anim-1-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-4.png",
+          "logicalId": "image:Birds/bird-anim-1-4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-5.png",
+          "logicalId": "image:Birds/bird-anim-1-5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-6.png",
+          "logicalId": "image:Birds/bird-anim-1-6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-7.png",
+          "logicalId": "image:Birds/bird-anim-1-7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-8.png",
+          "logicalId": "image:Birds/bird-anim-1-8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-1-9.png",
+          "logicalId": "image:Birds/bird-anim-1-9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "animation",
+      "timing": {
+        "frameDurationSeconds": 0.10000000149011612,
+        "loop": true
+      },
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00144271",
+          "functionSymbol": "_ZN9BirdBlade7onEnterEv",
+          "demangledSymbol": "BirdBlade::onEnter()",
+          "reviewState": "auto-indexed",
+          "animationCalls": [
+            {
+              "siteAddress": "0x001443b2",
+              "targetAddress": "0x001cf11a",
+              "targetSymbol": "cocos2d::CCAnimation::createWithSpriteFrames(cocos2d::CCArray*, float)"
+            },
+            {
+              "siteAddress": "0x001443b6",
+              "targetAddress": "0x001a052e",
+              "targetSymbol": "cocos2d::CCAnimate::create(cocos2d::CCAnimation*)"
+            },
+            {
+              "siteAddress": "0x001443bc",
+              "targetAddress": "0x0019ed54",
+              "targetSymbol": "cocos2d::CCRepeatForever::create(cocos2d::CCActionInterval*)"
+            },
+            {
+              "siteAddress": "0x001443c4",
+              "targetAddress": "0x001a52d8",
+              "targetSymbol": "cocos2d::CCNode::runAction(cocos2d::CCAction*)"
+            }
+          ],
+          "resourceStringXrefs": [
+            {
+              "siteAddress": "0x00144280",
+              "targetAddress": "0x003d0c3b",
+              "text": "Birds/bird-anim-%d-%d.png"
+            },
+            {
+              "siteAddress": "0x00144348",
+              "targetAddress": "0x003d0c55",
+              "text": "Birds/bird-anim-%d-0.png"
+            }
+          ]
+        }
+      ],
+      "evidenceRefs": [
+        "game/assets/scripts/domain/bird-resource-contract.ts",
+        "game/assets/scripts/creator/bird-blade-presenter.ts",
+        "forensics/native/function-map.csv"
+      ]
+    },
+    {
+      "id": "480x800/Birds/bird-anim-2-*.png",
+      "directory": "480x800/Birds",
+      "prefix": "bird-anim-2-",
+      "extension": ".png",
+      "frameOrVariantCount": 10,
+      "members": [
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-0.png",
+          "logicalId": "image:Birds/bird-anim-2-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-1.png",
+          "logicalId": "image:Birds/bird-anim-2-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-2.png",
+          "logicalId": "image:Birds/bird-anim-2-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-3.png",
+          "logicalId": "image:Birds/bird-anim-2-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-4.png",
+          "logicalId": "image:Birds/bird-anim-2-4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-5.png",
+          "logicalId": "image:Birds/bird-anim-2-5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-6.png",
+          "logicalId": "image:Birds/bird-anim-2-6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-7.png",
+          "logicalId": "image:Birds/bird-anim-2-7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-8.png",
+          "logicalId": "image:Birds/bird-anim-2-8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-2-9.png",
+          "logicalId": "image:Birds/bird-anim-2-9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "animation",
+      "timing": {
+        "frameDurationSeconds": 0.10000000149011612,
+        "loop": true
+      },
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00144271",
+          "functionSymbol": "_ZN9BirdBlade7onEnterEv",
+          "demangledSymbol": "BirdBlade::onEnter()",
+          "reviewState": "auto-indexed",
+          "animationCalls": [
+            {
+              "siteAddress": "0x001443b2",
+              "targetAddress": "0x001cf11a",
+              "targetSymbol": "cocos2d::CCAnimation::createWithSpriteFrames(cocos2d::CCArray*, float)"
+            },
+            {
+              "siteAddress": "0x001443b6",
+              "targetAddress": "0x001a052e",
+              "targetSymbol": "cocos2d::CCAnimate::create(cocos2d::CCAnimation*)"
+            },
+            {
+              "siteAddress": "0x001443bc",
+              "targetAddress": "0x0019ed54",
+              "targetSymbol": "cocos2d::CCRepeatForever::create(cocos2d::CCActionInterval*)"
+            },
+            {
+              "siteAddress": "0x001443c4",
+              "targetAddress": "0x001a52d8",
+              "targetSymbol": "cocos2d::CCNode::runAction(cocos2d::CCAction*)"
+            }
+          ],
+          "resourceStringXrefs": [
+            {
+              "siteAddress": "0x00144280",
+              "targetAddress": "0x003d0c3b",
+              "text": "Birds/bird-anim-%d-%d.png"
+            },
+            {
+              "siteAddress": "0x00144348",
+              "targetAddress": "0x003d0c55",
+              "text": "Birds/bird-anim-%d-0.png"
+            }
+          ]
+        }
+      ],
+      "evidenceRefs": [
+        "game/assets/scripts/domain/bird-resource-contract.ts",
+        "game/assets/scripts/creator/bird-blade-presenter.ts",
+        "forensics/native/function-map.csv"
+      ]
+    },
+    {
+      "id": "480x800/Birds/bird-anim-3-*.png",
+      "directory": "480x800/Birds",
+      "prefix": "bird-anim-3-",
+      "extension": ".png",
+      "frameOrVariantCount": 10,
+      "members": [
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-0.png",
+          "logicalId": "image:Birds/bird-anim-3-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-1.png",
+          "logicalId": "image:Birds/bird-anim-3-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-2.png",
+          "logicalId": "image:Birds/bird-anim-3-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-3.png",
+          "logicalId": "image:Birds/bird-anim-3-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-4.png",
+          "logicalId": "image:Birds/bird-anim-3-4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-5.png",
+          "logicalId": "image:Birds/bird-anim-3-5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-6.png",
+          "logicalId": "image:Birds/bird-anim-3-6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-7.png",
+          "logicalId": "image:Birds/bird-anim-3-7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-8.png",
+          "logicalId": "image:Birds/bird-anim-3-8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-anim-3-9.png",
+          "logicalId": "image:Birds/bird-anim-3-9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "animation",
+      "timing": {
+        "frameDurationSeconds": 0.10000000149011612,
+        "loop": true
+      },
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00144271",
+          "functionSymbol": "_ZN9BirdBlade7onEnterEv",
+          "demangledSymbol": "BirdBlade::onEnter()",
+          "reviewState": "auto-indexed",
+          "animationCalls": [
+            {
+              "siteAddress": "0x001443b2",
+              "targetAddress": "0x001cf11a",
+              "targetSymbol": "cocos2d::CCAnimation::createWithSpriteFrames(cocos2d::CCArray*, float)"
+            },
+            {
+              "siteAddress": "0x001443b6",
+              "targetAddress": "0x001a052e",
+              "targetSymbol": "cocos2d::CCAnimate::create(cocos2d::CCAnimation*)"
+            },
+            {
+              "siteAddress": "0x001443bc",
+              "targetAddress": "0x0019ed54",
+              "targetSymbol": "cocos2d::CCRepeatForever::create(cocos2d::CCActionInterval*)"
+            },
+            {
+              "siteAddress": "0x001443c4",
+              "targetAddress": "0x001a52d8",
+              "targetSymbol": "cocos2d::CCNode::runAction(cocos2d::CCAction*)"
+            }
+          ],
+          "resourceStringXrefs": [
+            {
+              "siteAddress": "0x00144280",
+              "targetAddress": "0x003d0c3b",
+              "text": "Birds/bird-anim-%d-%d.png"
+            },
+            {
+              "siteAddress": "0x00144348",
+              "targetAddress": "0x003d0c55",
+              "text": "Birds/bird-anim-%d-0.png"
+            }
+          ]
+        }
+      ],
+      "evidenceRefs": [
+        "game/assets/scripts/domain/bird-resource-contract.ts",
+        "game/assets/scripts/creator/bird-blade-presenter.ts",
+        "forensics/native/function-map.csv"
+      ]
+    },
+    {
+      "id": "480x800/Birds/bird-left-*.png",
+      "directory": "480x800/Birds",
+      "prefix": "bird-left-",
+      "extension": ".png",
+      "frameOrVariantCount": 3,
+      "members": [
+        {
+          "canonicalPath": "480x800/Birds/bird-left-1.png",
+          "logicalId": "image:Birds/bird-left-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-left-2.png",
+          "logicalId": "image:Birds/bird-left-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-left-3.png",
+          "logicalId": "image:Birds/bird-left-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Birds/bird-right-*.png",
+      "directory": "480x800/Birds",
+      "prefix": "bird-right-",
+      "extension": ".png",
+      "frameOrVariantCount": 3,
+      "members": [
+        {
+          "canonicalPath": "480x800/Birds/bird-right-1.png",
+          "logicalId": "image:Birds/bird-right-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-right-2.png",
+          "logicalId": "image:Birds/bird-right-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Birds/bird-right-3.png",
+          "logicalId": "image:Birds/bird-right-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Blades/Bolts/MainBolts*.png",
+      "directory": "480x800/Blades/Bolts",
+      "prefix": "MainBolts",
+      "extension": ".png",
+      "frameOrVariantCount": 3,
+      "members": [
+        {
+          "canonicalPath": "480x800/Blades/Bolts/MainBolts1.png",
+          "logicalId": "image:Blades/Bolts/MainBolts1",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "advanced-blade-bolts-unowned"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Bolts/MainBolts2.png",
+          "logicalId": "image:Blades/Bolts/MainBolts2",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "advanced-blade-bolts-unowned"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Bolts/MainBolts3.png",
+          "logicalId": "image:Blades/Bolts/MainBolts3",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "advanced-blade-bolts-unowned"
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Blades/Dragon/dragon-body-*.png",
+      "directory": "480x800/Blades/Dragon",
+      "prefix": "dragon-body-",
+      "extension": ".png",
+      "frameOrVariantCount": 4,
+      "members": [
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-body-0.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-body-1.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-body-2.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-body-3.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Blades/Dragon/dragon-head-*.png",
+      "directory": "480x800/Blades/Dragon",
+      "prefix": "dragon-head-",
+      "extension": ".png",
+      "frameOrVariantCount": 4,
+      "members": [
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-head-0.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-head-1.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-head-2.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-head-3.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Blades/Dragon/dragon-tail-*.png",
+      "directory": "480x800/Blades/Dragon",
+      "prefix": "dragon-tail-",
+      "extension": ".png",
+      "frameOrVariantCount": 4,
+      "members": [
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-tail-0.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-tail-1.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-tail-2.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Dragon/dragon-tail-3.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Blades/Guidtar/nodes*.png",
+      "directory": "480x800/Blades/Guidtar",
+      "prefix": "nodes",
+      "extension": ".png",
+      "frameOrVariantCount": 5,
+      "members": [
+        {
+          "canonicalPath": "480x800/Blades/Guidtar/nodes0.png",
+          "logicalId": "image:Blades/Guidtar/nodes0",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "guidtar-family-unowned"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Guidtar/nodes1.png",
+          "logicalId": "image:Blades/Guidtar/nodes1",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "guidtar-family-unowned"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Guidtar/nodes2.png",
+          "logicalId": "image:Blades/Guidtar/nodes2",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "guidtar-family-unowned"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Guidtar/nodes3.png",
+          "logicalId": "image:Blades/Guidtar/nodes3",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "guidtar-family-unowned"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Guidtar/nodes4.png",
+          "logicalId": "image:Blades/Guidtar/nodes4",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "guidtar-family-unowned"
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Blades/Particles/Butterfly/butterfly*.png",
+      "directory": "480x800/Blades/Particles/Butterfly",
+      "prefix": "butterfly",
+      "extension": ".png",
+      "frameOrVariantCount": 6,
+      "members": [
+        {
+          "canonicalPath": "480x800/Blades/Particles/Butterfly/butterfly0.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Butterfly/butterfly1.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Butterfly/butterfly2.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Butterfly/butterfly3.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Butterfly/butterfly4.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Butterfly/butterfly5.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Blades/Particles/Lightning/cloud*.png",
+      "directory": "480x800/Blades/Particles/Lightning",
+      "prefix": "cloud",
+      "extension": ".png",
+      "frameOrVariantCount": 5,
+      "members": [
+        {
+          "canonicalPath": "480x800/Blades/Particles/Lightning/cloud0.png",
+          "logicalId": "image:Blades/Particles/Lightning/cloud0",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "lightning-cloud-particles-unowned"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Lightning/cloud1.png",
+          "logicalId": "image:Blades/Particles/Lightning/cloud1",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "lightning-cloud-particles-unowned"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Lightning/cloud2.png",
+          "logicalId": "image:Blades/Particles/Lightning/cloud2",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "lightning-cloud-particles-unowned"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Lightning/cloud3.png",
+          "logicalId": "image:Blades/Particles/Lightning/cloud3",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "lightning-cloud-particles-unowned"
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Lightning/cloud4.png",
+          "logicalId": "image:Blades/Particles/Lightning/cloud4",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "lightning-cloud-particles-unowned"
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Blades/Particles/Rainbow/rainbowstar*.png",
+      "directory": "480x800/Blades/Particles/Rainbow",
+      "prefix": "rainbowstar",
+      "extension": ".png",
+      "frameOrVariantCount": 5,
+      "members": [
+        {
+          "canonicalPath": "480x800/Blades/Particles/Rainbow/rainbowstar0.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Rainbow/rainbowstar1.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Rainbow/rainbowstar2.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Rainbow/rainbowstar3.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/Particles/Rainbow/rainbowstar4.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Blades/blade*.png",
+      "directory": "480x800/Blades",
+      "prefix": "blade",
+      "extension": ".png",
+      "frameOrVariantCount": 11,
+      "members": [
+        {
+          "canonicalPath": "480x800/Blades/blade0.png",
+          "logicalId": "image:Blades/blade0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-presentation",
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade1.png",
+          "logicalId": "image:Blades/blade1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade10.png",
+          "logicalId": "image:Blades/blade10",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade2.png",
+          "logicalId": "image:Blades/blade2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade3.png",
+          "logicalId": "image:Blades/blade3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade4.png",
+          "logicalId": "image:Blades/blade4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade5.png",
+          "logicalId": "image:Blades/blade5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade6.png",
+          "logicalId": "image:Blades/blade6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade7.png",
+          "logicalId": "image:Blades/blade7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade8.png",
+          "logicalId": "image:Blades/blade8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Blades/blade9.png",
+          "logicalId": "image:Blades/blade9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Criticles/criticle*.png",
+      "directory": "480x800/Criticles",
+      "prefix": "criticle",
+      "extension": ".png",
+      "frameOrVariantCount": 4,
+      "members": [
+        {
+          "canonicalPath": "480x800/Criticles/criticle1.png",
+          "logicalId": "image:Criticles/criticle1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Criticles/criticle2.png",
+          "logicalId": "image:Criticles/criticle2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Criticles/criticle3.png",
+          "logicalId": "image:Criticles/criticle3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Criticles/criticle4.png",
+          "logicalId": "image:Criticles/criticle4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-presentation"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Electric/electric*.png",
+      "directory": "480x800/Electric",
+      "prefix": "electric",
+      "extension": ".png",
+      "frameOrVariantCount": 8,
+      "members": [
+        {
+          "canonicalPath": "480x800/Electric/electric0.png",
+          "logicalId": "image:Electric/electric0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric1.png",
+          "logicalId": "image:Electric/electric1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric2.png",
+          "logicalId": "image:Electric/electric2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric3.png",
+          "logicalId": "image:Electric/electric3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric4.png",
+          "logicalId": "image:Electric/electric4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric5.png",
+          "logicalId": "image:Electric/electric5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric6.png",
+          "logicalId": "image:Electric/electric6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Electric/electric7.png",
+          "logicalId": "image:Electric/electric7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "animation",
+      "timing": {
+        "framesPerSecond": 15,
+        "loop": true
+      },
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00145cf1",
+          "functionSymbol": "_ZN12BombElectric14TurnOnElectricEv",
+          "demangledSymbol": "BombElectric::TurnOnElectric()",
+          "reviewState": "auto-indexed",
+          "animationCalls": [
+            {
+              "siteAddress": "0x00145e18",
+              "targetAddress": "0x001cf11a",
+              "targetSymbol": "cocos2d::CCAnimation::createWithSpriteFrames(cocos2d::CCArray*, float)"
+            },
+            {
+              "siteAddress": "0x00145e1c",
+              "targetAddress": "0x001a052e",
+              "targetSymbol": "cocos2d::CCAnimate::create(cocos2d::CCAnimation*)"
+            },
+            {
+              "siteAddress": "0x00145e28",
+              "targetAddress": "0x0019ed54",
+              "targetSymbol": "cocos2d::CCRepeatForever::create(cocos2d::CCActionInterval*)"
+            },
+            {
+              "siteAddress": "0x00145e30",
+              "targetAddress": "0x001a52d8",
+              "targetSymbol": "cocos2d::CCNode::runAction(cocos2d::CCAction*)"
+            },
+            {
+              "siteAddress": "0x00145e60",
+              "targetAddress": "0x001a52d8",
+              "targetSymbol": "cocos2d::CCNode::runAction(cocos2d::CCAction*)"
+            }
+          ],
+          "resourceStringXrefs": [
+            {
+              "siteAddress": "0x00145d24",
+              "targetAddress": "0x003d0dce",
+              "text": "Sounds/electric.mp3"
+            }
+          ]
+        }
+      ],
+      "evidenceRefs": [
+        "game/assets/scripts/domain/crazy-resource-contract.ts",
+        "game/assets/scripts/creator/crazy-bomb-electric-presenter.ts",
+        "forensics/native/function-map.csv"
+      ]
+    },
+    {
+      "id": "480x800/Icons/background-icon-*.png",
+      "directory": "480x800/Icons",
+      "prefix": "background-icon-",
+      "extension": ".png",
+      "frameOrVariantCount": 9,
+      "members": [
+        {
+          "canonicalPath": "480x800/Icons/background-icon-0.png",
+          "logicalId": "image:Icons/background-icon-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-1.png",
+          "logicalId": "image:Icons/background-icon-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-2.png",
+          "logicalId": "image:Icons/background-icon-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-3.png",
+          "logicalId": "image:Icons/background-icon-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-4.png",
+          "logicalId": "image:Icons/background-icon-4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-5.png",
+          "logicalId": "image:Icons/background-icon-5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-6.png",
+          "logicalId": "image:Icons/background-icon-6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-7.png",
+          "logicalId": "image:Icons/background-icon-7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/background-icon-8.png",
+          "logicalId": "image:Icons/background-icon-8",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "options-index-extras-excluded"
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Icons/blade-icon-*.png",
+      "directory": "480x800/Icons",
+      "prefix": "blade-icon-",
+      "extension": ".png",
+      "frameOrVariantCount": 21,
+      "members": [
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-0.png",
+          "logicalId": "image:Icons/blade-icon-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-1.png",
+          "logicalId": "image:Icons/blade-icon-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-10.png",
+          "logicalId": "image:Icons/blade-icon-10",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-11.png",
+          "logicalId": "image:Icons/blade-icon-11",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-12.png",
+          "logicalId": "image:Icons/blade-icon-12",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-13.png",
+          "logicalId": "image:Icons/blade-icon-13",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-14.png",
+          "logicalId": "image:Icons/blade-icon-14",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-15.png",
+          "logicalId": "image:Icons/blade-icon-15",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-16.png",
+          "logicalId": "image:Icons/blade-icon-16",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-17.png",
+          "logicalId": "image:Icons/blade-icon-17",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-19.png",
+          "logicalId": "image:Icons/blade-icon-19",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "options-index-extras-excluded"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-2.png",
+          "logicalId": "image:Icons/blade-icon-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-20.png",
+          "logicalId": "image:Icons/blade-icon-20",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "options-index-extras-excluded"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-21.png",
+          "logicalId": "image:Icons/blade-icon-21",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "options-index-extras-excluded"
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-3.png",
+          "logicalId": "image:Icons/blade-icon-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-4.png",
+          "logicalId": "image:Icons/blade-icon-4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-5.png",
+          "logicalId": "image:Icons/blade-icon-5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-6.png",
+          "logicalId": "image:Icons/blade-icon-6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-7.png",
+          "logicalId": "image:Icons/blade-icon-7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-8.png",
+          "logicalId": "image:Icons/blade-icon-8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/blade-icon-9.png",
+          "logicalId": "image:Icons/blade-icon-9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Icons/theme-icon-*.png",
+      "directory": "480x800/Icons",
+      "prefix": "theme-icon-",
+      "extension": ".png",
+      "frameOrVariantCount": 10,
+      "members": [
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-0.png",
+          "logicalId": "image:Icons/theme-icon-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-1.png",
+          "logicalId": "image:Icons/theme-icon-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-2.png",
+          "logicalId": "image:Icons/theme-icon-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-3.png",
+          "logicalId": "image:Icons/theme-icon-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-4.png",
+          "logicalId": "image:Icons/theme-icon-4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-5.png",
+          "logicalId": "image:Icons/theme-icon-5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-6.png",
+          "logicalId": "image:Icons/theme-icon-6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-7.png",
+          "logicalId": "image:Icons/theme-icon-7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-8.png",
+          "logicalId": "image:Icons/theme-icon-8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Icons/theme-icon-9.png",
+          "logicalId": "image:Icons/theme-icon-9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Leaf/leave*.png",
+      "directory": "480x800/Leaf",
+      "prefix": "leave",
+      "extension": ".png",
+      "frameOrVariantCount": 7,
+      "members": [
+        {
+          "canonicalPath": "480x800/Leaf/leave1.png",
+          "logicalId": "image:Leaf/leave1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Leaf/leave2.png",
+          "logicalId": "image:Leaf/leave2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Leaf/leave3.png",
+          "logicalId": "image:Leaf/leave3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Leaf/leave4.png",
+          "logicalId": "image:Leaf/leave4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Leaf/leave5.png",
+          "logicalId": "image:Leaf/leave5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Leaf/leave6.png",
+          "logicalId": "image:Leaf/leave6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Leaf/leave7.png",
+          "logicalId": "image:Leaf/leave7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "480x800/Themes/theme*.png",
+      "directory": "480x800/Themes",
+      "prefix": "theme",
+      "extension": ".png",
+      "frameOrVariantCount": 10,
+      "members": [
+        {
+          "canonicalPath": "480x800/Themes/theme0.png",
+          "logicalId": "image:Themes/theme0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme1.png",
+          "logicalId": "image:Themes/theme1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme2.png",
+          "logicalId": "image:Themes/theme2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme3.png",
+          "logicalId": "image:Themes/theme3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme4.png",
+          "logicalId": "image:Themes/theme4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme5.png",
+          "logicalId": "image:Themes/theme5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme6.png",
+          "logicalId": "image:Themes/theme6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme7.png",
+          "logicalId": "image:Themes/theme7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme8.png",
+          "logicalId": "image:Themes/theme8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "480x800/Themes/theme9.png",
+          "logicalId": "image:Themes/theme9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Backgrounds/paperbackground*.png",
+      "directory": "720x1280/Backgrounds",
+      "prefix": "paperbackground",
+      "extension": ".png",
+      "frameOrVariantCount": 9,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground0.png",
+          "logicalId": "image:Backgrounds/paperbackground0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-presentation",
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground1.png",
+          "logicalId": "image:Backgrounds/paperbackground1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground2.png",
+          "logicalId": "image:Backgrounds/paperbackground2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground3.png",
+          "logicalId": "image:Backgrounds/paperbackground3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground4.png",
+          "logicalId": "image:Backgrounds/paperbackground4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground5.png",
+          "logicalId": "image:Backgrounds/paperbackground5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground6.png",
+          "logicalId": "image:Backgrounds/paperbackground6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground7.png",
+          "logicalId": "image:Backgrounds/paperbackground7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Backgrounds/paperbackground8.png",
+          "logicalId": "image:Backgrounds/paperbackground8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Birds/bird-anim-1-*.png",
+      "directory": "720x1280/Birds",
+      "prefix": "bird-anim-1-",
+      "extension": ".png",
+      "frameOrVariantCount": 10,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-0.png",
+          "logicalId": "image:Birds/bird-anim-1-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-1.png",
+          "logicalId": "image:Birds/bird-anim-1-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-2.png",
+          "logicalId": "image:Birds/bird-anim-1-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-3.png",
+          "logicalId": "image:Birds/bird-anim-1-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-4.png",
+          "logicalId": "image:Birds/bird-anim-1-4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-5.png",
+          "logicalId": "image:Birds/bird-anim-1-5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-6.png",
+          "logicalId": "image:Birds/bird-anim-1-6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-7.png",
+          "logicalId": "image:Birds/bird-anim-1-7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-8.png",
+          "logicalId": "image:Birds/bird-anim-1-8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-1-9.png",
+          "logicalId": "image:Birds/bird-anim-1-9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "animation",
+      "timing": {
+        "frameDurationSeconds": 0.10000000149011612,
+        "loop": true
+      },
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00144271",
+          "functionSymbol": "_ZN9BirdBlade7onEnterEv",
+          "demangledSymbol": "BirdBlade::onEnter()",
+          "reviewState": "auto-indexed",
+          "animationCalls": [
+            {
+              "siteAddress": "0x001443b2",
+              "targetAddress": "0x001cf11a",
+              "targetSymbol": "cocos2d::CCAnimation::createWithSpriteFrames(cocos2d::CCArray*, float)"
+            },
+            {
+              "siteAddress": "0x001443b6",
+              "targetAddress": "0x001a052e",
+              "targetSymbol": "cocos2d::CCAnimate::create(cocos2d::CCAnimation*)"
+            },
+            {
+              "siteAddress": "0x001443bc",
+              "targetAddress": "0x0019ed54",
+              "targetSymbol": "cocos2d::CCRepeatForever::create(cocos2d::CCActionInterval*)"
+            },
+            {
+              "siteAddress": "0x001443c4",
+              "targetAddress": "0x001a52d8",
+              "targetSymbol": "cocos2d::CCNode::runAction(cocos2d::CCAction*)"
+            }
+          ],
+          "resourceStringXrefs": [
+            {
+              "siteAddress": "0x00144280",
+              "targetAddress": "0x003d0c3b",
+              "text": "Birds/bird-anim-%d-%d.png"
+            },
+            {
+              "siteAddress": "0x00144348",
+              "targetAddress": "0x003d0c55",
+              "text": "Birds/bird-anim-%d-0.png"
+            }
+          ]
+        }
+      ],
+      "evidenceRefs": [
+        "game/assets/scripts/domain/bird-resource-contract.ts",
+        "game/assets/scripts/creator/bird-blade-presenter.ts",
+        "forensics/native/function-map.csv"
+      ]
+    },
+    {
+      "id": "720x1280/Birds/bird-anim-2-*.png",
+      "directory": "720x1280/Birds",
+      "prefix": "bird-anim-2-",
+      "extension": ".png",
+      "frameOrVariantCount": 10,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-0.png",
+          "logicalId": "image:Birds/bird-anim-2-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-1.png",
+          "logicalId": "image:Birds/bird-anim-2-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-2.png",
+          "logicalId": "image:Birds/bird-anim-2-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-3.png",
+          "logicalId": "image:Birds/bird-anim-2-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-4.png",
+          "logicalId": "image:Birds/bird-anim-2-4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-5.png",
+          "logicalId": "image:Birds/bird-anim-2-5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-6.png",
+          "logicalId": "image:Birds/bird-anim-2-6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-7.png",
+          "logicalId": "image:Birds/bird-anim-2-7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-8.png",
+          "logicalId": "image:Birds/bird-anim-2-8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-2-9.png",
+          "logicalId": "image:Birds/bird-anim-2-9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "animation",
+      "timing": {
+        "frameDurationSeconds": 0.10000000149011612,
+        "loop": true
+      },
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00144271",
+          "functionSymbol": "_ZN9BirdBlade7onEnterEv",
+          "demangledSymbol": "BirdBlade::onEnter()",
+          "reviewState": "auto-indexed",
+          "animationCalls": [
+            {
+              "siteAddress": "0x001443b2",
+              "targetAddress": "0x001cf11a",
+              "targetSymbol": "cocos2d::CCAnimation::createWithSpriteFrames(cocos2d::CCArray*, float)"
+            },
+            {
+              "siteAddress": "0x001443b6",
+              "targetAddress": "0x001a052e",
+              "targetSymbol": "cocos2d::CCAnimate::create(cocos2d::CCAnimation*)"
+            },
+            {
+              "siteAddress": "0x001443bc",
+              "targetAddress": "0x0019ed54",
+              "targetSymbol": "cocos2d::CCRepeatForever::create(cocos2d::CCActionInterval*)"
+            },
+            {
+              "siteAddress": "0x001443c4",
+              "targetAddress": "0x001a52d8",
+              "targetSymbol": "cocos2d::CCNode::runAction(cocos2d::CCAction*)"
+            }
+          ],
+          "resourceStringXrefs": [
+            {
+              "siteAddress": "0x00144280",
+              "targetAddress": "0x003d0c3b",
+              "text": "Birds/bird-anim-%d-%d.png"
+            },
+            {
+              "siteAddress": "0x00144348",
+              "targetAddress": "0x003d0c55",
+              "text": "Birds/bird-anim-%d-0.png"
+            }
+          ]
+        }
+      ],
+      "evidenceRefs": [
+        "game/assets/scripts/domain/bird-resource-contract.ts",
+        "game/assets/scripts/creator/bird-blade-presenter.ts",
+        "forensics/native/function-map.csv"
+      ]
+    },
+    {
+      "id": "720x1280/Birds/bird-anim-3-*.png",
+      "directory": "720x1280/Birds",
+      "prefix": "bird-anim-3-",
+      "extension": ".png",
+      "frameOrVariantCount": 10,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-0.png",
+          "logicalId": "image:Birds/bird-anim-3-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-1.png",
+          "logicalId": "image:Birds/bird-anim-3-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-2.png",
+          "logicalId": "image:Birds/bird-anim-3-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-3.png",
+          "logicalId": "image:Birds/bird-anim-3-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-4.png",
+          "logicalId": "image:Birds/bird-anim-3-4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-5.png",
+          "logicalId": "image:Birds/bird-anim-3-5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-6.png",
+          "logicalId": "image:Birds/bird-anim-3-6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-7.png",
+          "logicalId": "image:Birds/bird-anim-3-7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-8.png",
+          "logicalId": "image:Birds/bird-anim-3-8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-anim-3-9.png",
+          "logicalId": "image:Birds/bird-anim-3-9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "animation",
+      "timing": {
+        "frameDurationSeconds": 0.10000000149011612,
+        "loop": true
+      },
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00144271",
+          "functionSymbol": "_ZN9BirdBlade7onEnterEv",
+          "demangledSymbol": "BirdBlade::onEnter()",
+          "reviewState": "auto-indexed",
+          "animationCalls": [
+            {
+              "siteAddress": "0x001443b2",
+              "targetAddress": "0x001cf11a",
+              "targetSymbol": "cocos2d::CCAnimation::createWithSpriteFrames(cocos2d::CCArray*, float)"
+            },
+            {
+              "siteAddress": "0x001443b6",
+              "targetAddress": "0x001a052e",
+              "targetSymbol": "cocos2d::CCAnimate::create(cocos2d::CCAnimation*)"
+            },
+            {
+              "siteAddress": "0x001443bc",
+              "targetAddress": "0x0019ed54",
+              "targetSymbol": "cocos2d::CCRepeatForever::create(cocos2d::CCActionInterval*)"
+            },
+            {
+              "siteAddress": "0x001443c4",
+              "targetAddress": "0x001a52d8",
+              "targetSymbol": "cocos2d::CCNode::runAction(cocos2d::CCAction*)"
+            }
+          ],
+          "resourceStringXrefs": [
+            {
+              "siteAddress": "0x00144280",
+              "targetAddress": "0x003d0c3b",
+              "text": "Birds/bird-anim-%d-%d.png"
+            },
+            {
+              "siteAddress": "0x00144348",
+              "targetAddress": "0x003d0c55",
+              "text": "Birds/bird-anim-%d-0.png"
+            }
+          ]
+        }
+      ],
+      "evidenceRefs": [
+        "game/assets/scripts/domain/bird-resource-contract.ts",
+        "game/assets/scripts/creator/bird-blade-presenter.ts",
+        "forensics/native/function-map.csv"
+      ]
+    },
+    {
+      "id": "720x1280/Birds/bird-left-*.png",
+      "directory": "720x1280/Birds",
+      "prefix": "bird-left-",
+      "extension": ".png",
+      "frameOrVariantCount": 3,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Birds/bird-left-1.png",
+          "logicalId": "image:Birds/bird-left-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-left-2.png",
+          "logicalId": "image:Birds/bird-left-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-left-3.png",
+          "logicalId": "image:Birds/bird-left-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Birds/bird-right-*.png",
+      "directory": "720x1280/Birds",
+      "prefix": "bird-right-",
+      "extension": ".png",
+      "frameOrVariantCount": 3,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Birds/bird-right-1.png",
+          "logicalId": "image:Birds/bird-right-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-right-2.png",
+          "logicalId": "image:Birds/bird-right-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Birds/bird-right-3.png",
+          "logicalId": "image:Birds/bird-right-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "bird"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Blades/Bolts/MainBolts*.png",
+      "directory": "720x1280/Blades/Bolts",
+      "prefix": "MainBolts",
+      "extension": ".png",
+      "frameOrVariantCount": 3,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Blades/Bolts/MainBolts1.png",
+          "logicalId": "image:Blades/Bolts/MainBolts1",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "advanced-blade-bolts-unowned"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Bolts/MainBolts2.png",
+          "logicalId": "image:Blades/Bolts/MainBolts2",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "advanced-blade-bolts-unowned"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Bolts/MainBolts3.png",
+          "logicalId": "image:Blades/Bolts/MainBolts3",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "advanced-blade-bolts-unowned"
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Blades/Dragon/dragon-body-*.png",
+      "directory": "720x1280/Blades/Dragon",
+      "prefix": "dragon-body-",
+      "extension": ".png",
+      "frameOrVariantCount": 4,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-body-0.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-body-1.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-body-2.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-body-3.png",
+          "logicalId": "image:Blades/Dragon/dragon-body-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Blades/Dragon/dragon-head-*.png",
+      "directory": "720x1280/Blades/Dragon",
+      "prefix": "dragon-head-",
+      "extension": ".png",
+      "frameOrVariantCount": 4,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-head-0.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-head-1.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-head-2.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-head-3.png",
+          "logicalId": "image:Blades/Dragon/dragon-head-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Blades/Dragon/dragon-tail-*.png",
+      "directory": "720x1280/Blades/Dragon",
+      "prefix": "dragon-tail-",
+      "extension": ".png",
+      "frameOrVariantCount": 4,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-tail-0.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-tail-1.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-tail-2.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Dragon/dragon-tail-3.png",
+          "logicalId": "image:Blades/Dragon/dragon-tail-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Blades/Guidtar/nodes*.png",
+      "directory": "720x1280/Blades/Guidtar",
+      "prefix": "nodes",
+      "extension": ".png",
+      "frameOrVariantCount": 5,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Blades/Guidtar/nodes0.png",
+          "logicalId": "image:Blades/Guidtar/nodes0",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "guidtar-family-unowned"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Guidtar/nodes1.png",
+          "logicalId": "image:Blades/Guidtar/nodes1",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "guidtar-family-unowned"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Guidtar/nodes2.png",
+          "logicalId": "image:Blades/Guidtar/nodes2",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "guidtar-family-unowned"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Guidtar/nodes3.png",
+          "logicalId": "image:Blades/Guidtar/nodes3",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "guidtar-family-unowned"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Guidtar/nodes4.png",
+          "logicalId": "image:Blades/Guidtar/nodes4",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "guidtar-family-unowned"
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Blades/Particles/Butterfly/butterfly*.png",
+      "directory": "720x1280/Blades/Particles/Butterfly",
+      "prefix": "butterfly",
+      "extension": ".png",
+      "frameOrVariantCount": 6,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Butterfly/butterfly0.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Butterfly/butterfly1.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Butterfly/butterfly2.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Butterfly/butterfly3.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Butterfly/butterfly4.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Butterfly/butterfly5.png",
+          "logicalId": "image:Blades/Particles/Butterfly/butterfly5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Blades/Particles/Lightning/cloud*.png",
+      "directory": "720x1280/Blades/Particles/Lightning",
+      "prefix": "cloud",
+      "extension": ".png",
+      "frameOrVariantCount": 5,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Lightning/cloud0.png",
+          "logicalId": "image:Blades/Particles/Lightning/cloud0",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "lightning-cloud-particles-unowned"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Lightning/cloud1.png",
+          "logicalId": "image:Blades/Particles/Lightning/cloud1",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "lightning-cloud-particles-unowned"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Lightning/cloud2.png",
+          "logicalId": "image:Blades/Particles/Lightning/cloud2",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "lightning-cloud-particles-unowned"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Lightning/cloud3.png",
+          "logicalId": "image:Blades/Particles/Lightning/cloud3",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "lightning-cloud-particles-unowned"
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Lightning/cloud4.png",
+          "logicalId": "image:Blades/Particles/Lightning/cloud4",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "lightning-cloud-particles-unowned"
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Blades/Particles/Rainbow/rainbowstar*.png",
+      "directory": "720x1280/Blades/Particles/Rainbow",
+      "prefix": "rainbowstar",
+      "extension": ".png",
+      "frameOrVariantCount": 5,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Rainbow/rainbowstar0.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Rainbow/rainbowstar1.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Rainbow/rainbowstar2.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Rainbow/rainbowstar3.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/Particles/Rainbow/rainbowstar4.png",
+          "logicalId": "image:Blades/Particles/Rainbow/rainbowstar4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Blades/blade*.png",
+      "directory": "720x1280/Blades",
+      "prefix": "blade",
+      "extension": ".png",
+      "frameOrVariantCount": 13,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Blades/blade0.png",
+          "logicalId": "image:Blades/blade0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-presentation",
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade1.png",
+          "logicalId": "image:Blades/blade1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade10.png",
+          "logicalId": "image:Blades/blade10",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade11.png",
+          "logicalId": "image:Blades/blade11",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade12.png",
+          "logicalId": "image:Blades/blade12",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade2.png",
+          "logicalId": "image:Blades/blade2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade3.png",
+          "logicalId": "image:Blades/blade3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade4.png",
+          "logicalId": "image:Blades/blade4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade5.png",
+          "logicalId": "image:Blades/blade5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade6.png",
+          "logicalId": "image:Blades/blade6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade7.png",
+          "logicalId": "image:Blades/blade7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade8.png",
+          "logicalId": "image:Blades/blade8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Blades/blade9.png",
+          "logicalId": "image:Blades/blade9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "standard-blade"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Criticles/criticle*.png",
+      "directory": "720x1280/Criticles",
+      "prefix": "criticle",
+      "extension": ".png",
+      "frameOrVariantCount": 4,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Criticles/criticle1.png",
+          "logicalId": "image:Criticles/criticle1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Criticles/criticle2.png",
+          "logicalId": "image:Criticles/criticle2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Criticles/criticle3.png",
+          "logicalId": "image:Criticles/criticle3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Criticles/criticle4.png",
+          "logicalId": "image:Criticles/criticle4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-presentation"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Electric/electric*.png",
+      "directory": "720x1280/Electric",
+      "prefix": "electric",
+      "extension": ".png",
+      "frameOrVariantCount": 8,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Electric/electric0.png",
+          "logicalId": "image:Electric/electric0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric1.png",
+          "logicalId": "image:Electric/electric1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric2.png",
+          "logicalId": "image:Electric/electric2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric3.png",
+          "logicalId": "image:Electric/electric3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric4.png",
+          "logicalId": "image:Electric/electric4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric5.png",
+          "logicalId": "image:Electric/electric5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric6.png",
+          "logicalId": "image:Electric/electric6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Electric/electric7.png",
+          "logicalId": "image:Electric/electric7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-presentation"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "animation",
+      "timing": {
+        "framesPerSecond": 15,
+        "loop": true
+      },
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00145cf1",
+          "functionSymbol": "_ZN12BombElectric14TurnOnElectricEv",
+          "demangledSymbol": "BombElectric::TurnOnElectric()",
+          "reviewState": "auto-indexed",
+          "animationCalls": [
+            {
+              "siteAddress": "0x00145e18",
+              "targetAddress": "0x001cf11a",
+              "targetSymbol": "cocos2d::CCAnimation::createWithSpriteFrames(cocos2d::CCArray*, float)"
+            },
+            {
+              "siteAddress": "0x00145e1c",
+              "targetAddress": "0x001a052e",
+              "targetSymbol": "cocos2d::CCAnimate::create(cocos2d::CCAnimation*)"
+            },
+            {
+              "siteAddress": "0x00145e28",
+              "targetAddress": "0x0019ed54",
+              "targetSymbol": "cocos2d::CCRepeatForever::create(cocos2d::CCActionInterval*)"
+            },
+            {
+              "siteAddress": "0x00145e30",
+              "targetAddress": "0x001a52d8",
+              "targetSymbol": "cocos2d::CCNode::runAction(cocos2d::CCAction*)"
+            },
+            {
+              "siteAddress": "0x00145e60",
+              "targetAddress": "0x001a52d8",
+              "targetSymbol": "cocos2d::CCNode::runAction(cocos2d::CCAction*)"
+            }
+          ],
+          "resourceStringXrefs": [
+            {
+              "siteAddress": "0x00145d24",
+              "targetAddress": "0x003d0dce",
+              "text": "Sounds/electric.mp3"
+            }
+          ]
+        }
+      ],
+      "evidenceRefs": [
+        "game/assets/scripts/domain/crazy-resource-contract.ts",
+        "game/assets/scripts/creator/crazy-bomb-electric-presenter.ts",
+        "forensics/native/function-map.csv"
+      ]
+    },
+    {
+      "id": "720x1280/Icons/background-icon-*.png",
+      "directory": "720x1280/Icons",
+      "prefix": "background-icon-",
+      "extension": ".png",
+      "frameOrVariantCount": 9,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-0.png",
+          "logicalId": "image:Icons/background-icon-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-1.png",
+          "logicalId": "image:Icons/background-icon-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-2.png",
+          "logicalId": "image:Icons/background-icon-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-3.png",
+          "logicalId": "image:Icons/background-icon-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-4.png",
+          "logicalId": "image:Icons/background-icon-4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-5.png",
+          "logicalId": "image:Icons/background-icon-5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-6.png",
+          "logicalId": "image:Icons/background-icon-6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-7.png",
+          "logicalId": "image:Icons/background-icon-7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/background-icon-8.png",
+          "logicalId": "image:Icons/background-icon-8",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "options-index-extras-excluded"
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Icons/blade-icon-*.png",
+      "directory": "720x1280/Icons",
+      "prefix": "blade-icon-",
+      "extension": ".png",
+      "frameOrVariantCount": 21,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-0.png",
+          "logicalId": "image:Icons/blade-icon-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-1.png",
+          "logicalId": "image:Icons/blade-icon-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-10.png",
+          "logicalId": "image:Icons/blade-icon-10",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-11.png",
+          "logicalId": "image:Icons/blade-icon-11",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-12.png",
+          "logicalId": "image:Icons/blade-icon-12",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-13.png",
+          "logicalId": "image:Icons/blade-icon-13",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-14.png",
+          "logicalId": "image:Icons/blade-icon-14",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-15.png",
+          "logicalId": "image:Icons/blade-icon-15",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-16.png",
+          "logicalId": "image:Icons/blade-icon-16",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-17.png",
+          "logicalId": "image:Icons/blade-icon-17",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-19.png",
+          "logicalId": "image:Icons/blade-icon-19",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "options-index-extras-excluded"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-2.png",
+          "logicalId": "image:Icons/blade-icon-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-20.png",
+          "logicalId": "image:Icons/blade-icon-20",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "options-index-extras-excluded"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-21.png",
+          "logicalId": "image:Icons/blade-icon-21",
+          "reachability": "excluded",
+          "consumerIds": [],
+          "dispositionId": "options-index-extras-excluded"
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-3.png",
+          "logicalId": "image:Icons/blade-icon-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-4.png",
+          "logicalId": "image:Icons/blade-icon-4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-5.png",
+          "logicalId": "image:Icons/blade-icon-5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-6.png",
+          "logicalId": "image:Icons/blade-icon-6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-7.png",
+          "logicalId": "image:Icons/blade-icon-7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-8.png",
+          "logicalId": "image:Icons/blade-icon-8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/blade-icon-9.png",
+          "logicalId": "image:Icons/blade-icon-9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Icons/theme-icon-*.png",
+      "directory": "720x1280/Icons",
+      "prefix": "theme-icon-",
+      "extension": ".png",
+      "frameOrVariantCount": 10,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-0.png",
+          "logicalId": "image:Icons/theme-icon-0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-1.png",
+          "logicalId": "image:Icons/theme-icon-1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-2.png",
+          "logicalId": "image:Icons/theme-icon-2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-3.png",
+          "logicalId": "image:Icons/theme-icon-3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-4.png",
+          "logicalId": "image:Icons/theme-icon-4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-5.png",
+          "logicalId": "image:Icons/theme-icon-5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-6.png",
+          "logicalId": "image:Icons/theme-icon-6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-7.png",
+          "logicalId": "image:Icons/theme-icon-7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-8.png",
+          "logicalId": "image:Icons/theme-icon-8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Icons/theme-icon-9.png",
+          "logicalId": "image:Icons/theme-icon-9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "options"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Leaf/leave*.png",
+      "directory": "720x1280/Leaf",
+      "prefix": "leave",
+      "extension": ".png",
+      "frameOrVariantCount": 7,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Leaf/leave1.png",
+          "logicalId": "image:Leaf/leave1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Leaf/leave2.png",
+          "logicalId": "image:Leaf/leave2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Leaf/leave3.png",
+          "logicalId": "image:Leaf/leave3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Leaf/leave4.png",
+          "logicalId": "image:Leaf/leave4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Leaf/leave5.png",
+          "logicalId": "image:Leaf/leave5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Leaf/leave6.png",
+          "logicalId": "image:Leaf/leave6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Leaf/leave7.png",
+          "logicalId": "image:Leaf/leave7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "720x1280/Themes/theme*.png",
+      "directory": "720x1280/Themes",
+      "prefix": "theme",
+      "extension": ".png",
+      "frameOrVariantCount": 10,
+      "members": [
+        {
+          "canonicalPath": "720x1280/Themes/theme0.png",
+          "logicalId": "image:Themes/theme0",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme1.png",
+          "logicalId": "image:Themes/theme1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme2.png",
+          "logicalId": "image:Themes/theme2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme3.png",
+          "logicalId": "image:Themes/theme3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme4.png",
+          "logicalId": "image:Themes/theme4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme5.png",
+          "logicalId": "image:Themes/theme5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme6.png",
+          "logicalId": "image:Themes/theme6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme7.png",
+          "logicalId": "image:Themes/theme7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme8.png",
+          "logicalId": "image:Themes/theme8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "720x1280/Themes/theme9.png",
+          "logicalId": "image:Themes/theme9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "shared-scene"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "Sounds/compo*.wav",
+      "directory": "Sounds",
+      "prefix": "compo",
+      "extension": ".wav",
+      "frameOrVariantCount": 3,
+      "members": [
+        {
+          "canonicalPath": "Sounds/compo1.wav",
+          "logicalId": "audio:Sounds/compo1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/compo2.wav",
+          "logicalId": "audio:Sounds/compo2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/compo3.wav",
+          "logicalId": "audio:Sounds/compo3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "Sounds/ehit*.wav",
+      "directory": "Sounds",
+      "prefix": "ehit",
+      "extension": ".wav",
+      "frameOrVariantCount": 4,
+      "members": [
+        {
+          "canonicalPath": "Sounds/ehit1.wav",
+          "logicalId": "audio:Sounds/ehit1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/ehit2.wav",
+          "logicalId": "audio:Sounds/ehit2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/ehit3.wav",
+          "logicalId": "audio:Sounds/ehit3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/ehit4.wav",
+          "logicalId": "audio:Sounds/ehit4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "Sounds/juice*.wav",
+      "directory": "Sounds",
+      "prefix": "juice",
+      "extension": ".wav",
+      "frameOrVariantCount": 4,
+      "members": [
+        {
+          "canonicalPath": "Sounds/juice1.wav",
+          "logicalId": "audio:Sounds/juice1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/juice2.wav",
+          "logicalId": "audio:Sounds/juice2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/juice3.wav",
+          "logicalId": "audio:Sounds/juice3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/juice4.wav",
+          "logicalId": "audio:Sounds/juice4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "loading"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "Sounds/lightning*.wav",
+      "directory": "Sounds",
+      "prefix": "lightning",
+      "extension": ".wav",
+      "frameOrVariantCount": 2,
+      "members": [
+        {
+          "canonicalPath": "Sounds/lightning1.wav",
+          "logicalId": "audio:Sounds/lightning1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/lightning2.wav",
+          "logicalId": "audio:Sounds/lightning2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "crazy-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "Sounds/mono*.wav",
+      "directory": "Sounds",
+      "prefix": "mono",
+      "extension": ".wav",
+      "frameOrVariantCount": 2,
+      "members": [
+        {
+          "canonicalPath": "Sounds/mono1.wav",
+          "logicalId": "audio:Sounds/mono1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading",
+            "options"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/mono2.wav",
+          "logicalId": "audio:Sounds/mono2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading",
+            "options"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    },
+    {
+      "id": "Sounds/swoosh*.wav",
+      "directory": "Sounds",
+      "prefix": "swoosh",
+      "extension": ".wav",
+      "frameOrVariantCount": 9,
+      "members": [
+        {
+          "canonicalPath": "Sounds/swoosh1.wav",
+          "logicalId": "audio:Sounds/swoosh1",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/swoosh2.wav",
+          "logicalId": "audio:Sounds/swoosh2",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/swoosh3.wav",
+          "logicalId": "audio:Sounds/swoosh3",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/swoosh4.wav",
+          "logicalId": "audio:Sounds/swoosh4",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/swoosh5.wav",
+          "logicalId": "audio:Sounds/swoosh5",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/swoosh6.wav",
+          "logicalId": "audio:Sounds/swoosh6",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/swoosh7.wav",
+          "logicalId": "audio:Sounds/swoosh7",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/swoosh8.wav",
+          "logicalId": "audio:Sounds/swoosh8",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        },
+        {
+          "canonicalPath": "Sounds/swoosh9.wav",
+          "logicalId": "audio:Sounds/swoosh9",
+          "reachability": "consumed",
+          "consumerIds": [
+            "classic-audio",
+            "loading"
+          ],
+          "dispositionId": null
+        }
+      ],
+      "evidenceStatus": "recovered",
+      "role": "indexed-variant-set",
+      "timing": null,
+      "nativeEvents": [],
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json"
+      ]
+    }
+  ]
+}

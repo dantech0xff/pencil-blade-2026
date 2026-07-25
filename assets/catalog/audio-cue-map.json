@@ -1,0 +1,1859 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": [
+    "assets/catalog/creator-staging-manifest.json",
+    "forensics/native/function-map.csv",
+    "game/assets/scripts/domain",
+    "game/assets/scripts/creator"
+  ],
+  "summary": {
+    "cues": 62,
+    "wav": 59,
+    "mp3": 3,
+    "nativeXrefCues": 20,
+    "reconstructedContractCues": 52,
+    "classified": 62,
+    "unknown": 0
+  },
+  "cues": [
+    {
+      "id": "audio:Sounds/GangnamStyle",
+      "canonicalPath": "Sounds/GangnamStyle.mp3",
+      "format": "mp3",
+      "reachability": "consumed",
+      "consumerIds": [
+        "gn-style",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/creator/gn-style-background-music-presenter.ts",
+        "game/assets/scripts/domain/gn-style-resource-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/apple",
+      "canonicalPath": "Sounds/apple.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading",
+        "mode-select"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x001505a5",
+          "instructionAddress": "0x001505d0",
+          "functionSymbol": "_ZN5Fruit12PlayCutSoundEv",
+          "demangledSymbol": "Fruit::PlayCutSound()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/banana",
+      "canonicalPath": "Sounds/banana.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading",
+        "mode-select"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/boomexplosion",
+      "canonicalPath": "Sounds/boomexplosion.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00145865",
+          "instructionAddress": "0x001458dc",
+          "functionSymbol": "_ZN4Bomb3CutEN7cocos2d7CCPointES1_",
+          "demangledSymbol": "Bomb::Cut(cocos2d::CCPoint, cocos2d::CCPoint)",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/boomhit",
+      "canonicalPath": "Sounds/boomhit.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/boomsound",
+      "canonicalPath": "Sounds/boomsound.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00145539",
+          "instructionAddress": "0x00145584",
+          "functionSymbol": "_ZN4Bomb7onEnterEv",
+          "demangledSymbol": "Bomb::onEnter()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/boomtoss",
+      "canonicalPath": "Sounds/boomtoss.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/classic-spawn-planner.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00165229",
+          "instructionAddress": "0x00165258",
+          "functionSymbol": "_ZN8TossTurn13PlayTossSoundEv",
+          "demangledSymbol": "TossTurn::PlayTossSound()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/cheer",
+      "canonicalPath": "Sounds/cheer.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/compo1",
+      "canonicalPath": "Sounds/compo1.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/compo2",
+      "canonicalPath": "Sounds/compo2.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x0014a11d",
+          "instructionAddress": "0x0014a14c",
+          "functionSymbol": "_ZN12ComboManager20PlayRandomComboSoundEv",
+          "demangledSymbol": "ComboManager::PlayRandomComboSound()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/compo3",
+      "canonicalPath": "Sounds/compo3.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/critical",
+      "canonicalPath": "Sounds/critical.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/doublepoint",
+      "canonicalPath": "Sounds/doublepoint.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00162b81",
+          "instructionAddress": "0x00162b98",
+          "functionSymbol": "_ZN12ScoreManager17EnableDoubleScoreEv",
+          "demangledSymbol": "ScoreManager::EnableDoubleScore()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/doubletoss",
+      "canonicalPath": "Sounds/doubletoss.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/double-toss-strategy.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x0014de61",
+          "instructionAddress": "0x0014de98",
+          "functionSymbol": "_ZN10DoubleToss5StartEv",
+          "demangledSymbol": "DoubleToss::Start()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/doubletosstrum",
+      "canonicalPath": "Sounds/doubletosstrum.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/double-toss-strategy.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x0014dd29",
+          "instructionAddress": "0x0014dd6c",
+          "functionSymbol": "_ZN10DoubleToss4StopEv",
+          "demangledSymbol": "DoubleToss::Stop()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/eapplecut",
+      "canonicalPath": "Sounds/eapplecut.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/ehit1",
+      "canonicalPath": "Sounds/ehit1.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x001458ed",
+          "instructionAddress": "0x00145918",
+          "functionSymbol": "_ZN4Bomb11HitElectricEv",
+          "demangledSymbol": "Bomb::HitElectric()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/ehit2",
+      "canonicalPath": "Sounds/ehit2.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/ehit3",
+      "canonicalPath": "Sounds/ehit3.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x001458ed",
+          "instructionAddress": "0x0014592c",
+          "functionSymbol": "_ZN4Bomb11HitElectricEv",
+          "demangledSymbol": "Bomb::HitElectric()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/ehit4",
+      "canonicalPath": "Sounds/ehit4.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/electric",
+      "canonicalPath": "Sounds/electric.mp3",
+      "format": "mp3",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00145cf1",
+          "instructionAddress": "0x00145d24",
+          "functionSymbol": "_ZN12BombElectric14TurnOnElectricEv",
+          "demangledSymbol": "BombElectric::TurnOnElectric()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/electricexplose",
+      "canonicalPath": "Sounds/electricexplose.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/finishhitmusic",
+      "canonicalPath": "Sounds/finishhitmusic.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/firstplace",
+      "canonicalPath": "Sounds/firstplace.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/freeze",
+      "canonicalPath": "Sounds/freeze.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/time-manager-service.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00164b9d",
+          "instructionAddress": "0x00164bbc",
+          "functionSymbol": "_ZN11TimeManager6FreezeEv",
+          "demangledSymbol": "TimeManager::Freeze()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/fruitfail",
+      "canonicalPath": "Sounds/fruitfail.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "resource-consumer-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/gameplayselected",
+      "canonicalPath": "Sounds/gameplayselected.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading",
+        "mode-select"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/mode-select-resource-contract.ts",
+        "game/assets/scripts/domain/mode-select-state.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x0015c08d",
+          "instructionAddress": "0x0015c0a4",
+          "functionSymbol": "_ZN15ModeSelectLayer12ModeSelectedEv",
+          "demangledSymbol": "ModeSelectLayer::ModeSelected()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/get_coins",
+      "canonicalPath": "Sounds/get_coins.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "resource-consumer-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/hitmusic",
+      "canonicalPath": "Sounds/hitmusic.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x0014eb25",
+          "instructionAddress": "0x0014eb64",
+          "functionSymbol": "_ZN11DragonFruit3CutEN7cocos2d7CCPointES1_",
+          "demangledSymbol": "DragonFruit::Cut(cocos2d::CCPoint, cocos2d::CCPoint)",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/juice1",
+      "canonicalPath": "Sounds/juice1.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "resource-consumer-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/juice2",
+      "canonicalPath": "Sounds/juice2.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "resource-consumer-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/juice3",
+      "canonicalPath": "Sounds/juice3.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "resource-consumer-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/juice4",
+      "canonicalPath": "Sounds/juice4.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "resource-consumer-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/kiwi",
+      "canonicalPath": "Sounds/kiwi.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "resource-consumer-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/lightning1",
+      "canonicalPath": "Sounds/lightning1.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/lightning2",
+      "canonicalPath": "Sounds/lightning2.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/magnet",
+      "canonicalPath": "Sounds/magnet.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/mainmenumusic",
+      "canonicalPath": "Sounds/mainmenumusic.mp3",
+      "format": "mp3",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading",
+        "main-menu"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/main-menu-resource-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x0015bb89",
+          "instructionAddress": "0x0015bbec",
+          "functionSymbol": "_ZN13MainMenuLayerC1Ev",
+          "demangledSymbol": "MainMenuLayer::MainMenuLayer()",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x0015bb89",
+          "instructionAddress": "0x0015bbec",
+          "functionSymbol": "_ZN13MainMenuLayerC2Ev",
+          "demangledSymbol": "MainMenuLayer::MainMenuLayer()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/mangosteen",
+      "canonicalPath": "Sounds/mangosteen.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "crazy-audio",
+        "loading",
+        "main-menu",
+        "mode-select"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/main-menu-resource-contract.ts",
+        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x001505a5",
+          "instructionAddress": "0x001505f8",
+          "functionSymbol": "_ZN5Fruit12PlayCutSoundEv",
+          "demangledSymbol": "Fruit::PlayCutSound()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/menubuttonclick",
+      "canonicalPath": "Sounds/menubuttonclick.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "about",
+        "classic-audio",
+        "leaderboard",
+        "loading",
+        "main-menu",
+        "mode-select",
+        "objectives",
+        "options"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/about-resource-contract.ts",
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/crazy-result-navigation.ts",
+        "game/assets/scripts/domain/leaderboard-resource-contract.ts",
+        "game/assets/scripts/domain/main-menu-resource-contract.ts",
+        "game/assets/scripts/domain/mode-select-resource-contract.ts",
+        "game/assets/scripts/domain/mode-select-state.ts",
+        "game/assets/scripts/domain/objectives-screen-resource-contract.ts",
+        "game/assets/scripts/domain/options-resource-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x00141819",
+          "instructionAddress": "0x00141860",
+          "functionSymbol": "_ZN10AboutLayer12menuCallbackEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "AboutLayer::menuCallback(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x00142a0d",
+          "instructionAddress": "0x00142a78",
+          "functionSymbol": "_ZN17BaseGameplayLayer14ReplayCallbackEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "BaseGameplayLayer::ReplayCallback(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x00143245",
+          "instructionAddress": "0x00143264",
+          "functionSymbol": "_ZN17BaseGameplayLayer13PauseCallbackEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "BaseGameplayLayer::PauseCallback(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x00158f21",
+          "instructionAddress": "0x00158f68",
+          "functionSymbol": "_ZN16LeaderboardLayer12backCallbackEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "LeaderboardLayer::backCallback(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x0015abf1",
+          "instructionAddress": "0x0015ac38",
+          "functionSymbol": "_ZN13MainMenuLayer15optionsCallbackEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "MainMenuLayer::optionsCallback(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x0015ac55",
+          "instructionAddress": "0x0015ac9c",
+          "functionSymbol": "_ZN13MainMenuLayer13aboutCallbackEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "MainMenuLayer::aboutCallback(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x0015ba95",
+          "instructionAddress": "0x0015babc",
+          "functionSymbol": "_ZN13MainMenuLayer14effectCallbackEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "MainMenuLayer::effectCallback(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x0015bacd",
+          "instructionAddress": "0x0015bafc",
+          "functionSymbol": "_ZN13MainMenuLayer13musicCallbackEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "MainMenuLayer::musicCallback(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x0015bd61",
+          "instructionAddress": "0x0015bd78",
+          "functionSymbol": "_ZN15ModeSelectLayer12backCallbackEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "ModeSelectLayer::backCallback(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x0015d6ed",
+          "instructionAddress": "0x0015d704",
+          "functionSymbol": "_ZN15ObjectivesLayer12backCallbackEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "ObjectivesLayer::backCallback(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x0015d991",
+          "instructionAddress": "0x0015d9a8",
+          "functionSymbol": "_ZN15ObjectivesLayer12skipCakkbackEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "ObjectivesLayer::skipCakkback(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x0015ec51",
+          "instructionAddress": "0x0015ec68",
+          "functionSymbol": "_ZN12OptionsLayer20SelectedBladeChangedEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "OptionsLayer::SelectedBladeChanged(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x0015ed05",
+          "instructionAddress": "0x0015ed1c",
+          "functionSymbol": "_ZN12OptionsLayer25SelectedBackgroundChangedEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "OptionsLayer::SelectedBackgroundChanged(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x0015fc49",
+          "instructionAddress": "0x0015fc60",
+          "functionSymbol": "_ZN12OptionsLayer18BackButtonCallbackEPN7cocos2d8CCObjectE",
+          "demangledSymbol": "OptionsLayer::BackButtonCallback(cocos2d::CCObject*)",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/mono1",
+      "canonicalPath": "Sounds/mono1.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading",
+        "options"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x0015efb1",
+          "instructionAddress": "0x0015f198",
+          "functionSymbol": "_ZN12OptionsLayer19BackgroundsCallbackEv",
+          "demangledSymbol": "OptionsLayer::BackgroundsCallback()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/mono2",
+      "canonicalPath": "Sounds/mono2.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading",
+        "options"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x0015edb5",
+          "instructionAddress": "0x0015ef78",
+          "functionSymbol": "_ZN12OptionsLayer14BladesCallbackEv",
+          "demangledSymbol": "OptionsLayer::BladesCallback()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/orange",
+      "canonicalPath": "Sounds/orange.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "resource-consumer-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/pineapple",
+      "canonicalPath": "Sounds/pineapple.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "resource-consumer-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/powerup",
+      "canonicalPath": "Sounds/powerup.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/scorescreen",
+      "canonicalPath": "Sounds/scorescreen.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "resource-consumer-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/secondplace",
+      "canonicalPath": "Sounds/secondplace.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/strawberry",
+      "canonicalPath": "Sounds/strawberry.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "crazy-audio",
+        "loading",
+        "main-menu",
+        "mode-select"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/main-menu-resource-contract.ts",
+        "game/assets/scripts/domain/mode-select-resource-contract.ts"
+      ],
+      "nativeEvents": [
+        {
+          "functionAddress": "0x0014eb25",
+          "instructionAddress": "0x0014eda8",
+          "functionSymbol": "_ZN11DragonFruit3CutEN7cocos2d7CCPointES1_",
+          "demangledSymbol": "DragonFruit::Cut(cocos2d::CCPoint, cocos2d::CCPoint)",
+          "reviewState": "auto-indexed"
+        },
+        {
+          "functionAddress": "0x001505a5",
+          "instructionAddress": "0x001505e4",
+          "functionSymbol": "_ZN5Fruit12PlayCutSoundEv",
+          "demangledSymbol": "Fruit::PlayCutSound()",
+          "reviewState": "auto-indexed"
+        }
+      ],
+      "eventEvidenceStatus": "native-string-xref",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/swoosh1",
+      "canonicalPath": "Sounds/swoosh1.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/swoosh2",
+      "canonicalPath": "Sounds/swoosh2.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/swoosh3",
+      "canonicalPath": "Sounds/swoosh3.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/swoosh4",
+      "canonicalPath": "Sounds/swoosh4.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/swoosh5",
+      "canonicalPath": "Sounds/swoosh5.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/swoosh6",
+      "canonicalPath": "Sounds/swoosh6.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/swoosh7",
+      "canonicalPath": "Sounds/swoosh7.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/swoosh8",
+      "canonicalPath": "Sounds/swoosh8.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/swoosh9",
+      "canonicalPath": "Sounds/swoosh9.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/thirdplace",
+      "canonicalPath": "Sounds/thirdplace.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/timetick",
+      "canonicalPath": "Sounds/timetick.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/creator/time-manager-audio-presenter.ts",
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/time-manager-service.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/timeup",
+      "canonicalPath": "Sounds/timeup.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/creator/time-manager-audio-presenter.ts",
+        "game/assets/scripts/domain/crazy-audio-contract.ts",
+        "game/assets/scripts/domain/time-manager-service.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/tossfruit",
+      "canonicalPath": "Sounds/tossfruit.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "crazy-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/creator/crazy-entity-registry.ts",
+        "game/assets/scripts/domain/bonus-toss-strategy.ts",
+        "game/assets/scripts/domain/classic-audio-contract.ts",
+        "game/assets/scripts/domain/classic-spawn-planner.ts",
+        "game/assets/scripts/domain/crazy-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    },
+    {
+      "id": "audio:Sounds/waterfruit",
+      "canonicalPath": "Sounds/waterfruit.wav",
+      "format": "wav",
+      "reachability": "consumed",
+      "consumerIds": [
+        "classic-audio",
+        "loading"
+      ],
+      "dispositionId": null,
+      "preloadSources": [
+        "game/assets/scripts/domain/loading-resource-contract.ts"
+      ],
+      "eventSources": [
+        "game/assets/scripts/domain/classic-audio-contract.ts"
+      ],
+      "nativeEvents": [],
+      "eventEvidenceStatus": "reconstructed-contract",
+      "rights": {
+        "recordId": "recovered-audio-assets",
+        "status": "unresolved",
+        "shipReady": false,
+        "evidenceRefs": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,322 @@
+{
+  "schemaVersion": 1,
+  "metricId": "pencil-blade-maximal-recoverable-fidelity",
+  "metricVersion": "1.1.0",
+  "scope": "Conformance of the clean-room Cocos Creator reconstruction to the frozen, statically recovered contract corpus. This is not an original-runtime identity or perceptual-comparison score.",
+  "acceptance": {
+    "domainFloorPercent": 99,
+    "overallRule": "minimum-domain-score",
+    "requiresEveryDomainAtFloor": true,
+    "weighting": "forbidden"
+  },
+  "scoring": {
+    "unitRule": "Each frozen recovered-contract unit is binary: pass only with cited executable or exact-byte evidence; otherwise fail.",
+    "domainRule": "passed units divided by frozen units, rounded down to two decimals.",
+    "overallRule": "The overall score is the minimum of the five domain scores. No average or weight can hide a weak domain.",
+    "residualRule": "Inferences, unknowns, exceptions, rights decisions, and platform divergences are recorded outside the recovered-unit numerator and denominator. Adding or closing one cannot raise a domain score unless it becomes a new versioned recovered-contract unit with evidence.",
+    "divergenceRule": "Any unexplained contradiction against a recovered contract fails the affected unit and the release gate."
+  },
+  "scopeDisclosure": {
+    "canonicalAudioFiles": 62,
+    "recoveredAudioEventUnits": 52,
+    "disclosedAudioResidualUnits": 10,
+    "renderingAssertions": 4,
+    "recoveredRenderingUnits": 3,
+    "disclosedRenderingResidualUnits": 1,
+    "levelProgressionAssertions": 4,
+    "recoveredLevelProgressionUnits": 3,
+    "disclosedLevelProgressionResidualUnits": 1
+  },
+  "domains": [
+    {
+      "id": "visuals-layout-animation",
+      "title": "Visuals, layout, and animation",
+      "frozenUnits": 813,
+      "passedUnits": 813,
+      "failedUnits": 0,
+      "scorePercent": 100,
+      "unitGroups": [
+        {
+          "id": "canonical-png-closure",
+          "frozenUnits": 784,
+          "observedUnits": 784,
+          "passedUnits": 784,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "assets/catalog/asset-catalog.json"
+          ],
+          "status": "pass"
+        },
+        {
+          "id": "screen-layout-consumer-contracts",
+          "frozenUnits": 18,
+          "observedUnits": 18,
+          "passedUnits": 18,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "assets/catalog/screen-element-map.json"
+          ],
+          "status": "pass"
+        },
+        {
+          "id": "recovered-animation-timelines",
+          "frozenUnits": 8,
+          "observedUnits": 8,
+          "passedUnits": 8,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "assets/catalog/animation-frame-map.json"
+          ],
+          "status": "pass"
+        },
+        {
+          "id": "supported-runtime-visual-rows",
+          "frozenUnits": 3,
+          "observedUnits": 3,
+          "passedUnits": 3,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json",
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/h5-runtime-matrix.json"
+          ],
+          "status": "pass"
+        }
+      ],
+      "status": "pass"
+    },
+    {
+      "id": "audio",
+      "title": "Audio",
+      "frozenUnits": 55,
+      "passedUnits": 55,
+      "failedUnits": 0,
+      "scorePercent": 100,
+      "unitGroups": [
+        {
+          "id": "recovered-audio-event-cues",
+          "frozenUnits": 52,
+          "observedUnits": 52,
+          "passedUnits": 52,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "assets/catalog/audio-cue-map.json"
+          ],
+          "status": "pass"
+        },
+        {
+          "id": "supported-runtime-audio-rows",
+          "frozenUnits": 3,
+          "observedUnits": 3,
+          "passedUnits": 3,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json",
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/h5-runtime-matrix.json"
+          ],
+          "status": "pass"
+        }
+      ],
+      "status": "pass"
+    },
+    {
+      "id": "shader-material-rendering",
+      "title": "Shader, material, and rendering",
+      "frozenUnits": 6,
+      "passedUnits": 6,
+      "failedUnits": 0,
+      "scorePercent": 100,
+      "unitGroups": [
+        {
+          "id": "rendering-contract-assertions",
+          "frozenUnits": 3,
+          "observedUnits": 3,
+          "passedUnits": 3,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "assets/catalog/presentation-contract-map.json"
+          ],
+          "status": "pass"
+        },
+        {
+          "id": "supported-runtime-rendering-rows",
+          "frozenUnits": 3,
+          "observedUnits": 3,
+          "passedUnits": 3,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json",
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/h5-runtime-matrix.json"
+          ],
+          "status": "pass"
+        }
+      ],
+      "status": "pass"
+    },
+    {
+      "id": "level-progression",
+      "title": "Level, mode, and progression",
+      "frozenUnits": 61,
+      "passedUnits": 61,
+      "failedUnits": 0,
+      "scorePercent": 100,
+      "unitGroups": [
+        {
+          "id": "production-mode-routes",
+          "frozenUnits": 6,
+          "observedUnits": 6,
+          "passedUnits": 6,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "game/assets/scripts/domain/mode-select-state.ts",
+            "docs/cocos-creator-contract-map.md"
+          ],
+          "status": "pass"
+        },
+        {
+          "id": "objective-definitions",
+          "frozenUnits": 52,
+          "observedUnits": 52,
+          "passedUnits": 52,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "game/assets/scripts/domain/objectives-manager-state.ts",
+            "tests/reconstruction/vertical-slice/objectives-manager-state.test.ts"
+          ],
+          "status": "pass"
+        },
+        {
+          "id": "level-layout-progression-contracts",
+          "frozenUnits": 3,
+          "observedUnits": 3,
+          "passedUnits": 3,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "assets/catalog/presentation-contract-map.json"
+          ],
+          "status": "pass"
+        }
+      ],
+      "status": "pass"
+    },
+    {
+      "id": "gameplay-physics-timing-input-state",
+      "title": "Gameplay, physics, timing, input, and state",
+      "frozenUnits": 33,
+      "passedUnits": 33,
+      "failedUnits": 0,
+      "scorePercent": 100,
+      "unitGroups": [
+        {
+          "id": "classic-physics-acceptance-contracts",
+          "frozenUnits": 11,
+          "observedUnits": 11,
+          "passedUnits": 11,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "forensics/contracts/classic-physics-contract.md",
+            "tests/reconstruction/vertical-slice/classic-physics-adapter.test.ts",
+            "tests/reconstruction/vertical-slice/classic-blade-physics.test.ts",
+            "tests/reconstruction/vertical-slice/classic-variable-step.test.ts"
+          ],
+          "status": "pass"
+        },
+        {
+          "id": "physics2d-backend-equivalence-domains",
+          "frozenUnits": 4,
+          "observedUnits": 4,
+          "passedUnits": 4,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "forensics/runtime/physics2d-backend-equivalence.json",
+            "tests/physics2d-backend-equivalence.test.mjs"
+          ],
+          "status": "pass"
+        },
+        {
+          "id": "production-gameplay-route-owners",
+          "frozenUnits": 6,
+          "observedUnits": 6,
+          "passedUnits": 6,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "docs/cocos-creator-contract-map.md",
+            "tests/reconstruction/vertical-slice/recovered-app-shell-controller.test.ts"
+          ],
+          "status": "pass"
+        },
+        {
+          "id": "supported-runtime-input-rows",
+          "frozenUnits": 3,
+          "observedUnits": 3,
+          "passedUnits": 3,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json",
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/h5-runtime-matrix.json"
+          ],
+          "status": "pass"
+        },
+        {
+          "id": "supported-runtime-lifecycle-rows",
+          "frozenUnits": 3,
+          "observedUnits": 3,
+          "passedUnits": 3,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json",
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/h5-runtime-matrix.json"
+          ],
+          "status": "pass"
+        },
+        {
+          "id": "supported-runtime-storage-rows",
+          "frozenUnits": 3,
+          "observedUnits": 3,
+          "passedUnits": 3,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json",
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/h5-runtime-matrix.json"
+          ],
+          "status": "pass"
+        },
+        {
+          "id": "supported-runtime-offline-rows",
+          "frozenUnits": 3,
+          "observedUnits": 3,
+          "passedUnits": 3,
+          "failedUnits": 0,
+          "scorePercent": 100,
+          "evidenceRefs": [
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json",
+            "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/h5-runtime-matrix.json"
+          ],
+          "status": "pass"
+        }
+      ],
+      "status": "pass"
+    }
+  ],
+  "overallScorePercent": 100,
+  "everyDomainAtFloor": true,
+  "unexplainedDivergences": 0,
+  "originalRuntimeIdentityClaim": false,
+  "status": "pass"
+}

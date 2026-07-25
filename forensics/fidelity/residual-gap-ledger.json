@@ -1,0 +1,375 @@
+{
+  "schemaVersion": 1,
+  "metricId": "pencil-blade-maximal-recoverable-fidelity",
+  "metricVersion": "1.1.0",
+  "policy": "Inferences, unknowns, exceptions, rights decisions, and platform divergences are recorded outside the recovered-unit numerator and denominator. Adding or closing one cannot raise a domain score unless it becomes a new versioned recovered-contract unit with evidence.",
+  "summary": {
+    "total": 25,
+    "byClassification": [
+      {
+        "classification": "evidence-limit",
+        "count": 1
+      },
+      {
+        "classification": "unknown",
+        "count": 8
+      },
+      {
+        "classification": "reviewed-inference",
+        "count": 3
+      },
+      {
+        "classification": "compatibility-exception",
+        "count": 1
+      },
+      {
+        "classification": "recovered-absence",
+        "count": 1
+      },
+      {
+        "classification": "compatibility-boundary",
+        "count": 1
+      },
+      {
+        "classification": "reviewed-compatibility-decision",
+        "count": 1
+      },
+      {
+        "classification": "safety-exception",
+        "count": 1
+      },
+      {
+        "classification": "declared-divergence",
+        "count": 3
+      },
+      {
+        "classification": "intentional-exclusion",
+        "count": 1
+      },
+      {
+        "classification": "unsupported-resource-exception",
+        "count": 1
+      },
+      {
+        "classification": "rights-unknown",
+        "count": 1
+      },
+      {
+        "classification": "external-evidence-blocker",
+        "count": 1
+      },
+      {
+        "classification": "external-release-blocker",
+        "count": 1
+      }
+    ],
+    "blockers": 4,
+    "unexplainedDivergences": 0
+  },
+  "residuals": [
+    {
+      "id": "EVIDENCE-ORIGINAL-RUNTIME-UNOBSERVABLE",
+      "domain": "cross-domain",
+      "classification": "evidence-limit",
+      "status": "accepted-boundary",
+      "statement": "The legacy APK runtime is unavailable; no pixel, waveform, frame, or trajectory identity claim is made against an executing original.",
+      "scoreEffect": "cannot-add-recovered-credit",
+      "evidenceRefs": [
+        "plans/260721-2253-pencil-blade-restoration/plan.md",
+        "forensics/unknowns.md"
+      ]
+    },
+    {
+      "id": "VISUAL-PIXEL-GOLDEN-UNAVAILABLE",
+      "domain": "visuals-layout-animation",
+      "classification": "unknown",
+      "status": "open-evidence-limit",
+      "statement": "No original-runtime pixel golden or provenance-qualified historical capture exists; screenshots validate current supported rows and recovered geometry only.",
+      "scoreEffect": "cannot-add-recovered-credit",
+      "evidenceRefs": [
+        "forensics/contracts/classic-presentation-contract.md",
+        "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/h5-runtime-matrix.json",
+        "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json"
+      ]
+    },
+    {
+      "id": "VISUAL-DEFAULT-CENTER-ANCHORS",
+      "domain": "visuals-layout-animation",
+      "classification": "reviewed-inference",
+      "status": "implemented-disclosed",
+      "statement": "Where native code did not write an anchor, Creator uses the legacy default center anchor explicitly.",
+      "scoreEffect": "excluded-from-recovered-units",
+      "evidenceRefs": [
+        "forensics/contracts/classic-presentation-contract.md",
+        "forensics/contracts/main-menu-presentation-contract.md"
+      ]
+    },
+    {
+      "id": "VISUAL-FONT-RASTERIZATION",
+      "domain": "visuals-layout-animation",
+      "classification": "unknown",
+      "status": "open-compatibility-boundary",
+      "statement": "Exact legacy FreeType/font rasterization cannot be established under Creator 3.8.8; font bytes, label contracts, and current runtime output are preserved and tested.",
+      "scoreEffect": "cannot-add-recovered-credit",
+      "evidenceRefs": [
+        "docs/release-rights-checklist.md",
+        "scripts/validate-creator-resource-meta.mjs"
+      ]
+    },
+    {
+      "id": "AUDIO-ORIGINAL-WAVEFORM-OUTPUT",
+      "domain": "audio",
+      "classification": "unknown",
+      "status": "open-evidence-limit",
+      "statement": "Exact legacy mixer output, latency, device gain, and waveform timing cannot be compared without the original runtime.",
+      "scoreEffect": "cannot-add-recovered-credit",
+      "evidenceRefs": [
+        "assets/catalog/audio-cue-map.json",
+        "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/h5-runtime-matrix.json",
+        "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json"
+      ]
+    },
+    {
+      "id": "AUDIO-RESOURCE-ONLY-CUES",
+      "domain": "audio",
+      "classification": "unknown",
+      "status": "preserved-not-invented",
+      "statement": "Ten consumed audio files have a recovered resource consumer/preload contract but no exact native string xref or reconstructed event assignment; they remain classified without invented cue timing.",
+      "scoreEffect": "cannot-add-event-linkage-credit",
+      "evidenceRefs": [
+        "assets/catalog/audio-cue-map.json"
+      ]
+    },
+    {
+      "id": "RENDER-BASIC-BLADE-MATERIAL",
+      "domain": "shader-material-rendering",
+      "classification": "reviewed-inference",
+      "status": "implemented-disclosed",
+      "statement": "Recovered blade texture, topology, vertex layout, and lifecycle use Creator's unlit textured material; exact legacy numeric blend factors and sampler state remain unknown.",
+      "scoreEffect": "inferred-material-does-not-add-recovered-credit",
+      "evidenceRefs": [
+        "forensics/contracts/basic-blade-presentation-contract.md",
+        "game/assets/scripts/creator/classic-blade-presenter.ts"
+      ]
+    },
+    {
+      "id": "RENDER-CREATOR-JSB-DRAWINFO",
+      "domain": "shader-material-rendering",
+      "classification": "compatibility-exception",
+      "status": "resolved",
+      "statement": "JSB exposes RenderingSubMesh draw info through getDrawInfo() while Web exposes drawInfo; the presenter uses both exact engine bindings.",
+      "scoreEffect": "none-after-verified-fix",
+      "evidenceRefs": [
+        "game/assets/scripts/creator/classic-blade-presenter.ts",
+        "game/assets/scripts/creator/bird-blade-presenter.ts",
+        "tests/reconstruction/vertical-slice/classic-blade-presenter.test.ts",
+        "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json"
+      ]
+    },
+    {
+      "id": "RENDER-NO-AUTHORED-MATERIAL-MANIFEST",
+      "domain": "shader-material-rendering",
+      "classification": "recovered-absence",
+      "status": "closed",
+      "statement": "The canonical APK contains no standalone shader, material, effect, animation-clip, prefab, atlas, or level manifest; no replacement artifact is invented.",
+      "scoreEffect": "counted-only-as-recovered-absence-contract",
+      "evidenceRefs": [
+        "forensics/resources/resource-usage-map.json",
+        "assets/catalog/presentation-contract-map.json"
+      ]
+    },
+    {
+      "id": "PROGRESSION-CRAZY-BIRD-COMBO-CALLBACK",
+      "domain": "level-progression",
+      "classification": "reviewed-inference",
+      "status": "implemented-disclosed",
+      "statement": "The exact native Crazy Bird combo callback operand/order is not statically recoverable; the bounded production behavior is explicitly inferred.",
+      "scoreEffect": "excluded-from-recovered-units",
+      "evidenceRefs": [
+        "docs/cocos-creator-contract-map.md",
+        "game/assets/scripts/domain/crazy-timed-mode-profile.ts"
+      ]
+    },
+    {
+      "id": "PROGRESSION-CLASSIC-BOMB-SCHEDULER",
+      "domain": "level-progression",
+      "classification": "unknown",
+      "status": "open-static-gap",
+      "statement": "Classic bomb scheduling ownership and one native lower-bound side effect remain unproven; no fruit-miss substitute is used.",
+      "scoreEffect": "cannot-add-recovered-credit",
+      "evidenceRefs": [
+        "docs/cocos-creator-contract-map.md",
+        "forensics/contracts/classic-toss-contract.md"
+      ]
+    },
+    {
+      "id": "PHYSICS-NATIVE-RNG-INTERLEAVING",
+      "domain": "gameplay-physics-timing-input-state",
+      "classification": "unknown",
+      "status": "open-unobservable-sequence",
+      "statement": "Exact same-frame native RNG interleaving with engine/VFX consumers cannot be fully reconstructed; recovered gameplay RNG consumers and order remain explicit.",
+      "scoreEffect": "cannot-add-recovered-credit",
+      "evidenceRefs": [
+        "forensics/unknowns.md",
+        "forensics/contracts/classic-toss-contract.md"
+      ]
+    },
+    {
+      "id": "PHYSICS-RAYCAST-CALLBACK-ORDER",
+      "domain": "gameplay-physics-timing-input-state",
+      "classification": "compatibility-boundary",
+      "status": "measured-and-preserved",
+      "statement": "Box2D does not contract nearest-first callback order; the reconstruction preserves measured forward results followed by measured reverse results without sorting or deduplication.",
+      "scoreEffect": "ordering-not-assumed",
+      "evidenceRefs": [
+        "forensics/runtime/physics2d-backend-equivalence.json",
+        "forensics/contracts/classic-physics-contract.md"
+      ]
+    },
+    {
+      "id": "PHYSICS-DUPLICATE-RAY-HIT-RATIONALE",
+      "domain": "gameplay-physics-timing-input-state",
+      "classification": "reviewed-compatibility-decision",
+      "status": "implemented-disclosed",
+      "statement": "The broken native pointer-value deduplication is preserved as duplicate fixture dispatch; the gameplay rationale is unknown.",
+      "scoreEffect": "no-extra-credit",
+      "evidenceRefs": [
+        "forensics/contracts/classic-physics-contract.md",
+        "game/assets/scripts/domain/classic-cut-query.ts"
+      ]
+    },
+    {
+      "id": "PHYSICS-ELECTRIC-NATIVE-LAYOUT-DEFECT",
+      "domain": "gameplay-physics-timing-input-state",
+      "classification": "safety-exception",
+      "status": "implemented-disclosed",
+      "statement": "The memory-unsafe native electric-contact layout is not reproduced; Creator uses type-safe handling while preserving recovered filter and activation outcomes.",
+      "scoreEffect": "unsafe-behavior-excluded",
+      "evidenceRefs": [
+        "forensics/contracts/classic-physics-contract.md",
+        "forensics/runtime/physics2d-backend-equivalence.json"
+      ]
+    },
+    {
+      "id": "PHYSICS-LEAF-SOLVER-SEQUENCE",
+      "domain": "gameplay-physics-timing-input-state",
+      "classification": "unknown",
+      "status": "open-compatibility-boundary",
+      "statement": "Exact legacy leaf solver arithmetic, dt/RNG sequence, and framebuffer result remain unobservable; a separate recovered leaf physics boundary is preserved.",
+      "scoreEffect": "cannot-add-recovered-credit",
+      "evidenceRefs": [
+        "docs/cocos-creator-contract-map.md",
+        "forensics/contracts/shared-game-scene-presentation-contract.md"
+      ]
+    },
+    {
+      "id": "PHYSICS-ROPE-SOLVER-SEQUENCE",
+      "domain": "gameplay-physics-timing-input-state",
+      "classification": "unknown",
+      "status": "open-compatibility-boundary",
+      "statement": "Exact legacy rope trajectory and scheduler sampling are unavailable; recovered drag, flick, snap, rail, and selection contracts are implemented.",
+      "scoreEffect": "cannot-add-recovered-credit",
+      "evidenceRefs": [
+        "docs/cocos-creator-contract-map.md",
+        "forensics/contracts/mode-select-presentation-contract.md"
+      ]
+    },
+    {
+      "id": "PLATFORM-ANDROID-MIN-SDK",
+      "domain": "release-platform",
+      "classification": "declared-divergence",
+      "status": "accepted",
+      "statement": "Creator 3.8.8 requires Android min SDK 21; the original manifest declared min SDK 9.",
+      "scoreEffect": "outside-recovered-gameplay-score",
+      "evidenceRefs": [
+        "game/build-configs/android-debug.json",
+        "docs/compatibility-matrix.md"
+      ]
+    },
+    {
+      "id": "PLATFORM-ANDROID-GLES",
+      "domain": "release-platform",
+      "classification": "declared-divergence",
+      "status": "accepted",
+      "statement": "The reconstruction pins GLES3 while the original manifest declared OpenGL ES 2.0; this is a supported-platform envelope change, not a gameplay rule change.",
+      "scoreEffect": "outside-recovered-gameplay-score",
+      "evidenceRefs": [
+        "game/build-configs/android-debug.json",
+        "docs/compatibility-matrix.md"
+      ]
+    },
+    {
+      "id": "PLATFORM-PACKAGE-NAME",
+      "domain": "release-platform",
+      "classification": "declared-divergence",
+      "status": "accepted",
+      "statement": "The internal debug package is io.github.dantech0xff.pencilblade.debug rather than the retired uit.dev.pencilblade identifier.",
+      "scoreEffect": "outside-recovered-gameplay-score",
+      "evidenceRefs": [
+        "game/build-configs/android-debug.json",
+        "docs/compatibility-matrix.md"
+      ]
+    },
+    {
+      "id": "RELEASE-RETIRED-INTEGRATIONS",
+      "domain": "release-platform",
+      "classification": "intentional-exclusion",
+      "status": "accepted",
+      "statement": "Ads, analytics, remote leaderboard, review, feedback, email, and social bridges are not recreated in the clean-room gameplay core.",
+      "scoreEffect": "outside-approved-scope",
+      "evidenceRefs": [
+        "plans/260721-2253-pencil-blade-restoration/plan.md",
+        "release/recovered-reconstruction-manifest.json"
+      ]
+    },
+    {
+      "id": "RESOURCE-COOPERBLACK-OTF",
+      "domain": "release-rights",
+      "classification": "unsupported-resource-exception",
+      "status": "user-decision-required",
+      "statement": "Fonts/CooperBlackStd.otf is byte-preserved but has no supported Creator 3.8.8 font consumer; exclude, replace, or convert only after an explicit authorized decision.",
+      "scoreEffect": "blocks-public-release-not-technical-score",
+      "evidenceRefs": [
+        "assets/catalog/asset-catalog.json",
+        "docs/release-rights-checklist.md"
+      ]
+    },
+    {
+      "id": "RIGHTS-PUBLIC-DISTRIBUTION",
+      "domain": "release-rights",
+      "classification": "rights-unknown",
+      "status": "blocked",
+      "statement": "Public-distribution approval is absent for clean-room code, 784 PNG, 62 audio, 16 fonts, the Pencil Blade identity, and the generated Cocos Web runtime.",
+      "scoreEffect": "blocks-public-release-not-technical-score",
+      "evidenceRefs": [
+        "release/public-release-variant-manifest.json",
+        "docs/release-rights-checklist.md"
+      ]
+    },
+    {
+      "id": "CUSTODY-TWO-OFFLINE-BACKUPS",
+      "domain": "evidence-custody",
+      "classification": "external-evidence-blocker",
+      "status": "blocked",
+      "statement": "Two independently held offline backup APK copies have not been supplied or mounted for SHA-256 verification.",
+      "scoreEffect": "blocks-phase-01-closeout-not-technical-score",
+      "evidenceRefs": [
+        "plans/260721-2253-pencil-blade-restoration/phase-01-preserve-evidence-and-establish-baseline.md",
+        "docs/evidence-register.md"
+      ]
+    },
+    {
+      "id": "RELEASE-GITHUB-PAGES",
+      "domain": "release-platform",
+      "classification": "external-release-blocker",
+      "status": "blocked",
+      "statement": "The protected Creator runner, branch protection, github-pages environment, Pages source, and production deployment are not configured; GitHub authentication is unavailable and rights gate is closed.",
+      "scoreEffect": "blocks-public-release-not-technical-score",
+      "evidenceRefs": [
+        ".github/workflows/deploy-web-mobile-pages.yml",
+        "docs/reconstruction-report.md",
+        "docs/release-rights-checklist.md"
+      ]
+    }
+  ]
+}

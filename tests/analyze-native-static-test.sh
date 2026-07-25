@@ -62,6 +62,7 @@ assert_contains_file() {
 test_shell_syntax() {
   sh -n "$SCRIPT"
   sh -n "$ROOT_DIR/tests/analyze-native-static-test.sh"
+  node --check "$ROOT_DIR/scripts/enrich-native-function-map.mjs"
 }
 
 test_missing_and_bad_args() {
@@ -173,10 +174,13 @@ test_analysis_outputs() {
     symbols/imports-raw.txt \
     symbols/imports-demangled.txt \
     function-inventory.csv \
+    app-function-base.csv \
     app-function-inventory.csv \
+    function-enrichment-summary.json \
     strings/all-offsets.txt \
     resource-looking-strings.txt \
     disassembly/samples.tsv \
+    disassembly/gnu-full.txt \
     disassembly/gnu-thumb-samples.txt \
     disassembly/llvm-thumb-samples.txt
   do
@@ -188,7 +192,7 @@ test_analysis_outputs() {
 
   assert_contains_file "$output_dir/input.txt" "sha256=$EXPECTED_SHA256" || return 1
   assert_contains_file "$output_dir/input.txt" "bytes=4734880" || return 1
-  assert_contains_file "$output_dir/tool-versions.txt" "analyzer-script=2" || return 1
+  assert_contains_file "$output_dir/tool-versions.txt" "analyzer-script=3" || return 1
   assert_contains_file "$output_dir/commands.txt" "--triple=thumbv5te-none-linux-android" || return 1
   assert_contains_file "$output_dir/summary.txt" "named_dynamic_symbols=16516" || return 1
   assert_contains_file "$output_dir/summary.txt" "defined_dynamic_symbols=16173" || return 1
@@ -218,11 +222,13 @@ test_analysis_outputs() {
   assert_contains_file "$SCRIPT" 'pthread_' || return 1
   assert_contains_file "$SCRIPT" 'memcpy$' || return 1
 
-  [ "$(sed -n '1p' "$output_dir/app-function-inventory.csv")" = "$expected_header" ] || return 1
+  enriched_header="$expected_header,direct_call_count,direct_calls_json,numeric_constant_count,numeric_constants_json,string_xref_count,string_xrefs_json,review_state"
+  [ "$(sed -n '1p' "$output_dir/app-function-base.csv")" = "$expected_header" ] || return 1
+  [ "$(sed -n '1p' "$output_dir/app-function-inventory.csv")" = "$enriched_header" ] || return 1
   awk 'NR > 1 && $0 !~ /,"app",/ {bad=1} END {exit (NR <= 1 || bad)}' \
     "$output_dir/app-function-inventory.csv" || return 1
   awk 'NR == 1 || /,"app",/' "$output_dir/function-inventory.csv" > "$case_dir/expected-app-function-inventory.csv"
-  cmp "$case_dir/expected-app-function-inventory.csv" "$output_dir/app-function-inventory.csv" || return 1
+  cmp "$case_dir/expected-app-function-inventory.csv" "$output_dir/app-function-base.csv" || return 1
   cmp "$CURATED_APP_MAP" "$output_dir/app-function-inventory.csv" || {
     printf 'curated application function map is stale; regenerate it with scripts/analyze-native-static.sh\n' >&2
     return 1
@@ -233,6 +239,15 @@ test_analysis_outputs() {
   [ "$inventory_app_functions" -gt 0 ] || return 1
   assert_contains_file "$output_dir/app-function-inventory.csv" '"PhysicsLayer::getPhysicsWorld()","app"' || return 1
   assert_contains_file "$output_dir/app-function-inventory.csv" '"ClassicModeLayer::GetGameMode()","app"' || return 1
+  assert_contains_file "$output_dir/app-function-inventory.csv" '"AboutLayer::onEnter()","app","presentation","0.99","DER-NATIVE-001;DER-NATIVE-CORPUS-001"' || return 1
+  assert_contains_file "$output_dir/app-function-inventory.csv" 'Backgrounds/aboutbackground.png' || return 1
+  assert_contains_file "$output_dir/app-function-inventory.csv" 'Sounds/menubuttonclick.wav' || return 1
+  assert_contains_file "$output_dir/app-function-inventory.csv" ',"auto-indexed"' || return 1
+  assert_contains_file "$output_dir/function-enrichment-summary.json" '"totalFunctions": 713' || return 1
+  assert_contains_file "$output_dir/function-enrichment-summary.json" '"functionsWithDirectCalls": 553' || return 1
+  assert_contains_file "$output_dir/function-enrichment-summary.json" '"functionsWithNumericConstants": 684' || return 1
+  assert_contains_file "$output_dir/function-enrichment-summary.json" '"functionsWithStringXrefs": 91' || return 1
+  assert_contains_file "$output_dir/function-enrichment-summary.json" '"auto-indexed": 713' || return 1
 
   assert_contains_file "$output_dir/disassembly/samples.tsv" '0x00162ac9'
   assert_contains_file "$output_dir/disassembly/samples.tsv" 'ScoreManager::AddScore(int)'

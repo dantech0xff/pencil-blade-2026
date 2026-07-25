@@ -257,7 +257,7 @@ Current certification checkpoint:
 - [x] All mode contracts and progression fixtures pass
 - [x] Asset/audio usage reconciles with catalog as consumed, unknown, excluded, or unsupported
 - [x] Save reset, upgrade, and corruption behavior are defined and tested
-- [ ] No copied unknown-rights content enters a public build without clearance
+- [x] No copied unknown-rights content enters a public build without clearance
 - [x] Creator source/build audit proves that all application behavior is new TypeScript
       and content, with no original libgame.so/Cocos2d-x application runtime dependency
 

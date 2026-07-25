@@ -5,6 +5,12 @@ scope: phase-07-final-checkpoint
 status: pass
 ---
 
+> Superseded artifact identity: this historical checkpoint predates the JSB mesh fix and the
+> final runtime matrix. The canonical technical artifact set is now recorded in
+> `reports/technical-closeout-manifest.json`: Android SHA-256
+> `e313e149164eec8664b934a16e3c14b3a0f0265f9c7bb6306375a08a7cb5c37d` and H5 tree SHA-256
+> `90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54`.
+
 # Phase 07 Final Checkpoint
 
 ## Summary

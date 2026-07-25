@@ -1,7 +1,7 @@
 ---
 phase: 5
 title: "Build Cocos Creator Architecture and Vertical Slice"
-status: in-progress
+status: completed
 priority: P1
 dependencies: [3, 4]
 effort: "2-4 weeks"
@@ -82,7 +82,8 @@ ray-cast, and contact contracts. Any compatibility adjustment stays explicit at 
 
 ## Phase 5A: Fidelity-First Blade and Navigation Checkpoint
 
-Status: in progress. Continue this phase rather than creating a second restoration plan.
+Status: completed. This checkpoint was finished within the restoration plan rather than split
+into a second plan.
 
 ### Evidence gate
 
@@ -330,7 +331,7 @@ Current Editor integration:
 
 ## Success Criteria
 
-- [ ] Pinned Cocos Creator project builds and runs on the supported Android/H5 matrix
+- [x] Pinned Cocos Creator project builds and runs on the supported Android/H5 matrix
 - [x] All slice behavior is owned by reviewable TypeScript and Creator content
 - [x] Build contains no original APK, libgame.so, Cocos2d-x 2.1.4 runtime/source,
       decompiler artifact, native compatibility bridge, or emulator layer

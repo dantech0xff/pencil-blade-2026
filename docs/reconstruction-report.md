@@ -1,139 +1,126 @@
 # Reconstruction Report
 
-## Status and Scope
+## Current verdict
 
 **As of:** 2026-07-25
 
-**Policy:** [`reference/reconstruction-policy.yaml`](../reference/reconstruction-policy.yaml) `1.0.3`
+Technical reconstruction and maximal-recoverable-fidelity gates pass. Evidence custody and
+public release remain blocked by external inputs.
 
-**Recovered manifest:** [`release/recovered-reconstruction-manifest.json`](../release/recovered-reconstruction-manifest.json) `1.1.0`
+This report validates the clean-room Cocos Creator reconstruction against frozen static
+evidence, recovered contracts, exact resources, the selected Physics2D backend, and supported
+runtime rows. It does not claim empirical identity with an executing original and does not
+authorize public distribution.
 
-**Evidence mode:** static-only
+## Authority chain
 
-This report validates the clean-room reconstruction against frozen static evidence, recovered contracts, and deterministic fixtures. It does **not** claim original-runtime comparison, runtime identity, or final release authorization.
-
-## Authority Chain
-
-| Layer | Evidence |
+| Layer | Authority |
 |---|---|
-| Immutable source | [`docs/evidence-register.md`](../docs/evidence-register.md) |
-| Reconstruction policy | [`reference/reconstruction-policy.yaml`](../reference/reconstruction-policy.yaml) |
-| Canonical denominator decision | [`docs/decisions/apk-corpus-canonical-denominator.md`](./decisions/apk-corpus-canonical-denominator.md) |
-| Recovered reconstruction manifest | [`release/recovered-reconstruction-manifest.json`](../release/recovered-reconstruction-manifest.json) |
-| Public release variant manifest | [`release/public-release-variant-manifest.json`](../release/public-release-variant-manifest.json) |
-| APK-only resource corpus | [`plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-phase7-canonical-corpus.md`](../plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-phase7-canonical-corpus.md) |
-| H5 viewport audit | [`plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-h5-viewport-audit.md`](../plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-h5-viewport-audit.md) |
-| Phase 7 docs audit | [`plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-phase7-docs-audit.md`](../plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-phase7-docs-audit.md) |
-| Phase 7 platform build checkpoint | [`plans/260721-2253-pencil-blade-restoration/reports/implementer-2026-07-24-phase7-platform-builds.md`](../plans/260721-2253-pencil-blade-restoration/reports/implementer-2026-07-24-phase7-platform-builds.md) |
-| Phase 7 completion traceability | [`plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-phase7-completion-traceability.md`](../plans/260721-2253-pencil-blade-restoration/reports/explorer-2026-07-24-phase7-completion-traceability.md) |
-| Build scripts | [`scripts/build-android-debug.sh`](../scripts/build-android-debug.sh), [`scripts/audit-web-build.mjs`](../scripts/audit-web-build.mjs), [`scripts/verify-web-mobile-build.mjs`](../scripts/verify-web-mobile-build.mjs) |
-| Release workflow | [`.github/workflows/deploy-web-mobile-pages.yml`](../.github/workflows/deploy-web-mobile-pages.yml) |
-| Build configs | [`game/build-configs/android-debug.json`](../game/build-configs/android-debug.json), [`game/build-configs/web-mobile-pages.json`](../game/build-configs/web-mobile-pages.json) |
+| Immutable source | [`docs/evidence-register.md`](./evidence-register.md) |
+| Reconstruction policy | [`reference/reconstruction-policy.yaml`](../reference/reconstruction-policy.yaml) `1.0.3` |
+| Fidelity metric | [`reference/fidelity-metric-v1.json`](../reference/fidelity-metric-v1.json) `1.1.0` |
+| Canonical asset catalog | [`assets/catalog/asset-catalog.json`](../assets/catalog/asset-catalog.json) |
+| Presentation maps | [`docs/presentation-resource-spec.md`](./presentation-resource-spec.md) |
+| Physics2D probe | [`forensics/runtime/physics2d-backend-equivalence.json`](../forensics/runtime/physics2d-backend-equivalence.json) |
+| Android/H5 runtime | [`docs/compatibility-matrix.md`](./compatibility-matrix.md) |
+| Residuals | [`forensics/fidelity/residual-gap-ledger.json`](../forensics/fidelity/residual-gap-ledger.json) |
+| Preservation manifest | [`release/recovered-reconstruction-manifest.json`](../release/recovered-reconstruction-manifest.json) |
+| Public release manifest | [`release/public-release-variant-manifest.json`](../release/public-release-variant-manifest.json) |
 
-### Frozen corpus facts
+## Evidence and resource closure
 
-| Fact | Value |
-|---|---|
-| APK resource corpus scope | `recovered-apk-assets` |
-| Canonical root | `.forensics-work/phase-01/jadx/resources/assets` |
-| Asset count | `862` |
-| Byte count | `32,945,747` |
-| Corpus digest | `0143473b21e56525cde92163f72fd49b2a898ab70ef2b224cdad00eaba9238e3` |
-| Resource map digest | `165238f13f4186a9ab429c9c5a8bab07b4a42e941d0608f757d9e41a44d2ce67` |
-| Staging manifest digest | `5d8fd3761906eaf5c568e0bb215ba838f78bf8268a97009dff97421dd5ab6fc2` |
-| Reconciliation ledger digest | `18ea8ef7ae3fb3751d530dd89426979d601fd8e918d5e9b539a1b8d969daacae` |
-| Resource dispositions | `761` consumed, `100` excluded, `1` unsupported, `0` unknown |
+| Measure | Result |
+|---|---:|
+| Source APK SHA-256 | `95225733d46473f2b155737e8c83b567e028342257c747c0faac6ed4ab87e7aa` |
+| Native library SHA-256 | `55385c170f08c45c6a36358c6cac6f4b82104475ae8d2efd22c9187d1038500e` |
+| Enriched application functions | `713/713` with calls, constants, string xrefs, and review state |
+| Canonical assets | `862`, `32,945,747` bytes |
+| Exact-byte staged assets | `862/862` |
+| Creator metadata/UUID captured | `862/862` |
+| Runtime-consumed assets | `761` |
+| Reviewed excluded assets | `100` |
+| Reviewed unsupported assets | `1` (`Fonts/CooperBlackStd.otf`) |
+| Unknown resource dispositions | `0` |
+| Logical assets with a rights record | `473/473` |
+| Physical assets approved for public distribution | `0/862` |
 
-The project owner confirmed that the APK is the only extant source. This verified corpus is
-the approved canonical game-resource denominator; no external sample project is expected.
+The resource closure includes 50 classified indexed sequences, eight recovered animation
+timelines, all 62 audio cues, 18 presentation/resource consumers, every recovered static
+screen signal, generated primitives, stock/procedural rendering decisions, six production
+modes, and code-driven level/progression contracts.
 
-## Coverage Definitions
+## Five-domain metric
 
-| Coverage class | Current value | Notes |
-|---|---:|---|
-| APK inventory | `100%` | Exact recovered APK corpus inventory. |
-| Exact-byte staging | `100%` | `862/862` bytes staged into the Creator bundle. |
-| Disposition reconciliation | `100%` | Every staged path classified as consumed, excluded, or unsupported. |
-| Live consumer coverage | `88.28%` | `761/862`; this is not the final fidelity score. |
-| Policy-registered recovered claims | `21/21` within the current policy scope | Limited Classic/menu scope only. |
-| Rights resolution | `0%` | No public-distribution approval is registered. |
-| Final five-domain fidelity score | `not computed` | Resource scope is frozen; domain units, weighting, Physics2D equivalence, and residual scoring remain open. |
+Metric: `pencil-blade-maximal-recoverable-fidelity@1.1.0`.
 
-## Five-Domain Metric Status
+The overall score is the minimum domain score. Weighting and averaging are forbidden. Each
+unit is binary and evidence-backed. Inferences, unknowns, exceptions, rights decisions, and
+platform divergences stay outside recovered units and cannot raise coverage.
 
-| Domain | Frozen denominator | Weighting rule | Recovered | Inferred | Unknown | Residuals | Score |
-|---|---|---|---:|---:|---:|---|---|
-| Visuals / layout / animation | resource scope frozen; contract units pending | not frozen | not frozen | not frozen | not frozen | browser/version matrix and release substitutions remain open | not computable |
-| Audio | resource scope frozen; cue units pending | not frozen | not frozen | not frozen | not frozen | release treatment for uncleared audio remains open | not computable |
-| Shaders / materials / rendering | resource scope frozen; rendering units pending | not frozen | not frozen | not frozen | not frozen | final rendering-contract units are not frozen | not computable |
-| Levels / progression | resource scope frozen; contract units pending | not frozen | not frozen | not frozen | not frozen | final progression-contract units are not frozen | not computable |
-| Gameplay / physics / timing / input / state | static contract scope present; parity units pending | not frozen | not frozen | not frozen | not frozen | Physics2D parity gaps remain open | not computable |
+| Domain | Passed / frozen units | Score | Status |
+|---|---:|---:|---|
+| Visuals, layout, animation | `813/813` | `100.00%` | Pass |
+| Audio | `55/55` | `100.00%` | Pass |
+| Shader, material, rendering | `6/6` | `100.00%` | Pass |
+| Level, mode, progression | `61/61` | `100.00%` | Pass |
+| Gameplay, physics, timing, input, state | `33/33` | `100.00%` | Pass |
+| **Overall minimum** | — | **`100.00%`** | **Pass** |
 
-The `>=99%` acceptance gate remains open until domain units, weighting, Physics2D parity, and
-the residual list are versioned and approved.
+There are 25 disclosed residual/exception/blocker records and zero unexplained divergences.
+The original-runtime identity flag is explicitly `false`.
 
-## Policy Execution
+The complete catalog remains visible beside the narrower recovered denominator: 62 audio
+files contain 52 recovered event-linkage units and 10 disclosed resource-only residuals;
+four rendering assertions contain three recovered units and one inferred-material residual;
+four level/progression assertions contain three recovered units and one listed-inference
+residual. These 12 records are not scored and are not silently omitted.
 
-The current reconstruction policy is intentionally narrow:
+## Physics2D equivalence
 
-- scope: `classic-vertical-slice`
-- registered contracts: `9`
-- required claims: `21`
-- required evidence tier: `1`
-- minimum confidence: `0.99`
-- inferred treatment: `excluded`
-- unknown treatment: `blocks-affected-scope`
+The selected `@cocos/box2d@1.0.2` backend is pinned by path and SHA-256. Executable probes pass:
 
-This policy validates the recovered contract set that is currently registered. Passing the policy does **not** mean whole-game fidelity has been proven.
+- gravity/trajectory at `1/120`, `1/60`, and `1/30` with iterations `10/10`
+- forward then reverse raycasts with all fixture results and duplicate occurrences preserved
+- bilateral bomb/electric contact acceptance and fruit/bomb rejection
+- world locked during contact callback, direct destroy rejected, queued destroy successful
+  after `Step`
 
-## Residual and Uncertainty Ledger
+Creator adapter tests independently cover world-unit/PTM translation, gravity `-320` public
+units to `-10 m/s²`, linear velocity, variable timestep, synchronization/events, collision
+rows, input dispatch, deferred mutation, and restoration. Android and H5 gameplay gestures
+exercise the integrated runtime.
 
-| Category | Item | Status | Notes |
-|---|---|---|---|
-| Fidelity metric | Domain contract units and weighting | open | The resource corpus is frozen; the cross-domain scoring model is not yet versioned. |
-| Unsupported asset | `Fonts/CooperBlackStd.otf` | unsupported | Byte-preserved, not consumed, and not counted as recovered coverage. |
-| Metadata projection | Per-entry Creator metadata / UUID projection | pending | Live metadata audit exists, but the versioned per-entry projection is still to be captured. |
-| Native parity | Native RNG sequence parity | not claimed | Explicitly not part of the current evidence set. |
-| Physics2D | Trajectory / ray / contact / lifecycle equivalence | open | Needs the pinned backend validation path. |
-| Bomb electric | Fixture/contact decisions | open | Remains a documented residual in the policy corpus. |
-| Safe divergence | TimeManager callback hardening | open | Policy decision `time-manager-callback-hardening` remains unresolved and cannot be labeled recovered behavior. |
-| Post-fidelity variant | Reference-counted multi-bomb behavior | open | Policy decision `multi-bomb-reference-counted-variant` remains outside recovered coverage until explicitly reviewed after fidelity closure. |
-| Rights | Name, artwork, fonts, audio, code, engine runtime | unresolved | Public release remains blocked. |
-| Pages | Public deployment | blocked | No approved production deploy is registered. |
-| Browser matrix | Final H5 browser/version/device set | not frozen | The repository does not yet freeze this matrix. |
+## Supported runtime matrix
 
-## Validation Evidence
+- Android 13/API 33 arm64 emulator: cold start, gesture navigation/gameplay, audio focus,
+  `jsb.sqlite`, same-process resume, portrait lock, and completely offline cold start pass.
+- Google Chrome `150.0.7871.182`: `480x800` and `720x1280`, DPR 1, touch gestures,
+  WebAudio, localStorage persistence, background/foreground, orientation restore, and
+  post-load offline gameplay pass with zero console/page/request failures.
+- Fresh Web Mobile tree: 2,539 files, 39,613,694 bytes, tree SHA-256
+  `90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54`;
+  every eager/lazy file passes the exact `/pencil-blade-2026/` prefix verifier.
+- Fresh Android artifact: SHA-256
+  `e313e149164eec8664b934a16e3c14b3a0f0265f9c7bb6306375a08a7cb5c37d`.
 
-| Date | Evidence | Result |
+## Independent decisions
+
+| Decision | Verdict | Reason |
 |---|---|---|
-| 2026-07-24 | `./scripts/build-android-debug.sh` | Android debug build succeeded; the verified evidence records Gradle `3m43s` / `70` tasks, package `io.github.dantech0xff.pencilblade.debug`, min/target/compile SDK `21/36/36`, `arm64-v8a` only, debug signing, `55 MiB`, SHA-256 `1a4d96c71e53572fe86ce7bf73e73990df1a777a8fe33315cd1b9f6fd2705f4d`, and prohibited-runtime audit PASS. |
-| 2026-07-24 | Cocos Creator Web Mobile build + audit | Creator build exit `36`; web audit PASS; prefix verifier PASS with `2539` files. |
-| 2026-07-24 | Browser smoke on the generated Web Mobile build | All six modes, menu transitions, unlocks, `999999` coins, and particles passed with zero console warnings/errors. |
-| 2026-07-25 | Whole-repo tests | Repository checkpoint reports record `182/182` top-level Node tests and `1567/1567` vertical-slice tests, for `1749/1749` total; zero failures, skips, cancellations, or todos. |
+| Maximal recoverable technical fidelity | Pass | Minimum of all five frozen domains is `100.00%`; zero unexplained divergences |
+| Android artifact/runtime | Pass | Build audit plus supported arm64 runtime matrix pass |
+| Local H5 artifact/runtime | Pass | Build/prefix audit plus both frozen Chrome rows pass |
+| Evidence custody | Blocked | Two external offline APK copies have not been supplied for SHA-256 verification |
+| Rights authorization | Blocked | Six public-release records lack complete approval evidence |
+| Public GitHub Pages | Blocked | Rights gate is closed; GitHub authentication/settings/protected runner/environment/deployment are unavailable |
 
-The validation evidence above is recorded from the verified Phase 07 corpus. It is not a claim that the public Pages deploy has occurred.
+## Closeout blockers
 
-## Independent Decisions
-
-| Decision | Current verdict | Why |
-|---|---|---|
-| Static fidelity | not computable | Resource scope is frozen; domain units, weighting, and residual scoring are not. |
-| Android artifact | verified | The debug build and prohibited-runtime audit passed. |
-| Local H5 artifact | verified | The generated Web Mobile build and audit passed. |
-| Public Pages deployment | blocked | Rights approval is missing, no Pages site/runner/environment is configured, and the installed Creator bundle fails the workflow's strict signature preflight. |
-| Public rights authorization | blocked | The release manifest is still fail-closed. |
-
-## References and Unresolved Questions
-
-- [Compatibility matrix](./compatibility-matrix.md)
-- [Release rights checklist](./release-rights-checklist.md)
-- [Cocos Creator build audit](./cocos-creator-build-audit.md)
-- [Recovered reconstruction manifest](../release/recovered-reconstruction-manifest.json)
-- [Public release variant manifest](../release/public-release-variant-manifest.json)
-
-Unresolved questions:
-
-- What contract-unit definitions and weights will govern the five-domain fidelity score?
-- What release treatment is authorized for `Fonts/CooperBlackStd.otf`?
-- Which browser/version/device rows are frozen for the H5 matrix?
-- When, if ever, will the public Pages deploy be approved?
+1. Supply two independently held offline APK paths/media; both must hash to
+   `95225733d46473f2b155737e8c83b567e028342257c747c0faac6ed4ab87e7aa`.
+2. Provide accountable rights/license evidence and approval for clean-room code, 784 PNG,
+   62 audio, 16 fonts, the Pencil Blade identity, and the generated Cocos Web runtime.
+3. Decide the authorized public treatment of `Fonts/CooperBlackStd.otf`.
+4. Restore GitHub authentication, configure protected `main`, the protected labeled Creator
+   runner, Pages source, and `github-pages` environment, then deploy only after the rights gate
+   passes and verify the production URL.

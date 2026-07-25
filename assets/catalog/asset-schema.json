@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dantech0xff.github.io/pencil-blade-2026/schemas/asset-schema.json",
+  "title": "Pencil Blade canonical asset catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedFrom",
+    "summary",
+    "physicalAssets",
+    "logicalAssets"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "generatedFrom": {
+      "type": "object"
+    },
+    "summary": {
+      "type": "object"
+    },
+    "physicalAssets": {
+      "type": "array",
+      "minItems": 862,
+      "maxItems": 862,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "canonicalPath",
+          "targetPath",
+          "logicalId",
+          "bytes",
+          "sha256",
+          "extension",
+          "cocosType",
+          "importPolicy",
+          "reachability",
+          "rights",
+          "creatorImport"
+        ],
+        "properties": {
+          "canonicalPath": {
+            "type": "string",
+            "minLength": 1
+          },
+          "targetPath": {
+            "type": "string",
+            "minLength": 1
+          },
+          "logicalId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "extension": {
+            "enum": [
+              ".png",
+              ".wav",
+              ".mp3",
+              ".ttf",
+              ".otf"
+            ]
+          },
+          "cocosType": {
+            "type": "string",
+            "minLength": 1
+          },
+          "importPolicy": {
+            "type": "object"
+          },
+          "reachability": {
+            "type": "object",
+            "required": [
+              "status",
+              "consumerIds",
+              "dispositionId",
+              "reason",
+              "evidenceRefs"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "consumed",
+                  "excluded",
+                  "unsupported",
+                  "unknown"
+                ]
+              },
+              "consumerIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "dispositionId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "evidenceRefs": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "rights": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "recordId",
+              "status",
+              "shipReady",
+              "evidenceRefs"
+            ],
+            "properties": {
+              "recordId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "type": "string",
+                "minLength": 1
+              },
+              "shipReady": {
+                "type": "boolean"
+              },
+              "evidenceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "creatorImport": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "metadataStatus",
+              "uuidStatus",
+              "uuid",
+              "importer",
+              "version",
+              "subMetas",
+              "sidecarPath"
+            ],
+            "properties": {
+              "metadataStatus": {
+                "const": "captured"
+              },
+              "uuidStatus": {
+                "const": "captured"
+              },
+              "uuid": {
+                "type": "string",
+                "minLength": 1
+              },
+              "importer": {
+                "type": "string",
+                "minLength": 1
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "subMetas": {
+                "type": "array"
+              },
+              "sidecarPath": {
+                "type": "string",
+                "pattern": "\\.meta$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "logicalAssets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "logicalId",
+          "canonicalPaths",
+          "resolutionVariants",
+          "mediaType",
+          "reachabilityStates",
+          "consumerIds",
+          "dispositionIds",
+          "rights"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "status": {
+    "technicalReconstruction": "pass",
+    "publicRelease": "blocked",
+    "programCloseout": "blocked"
+  },
+  "canonicalArtifacts": {
+    "android": {
+      "path": "game/build/artifacts/android/pencil-blade-debug.apk",
+      "bytes": 57352687,
+      "sha256": "e313e149164eec8664b934a16e3c14b3a0f0265f9c7bb6306375a08a7cb5c37d",
+      "package": "io.github.dantech0xff.pencilblade.debug",
+      "activity": "io.github.dantech0xff.pencilblade.debug/com.cocos.game.AppActivity",
+      "runtimeReport": {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json",
+        "bytes": 4717,
+        "sha256": "c6d36330ae76b38ab7588500d4c157e2f346f4e19a48a8806fd67486e4a80688"
+      }
+    },
+    "h5": {
+      "directory": "game/build/web-mobile-pages",
+      "files": 2539,
+      "bytes": 39613694,
+      "treeDigestSha256": "90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54",
+      "pagesPrefix": "/pencil-blade-2026/",
+      "browser": {
+        "product": "Google Chrome",
+        "version": "150.0.7871.182",
+        "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+      },
+      "runtimeRows": [
+        "chrome-480x800",
+        "chrome-720x1280"
+      ],
+      "runtimeReport": {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/h5-runtime-matrix.json",
+        "bytes": 6701,
+        "sha256": "1f4454e919790f76d46cd7c47372793c46f7f25b82f13e5da3e817cd491cd8d0"
+      }
+    }
+  },
+  "fidelity": {
+    "metricId": "pencil-blade-maximal-recoverable-fidelity",
+    "metricVersion": "1.1.0",
+    "overallScorePercent": 100,
+    "originalRuntimeIdentityClaim": false,
+    "unexplainedDivergences": 0,
+    "report": {
+      "path": "forensics/fidelity/fidelity-report-v1.json",
+      "bytes": 10822,
+      "sha256": "e04e1eeb7796855b92b46c27a01384af42cc36252d3a3d9154a185eae9ee2b96"
+    },
+    "residualLedger": {
+      "path": "forensics/fidelity/residual-gap-ledger.json",
+      "bytes": 15807,
+      "sha256": "8e09174e2963786919573e185656f5139cc0ec35d51954a98e129188c6280a37"
+    },
+    "frozenSuite": {
+      "path": "forensics/fidelity/frozen-evidence-fixture-manifest.json",
+      "bytes": 51514,
+      "sha256": "081d0004d239a1eb33b1f567bc55be3769c516e9b0d1596bf43b439d995edb9e",
+      "staticEvidenceAggregateSha256": "dfb544d91b6d8898fb74b8ab917072d5cc310b8775bfe1e76997a55a51e13791",
+      "reconstructionFixturesAggregateSha256": "9e7b93974c9b6c01760f14ff609711e7dc20e00307f61af1a8025372b808ee3f"
+    }
+  },
+  "blockers": [
+    "two-external-offline-apk-backups-unverified",
+    "public-rights-unapproved",
+    "cooper-black-treatment-undecided",
+    "protected-runner-pages-environment-and-production-url-unavailable"
+  ],
+  "publicReleaseManifest": {
+    "path": "release/public-release-variant-manifest.json",
+    "bytes": 3791,
+    "sha256": "eadf75a39d0d7eb6ee9451718e13452586ffc42683ef6a38534d96a776a1daa6"
+  }
+}
