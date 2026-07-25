@@ -50,7 +50,7 @@ test('build and deploy jobs use least privilege and bounded execution', () => {
   assert.match(workflow, /node --test --test-concurrency=1 tests\/\*\.mjs/u);
 });
 
-test('source compatibility, build audit, and prefix verification precede artifact upload', () => {
+test('Creator initializes project metadata before tests and every gate precedes artifact upload', () => {
   const iterableSpreadAudit = workflow.indexOf('audit-creator-iterable-spreads.mjs');
   const creatorBuild = workflow.indexOf('--build "stage=build;configPath=');
   const audit = workflow.indexOf('audit-web-build.mjs');
@@ -58,7 +58,7 @@ test('source compatibility, build audit, and prefix verification precede artifac
   const upload = workflow.indexOf('actions/upload-pages-artifact@v4');
   const deploy = workflow.indexOf('actions/deploy-pages@v4');
 
-  assert.ok(iterableSpreadAudit >= 0 && iterableSpreadAudit < creatorBuild);
+  assert.ok(creatorBuild >= 0 && creatorBuild < iterableSpreadAudit);
   assert.equal(workflow.indexOf('verify-release-rights.mjs'), -1);
   assert.ok(creatorBuild < audit);
   assert.ok(audit < prefix);

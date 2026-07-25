@@ -59,21 +59,6 @@ jobs:
               ;;
           esac
 
-      - name: Run reconstruction and release tests
-        shell: bash
-        run: |
-          set -euo pipefail
-          node scripts/audit-creator-iterable-spreads.mjs \
-            --typescript "$COCOS_CREATOR_APP/Contents/Resources/app.asar.unpacked/node_modules/typescript/lib/typescript.js"
-          node --test --test-concurrency=1 tests/*.mjs
-          node --test tests/reconstruction/vertical-slice/*.test.ts
-          node "$COCOS_CREATOR_APP/Contents/Resources/app.asar.unpacked/node_modules/typescript/lib/tsc.js" \
-            -p game/tsconfig.json \
-            --pretty false \
-            --noEmit
-          sh tests/reconstruction-policy-test.sh
-          sh tests/reconstruction-policy-negative-test.sh
-
       - name: Build Web Mobile with Cocos Creator 3.8.8
         shell: bash
         run: |
@@ -108,6 +93,21 @@ jobs:
               exit 1
               ;;
           esac
+
+      - name: Run reconstruction and release tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/audit-creator-iterable-spreads.mjs \
+            --typescript "$COCOS_CREATOR_APP/Contents/Resources/app.asar.unpacked/node_modules/typescript/lib/typescript.js"
+          node --test --test-concurrency=1 tests/*.mjs
+          node --test tests/reconstruction/vertical-slice/*.test.ts
+          node "$COCOS_CREATOR_APP/Contents/Resources/app.asar.unpacked/node_modules/typescript/lib/tsc.js" \
+            -p game/tsconfig.json \
+            --pretty false \
+            --noEmit
+          sh tests/reconstruction-policy-test.sh
+          sh tests/reconstruction-policy-negative-test.sh
 
       - name: Audit generated Web Mobile tree
         shell: bash
