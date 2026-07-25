@@ -94,8 +94,9 @@ File existence alone is not a passing audit. The build and release paths are onl
 1. Dispatch manually from `main`.
 2. Run on a protected self-hosted macOS ARM64 runner labeled for Creator `3.8.8`.
 3. Verify Creator version/executable SHA-256, GNU tar availability, and Node `22+`.
-4. Run reconstruction tests, strict TypeScript, and policy tests.
-5. Build the Web Mobile tree with Creator `3.8.8`.
+4. Build the Web Mobile tree with Creator `3.8.8`, which initializes the ignored project
+   metadata required by the Creator TypeScript configuration.
+5. Run reconstruction tests, strict TypeScript, and policy tests.
 6. Audit the generated tree with [`scripts/audit-web-build.mjs`](../scripts/audit-web-build.mjs).
 7. Verify the prefix routing and asset serving with [`scripts/verify-web-mobile-build.mjs`](../scripts/verify-web-mobile-build.mjs).
 8. Upload the generated H5 directory as an immutable Pages artifact.
