@@ -59,7 +59,11 @@ const FROZEN_FIXTURE_PATHS = Object.freeze([
   'tests/reconstruction/vertical-slice',
   'tests',
 ]);
-const FROZEN_NON_TEST_FIXTURE_PATHS = new Set(FROZEN_FIXTURE_PATHS.slice(0, 3));
+const FROZEN_NON_TEST_FIXTURE_PATHS = new Set([
+  '.github/workflows/deploy-web-mobile-pages.yml',
+  'scripts/generate-fidelity-report.mjs',
+  'scripts/generate-technical-closeout-manifest.mjs',
+]);
 
 function readJson(path) {
   return JSON.parse(readFileSync(resolve(ROOT, path), 'utf8'));

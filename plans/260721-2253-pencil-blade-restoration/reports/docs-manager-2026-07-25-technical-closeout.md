@@ -3,6 +3,11 @@
 Date: 2026-07-25
 Scope: documentation synchronization audit for the Pencil Blade technical closeout
 
+Superseded checkpoint note: this report audited the earlier `123/130` fail-closed state.
+The later owner-approved academic scope waiver moves the live plan to `127/130`; the current
+technical-closeout manifest now retains only the Pages environment/deployment/URL blocker.
+The findings below are preserved as historical audit context, not current status.
+
 ## Reviewed Sources
 
 - `docs/*.md`

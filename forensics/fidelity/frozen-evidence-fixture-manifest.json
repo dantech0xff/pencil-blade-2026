@@ -142,8 +142,8 @@
   },
   "reconstructionFixtures": {
     "files": 220,
-    "bytes": 3399883,
-    "aggregateSha256": "cc59e5ab4e273df759b3b90eec88fc9a4b9e52842766999928eb8cafbc46c630",
+    "bytes": 3400269,
+    "aggregateSha256": "977f15abd194f4e0bc3a85fe8a5d0c5e7f626488eceacb30636eb68d67107858",
     "entries": [
       {
         "path": ".github/workflows/deploy-web-mobile-pages.yml",
@@ -152,8 +152,8 @@
       },
       {
         "path": "scripts/generate-fidelity-report.mjs",
-        "bytes": 25964,
-        "sha256": "bf866c6325049ecded89ff85f949b920b0f3167023492c0128d5269cfc1fe550"
+        "bytes": 26082,
+        "sha256": "fa51e139551f2f034e1a44f12b9a514a40a2213d189a41582de40072550fac6c"
       },
       {
         "path": "scripts/generate-technical-closeout-manifest.mjs",
@@ -212,8 +212,8 @@
       },
       {
         "path": "tests/generate-technical-closeout-manifest.test.mjs",
-        "bytes": 4173,
-        "sha256": "c38093f430db02fb8968f7b0b030f16175194deb7ff1c82e8eef7158d49327d6"
+        "bytes": 4441,
+        "sha256": "1440f7dc09a0ef7a6fda9ce1eb7d75d1a61effc767fb24472875cee6b1a67597"
       },
       {
         "path": "tests/github-pages-workflow.test.mjs",

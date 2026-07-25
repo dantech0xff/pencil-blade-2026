@@ -2,6 +2,7 @@
 
 import assert from 'node:assert/strict';
 import {
+  copyFileSync,
   linkSync,
   mkdirSync,
   mkdtempSync,
@@ -20,6 +21,17 @@ import {
 } from '../scripts/generate-technical-closeout-manifest.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+
+function linkOrCopy(source, destination) {
+  try {
+    linkSync(source, destination);
+  } catch (error) {
+    if (!['EACCES', 'EPERM', 'EXDEV', 'ENOTSUP'].includes(error.code)) {
+      throw error;
+    }
+    copyFileSync(source, destination);
+  }
+}
 
 test('technical closeout binds one canonical artifact set and keeps public release blocked', () => {
   const manifest = generateTechnicalCloseoutManifest({ writeOutput: false });
@@ -107,7 +119,7 @@ test('strict workspace validation rejects H5 audit findings before artifact tota
   try {
     const apkPath = resolve(fixtureRoot, android.artifact.path);
     mkdirSync(dirname(apkPath), { recursive: true });
-    linkSync(resolve(ROOT, android.artifact.path), apkPath);
+    linkOrCopy(resolve(ROOT, android.artifact.path), apkPath);
 
     const webPath = resolve(fixtureRoot, h5.build.directory);
     mkdirSync(webPath, { recursive: true });
