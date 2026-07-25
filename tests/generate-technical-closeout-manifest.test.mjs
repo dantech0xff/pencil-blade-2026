@@ -2,6 +2,7 @@
 
 import assert from 'node:assert/strict';
 import {
+  linkSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -21,7 +22,7 @@ import {
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 test('technical closeout binds one canonical artifact set and keeps public release blocked', () => {
-  const manifest = generateTechnicalCloseoutManifest();
+  const manifest = generateTechnicalCloseoutManifest({ writeOutput: false });
   assert.equal(manifest.status.technicalReconstruction, 'pass');
   assert.equal(manifest.status.publicRelease, 'blocked');
   assert.equal(manifest.status.programCloseout, 'blocked');
@@ -36,7 +37,13 @@ test('technical closeout binds one canonical artifact set and keeps public relea
   assert.equal(manifest.fidelity.metricVersion, '1.1.0');
   assert.equal(manifest.fidelity.overallScorePercent, 100);
   assert.equal(manifest.fidelity.unexplainedDivergences, 0);
-  assert.equal(manifest.blockers.length, 4);
+  assert.deepEqual(manifest.blockers, [
+    'two-external-offline-apk-backups-nonexistent',
+    'public-rights-unapproved',
+    'cooper-black-treatment-undecided',
+    'creator-bundle-signature-preflight-failed',
+    'pages-environment-and-production-url-unavailable',
+  ]);
 
   for (const path of [
     'docs/cocos-creator-build-audit.md',
@@ -79,6 +86,40 @@ test('strict workspace validation rejects missing and drifted Android artifacts'
     assert.throws(
       () => validateWorkspaceArtifacts(android, h5, fixtureRoot),
       /Android artifact byte count drifted/u,
+    );
+  } finally {
+    rmSync(fixtureRoot, { force: true, recursive: true });
+  }
+});
+
+test('strict workspace validation rejects H5 audit findings before artifact totals', () => {
+  const android = JSON.parse(readFileSync(
+    resolve(
+      ROOT,
+      'plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json',
+    ),
+    'utf8',
+  ));
+  const h5 = JSON.parse(readFileSync(
+    resolve(
+      ROOT,
+      'plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/h5-runtime-matrix.json',
+    ),
+    'utf8',
+  ));
+  const fixtureRoot = mkdtempSync(resolve(tmpdir(), 'pencil-closeout-h5-'));
+  try {
+    const apkPath = resolve(fixtureRoot, android.artifact.path);
+    mkdirSync(dirname(apkPath), { recursive: true });
+    linkSync(resolve(ROOT, android.artifact.path), apkPath);
+
+    const webPath = resolve(fixtureRoot, h5.build.directory);
+    mkdirSync(webPath, { recursive: true });
+    writeFileSync(resolve(webPath, 'index.html'), '<!doctype html><title>incomplete</title>');
+
+    assert.throws(
+      () => validateWorkspaceArtifacts(android, h5, fixtureRoot),
+      /H5 artifact audit failed/u,
     );
   } finally {
     rmSync(fixtureRoot, { force: true, recursive: true });

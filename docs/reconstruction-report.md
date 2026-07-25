@@ -110,17 +110,17 @@ exercise the integrated runtime.
 | Maximal recoverable technical fidelity | Pass | Minimum of all five frozen domains is `100.00%`; zero unexplained divergences |
 | Android artifact/runtime | Pass | Build audit plus supported arm64 runtime matrix pass |
 | Local H5 artifact/runtime | Pass | Build/prefix audit plus both frozen Chrome rows pass |
-| Evidence custody | Blocked | Two external offline APK copies have not been supplied for SHA-256 verification |
+| Evidence custody | Blocked | The project owner confirmed that no external offline APK copies exist for SHA-256 verification |
 | Rights authorization | Blocked | Six public-release records lack complete approval evidence |
-| Public GitHub Pages | Blocked | Rights gate is closed; GitHub authentication/settings/protected runner/environment/deployment are unavailable |
+| Public GitHub Pages | Blocked | Rights gate is closed; `main` and the online labeled runner are configured, but the fresh official Creator bundle fails signature validation and Pages/environment/deployment remain absent |
 
 ## Closeout blockers
 
-1. Supply two independently held offline APK paths/media; both must hash to
+1. Create and supply two independently held offline APK paths/media; both must hash to
    `95225733d46473f2b155737e8c83b567e028342257c747c0faac6ed4ab87e7aa`.
 2. Provide accountable rights/license evidence and approval for clean-room code, 784 PNG,
    62 audio, 16 fonts, the Pencil Blade identity, and the generated Cocos Web runtime.
 3. Decide the authorized public treatment of `Fonts/CooperBlackStd.otf`.
-4. Restore GitHub authentication, configure protected `main`, the protected labeled Creator
-   runner, Pages source, and `github-pages` environment, then deploy only after the rights gate
-   passes and verify the production URL.
+4. Resolve the Creator signature preflight on the already protected, online labeled runner.
+   Configure Pages source and `github-pages` only after the rights gate passes, then deploy and
+   verify the production URL.

@@ -1036,7 +1036,7 @@ function buildSpecification(catalog, animationMap, audioMap, screenMap, contract
     '',
     '## Sequence and audio closure',
     '',
-    `All ${animationMap.summary.groups} numeric resource groups are classified. `,
+    `All ${animationMap.summary.groups} numeric resource groups are classified.`,
     `${animationMap.summary.animationGroups} are recovered animation timelines; the remaining`,
     `${animationMap.summary.indexedVariantGroups} are indexed selector/variant families and are not`,
     'misrepresented as animations.',
@@ -1080,7 +1080,7 @@ function buildSpecification(catalog, animationMap, audioMap, screenMap, contract
     'for each included rights record, including an explicit treatment for `Fonts/CooperBlackStd.otf`.',
     '',
   ];
-  return `${lines.join('\n')}\n`;
+  return lines.join('\n');
 }
 
 function assertInputs() {

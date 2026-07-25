@@ -7,7 +7,9 @@ import test from 'node:test';
 import { generateFidelityReport } from '../scripts/generate-fidelity-report.mjs';
 
 test('five-domain metric uses a minimum score and keeps every residual outside recovered credit', () => {
-  const { report, residualLedger, frozenSuite } = generateFidelityReport();
+  const { report, residualLedger, frozenSuite } = generateFidelityReport({
+    writeOutputs: false,
+  });
 
   assert.equal(report.metricVersion, '1.1.0');
   assert.equal(report.acceptance.weighting, 'forbidden');

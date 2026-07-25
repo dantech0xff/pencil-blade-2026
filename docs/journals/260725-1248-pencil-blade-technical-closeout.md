@@ -16,12 +16,19 @@ This is the point where lying would have been easy and stupid. The hard part was
 ## Technical Details
 
 - The current closeout is `123/130`, not `130/130`.
-- Final verification now reads `129/129` top-level tests, `1568/1568` vertical-slice tests, `1697/1697` total.
+- Final verification now reads `192/192` top-level tests, `1568/1568` vertical-slice tests,
+  `1760/1760` total.
 - Review and testing surfaced the fixes that mattered:
   - JSB mesh initialization was corrected.
   - Fidelity scoring was forced fail-closed instead of granting bogus credit.
   - Artifact identity was tightened so the Android/H5 provenance chain stays strict.
-- The remaining blocked inputs are still external: two verified offline APK backups, public rights approval, Cooper Black treatment decision, protected Creator runner, Pages source/environment, production URL verification, and public H5 deployment.
+- The project owner confirmed that the two required external offline APK backups do not exist.
+- GitHub authentication is restored, `main` is protected, and the repository-scoped macOS ARM64
+  runner is registered with the required Creator label and active service. It was online at the
+  captured API checkpoint; after a broker incident required a listener restart, a final REST
+  read reconfirmed it online and idle.
+- The remaining infrastructure failure is narrower: the fresh official Creator `3.8.8` bundle
+  fails strict signature validation, while Pages/environment/deployment remain gated on rights.
 
 ## What We Tried
 
@@ -42,11 +49,15 @@ The technical work was mostly complete; the remaining failure was process honest
 ## Next Steps
 
 - Owner: project lead and release stakeholders.
-- Required inputs: custody verification for the two offline backups, rights approval, Cooper treatment decision, protected runner availability, Pages configuration, and production URL verification.
+- Required inputs: creation and custody verification of two real offline backups, rights approval,
+  Cooper treatment decision, a valid runner trust control, Pages configuration, and production
+  URL verification.
 - Until those are supplied, the correct status stays blocked.
 
 ## Unresolved Questions
 
-- Which party is actually responsible for the two offline backup verifications?
-- Will rights approval land before the Pages/runner work is even worth doing?
+- Will the owner create two independently held offline copies for verification?
+- Will the owner accept an exact-bundle hash pin for Creator, or require a vendor bundle whose
+  macOS signature validates?
+- Will rights approval land before Pages configuration is authorized?
 - Does the project want the Cooper Black decision treated as a hard release gate or a documented exception?

@@ -39,7 +39,13 @@ jobs:
           test "$GITHUB_REF" = "refs/heads/main"
           test -x "$COCOS_CREATOR_BIN"
           test -x /opt/homebrew/bin/gtar
-          creator_version=$(/usr/bin/defaults read "$COCOS_CREATOR_APP/Contents/Info" CFBundleShortVersionString)
+          creator_version=$(
+            /usr/bin/plutil \
+              -extract CFBundleShortVersionString \
+              raw \
+              -o - \
+              "$COCOS_CREATOR_APP/Contents/Info.plist"
+          )
           test "$creator_version" = "3.8.8"
           /usr/bin/codesign --verify --deep --strict "$COCOS_CREATOR_APP"
           node_version=$(node --version)
@@ -57,7 +63,7 @@ jobs:
           set -euo pipefail
           node scripts/audit-creator-iterable-spreads.mjs \
             --typescript "$COCOS_CREATOR_APP/Contents/Resources/app.asar.unpacked/node_modules/typescript/lib/typescript.js"
-          node --test tests/*.mjs
+          node --test --test-concurrency=1 tests/*.mjs
           node --test tests/reconstruction/vertical-slice/*.test.ts
           node "$COCOS_CREATOR_APP/Contents/Resources/app.asar.unpacked/node_modules/typescript/lib/tsc.js" \
             -p game/tsconfig.json \

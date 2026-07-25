@@ -125,11 +125,18 @@ File existence alone is not a passing audit. The build and release paths are onl
 
 ### GitHub deployment prerequisites
 
-Read-only GitHub verification on 2026-07-24 found a public `main` repository, no configured
-Pages site (`404` from the Pages API), zero Actions runners, and zero environments. The local
-Creator `3.8.8` application also fails strict macOS code-signature validation, while the
-workflow intentionally requires that preflight to pass. These infrastructure failures remain
-independent of the public-rights blocker.
+GitHub verification on 2026-07-25 confirms protected `main` and one repository-scoped Actions
+runner version `2.336.0` with labels `self-hosted`, `macOS`, `ARM64`, and
+`cocos-creator-3.8.8`. The runner was online at the captured API checkpoint; its service is
+installed and active, and a later broker incident required a listener restart. The local
+listener recovered; after transient GitHub `502`/`504` responses, a final REST read reconfirmed
+the runner online and idle. The repository still has no
+configured Pages site (`404` from the Pages API) and zero environments. Cocos Dashboard `2.2.1`
+reinstalled Creator `3.8.8` from its official catalog, but the fresh never-launched bundle still
+fails strict macOS code-signature validation. The workflow intentionally requires that preflight
+to pass. This remaining runner failure and the deliberately absent Pages environment are
+independent of the public-rights blocker. See the
+[GitHub infrastructure checkpoint](../plans/260721-2253-pencil-blade-restoration/reports/github-infrastructure-2026-07-25.md).
 
 ## Current Audit Boundary
 
@@ -139,7 +146,7 @@ The repository currently proves:
 - a clean local Web Mobile build
 - a successful web tree audit and prefix verifier
 - a fail-closed public release gate
-- Node-suite checkpoint reports at `1697/1697`
+- Node-suite checkpoint reports at `1760/1760`
 - a frozen Chrome `150.0.7871.182` matrix at `480x800` and `720x1280`
 - an Android 13/API 33 arm64 emulator runtime row
 
@@ -148,4 +155,4 @@ The repository does **not** yet prove:
 - public Pages deployment
 - final production URL verification
 - approval to publish uncleared art, audio, fonts, code, identity, or engine runtime
-- a protected labeled Creator runner, `github-pages` environment, and valid Creator bundle signature
+- a valid Creator bundle signature, `github-pages` environment, and production deployment

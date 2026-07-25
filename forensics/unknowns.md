@@ -23,12 +23,19 @@ rights decision, custody blocker, and release blocker together with its score ef
 
 ## External closeout blockers
 
-- Two independently held offline APK backup copies have not been supplied for hash verification.
+- The project owner confirmed on 2026-07-25 that no independently held offline APK backup
+  copies exist. The checksum gate cannot pass without two real external/offline custody copies;
+  same-disk duplicates are not substitutes.
 - Public-distribution evidence is absent for code, 784 PNG, 62 audio files, 16 fonts, the
   Pencil Blade identity, and the generated Cocos Web runtime.
 - `Fonts/CooperBlackStd.otf` needs an explicit authorized exclude/replace/convert decision.
-- GitHub authentication, protected runner/branch settings, the `github-pages` environment,
-  Pages source, and production deployment remain unavailable while the rights gate is closed.
+- GitHub authentication is restored, `main` protection is enabled, and a repository-scoped
+  macOS ARM64 runner is registered with the required Creator label and active LaunchAgent.
+  It was online at the captured API checkpoint; a later GitHub broker incident required a
+  listener restart, and a final REST read reconfirmed it online and idle. A fresh official
+  Dashboard reinstall of Creator `3.8.8` still fails strict macOS signature verification, so
+  runner readiness remains open. The `github-pages` environment, Pages source, and production
+  deployment remain intentionally absent while the rights gate is closed.
 
 These blockers do not alter the technical fidelity numerator. They keep evidence-custody and
 public-release completion closed.

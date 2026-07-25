@@ -78,6 +78,10 @@ Use three evidence zones:
 - [x] No copyrighted bulk extraction is staged or committed
 - [x] Every curated finding can cite immutable evidence or a declared supporting source
 
+Checkpoint note, 2026-07-25: the project owner confirmed that no external offline APK backups
+exist. This checklist item remains open because two copies on the same disk, generated disk
+images, or duplicated workspace files would not satisfy independent offline custody.
+
 ## Risk Assessment
 
 - Sole-artifact loss: maintain at least two offline copies with verified hashes.

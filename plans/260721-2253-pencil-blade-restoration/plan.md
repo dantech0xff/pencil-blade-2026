@@ -32,10 +32,14 @@ Verified starting point:
 
 Current closeout checkpoint (2026-07-25): `123/130` checklist items pass. Phases 2-6 are
 complete. The remaining seven items are deliberately fail-closed: two external offline backup
-copies, rights/Cooper approval, protected Creator runner, Pages source/environment, production
-URL verification, and the rights-clean public H5 deployment. Technical evidence is bound by
-`reports/technical-closeout-manifest.json`; none of these external gates is represented as
-complete without its required evidence or owner decision.
+copies (confirmed nonexistent by the project owner), rights/Cooper approval, protected Creator
+runner readiness, Pages source/environment, production URL verification, and the rights-clean
+public H5 deployment. `main`, runner registration/labels, and the runner service are configured.
+The runner was online at capture; after a later GitHub broker incident required a listener
+restart, a final REST read reconfirmed it online and idle. The fresh official Creator bundle
+still fails the required signature preflight. Technical evidence is bound by
+`reports/technical-closeout-manifest.json`; none of these gates is represented as complete
+without its required evidence or owner decision.
 
 ## Program Decisions
 
@@ -173,11 +177,11 @@ complete without its required evidence or owner decision.
   transactional Main Menu ↔ About ownership, direct Menu/Review/Email/Like controls,
   `MOBILE_BACK`, production pulse disabled by `localCompatibilityAvailable=false`, and
   sanitized retired-offline review/feedback/social events. The current repository checkpoint
-  now passes `129/129` top-level Node tests, `1568/1568` vertical-slice tests, and `1697/1697`
+  now passes `192/192` top-level Node tests, `1568/1568` vertical-slice tests, and `1760/1760`
   combined, with strict Creator TypeScript/audits still green and the Android debug APK plus
-  private Web Mobile artifact still verified; public GitHub Pages, runtime-device coverage,
-  Physics2D equivalence, the final five-domain fidelity score, and release-rights clearance
-  remain open gates.
+  private Web Mobile artifact still verified; runtime-device coverage, Physics2D equivalence,
+  and the final five-domain fidelity score now pass. Public GitHub Pages, external backup
+  custody, Creator runner signature readiness, and release-rights clearance remain open gates.
   The recovered Loading checkpoint now owns the exact four selected-profile rasters, exact
   62-step audio preload order, `/61` clamped progress, and half-second Main Menu handoff.
   It passes `1520/1520` full vertical-slice tests, `61/61` top-level tests, strict Creator
@@ -197,11 +201,13 @@ complete without its required evidence or owner decision.
   `360x800` (logical/resource tree `480x800`) for Resume, fresh Replay, Quit, and repeated entry,
   with Cocos counters `0/0/0` and no project DevTools error. Phase 7 has now produced and
   audited the pinned Android debug APK and privately built, prefix-verified, and smoke-tested
-  the Web Mobile H5 output across all six modes. Public GitHub Pages deployment, pinned
-  Physics2D equivalence, the final five-domain fidelity score, and release-rights clearance
-  remain open gates. The sole-source APK corpus is the approved canonical denominator.
-- Phase 1's two offline backups remain a custody closeout; they are not runtime evidence and
-  do not prevent read-only static analysis from continuing against the verified workspace copy.
+  the Web Mobile H5 output across all six modes. Pinned Physics2D equivalence and the final
+  five-domain fidelity score now pass. Public GitHub Pages deployment, Creator runner signature
+  readiness, external backup custody, and release-rights clearance remain open gates. The
+  sole-source APK corpus is the approved canonical denominator.
+- Phase 1's two offline backups remain a custody closeout. The project owner confirmed that
+  they do not exist; this is not runtime evidence and does not prevent read-only static analysis,
+  but the checklist cannot pass without two real external/offline copies.
 
 ## Acceptance Criteria
 

@@ -28,7 +28,8 @@ Scope: documentation synchronization audit for the Pencil Blade technical closeo
    - `docs/cocos-creator-contract-map.md:40` also matches the same closeout state, including the blocked public Pages boundary.
 
 3. The previous `189/189` and `1757/1757` count claims were stale in this report and are now corrected in the repo docs.
-   - Fresh full runs now establish `129/129` `node --test tests/*.test.mjs`, `1568/1568` vertical-slice, and `1697/1697` total Node-suites coverage.
+   - Fresh full runs now establish `192/192` `node --test --test-concurrency=1 tests/*.mjs`,
+     `1568/1568` vertical-slice, and `1760/1760` total Node-suites coverage.
    - The current docs and plan now reflect those corrected totals, so the audit no longer treats the older numbers as current-state claims.
 
 4. The only nuance is blocker granularity, not a contradiction.

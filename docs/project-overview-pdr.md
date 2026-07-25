@@ -111,7 +111,7 @@ replay, and device comparison are unavailable and are not project gates.
 - Compact `360x800` and high `720x1280` Creator Preview profiles also pass Main Menu →
   Options selection/purchase/Back with an empty Cocos Editor console.
 - The current closeout passes `218/218` focused tests, `1568/1568` full vertical-slice tests,
-  `129/129` top-level Node tests, and Creator 3.8.8 strict TypeScript with zero diagnostics.
+  `192/192` top-level Node tests, and Creator 3.8.8 strict TypeScript with zero diagnostics.
   Recovered Loading remains
   Preview-clean in compact logical `480x800` plus high `720x1280`. The final Cocos counters
   are `0/0/0`; DevTools has no project error, and its only error comes from a Chrome extension.
@@ -207,7 +207,7 @@ replay, and device comparison are unavailable and are not project gates.
 
 ## Unresolved questions
 
-- Where are the two external offline backups stored and when were they verified?
+- Will two independently held external offline copies be created and supplied for hash verification?
 - What is the APK's original acquisition date and upstream source record?
 - Who can provide accountable approval and repository evidence for the intended public Web release?
 - What rights or permissions exist for the name, artwork, fonts, music, and other content?

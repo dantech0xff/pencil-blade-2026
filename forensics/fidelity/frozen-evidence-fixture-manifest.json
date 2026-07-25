@@ -141,10 +141,25 @@
     ]
   },
   "reconstructionFixtures": {
-    "files": 217,
-    "bytes": 3361102,
-    "aggregateSha256": "9e7b93974c9b6c01760f14ff609711e7dc20e00307f61af1a8025372b808ee3f",
+    "files": 220,
+    "bytes": 3399797,
+    "aggregateSha256": "aa18e835c5acf079c2c0e7287346e142f13b7ff6c14c4b7d75bfed8287b17612",
     "entries": [
+      {
+        "path": ".github/workflows/deploy-web-mobile-pages.yml",
+        "bytes": 4795,
+        "sha256": "5aac84028be6297f682e5450c44445ff2a620e622b92a2425913f5e3ae6bb7de"
+      },
+      {
+        "path": "scripts/generate-fidelity-report.mjs",
+        "bytes": 25964,
+        "sha256": "bf866c6325049ecded89ff85f949b920b0f3167023492c0128d5269cfc1fe550"
+      },
+      {
+        "path": "scripts/generate-technical-closeout-manifest.mjs",
+        "bytes": 6169,
+        "sha256": "26e4418e78ca39e134ed4cb946aca37fe9a96902938163ef2728b834539bc7b5"
+      },
       {
         "path": "tests/analyze-native-static-test.sh",
         "bytes": 13050,
@@ -182,8 +197,8 @@
       },
       {
         "path": "tests/generate-fidelity-report.test.mjs",
-        "bytes": 5104,
-        "sha256": "ffd8c9bed015fd9c685e9462bad1d4118c848972de05bdc48b310b9414d0befd"
+        "bytes": 5134,
+        "sha256": "645fe8ac26ef7ab6ac3871ad0112879f976362ed6518adb7bcaf8dd835f15107"
       },
       {
         "path": "tests/generate-presentation-catalog-test.mjs",
@@ -197,13 +212,13 @@
       },
       {
         "path": "tests/generate-technical-closeout-manifest.test.mjs",
-        "bytes": 2929,
-        "sha256": "ebcf456cbe6f88092b78e7f37b2c7f14e0cbff9d36b64853987a11c6163aa10d"
+        "bytes": 4346,
+        "sha256": "e42548420c18fa65e6a08103c1d10ac703f64882ba856bad435fe738ef2021c6"
       },
       {
         "path": "tests/github-pages-workflow.test.mjs",
-        "bytes": 3003,
-        "sha256": "7ec197296d518a7116db9837b95218308542db56b350cb5c30c74fe8553ad248"
+        "bytes": 3323,
+        "sha256": "23f236eb34af9bef036d9b4c5e9ef3ce44c492349fbfc9e0fdb9b7ed3ed2c179"
       },
       {
         "path": "tests/inventory-apk-test.sh",

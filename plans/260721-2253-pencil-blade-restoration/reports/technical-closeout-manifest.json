@@ -58,17 +58,18 @@
     },
     "frozenSuite": {
       "path": "forensics/fidelity/frozen-evidence-fixture-manifest.json",
-      "bytes": 51514,
-      "sha256": "081d0004d239a1eb33b1f567bc55be3769c516e9b0d1596bf43b439d995edb9e",
+      "bytes": 52079,
+      "sha256": "9d5ec316d1f1128cf3ea1e92a1bd18d622f99faeb00c98da502a5976bd3ed0c6",
       "staticEvidenceAggregateSha256": "dfb544d91b6d8898fb74b8ab917072d5cc310b8775bfe1e76997a55a51e13791",
-      "reconstructionFixturesAggregateSha256": "9e7b93974c9b6c01760f14ff609711e7dc20e00307f61af1a8025372b808ee3f"
+      "reconstructionFixturesAggregateSha256": "aa18e835c5acf079c2c0e7287346e142f13b7ff6c14c4b7d75bfed8287b17612"
     }
   },
   "blockers": [
-    "two-external-offline-apk-backups-unverified",
+    "two-external-offline-apk-backups-nonexistent",
     "public-rights-unapproved",
     "cooper-black-treatment-undecided",
-    "protected-runner-pages-environment-and-production-url-unavailable"
+    "creator-bundle-signature-preflight-failed",
+    "pages-environment-and-production-url-unavailable"
   ],
   "publicReleaseManifest": {
     "path": "release/public-release-variant-manifest.json",

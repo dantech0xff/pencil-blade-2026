@@ -23,6 +23,11 @@ test('untrusted code never targets the pinned Creator runner', () => {
   assert.match(workflow, /- ARM64/u);
   assert.match(workflow, /- cocos-creator-3\.8\.8/u);
   assert.match(workflow, /Cocos\/Creator\/3\.8\.8\/CocosCreator\.app/u);
+  assert.match(
+    workflow,
+    /plutil[\s\S]*?-extract CFBundleShortVersionString[\s\S]*?Contents\/Info\.plist/u,
+  );
+  assert.doesNotMatch(workflow, /defaults read/u);
   assert.match(workflow, /codesign --verify --deep --strict/u);
 });
 
@@ -36,6 +41,8 @@ test('build and deploy jobs use least privilege and bounded execution', () => {
   assert.match(workflow, /timeout-minutes: 60/u);
   assert.match(workflow, /timeout-minutes: 15/u);
   assert.match(workflow, /cancel-in-progress: false/u);
+  assert.match(workflow, /deploy:[\s\S]*?needs: build-web-mobile/u);
+  assert.match(workflow, /node --test --test-concurrency=1 tests\/\*\.mjs/u);
 });
 
 test('source compatibility, rights, build audit, and prefix verification precede artifact upload', () => {

@@ -53,9 +53,13 @@ const FROZEN_STATIC_EVIDENCE_PATHS = Object.freeze([
   'reference/reconstruction-policy.yaml',
 ]);
 const FROZEN_FIXTURE_PATHS = Object.freeze([
+  '.github/workflows/deploy-web-mobile-pages.yml',
+  'scripts/generate-fidelity-report.mjs',
+  'scripts/generate-technical-closeout-manifest.mjs',
   'tests/reconstruction/vertical-slice',
   'tests',
 ]);
+const FROZEN_NON_TEST_FIXTURE_PATHS = new Set(FROZEN_FIXTURE_PATHS.slice(0, 3));
 
 function readJson(path) {
   return JSON.parse(readFileSync(resolve(ROOT, path), 'utf8'));
@@ -116,7 +120,8 @@ function buildFrozenSuite(metric) {
   const reconstructionFixtures = freezeEntries(
     FROZEN_FIXTURE_PATHS,
     (path) => (
-      path.startsWith('tests/reconstruction/vertical-slice/')
+      FROZEN_NON_TEST_FIXTURE_PATHS.has(path)
+      || path.startsWith('tests/reconstruction/vertical-slice/')
       || /^tests\/[^/]+\.(?:mjs|sh)$/u.test(path)
     ),
   );
@@ -594,7 +599,7 @@ function buildDocumentation(report, residualLedger) {
     'remains false.',
     '',
   ];
-  return `${lines.join('\n')}\n`;
+  return lines.join('\n');
 }
 
 export function generateFidelityReport(options = {}) {

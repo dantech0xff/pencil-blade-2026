@@ -31,7 +31,7 @@ HarmonyOS/OpenHarmony, Web Desktop as a separate build, mini-game channels, and 
 |----------|--------|----------|
 | Android debug artifact | Technical pass | Fresh debug-signed `arm64-v8a` APK for package `io.github.dantech0xff.pencilblade.debug`; `57,352,687` bytes; SHA-256 `e313e149164eec8664b934a16e3c14b3a0f0265f9c7bb6306375a08a7cb5c37d`; Android 13/API 33 runtime matrix pass |
 | Private Web Mobile artifact | Technical pass | Fresh Creator build, prohibited-content audit, exact `/pencil-blade-2026/` prefix verification for 2,539 files, and Chrome `150.0.7871.182` runtime rows at `480x800` and `720x1280`; tree digest `90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54` |
-| Public GitHub Pages deployment | Blocked | Public-rights manifest is unapproved; the public repository has no Pages site, protected Creator runner, or `github-pages` environment |
+| Public GitHub Pages deployment | Blocked | Public-rights manifest is unapproved; `main` and the online labeled runner are configured, but the official fresh Creator bundle fails the intentional signature preflight and no Pages site or `github-pages` environment exists |
 | Canonical resource denominator | Approved | The project owner confirmed the APK is the sole source; the verified `862`-asset corpus and `862/862` disposition ledger are final |
 | Final static fidelity decision | Technical pass | Metric `1.1.0` uses minimum-domain scoring with no weighting; every recovered domain is `100.00%`, 12 non-recovered audio/rendering/progression assertions remain disclosed outside scored units, Physics2D equivalence passes, and zero unexplained divergences remain |
 
@@ -39,6 +39,8 @@ The registered reconstruction policy remains a limited Classic/menu claim gate; 
 five-domain metric covers the full recovered product contract. Neither establishes empirical
 identity with an executing original. The canonical local artifact set is bound by
 `reports/technical-closeout-manifest.json`; public release remains a separate blocked gate.
+The current GitHub/runner evidence is recorded in
+[`reports/github-infrastructure-2026-07-25.md`](./reports/github-infrastructure-2026-07-25.md).
 
 ## Context Links
 

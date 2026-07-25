@@ -7,7 +7,8 @@
 ## Verified State
 
 - Phase 2 corpus, Phase 3 resource/presentation catalog, Phase 4 gameplay/physics contracts, Phase 5 vertical slice, and Phase 6 full content/progression are complete.
-- Phase 1 remains open only on external offline-backup custody.
+- Phase 1 remains open only on external offline-backup custody; the project owner has now
+  confirmed that the two required copies do not exist.
 - Phase 7 remains open on external release gates, not on missing core reconstruction work.
 - Technical reconstruction is verified by the current closeout manifest and audit bundle:
   - Android debug APK: `game/build/artifacts/android/pencil-blade-debug.apk`
@@ -25,7 +26,11 @@
 ## Why `130/130` Is Not Claimable
 
 - The closeout manifest records `technicalReconstruction=pass`, but `publicRelease=blocked` and `programCloseout=blocked`.
-- Public release is still blocked by external approvals and infrastructure.
+- Public release is still blocked by external approvals and remaining infrastructure gates.
+- `main`, the repository-scoped Creator runner registration/labels, and its service are
+  configured. The runner was online at capture; after a later GitHub broker incident required a
+  listener restart, a final REST read reconfirmed it online and idle. A fresh official Creator
+  `3.8.8` reinstall still fails strict signature validation.
 - The current fidelity and runtime evidence are real, but the remaining release gates are not satisfied.
 - The repository also still carries the older and newer artifact provenance trail in the phase-7 closeout record, so the public-deploy claim is not complete enough to state as final public release.
 
@@ -44,7 +49,8 @@
 - Focused static analysis, catalog, fidelity, Physics2D equivalence, runtime-matrix, Android build-audit, web prefix audit, and blade/classic vertical-slice tests passed in the closeout reports.
 - The verified artifact identities are the current Android debug APK and current H5 tree listed above.
 - The closeout manifest binds those artifact identities to the runtime reports and fidelity report, which is the correct basis for technical reconstruction status.
-- Public GitHub Pages deployment is not verified and cannot be claimed because the rights gate and Pages infrastructure remain unresolved.
+- Public GitHub Pages deployment is not verified and cannot be claimed because the rights gate,
+  Pages source/environment, Creator signature preflight, and production deployment remain unresolved.
 
 ## Conclusion
 
@@ -52,4 +58,6 @@ Technical reconstruction is complete enough to support the `123/130` checkpoint,
 
 Status: DONE_WITH_CONCERNS
 Summary: Report written for the technical closeout checkpoint. It records `123/130`, phases `02`-`06` complete, phases `01` and `07` still open, the verified Android/Web artifact identities, and the seven external blockers.
-Concerns/Blockers: Public release and final program closeout remain blocked by offline-backup custody, runner/pages infrastructure, rights approval, and production URL verification.
+Concerns/Blockers: Public release and final program closeout remain blocked by nonexistent
+offline-backup custody, Creator signature readiness, Pages configuration/deployment, rights
+approval, and production URL verification.
