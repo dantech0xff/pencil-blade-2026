@@ -59,6 +59,11 @@ jobs:
               ;;
           esac
 
+      - name: Install locked project dependencies
+        working-directory: game
+        shell: bash
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
       - name: Build Web Mobile with Cocos Creator 3.8.8
         shell: bash
         run: |

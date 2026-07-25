@@ -59,9 +59,9 @@
     "frozenSuite": {
       "path": "forensics/fidelity/frozen-evidence-fixture-manifest.json",
       "bytes": 52079,
-      "sha256": "ba74ec41c79e1b263bcec198411f3ef31f9d26cd264d665c66e0efc1e48d5f86",
+      "sha256": "3aba6e380db69f55a38ed64bb56996ab52ff8370a6da1b0fc4d46a9cc18c244f",
       "staticEvidenceAggregateSha256": "c4336f76f1f7bcf4515f053fd42c0de94e14221fd53237a1723fb8735c5ff1be",
-      "reconstructionFixturesAggregateSha256": "d08c83f102fbca9506d941ef64facfe6b648388c286c008b4ff7205ce1e8d06f"
+      "reconstructionFixturesAggregateSha256": "a3948d81524fa235c3d80c2a6c52ecb8e364a4cdfafdc6bb05594c2580b28e04"
     }
   },
   "blockers": [
