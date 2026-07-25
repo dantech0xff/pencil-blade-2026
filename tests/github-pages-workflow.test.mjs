@@ -47,7 +47,16 @@ test('build and deploy jobs use least privilege and bounded execution', () => {
   assert.match(workflow, /timeout-minutes: 15/u);
   assert.match(workflow, /cancel-in-progress: false/u);
   assert.match(workflow, /deploy:[\s\S]*?needs: build-web-mobile/u);
-  assert.match(workflow, /node --test --test-concurrency=1 tests\/\*\.mjs/u);
+  assert.match(workflow, /node --test --test-concurrency=1 "\$\{portable_tests\[@\]\}"/u);
+  for (const localOnlyTest of [
+    'audit-creator-build-test.mjs',
+    'catalog-static-resources-test.mjs',
+    'extract-gn-style-particle-choreography-test.mjs',
+    'generate-technical-closeout-manifest.test.mjs',
+    'stage-creator-assets-test.mjs',
+  ]) {
+    assert.match(workflow, new RegExp(`tests/${localOnlyTest.replaceAll('.', '\\.')}`, 'u'));
+  }
 });
 
 test('locked dependencies precede Creator build and every gate precedes artifact upload', () => {
