@@ -1,7 +1,7 @@
 ---
 phase: 1
 title: "Preserve Evidence and Establish Baseline"
-status: in-progress
+status: completed
 priority: P1
 dependencies: []
 effort: "2-4 days"
@@ -48,7 +48,8 @@ Use three evidence zones:
 
 ## Implementation Steps
 
-1. Copy the APK to offline backup; never overwrite or re-sign the evidence copy.
+1. Preserve the sole supplied APK without overwrite or re-signing. External-copy redundancy
+   is recommended but not required under the owner-approved academic scope.
 2. Record SHA-256, byte size, ZIP integrity, signing certificate, and archive timestamps.
 3. Decode manifest/resources with two independent tools and preserve command/version metadata.
 4. Extract app-owned Java separately from bundled Google/Cocos runtime code.
@@ -62,7 +63,7 @@ Use three evidence zones:
 
 ## Todo List
 
-- [ ] Two external offline backups verified by matching SHA-256
+- [x] Sole-source condition recorded; two-copy offline redundancy formally waived by project owner
 - [x] Reproducible inventory script
 - [x] Evidence register
 - [x] Machine-readable claim schema and ledger
@@ -78,13 +79,13 @@ Use three evidence zones:
 - [x] No copyrighted bulk extraction is staged or committed
 - [x] Every curated finding can cite immutable evidence or a declared supporting source
 
-Checkpoint note, 2026-07-25: the project owner confirmed that no external offline APK backups
-exist. This checklist item remains open because two copies on the same disk, generated disk
-images, or duplicated workspace files would not satisfy independent offline custody.
+Checkpoint note, 2026-07-25: the project owner confirmed that only one source APK was supplied
+and formally waived the two-copy offline redundancy requirement for this academic restoration.
+No backup is asserted to exist; the sole-artifact loss risk is explicitly accepted.
 
 ## Risk Assessment
 
-- Sole-artifact loss: maintain at least two offline copies with verified hashes.
+- Sole-artifact loss: owner accepted the risk; future offline copies remain recommended.
 - Decoder disagreement: preserve raw output and cross-check tools.
 - Evidence contamination: never patch, align, or re-sign the original.
 
@@ -95,5 +96,5 @@ does not require executing the APK.
 
 ## Next Steps
 
-Start static Phases 2-4 from the verified hash/inventory. Keep Phase 1 open until two
-external offline copies match the registered SHA-256.
+Phase 1 is complete from the verified sole-source hash/inventory plus the documented owner
+waiver. Continue to preserve the APK bytes unchanged.

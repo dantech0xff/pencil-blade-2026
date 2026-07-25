@@ -145,10 +145,6 @@ export function generateTechnicalCloseoutManifest(options = {}) {
       },
     },
     blockers: [
-      'two-external-offline-apk-backups-nonexistent',
-      'public-rights-unapproved',
-      'cooper-black-treatment-undecided',
-      'creator-bundle-signature-preflight-failed',
       'pages-environment-and-production-url-unavailable',
     ],
     publicReleaseManifest: fileRecord(PATHS.publicRelease),

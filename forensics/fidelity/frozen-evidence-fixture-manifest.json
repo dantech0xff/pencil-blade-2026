@@ -5,8 +5,8 @@
   "policy": "Any evidence or fixture byte change changes its entry digest and aggregate digest. The version-controlled manifest must be regenerated and reviewed explicitly.",
   "staticEvidence": {
     "files": 26,
-    "bytes": 4546863,
-    "aggregateSha256": "dfb544d91b6d8898fb74b8ab917072d5cc310b8775bfe1e76997a55a51e13791",
+    "bytes": 4547079,
+    "aggregateSha256": "c4336f76f1f7bcf4515f053fd42c0de94e14221fd53237a1723fb8735c5ff1be",
     "entries": [
       {
         "path": "assets/catalog/animation-frame-map.json",
@@ -130,8 +130,8 @@
       },
       {
         "path": "reference/fidelity-metric-v1.json",
-        "bytes": 19781,
-        "sha256": "adb1d458722b85d548f8feb7341f23ceb412406de275542dd83796029b51cefa"
+        "bytes": 19997,
+        "sha256": "5a64cdd4485cbe1cdfee3e1e5f5166c331fa0f44ad836f10d58929860a829e24"
       },
       {
         "path": "reference/reconstruction-policy.yaml",
@@ -142,13 +142,13 @@
   },
   "reconstructionFixtures": {
     "files": 220,
-    "bytes": 3399797,
-    "aggregateSha256": "aa18e835c5acf079c2c0e7287346e142f13b7ff6c14c4b7d75bfed8287b17612",
+    "bytes": 3399883,
+    "aggregateSha256": "cc59e5ab4e273df759b3b90eec88fc9a4b9e52842766999928eb8cafbc46c630",
     "entries": [
       {
         "path": ".github/workflows/deploy-web-mobile-pages.yml",
-        "bytes": 4795,
-        "sha256": "5aac84028be6297f682e5450c44445ff2a620e622b92a2425913f5e3ae6bb7de"
+        "bytes": 4723,
+        "sha256": "9072ec59ab7eda5dd92f9c9bf4db810d7687a7b0b5f8fc3b0539efe202224cea"
       },
       {
         "path": "scripts/generate-fidelity-report.mjs",
@@ -157,8 +157,8 @@
       },
       {
         "path": "scripts/generate-technical-closeout-manifest.mjs",
-        "bytes": 6169,
-        "sha256": "26e4418e78ca39e134ed4cb946aca37fe9a96902938163ef2728b834539bc7b5"
+        "bytes": 5988,
+        "sha256": "37d985da9b17e42ce4878aed97c75b7db0ff83daaa27ccef212f39470fdecbe7"
       },
       {
         "path": "tests/analyze-native-static-test.sh",
@@ -197,8 +197,8 @@
       },
       {
         "path": "tests/generate-fidelity-report.test.mjs",
-        "bytes": 5134,
-        "sha256": "645fe8ac26ef7ab6ac3871ad0112879f976362ed6518adb7bcaf8dd835f15107"
+        "bytes": 5474,
+        "sha256": "3f766e81f2779cba9ce9acc6fa13dd969f2e8932f586351b436ed32d0631c684"
       },
       {
         "path": "tests/generate-presentation-catalog-test.mjs",
@@ -212,13 +212,13 @@
       },
       {
         "path": "tests/generate-technical-closeout-manifest.test.mjs",
-        "bytes": 4346,
-        "sha256": "e42548420c18fa65e6a08103c1d10ac703f64882ba856bad435fe738ef2021c6"
+        "bytes": 4173,
+        "sha256": "c38093f430db02fb8968f7b0b030f16175194deb7ff1c82e8eef7158d49327d6"
       },
       {
         "path": "tests/github-pages-workflow.test.mjs",
-        "bytes": 3323,
-        "sha256": "23f236eb34af9bef036d9b4c5e9ef3ce44c492349fbfc9e0fdb9b7ed3ed2c179"
+        "bytes": 3495,
+        "sha256": "639c1689243e998a783a4a87a401723b2174c57754955c2ec8e65b0eb284f40c"
       },
       {
         "path": "tests/inventory-apk-test.sh",

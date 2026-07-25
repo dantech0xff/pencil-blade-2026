@@ -53,22 +53,18 @@
     },
     "residualLedger": {
       "path": "forensics/fidelity/residual-gap-ledger.json",
-      "bytes": 15807,
-      "sha256": "8e09174e2963786919573e185656f5139cc0ec35d51954a98e129188c6280a37"
+      "bytes": 15945,
+      "sha256": "ef56251e2cc089357f81786f073ce69106aabf5ec4d5574084040fd046a7589e"
     },
     "frozenSuite": {
       "path": "forensics/fidelity/frozen-evidence-fixture-manifest.json",
       "bytes": 52079,
-      "sha256": "9d5ec316d1f1128cf3ea1e92a1bd18d622f99faeb00c98da502a5976bd3ed0c6",
-      "staticEvidenceAggregateSha256": "dfb544d91b6d8898fb74b8ab917072d5cc310b8775bfe1e76997a55a51e13791",
-      "reconstructionFixturesAggregateSha256": "aa18e835c5acf079c2c0e7287346e142f13b7ff6c14c4b7d75bfed8287b17612"
+      "sha256": "4b60ff2ea96bce08809144735d15934723256d1a6b62bb44b8c810e142a56353",
+      "staticEvidenceAggregateSha256": "c4336f76f1f7bcf4515f053fd42c0de94e14221fd53237a1723fb8735c5ff1be",
+      "reconstructionFixturesAggregateSha256": "cc59e5ab4e273df759b3b90eec88fc9a4b9e52842766999928eb8cafbc46c630"
     }
   },
   "blockers": [
-    "two-external-offline-apk-backups-nonexistent",
-    "public-rights-unapproved",
-    "cooper-black-treatment-undecided",
-    "creator-bundle-signature-preflight-failed",
     "pages-environment-and-production-url-unavailable"
   ],
   "publicReleaseManifest": {

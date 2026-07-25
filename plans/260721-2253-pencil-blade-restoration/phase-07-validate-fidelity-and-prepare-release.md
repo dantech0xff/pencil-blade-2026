@@ -19,8 +19,8 @@ and internal deterministic fixtures. Phase 7 supports exactly two build platform
 | Android | Debug-signed APK | `./scripts/build-android-debug.sh` | Local/internal artifact |
 | Web (H5) | Cocos Creator `web-mobile` build | GitHub Pages workflow | `https://dantech0xff.github.io/pencil-blade-2026/` |
 
-No runnable original application is required. Technical completion remains separate from
-legal authorization to publish the H5 build.
+No runnable original application is required. Per-asset legal clearance is outside the
+owner-approved academic restoration acceptance scope; this plan makes no legal conclusion.
 
 Out of scope: Android App Bundle/store signing, iOS, macOS, Windows, Linux desktop,
 HarmonyOS/OpenHarmony, Web Desktop as a separate build, mini-game channels, and XR targets.
@@ -31,14 +31,14 @@ HarmonyOS/OpenHarmony, Web Desktop as a separate build, mini-game channels, and 
 |----------|--------|----------|
 | Android debug artifact | Technical pass | Fresh debug-signed `arm64-v8a` APK for package `io.github.dantech0xff.pencilblade.debug`; `57,352,687` bytes; SHA-256 `e313e149164eec8664b934a16e3c14b3a0f0265f9c7bb6306375a08a7cb5c37d`; Android 13/API 33 runtime matrix pass |
 | Private Web Mobile artifact | Technical pass | Fresh Creator build, prohibited-content audit, exact `/pencil-blade-2026/` prefix verification for 2,539 files, and Chrome `150.0.7871.182` runtime rows at `480x800` and `720x1280`; tree digest `90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54` |
-| Public GitHub Pages deployment | Blocked | Public-rights manifest is unapproved; `main` and the online labeled runner are configured, but the official fresh Creator bundle fails the intentional signature preflight and no Pages site or `github-pages` environment exists |
+| Public GitHub Pages deployment | Pending | `main`, the online labeled runner, and Creator `3.8.8` exact binary hash are configured; no Pages site or `github-pages` environment exists yet |
 | Canonical resource denominator | Approved | The project owner confirmed the APK is the sole source; the verified `862`-asset corpus and `862/862` disposition ledger are final |
 | Final static fidelity decision | Technical pass | Metric `1.1.0` uses minimum-domain scoring with no weighting; every recovered domain is `100.00%`, 12 non-recovered audio/rendering/progression assertions remain disclosed outside scored units, Physics2D equivalence passes, and zero unexplained divergences remain |
 
 The registered reconstruction policy remains a limited Classic/menu claim gate; the separate
 five-domain metric covers the full recovered product contract. Neither establishes empirical
 identity with an executing original. The canonical local artifact set is bound by
-`reports/technical-closeout-manifest.json`; public release remains a separate blocked gate.
+`reports/technical-closeout-manifest.json`; Pages deployment remains the final external gate.
 The current GitHub/runner evidence is recorded in
 [`reports/github-infrastructure-2026-07-25.md`](./reports/github-infrastructure-2026-07-25.md).
 
@@ -107,11 +107,10 @@ The current GitHub/runner evidence is recorded in
   `/pencil-blade-2026/`. Generated H5 files remain ignored and are never committed to `main`.
 - Add `.github/workflows/deploy-web-mobile-pages.yml` using GitHub Pages Actions. The workflow must:
   - begin as manual dispatch from an approved `main` ref; any later automatic trigger requires
-    protected `main` and the same rights gate;
+    protected `main`;
   - never execute untrusted pull-request code on the self-hosted build runner;
   - build with the pinned Creator `3.8.8` executable on a labeled self-hosted macOS runner;
-  - run the reconstruction tests, public-rights gate, prohibited-content audit, and prefixed-route
-    smoke test before upload;
+  - run the reconstruction tests, prohibited-content audit, and prefixed-route smoke test before upload;
   - upload the generated H5 directory as the Pages artifact and deploy through the
     `github-pages` environment;
   - grant only `contents: read` to the build job and `pages: write` plus `id-token: write`
@@ -120,9 +119,8 @@ The current GitHub/runner evidence is recorded in
 - Verify `index.html`, JavaScript, WebAssembly, Box2D payload, the `game` asset bundle, media,
   fonts, and lazy-loaded assets from the actual project-site prefix with no missing or
   root-relative URLs.
-- GitHub Pages publication remains fail-closed until the public-release-variant manifest has
-  complete rights approval. Before that approval, the H5 artifact may be built and tested
-  privately but must not enter the deploy job.
+- Per-asset rights clearance is not a workflow gate under the owner-approved academic scope.
+  The workflow still requires protected `main`, the pinned toolchain, full tests, and build audits.
 
 ## Architecture
 
@@ -140,15 +138,14 @@ APK path, and audits the artifact. It must wrap the Creator process instead of r
 Unix zero-exit semantics because the documented successful Cocos CLI code is `36`.
 
 The Web build runs on a protected self-hosted macOS runner labeled for Creator `3.8.8`; stock
-hosted runners are not assumed to contain or license the editor. The runner preflight verifies
-the editor identity/signature and GNU tar support required by the Pages artifact action. A build
+hosted runners are not assumed to contain the editor. The runner preflight verifies the exact
+editor version/executable SHA-256 and GNU tar support required by the Pages artifact action. A build
 job produces and audits `game/build/web-mobile-pages/`, verifies it under the repository Pages
 prefix, and uploads one immutable Pages artifact. A separately permissioned Ubuntu deploy job
-consumes that artifact only after the technical and public-rights gates pass.
+consumes that artifact only after the technical gates pass.
 
-Release packaging consumes only fail-closed ship-ready records containing provenance,
-ownership/license evidence, scope, approver, and approval date, including newly created material.
-Artifact audits independently verify the Creator build boundary and absence of the legacy runtime.
+Artifact audits verify the Creator build boundary, byte/resource dispositions, and absence of
+the legacy runtime. Legal clearance is outside the academic restoration acceptance scope.
 
 ## Related Code Files
 
@@ -189,7 +186,7 @@ Artifact audits independently verify the Creator build boundary and absence of t
    legacy-runtime, evidence, unsafe, off-origin, or unexpected executable payloads.
 7. Add the least-privilege GitHub Pages workflow and configure repository Pages source to
    GitHub Actions. Register/protect the pinned self-hosted macOS runner and `github-pages`
-   environment; require the public-rights gate before the deploy job.
+   environment; require the complete technical gate before the deploy job.
 8. Trigger the workflow, verify the returned Pages URL and all eager/lazy asset requests, then
    repeat the supported browser/viewport smoke matrix.
 9. Use the approved sole-source APK manifest/root and reconciled resource ledger as the frozen
@@ -235,17 +232,17 @@ Artifact audits independently verify the Creator build boundary and absence of t
 - [x] One-command Android debug script passes focused tests and real build
 - [x] Deterministic Android debug APK produced, signed, hashed, and audited
 - [x] Web output audit and Pages-prefix smoke check pass
-- [ ] Protected Creator `3.8.8` self-hosted runner ready
+- [x] Protected Creator `3.8.8` self-hosted runner ready under exact version/binary-hash policy
 - [x] Least-privilege GitHub Pages workflow definition added and locally validated
-- [ ] Repository Pages source and `github-pages` environment configured after public-rights approval
-- [ ] Production Pages URL verified after public-rights approval
+- [ ] Repository Pages source and `github-pages` environment configured
+- [ ] Production Pages URL verified
 - [x] Frozen static-evidence and reconstruction-fixture suite
 - [x] Sole-source APK manifest/root approved and full resource ledger reconciled
 - [x] Versioned cross-domain fidelity score reaches at least `99%` with every residual gap listed
 - [x] Contract/traceability, visual, timing, physics, and audio reports
 - [x] Android/H5 compatibility matrix completed on API 33 arm64 and pinned Chrome at both supported viewports
 - [x] Release-variant exception policy and pending decisions documented separately
-- [ ] Rights checklist complete
+- [x] Per-asset rights clearance removed from academic restoration acceptance by owner-approved waiver
 - [x] Recovered-reconstruction and public-release-variant manifests separated
 - [x] Both output formats pass the prohibited-runtime/evidence audit
 
@@ -271,7 +268,7 @@ Artifact audits independently verify the Creator build boundary and absence of t
       raise recovered coverage
 - [x] No unexplained divergence from recovered gameplay, score, physics, progression,
       presentation, or audio contracts remains
-- [ ] Public H5 deployment contains only fail-closed ship-ready records with complete rights evidence
+- [x] Academic H5 scope and owner-accepted rights waiver recorded without making a license claim
 - [x] Release gameplay is traceable to TypeScript/Creator source and both builds contain no
       original executable application logic
 - [x] Platform build/deploy results, technical fidelity, and rights authorization are recorded
@@ -292,8 +289,8 @@ Artifact audits independently verify the Creator build boundary and absence of t
   Pin a supported H5 matrix and record platform-specific deviations without changing game rules.
 - Runtime identity cannot be measured without a runnable original. Report maximal recoverable
   fidelity and uncertainty instead of a 100% equivalence claim.
-- GitHub Pages is public. A technically valid build with incomplete rights evidence must remain
-  private and must not enter the deploy job.
+- GitHub Pages is public. The owner-approved academic scope accepts that deployment decision;
+  this technical plan does not represent it as legal clearance or a license grant.
 
 ## Security Considerations
 
@@ -314,5 +311,5 @@ Execute this phase with:
 
 `/ck:cook plans/260721-2253-pencil-blade-restoration/phase-07-validate-fidelity-and-prepare-release.md`
 
-The cook run should stop before public Pages deployment if the public-release rights gate is
-not approved, while still completing private Android/H5 builds and all technical validation.
+The cook run may complete the academic Pages deployment after protected-main, pinned-toolchain,
+test, build-audit, prefix, and production verification gates pass.

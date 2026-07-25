@@ -203,12 +203,10 @@ replay, and device comparison are unavailable and are not project gates.
 - The inventory reproduces the reviewed archive, manifest, asset, and native baselines.
 - Decoder and native-tool outputs live only in the ignored working zone.
 - Every curated claim resolves to immutable static evidence or a declared supporting source.
-- At least two external offline copies are hash-verified before Phase 1 is marked complete.
+- The sole supplied APK hash is verified; unavailable external-copy redundancy is covered by
+  the project owner's explicit academic-scope waiver without asserting that backups exist.
 
 ## Unresolved questions
 
-- Will two independently held external offline copies be created and supplied for hash verification?
 - What is the APK's original acquisition date and upstream source record?
-- Who can provide accountable approval and repository evidence for the intended public Web release?
-- What rights or permissions exist for the name, artwork, fonts, music, and other content?
 - Is any authentic historical gameplay media or documentation available for supporting review?

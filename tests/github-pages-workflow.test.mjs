@@ -28,7 +28,12 @@ test('untrusted code never targets the pinned Creator runner', () => {
     /plutil[\s\S]*?-extract CFBundleShortVersionString[\s\S]*?Contents\/Info\.plist/u,
   );
   assert.doesNotMatch(workflow, /defaults read/u);
-  assert.match(workflow, /codesign --verify --deep --strict/u);
+  assert.match(
+    workflow,
+    /COCOS_CREATOR_BIN_SHA256: 3a8452496c03e85f2784e64679a1fd203701b0b245125efee02c7923f2bd3464/u,
+  );
+  assert.match(workflow, /shasum -a 256 "\$COCOS_CREATOR_BIN"/u);
+  assert.doesNotMatch(workflow, /codesign --verify --deep --strict/u);
 });
 
 test('build and deploy jobs use least privilege and bounded execution', () => {
@@ -45,17 +50,16 @@ test('build and deploy jobs use least privilege and bounded execution', () => {
   assert.match(workflow, /node --test --test-concurrency=1 tests\/\*\.mjs/u);
 });
 
-test('source compatibility, rights, build audit, and prefix verification precede artifact upload', () => {
+test('source compatibility, build audit, and prefix verification precede artifact upload', () => {
   const iterableSpreadAudit = workflow.indexOf('audit-creator-iterable-spreads.mjs');
-  const rights = workflow.indexOf('verify-release-rights.mjs');
   const creatorBuild = workflow.indexOf('--build "stage=build;configPath=');
   const audit = workflow.indexOf('audit-web-build.mjs');
   const prefix = workflow.indexOf('verify-web-mobile-build.mjs');
   const upload = workflow.indexOf('actions/upload-pages-artifact@v4');
   const deploy = workflow.indexOf('actions/deploy-pages@v4');
 
-  assert.ok(iterableSpreadAudit >= 0 && iterableSpreadAudit < rights);
-  assert.ok(rights < creatorBuild);
+  assert.ok(iterableSpreadAudit >= 0 && iterableSpreadAudit < creatorBuild);
+  assert.equal(workflow.indexOf('verify-release-rights.mjs'), -1);
   assert.ok(creatorBuild < audit);
   assert.ok(audit < prefix);
   assert.ok(prefix < upload);

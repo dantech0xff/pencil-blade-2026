@@ -51,19 +51,15 @@
         "count": 1
       },
       {
-        "classification": "rights-unknown",
-        "count": 1
-      },
-      {
-        "classification": "external-evidence-blocker",
-        "count": 1
+        "classification": "owner-approved-scope-waiver",
+        "count": 2
       },
       {
         "classification": "external-release-blocker",
         "count": 1
       }
     ],
-    "blockers": 4,
+    "blockers": 1,
     "unexplainedDivergences": 0
   },
   "residuals": [
@@ -326,9 +322,9 @@
       "id": "RESOURCE-COOPERBLACK-OTF",
       "domain": "release-rights",
       "classification": "unsupported-resource-exception",
-      "status": "user-decision-required",
-      "statement": "Fonts/CooperBlackStd.otf is byte-preserved but has no supported Creator 3.8.8 font consumer; exclude, replace, or convert only after an explicit authorized decision.",
-      "scoreEffect": "blocks-public-release-not-technical-score",
+      "status": "owner-approved-byte-preserve-exclude",
+      "statement": "Fonts/CooperBlackStd.otf is byte-preserved and excluded from runtime consumption because Creator 3.8.8 has no supported consumer; no separate rights treatment is required by the owner-approved academic scope.",
+      "scoreEffect": "none-owner-approved-technical-disposition",
       "evidenceRefs": [
         "assets/catalog/asset-catalog.json",
         "docs/release-rights-checklist.md"
@@ -337,10 +333,10 @@
     {
       "id": "RIGHTS-PUBLIC-DISTRIBUTION",
       "domain": "release-rights",
-      "classification": "rights-unknown",
-      "status": "blocked",
-      "statement": "Public-distribution approval is absent for clean-room code, 784 PNG, 62 audio, 16 fonts, the Pencil Blade identity, and the generated Cocos Web runtime.",
-      "scoreEffect": "blocks-public-release-not-technical-score",
+      "classification": "owner-approved-scope-waiver",
+      "status": "owner-waived-out-of-scope",
+      "statement": "Per-asset rights clearance is outside the owner-approved academic restoration acceptance scope; this waiver records project scope and does not assert ownership or create a legal conclusion.",
+      "scoreEffect": "none-owner-accepted-scope",
       "evidenceRefs": [
         "release/public-release-variant-manifest.json",
         "docs/release-rights-checklist.md"
@@ -349,10 +345,10 @@
     {
       "id": "CUSTODY-TWO-OFFLINE-BACKUPS",
       "domain": "evidence-custody",
-      "classification": "external-evidence-blocker",
-      "status": "blocked",
-      "statement": "Two independently held offline backup APK copies have not been supplied or mounted for SHA-256 verification.",
-      "scoreEffect": "blocks-phase-01-closeout-not-technical-score",
+      "classification": "owner-approved-scope-waiver",
+      "status": "owner-waived-out-of-scope",
+      "statement": "Only one source APK was supplied; the project owner waived the two-copy offline redundancy requirement and accepted the sole-source preservation risk without asserting that backups exist.",
+      "scoreEffect": "none-owner-accepted-custody-risk",
       "evidenceRefs": [
         "plans/260721-2253-pencil-blade-restoration/phase-01-preserve-evidence-and-establish-baseline.md",
         "docs/evidence-register.md"
@@ -363,7 +359,7 @@
       "domain": "release-platform",
       "classification": "external-release-blocker",
       "status": "blocked",
-      "statement": "The protected Creator runner, branch protection, github-pages environment, Pages source, and production deployment are not configured; GitHub authentication is unavailable and rights gate is closed.",
+      "statement": "Branch protection and the protected Creator runner are ready under the pinned version-plus-binary-hash policy; the github-pages environment, Pages source, and production deployment remain to be configured and verified.",
       "scoreEffect": "blocks-public-release-not-technical-score",
       "evidenceRefs": [
         ".github/workflows/deploy-web-mobile-pages.yml",

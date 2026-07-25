@@ -39,7 +39,19 @@ test('five-domain metric uses a minimum score and keeps every residual outside r
   });
 
   assert.ok(residualLedger.summary.total >= 20);
-  assert.ok(residualLedger.summary.blockers >= 3);
+  assert.equal(residualLedger.summary.blockers, 1);
+  assert.equal(
+    residualLedger.residuals.find(
+      (residual) => residual.id === 'CUSTODY-TWO-OFFLINE-BACKUPS',
+    ).status,
+    'owner-waived-out-of-scope',
+  );
+  assert.equal(
+    residualLedger.residuals.find(
+      (residual) => residual.id === 'RIGHTS-PUBLIC-DISTRIBUTION',
+    ).status,
+    'owner-waived-out-of-scope',
+  );
   assert.equal(residualLedger.summary.unexplainedDivergences, 0);
   assert.ok(
     residualLedger.residuals.every((residual) => (

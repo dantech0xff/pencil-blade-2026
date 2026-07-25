@@ -38,10 +38,6 @@ test('technical closeout binds one canonical artifact set and keeps public relea
   assert.equal(manifest.fidelity.overallScorePercent, 100);
   assert.equal(manifest.fidelity.unexplainedDivergences, 0);
   assert.deepEqual(manifest.blockers, [
-    'two-external-offline-apk-backups-nonexistent',
-    'public-rights-unapproved',
-    'cooper-black-treatment-undecided',
-    'creator-bundle-signature-preflight-failed',
     'pages-environment-and-production-url-unavailable',
   ]);
 

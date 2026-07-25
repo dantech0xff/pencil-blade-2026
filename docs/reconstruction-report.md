@@ -4,13 +4,13 @@
 
 **As of:** 2026-07-25
 
-Technical reconstruction and maximal-recoverable-fidelity gates pass. Evidence custody and
-public release remain blocked by external inputs.
+Technical reconstruction and maximal-recoverable-fidelity gates pass. Backup redundancy and
+per-asset rights clearance are owner-waived/out-of-scope; Pages deployment remains pending.
 
 This report validates the clean-room Cocos Creator reconstruction against frozen static
 evidence, recovered contracts, exact resources, the selected Physics2D backend, and supported
-runtime rows. It does not claim empirical identity with an executing original and does not
-authorize public distribution.
+runtime rows. It does not claim empirical identity with an executing original or make a
+legal-rights conclusion.
 
 ## Authority chain
 
@@ -110,17 +110,12 @@ exercise the integrated runtime.
 | Maximal recoverable technical fidelity | Pass | Minimum of all five frozen domains is `100.00%`; zero unexplained divergences |
 | Android artifact/runtime | Pass | Build audit plus supported arm64 runtime matrix pass |
 | Local H5 artifact/runtime | Pass | Build/prefix audit plus both frozen Chrome rows pass |
-| Evidence custody | Blocked | The project owner confirmed that no external offline APK copies exist for SHA-256 verification |
-| Rights authorization | Blocked | Six public-release records lack complete approval evidence |
-| Public GitHub Pages | Blocked | Rights gate is closed; `main` and the online labeled runner are configured, but the fresh official Creator bundle fails signature validation and Pages/environment/deployment remain absent |
+| Evidence custody | Owner-waived | Only one source APK was supplied; no backup is claimed and the owner accepted the sole-source risk |
+| Rights authorization | Out of scope | Per-asset legal clearance is not an academic restoration acceptance gate; no license claim is made |
+| Public GitHub Pages | Pending | `main`, the online labeled runner, and exact Creator version/binary hash are configured; Pages/environment/deployment remain |
 
 ## Closeout blockers
 
-1. Create and supply two independently held offline APK paths/media; both must hash to
-   `95225733d46473f2b155737e8c83b567e028342257c747c0faac6ed4ab87e7aa`.
-2. Provide accountable rights/license evidence and approval for clean-room code, 784 PNG,
-   62 audio, 16 fonts, the Pencil Blade identity, and the generated Cocos Web runtime.
-3. Decide the authorized public treatment of `Fonts/CooperBlackStd.otf`.
-4. Resolve the Creator signature preflight on the already protected, online labeled runner.
-   Configure Pages source and `github-pages` only after the rights gate passes, then deploy and
-   verify the production URL.
+1. Configure Pages source and the `github-pages` environment.
+2. Deploy the audited H5 build through the protected runner.
+3. Verify the production URL, eager/lazy assets, browser console, and supported runtime rows.

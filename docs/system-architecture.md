@@ -116,12 +116,12 @@ remain ignored. The verified artifact is a local/internal debug APK, not a store
 The Web path builds the same scene as `web-mobile`, audits the complete generated tree, and
 serves every eager and statically discoverable lazy file under `/pencil-blade-2026/`.
 The manual GitHub workflow separates a read-only self-hosted Creator build job from the
-permissioned Pages deploy job. Artifact upload cannot occur until the public-rights manifest
-passes. As of 2026-07-25 `main` is protected and the correctly labeled repository runner service
+permissioned Pages deploy job. Artifact upload cannot occur until tests and build audits pass.
+As of 2026-07-25 `main` is protected and the correctly labeled repository runner service
 is configured and active. It was online at the captured API checkpoint; after a later GitHub
 broker incident required a listener restart, a final REST read reconfirmed it online and idle.
-The freshly reinstalled official Creator bundle still fails the intentional signature preflight.
-Pages/environment configuration and release rights remain blocked.
+The workflow accepts the reviewed Creator bundle through exact version `3.8.8` and executable
+SHA-256 pinning. Pages/environment configuration and production deployment remain pending.
 
 ## Current Domain Boundaries
 

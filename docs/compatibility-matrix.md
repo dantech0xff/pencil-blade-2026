@@ -12,7 +12,7 @@ Mobile build. Public Web distribution remains a separate rights/operations gate.
 | Scene | `db://assets/scenes/classic.scene` | `db://assets/scenes/classic.scene` |
 | Orientation | Portrait only | Portrait |
 | Package / route | `io.github.dantech0xff.pencilblade.debug` | `/pencil-blade-2026/` |
-| Distribution | Local/internal artifact | Private local artifact; GitHub Pages only after rights approval |
+| Distribution | Local/internal artifact | Academic GitHub Pages demo under owner-approved scope waiver |
 
 Android build pins: min SDK `21`, target/compile SDK `36`, Build Tools `36.0.0`,
 NDK `28.2.13676358`, CMake `3.22.1`, Gradle `8.11.1`, AGP `8.10.1`, JDK `17.0.15`,

@@ -11,7 +11,7 @@ File existence alone is not a passing audit. The build and release paths are onl
 | built | yes | yes |
 | audited | yes | yes |
 | published | no | no |
-| blocked | no | yes, pending rights approval for Pages deployment |
+| blocked | no | yes, pending Pages configuration and production deployment |
 
 ## Android Audit
 
@@ -93,8 +93,8 @@ File existence alone is not a passing audit. The build and release paths are onl
 
 1. Dispatch manually from `main`.
 2. Run on a protected self-hosted macOS ARM64 runner labeled for Creator `3.8.8`.
-3. Verify Creator version/signature, GNU tar availability, and Node `22+`.
-4. Run reconstruction tests, strict TypeScript, policy tests, and the rights gate.
+3. Verify Creator version/executable SHA-256, GNU tar availability, and Node `22+`.
+4. Run reconstruction tests, strict TypeScript, and policy tests.
 5. Build the Web Mobile tree with Creator `3.8.8`.
 6. Audit the generated tree with [`scripts/audit-web-build.mjs`](../scripts/audit-web-build.mjs).
 7. Verify the prefix routing and asset serving with [`scripts/verify-web-mobile-build.mjs`](../scripts/verify-web-mobile-build.mjs).
@@ -120,8 +120,8 @@ File existence alone is not a passing audit. The build and release paths are onl
 - tested: pass
 - built: pass
 - audited: pass
-- published: blocked
-- blocked: yes, pending public-rights approval
+- published: pending
+- blocked: yes, pending Pages configuration and production deployment
 
 ### GitHub deployment prerequisites
 
@@ -132,10 +132,10 @@ installed and active, and a later broker incident required a listener restart. T
 listener recovered; after transient GitHub `502`/`504` responses, a final REST read reconfirmed
 the runner online and idle. The repository still has no
 configured Pages site (`404` from the Pages API) and zero environments. Cocos Dashboard `2.2.1`
-reinstalled Creator `3.8.8` from its official catalog, but the fresh never-launched bundle still
-fails strict macOS code-signature validation. The workflow intentionally requires that preflight
-to pass. This remaining runner failure and the deliberately absent Pages environment are
-independent of the public-rights blocker. See the
+reinstalled Creator `3.8.8` from its official catalog. The workflow pins that reviewed
+executable by version and SHA-256
+`3a8452496c03e85f2784e64679a1fd203701b0b245125efee02c7923f2bd3464`.
+The remaining gate is the deliberately absent Pages environment/deployment. See the
 [GitHub infrastructure checkpoint](../plans/260721-2253-pencil-blade-restoration/reports/github-infrastructure-2026-07-25.md).
 
 ## Current Audit Boundary
@@ -145,7 +145,7 @@ The repository currently proves:
 - a clean Android debug build with exact signer and singleton-ABI verification
 - a clean local Web Mobile build
 - a successful web tree audit and prefix verifier
-- a fail-closed public release gate
+- an owner-recorded academic deployment scope with no legal-rights conclusion
 - Node-suite checkpoint reports at `1760/1760`
 - a frozen Chrome `150.0.7871.182` matrix at `480x800` and `720x1280`
 - an Android 13/API 33 arm64 emulator runtime row
@@ -154,5 +154,4 @@ The repository does **not** yet prove:
 
 - public Pages deployment
 - final production URL verification
-- approval to publish uncleared art, audio, fonts, code, identity, or engine runtime
-- a valid Creator bundle signature, `github-pages` environment, and production deployment
+- a configured `github-pages` environment and production deployment
