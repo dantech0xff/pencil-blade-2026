@@ -142,13 +142,13 @@
   },
   "reconstructionFixtures": {
     "files": 220,
-    "bytes": 3400705,
-    "aggregateSha256": "a3948d81524fa235c3d80c2a6c52ecb8e364a4cdfafdc6bb05594c2580b28e04",
+    "bytes": 3401792,
+    "aggregateSha256": "ea4abbd891b68448de0bc89561d18922eaff62ca948e9e28b871a6d8cf136121",
     "entries": [
       {
         "path": ".github/workflows/deploy-web-mobile-pages.yml",
-        "bytes": 4884,
-        "sha256": "ac40be97e84f2893430982f86c88010c1fe423b9b19740b47cb1eed2de3e195a"
+        "bytes": 5599,
+        "sha256": "3b86f4d55a0e5961edf6fe21a0b3117d17e2a86c2c9c92fcefc3afec2353758f"
       },
       {
         "path": "scripts/generate-fidelity-report.mjs",
@@ -217,8 +217,8 @@
       },
       {
         "path": "tests/github-pages-workflow.test.mjs",
-        "bytes": 3770,
-        "sha256": "585ed8d5f2b3b2922be2abcf930796d1d664e7bf2658c6861c9af5747bf34d08"
+        "bytes": 4142,
+        "sha256": "6afa1230574856be619df1e0c7e8bc4d312db4869162e57aaad43a92cff8c3f4"
       },
       {
         "path": "tests/inventory-apk-test.sh",

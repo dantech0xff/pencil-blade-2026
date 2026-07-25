@@ -105,7 +105,23 @@ jobs:
           set -euo pipefail
           node scripts/audit-creator-iterable-spreads.mjs \
             --typescript "$COCOS_CREATOR_APP/Contents/Resources/app.asar.unpacked/node_modules/typescript/lib/typescript.js"
-          node --test --test-concurrency=1 tests/*.mjs
+          portable_tests=()
+          for test_file in tests/*.mjs; do
+            case "$test_file" in
+              tests/audit-creator-build-test.mjs|\
+              tests/catalog-static-resources-test.mjs|\
+              tests/extract-gn-style-particle-choreography-test.mjs|\
+              tests/generate-technical-closeout-manifest.test.mjs|\
+              tests/stage-creator-assets-test.mjs)
+                # These bind the single owner-held APK, ignored forensic corpus, or
+                # ignored Android artifact. They pass in the recorded local closeout.
+                ;;
+              *)
+                portable_tests+=("$test_file")
+                ;;
+            esac
+          done
+          node --test --test-concurrency=1 "${portable_tests[@]}"
           node --test tests/reconstruction/vertical-slice/*.test.ts
           node "$COCOS_CREATOR_APP/Contents/Resources/app.asar.unpacked/node_modules/typescript/lib/tsc.js" \
             -p game/tsconfig.json \
