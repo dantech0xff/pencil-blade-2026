@@ -50,7 +50,8 @@ test('build and deploy jobs use least privilege and bounded execution', () => {
   assert.match(workflow, /node --test --test-concurrency=1 tests\/\*\.mjs/u);
 });
 
-test('Creator initializes project metadata before tests and every gate precedes artifact upload', () => {
+test('locked dependencies precede Creator build and every gate precedes artifact upload', () => {
+  const dependencyInstall = workflow.indexOf('npm ci --ignore-scripts --no-audit --no-fund');
   const iterableSpreadAudit = workflow.indexOf('audit-creator-iterable-spreads.mjs');
   const creatorBuild = workflow.indexOf('--build "stage=build;configPath=');
   const audit = workflow.indexOf('audit-web-build.mjs');
@@ -58,6 +59,11 @@ test('Creator initializes project metadata before tests and every gate precedes 
   const upload = workflow.indexOf('actions/upload-pages-artifact@v4');
   const deploy = workflow.indexOf('actions/deploy-pages@v4');
 
+  assert.match(
+    workflow,
+    /name: Install locked project dependencies[\s\S]*?working-directory: game/u,
+  );
+  assert.ok(dependencyInstall >= 0 && dependencyInstall < creatorBuild);
   assert.ok(creatorBuild >= 0 && creatorBuild < iterableSpreadAudit);
   assert.equal(workflow.indexOf('verify-release-rights.mjs'), -1);
   assert.ok(creatorBuild < audit);
