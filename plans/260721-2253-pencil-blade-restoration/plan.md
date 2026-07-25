@@ -1,7 +1,7 @@
 ---
 title: "Pencil Blade Cocos Creator Reconstruction Program"
 description: "Static-evidence roadmap to recover Pencil Blade 1.5 from libgame.so and packaged resources, then rebuild it in current Cocos Creator."
-status: in-progress
+status: completed
 priority: P1
 branch: "main"
 tags: [feature, android, web-h5, github-pages, game-preservation, reverse-engineering, cocos-creator, typescript]
@@ -30,20 +30,22 @@ Verified starting point:
 - Native dynamic symbols retain many game class and method names.
 - No game level/config files found in APK assets; composition and rules likely live in C++.
 
-Current closeout checkpoint (2026-07-25): `127/130` checklist items pass. Phases 1-6 are
-complete. The project owner defined this as an academic restoration from the sole supplied APK
+Final closeout (2026-07-25): `130/130` checklist items pass and all seven phases are complete.
+The project owner defined this as an academic restoration from the sole supplied APK
 and formally waived two-copy backup redundancy plus per-asset rights/Cooper clearance as
 acceptance gates; those waivers do not assert that backups or licenses exist. `main`, runner
 registration/labels, the runner service, and the exact Creator version/binary-hash trust policy
-are configured. The remaining three items are Pages source/environment, audited production
-deployment, and production URL verification.
+are configured. GitHub Pages deployment run `30161202889`, attempt `2`, published commit
+`c942ba69283c3725856dfce177fb2268939bfbfd` through the `github-pages` environment at
+`https://dantech0xff.github.io/pencil-blade-2026/`. Production verification reached
+`2,539/2,539` files and passed Chrome `150.0.7871.182` at both supported viewports with zero
+console, page, request, or HTTP-response failures.
 The runner was online at capture; after a later GitHub broker incident required a listener
 restart, a final REST read reconfirmed it online and idle. The fresh official Creator bundle
 is pinned by version `3.8.8` and executable SHA-256
 `3a8452496c03e85f2784e64679a1fd203701b0b245125efee02c7923f2bd3464`.
-Technical evidence is bound by
-`reports/technical-closeout-manifest.json`; none of these gates is represented as complete
-without its required evidence or owner decision.
+Technical evidence and the completed academic Pages release are bound by
+`reports/technical-closeout-manifest.json`.
 
 ## Program Decisions
 
@@ -75,12 +77,12 @@ without its required evidence or owner decision.
   release rights remain separate measures.
 - No canonical graphics, animation, audio, font, shader/material, level/layout, progression,
   or other game resource may be silently omitted or substituted.
-- `99%` is the future acceptance target for a versioned fidelity metric spanning
+- `99%` is the acceptance target for a versioned fidelity metric spanning
   visuals/layout/animation, audio, shader/material/rendering, level/progression, and
-  gameplay/physics/timing/input/state. The resource denominator is frozen; domain weighting,
-  contract-unit denominators, and the final residual-gap scoring remain open.
-- Technical fidelity and release rights are separate gates. If rights block exact reuse,
-  release blocks pending an explicit user decision; do not silently omit or substitute assets.
+  gameplay/physics/timing/input/state. Metric `1.1.0` freezes the denominator, uses no
+  weighting, reports every domain at `100%`, and discloses every residual separately.
+- Technical fidelity and rights records remain separate decisions. The owner-approved
+  academic release does not convert the out-of-scope rights ledger into a license claim.
 - Recreate no ads, analytics, review, or social dependency in the gameplay core.
 - A critical unknown blocks only the affected feature from being called recovered. It may be
   implemented as an explicit, reviewed inference without raising recovered-coverage metrics.
@@ -95,7 +97,7 @@ without its required evidence or owner decision.
 | 4 | [Recover Gameplay, Physics, and Progression Contracts](./phase-04-reverse-engineer-native-gameplay-contracts.md) | Complete |
 | 5 | [Build Cocos Creator Architecture and Vertical Slice](./phase-05-build-cocos-creator-architecture-and-vertical-slice.md) | Complete |
 | 6 | [Recreate Full Game Content and Progression](./phase-06-recreate-full-game-content-and-progression.md) | Complete |
-| 7 | [Validate Static Reconstruction and Prepare Release](./phase-07-validate-fidelity-and-prepare-release.md) | In progress |
+| 7 | [Validate Static Reconstruction and Prepare Release](./phase-07-validate-fidelity-and-prepare-release.md) | Complete |
 
 ## Dependencies
 
@@ -183,9 +185,9 @@ without its required evidence or owner decision.
   sanitized retired-offline review/feedback/social events. The current repository checkpoint
   now passes `192/192` top-level Node tests, `1568/1568` vertical-slice tests, and `1760/1760`
   combined, with strict Creator TypeScript/audits still green and the Android debug APK plus
-  private Web Mobile artifact still verified; runtime-device coverage, Physics2D equivalence,
-  and the final five-domain fidelity score now pass. Public GitHub Pages configuration,
-  deployment, and production verification remain open gates.
+  Web Mobile artifact still verified; runtime-device coverage, Physics2D equivalence,
+  the final five-domain fidelity score, GitHub Pages deployment, and production verification
+  now pass.
   The recovered Loading checkpoint now owns the exact four selected-profile rasters, exact
   62-step audio preload order, `/61` clamped progress, and half-second Main Menu handoff.
   It passes `1520/1520` full vertical-slice tests, `61/61` top-level tests, strict Creator
@@ -206,8 +208,7 @@ without its required evidence or owner decision.
   with Cocos counters `0/0/0` and no project DevTools error. Phase 7 has now produced and
   audited the pinned Android debug APK and privately built, prefix-verified, and smoke-tested
   the Web Mobile H5 output across all six modes. Pinned Physics2D equivalence and the final
-  five-domain fidelity score now pass. Public GitHub Pages deployment and production
-  verification remain open gates. The
+  five-domain fidelity score and the production Pages matrix now pass. The
   sole-source APK corpus is the approved canonical denominator.
 - Phase 1 is complete under the project owner's 2026-07-25 sole-source waiver. Only one APK was
   supplied; no external backup is claimed, and the owner explicitly accepts that preservation risk.
@@ -234,7 +235,8 @@ without its required evidence or owner decision.
   GitHub Pages project URL.
 - Android and Web Mobile H5 are the only supported platform builds. Both outputs contain no
   original binary/runtime, decompiler output, private evidence, or reference bridge.
-- Public release occurs only after asset, font, music, trademark, and code-rights review.
+- The academic Pages release follows the owner-approved waiver and makes no license or
+  commercial-clearance claim; any separate commercial release remains outside this plan.
 
 ## Research
 

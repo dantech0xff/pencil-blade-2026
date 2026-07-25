@@ -31,14 +31,14 @@ Snapshot generated from a temporary local Repomix XML export on 2026-07-24; `rep
 | Surface | Role |
 |---|---|
 | `game/build-configs/android-debug.json`, `game/build-configs/web-mobile-pages.json` | Sanitized Phase 07 build-panel exports for the two supported targets. |
-| `release/recovered-reconstruction-manifest.json`, `release/public-release-variant-manifest.json` | Preservation record and blocked public web release record. |
+| `release/recovered-reconstruction-manifest.json`, `release/public-release-variant-manifest.json` | Preservation record and separate out-of-scope rights ledger. |
 | `game/assets/scripts/domain/` | Pure gameplay, state, scoring, progression, and presentation contracts. |
 | `game/assets/scripts/creator/` | Creator-only lifecycle, scene, audio, resource, and Physics2D integration. |
 | `game/assets/scenes/classic.scene` | Editor-authored persistent bridge for the shell and route owners. |
 | `assets/catalog/resource-reconciliation-ledger.json`, `assets/catalog/creator-staging-manifest.json` | Exact-byte resource staging and live-consumer reconciliation for the recovered APK corpus. |
 | `scripts/build-android-debug.sh` | Pinned Android generation, Gradle build, debug-signing verification, singleton-ABI enforcement, prohibited-content audit, and normalized APK output. |
 | `scripts/audit-creator-build.mjs`, `scripts/audit-web-build.mjs`, `scripts/verify-web-mobile-build.mjs` | Android archive, static Web tree, and exact Pages-prefix gates. |
-| `.github/workflows/deploy-web-mobile-pages.yml`, `scripts/verify-release-rights.mjs` | Manual protected-main Pages workflow and fail-closed public-distribution gate. |
+| `.github/workflows/deploy-web-mobile-pages.yml`, `scripts/verify-release-rights.mjs` | Manual protected-main Pages workflow and separate future commercial-clearance verifier. |
 | `tests/reconstruction/vertical-slice/*.test.ts`, `tests/*.test.mjs` | Regression coverage for recovered contracts, shell transactions, build wrappers, release manifests, and artifact gates. |
 
 ## What This Repository Is Doing Now
@@ -64,8 +64,8 @@ Snapshot generated from a temporary local Repomix XML export on 2026-07-24; `rep
 - Protected `main` plus the repository runner registration, labels, and active service are
   configured. The runner was online at capture; a later GitHub broker incident required a
   listener restart, and a final REST read reconfirmed it online and idle. Creator `3.8.8` is
-  pinned by exact executable SHA-256. Public Pages deployment and the `github-pages`
-  environment remain open.
+  pinned by exact executable SHA-256. Pages run `30161202889`, attempt `2`, passes at
+  `https://dantech0xff.github.io/pencil-blade-2026/`.
 
 ## Checkpoint Evidence
 

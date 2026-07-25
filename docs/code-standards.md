@@ -68,7 +68,9 @@ the restoration plan depends on.
 - Keep the sanitized build-panel exports in `game/build-configs/` and the release manifests in `release/`.
 - Audit the complete Web Mobile tree with `node scripts/audit-web-build.mjs <build-dir>` and
   verify it at the exact Pages prefix with `node scripts/verify-web-mobile-build.mjs <build-dir>`.
-- Require `node scripts/verify-release-rights.mjs` to pass before uploading a public Pages artifact.
+- Keep `node scripts/verify-release-rights.mjs` fail-closed for any future distribution that
+  requires per-asset clearance. It is a separate ledger, not a gate for the owner-approved
+  academic Pages deployment.
 - Keep generated Android native projects, APKs, Web output, machine-local tool paths, and
   temporary runtime build configs ignored.
 - Fail any build that contains the original APK, `libgame.so`, legacy Cocos2d-x runtime, decompiler output, or a native compatibility bridge.

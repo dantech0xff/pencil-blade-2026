@@ -1,7 +1,7 @@
 ---
 phase: 7
 title: "Validate Static Reconstruction and Prepare Release"
-status: in-progress
+status: completed
 priority: P1
 dependencies: [6]
 effort: "2-4 weeks"
@@ -31,14 +31,14 @@ HarmonyOS/OpenHarmony, Web Desktop as a separate build, mini-game channels, and 
 |----------|--------|----------|
 | Android debug artifact | Technical pass | Fresh debug-signed `arm64-v8a` APK for package `io.github.dantech0xff.pencilblade.debug`; `57,352,687` bytes; SHA-256 `e313e149164eec8664b934a16e3c14b3a0f0265f9c7bb6306375a08a7cb5c37d`; Android 13/API 33 runtime matrix pass |
 | Private Web Mobile artifact | Technical pass | Fresh Creator build, prohibited-content audit, exact `/pencil-blade-2026/` prefix verification for 2,539 files, and Chrome `150.0.7871.182` runtime rows at `480x800` and `720x1280`; tree digest `90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54` |
-| Public GitHub Pages deployment | Pending | `main`, the online labeled runner, and Creator `3.8.8` exact binary hash are configured; no Pages site or `github-pages` environment exists yet |
+| Public GitHub Pages deployment | Technical pass | Run `30161202889`, attempt `2`, deployed commit `c942ba69283c3725856dfce177fb2268939bfbfd` through `github-pages`; production verification reached `2,539/2,539` files and passed both Chrome rows with zero console/page/request/HTTP failures |
 | Canonical resource denominator | Approved | The project owner confirmed the APK is the sole source; the verified `862`-asset corpus and `862/862` disposition ledger are final |
 | Final static fidelity decision | Technical pass | Metric `1.1.0` uses minimum-domain scoring with no weighting; every recovered domain is `100.00%`, 12 non-recovered audio/rendering/progression assertions remain disclosed outside scored units, Physics2D equivalence passes, and zero unexplained divergences remain |
 
 The registered reconstruction policy remains a limited Classic/menu claim gate; the separate
 five-domain metric covers the full recovered product contract. Neither establishes empirical
 identity with an executing original. The canonical local artifact set is bound by
-`reports/technical-closeout-manifest.json`; Pages deployment remains the final external gate.
+`reports/technical-closeout-manifest.json`; no technical closeout blocker remains.
 The current GitHub/runner evidence is recorded in
 [`reports/github-infrastructure-2026-07-25.md`](./reports/github-infrastructure-2026-07-25.md).
 
@@ -61,7 +61,8 @@ The current GitHub/runner evidence is recorded in
   score, audio, saves, evidence traceability, and uncertainty coverage.
 - Run deterministic reconstruction scenarios at the original logical viewports and on the
   supported Android and H5 target matrix.
-- Audit licensing/ownership for game name, artwork, music, fonts, code, and third-party services.
+- Preserve the separate licensing/ownership ledger without making it an academic acceptance
+  gate or a license conclusion.
 - Produce recovered-reconstruction and public-release-variant manifests separately.
 - Inferred behavior and release substitutions remain visible and never count as recovered coverage.
 - Use the approved sole-source APK resource denominator and preserve the existing `862/862`
@@ -199,8 +200,8 @@ the legacy runtime. Legal clearance is outside the academic restoration acceptan
     background/foreground behavior, orientation, and supported Android/H5 targets.
 13. Calculate the versioned cross-domain fidelity score, require at least `99%`, and list all
     residual gaps, inferences, unknowns, and release substitutions outside recovered coverage.
-14. Complete rights review. Block GitHub Pages deployment when any public asset is uncleared;
-    replace or omit material only after an explicit user decision and record the exception.
+14. Record the owner-approved academic waiver for per-asset rights and Cooper treatment;
+    retain the separate fail-closed rights manifest for any future commercial clearance.
 15. Produce the reconstruction, compatibility, build-audit, rights, recovered-manifest, and
     public-release-variant reports. Record the Android debug artifact and Pages deployment
     independently from the preservation/fidelity decision.
@@ -234,8 +235,8 @@ the legacy runtime. Legal clearance is outside the academic restoration acceptan
 - [x] Web output audit and Pages-prefix smoke check pass
 - [x] Protected Creator `3.8.8` self-hosted runner ready under exact version/binary-hash policy
 - [x] Least-privilege GitHub Pages workflow definition added and locally validated
-- [ ] Repository Pages source and `github-pages` environment configured
-- [ ] Production Pages URL verified
+- [x] Repository Pages source and `github-pages` environment configured
+- [x] Production Pages URL verified
 - [x] Frozen static-evidence and reconstruction-fixture suite
 - [x] Sole-source APK manifest/root approved and full resource ledger reconciled
 - [x] Versioned cross-domain fidelity score reaches at least `99%` with every residual gap listed
@@ -255,7 +256,7 @@ the legacy runtime. Legal clearance is outside the academic restoration acceptan
       and exits successfully when Creator returns documented success code `36`
 - [x] The debug APK has the configured package metadata, a valid debug signature, a recorded
       SHA-256, and no prohibited original runtime/evidence payload
-- [ ] GitHub Pages serves the audited Web Mobile build at
+- [x] GitHub Pages serves the audited Web Mobile build at
       `https://dantech0xff.github.io/pencil-blade-2026/` with no broken eager/lazy assets,
       root-prefix errors, or browser console failures in the supported matrix
 - [x] The sole-source APK manifest/root is the approved canonical resource denominator and all
@@ -305,11 +306,7 @@ the legacy runtime. Legal clearance is outside the academic restoration acceptan
 - Keep recovered identifiers, legacy SDKs, private data, obsolete endpoints, analytics, ads,
   review, and social integrations out of both builds.
 
-## Next Steps
+## Completion
 
-Execute this phase with:
-
-`/ck:cook plans/260721-2253-pencil-blade-restoration/phase-07-validate-fidelity-and-prepare-release.md`
-
-The cook run may complete the academic Pages deployment after protected-main, pinned-toolchain,
-test, build-audit, prefix, and production verification gates pass.
+Completed on 2026-07-25. The protected-main workflow, pinned Creator build, tests, artifact
+audit, Pages deployment, all-file reachability check, and production browser matrix passed.

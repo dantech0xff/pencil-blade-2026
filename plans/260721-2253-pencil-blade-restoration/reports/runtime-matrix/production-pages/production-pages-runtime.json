@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T14:39:05.197Z",
+  "productionUrl": "https://dantech0xff.github.io/pencil-blade-2026/",
+  "deployment": {
+    "runId": 30161202889,
+    "attempt": 2,
+    "commitSha": "c942ba69283c3725856dfce177fb2268939bfbfd",
+    "environment": "github-pages",
+    "deploymentId": 5601989210
+  },
+  "browser": {
+    "product": "Google Chrome",
+    "version": "150.0.7871.182"
+  },
+  "publishedFiles": {
+    "expected": 2539,
+    "checked": 2539,
+    "failures": []
+  },
+  "rows": [
+    {
+      "id": "chrome-480x800",
+      "viewport": {
+        "id": "chrome-480x800",
+        "width": 480,
+        "height": 800
+      },
+      "httpStatus": 200,
+      "input": {
+        "newGameGestureChangedFrame": true,
+        "classicGestureChangedFrame": true
+      },
+      "audio": {
+        "contextStates": [
+          "running"
+        ],
+        "htmlAudioElements": 0,
+        "backendAvailable": true
+      },
+      "storage": {
+        "retainedAcrossLifecycle": true,
+        "probeRemovedAfterTest": true
+      },
+      "lifecycle": {
+        "backgroundForeground": "pass",
+        "canvasVisibleAfterResume": true
+      },
+      "orientation": {
+        "declared": "portrait",
+        "landscape": {
+          "width": 800,
+          "height": 480,
+          "canvasVisible": true
+        },
+        "restoredPortrait": {
+          "width": 480,
+          "height": 800,
+          "canvasVisible": true
+        }
+      },
+      "offline": {
+        "postLoadGameplay": "pass",
+        "canvasVisible": true
+      },
+      "console": {
+        "errors": [],
+        "pageErrors": [],
+        "requestFailures": [],
+        "badResponses": []
+      },
+      "screenshots": [
+        {
+          "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-480x800-main-menu.png",
+          "sha256": "a78387d8d54b5b7de0176ef0722f4ce78092a7531a0863f560fa50e47d20608c"
+        },
+        {
+          "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-480x800-mode-select.png",
+          "sha256": "f5bc44358c043020709f99d28c6e3a5d16ce4623681084a286c45f4cb4f2a4c8"
+        },
+        {
+          "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-480x800-classic.png",
+          "sha256": "f8f9a6a2677fd4c86fc1212d5a15de2992676443b067744f553cbcfa56191a1e"
+        }
+      ],
+      "status": "pass"
+    },
+    {
+      "id": "chrome-720x1280",
+      "viewport": {
+        "id": "chrome-720x1280",
+        "width": 720,
+        "height": 1280
+      },
+      "httpStatus": 200,
+      "input": {
+        "newGameGestureChangedFrame": true,
+        "classicGestureChangedFrame": true
+      },
+      "audio": {
+        "contextStates": [
+          "running"
+        ],
+        "htmlAudioElements": 0,
+        "backendAvailable": true
+      },
+      "storage": {
+        "retainedAcrossLifecycle": true,
+        "probeRemovedAfterTest": true
+      },
+      "lifecycle": {
+        "backgroundForeground": "pass",
+        "canvasVisibleAfterResume": true
+      },
+      "orientation": {
+        "declared": "portrait",
+        "landscape": {
+          "width": 1280,
+          "height": 720,
+          "canvasVisible": true
+        },
+        "restoredPortrait": {
+          "width": 720,
+          "height": 1280,
+          "canvasVisible": true
+        }
+      },
+      "offline": {
+        "postLoadGameplay": "pass",
+        "canvasVisible": true
+      },
+      "console": {
+        "errors": [],
+        "pageErrors": [],
+        "requestFailures": [],
+        "badResponses": []
+      },
+      "screenshots": [
+        {
+          "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-720x1280-main-menu.png",
+          "sha256": "81e53faeaa21b0b05ea2c7fefe6e7161fbecccaa21ea8131969ddcdbbe6daf70"
+        },
+        {
+          "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-720x1280-mode-select.png",
+          "sha256": "87f55b4aafb01d346c7ce8a98a7b9ab4958ba9c5842b950ffff132b2b93055b5"
+        },
+        {
+          "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-720x1280-classic.png",
+          "sha256": "80efc4c60ee39ae020fce7cff3ce2d6519d3c6393e777dd9889d1f4f39477991"
+        }
+      ],
+      "status": "pass"
+    }
+  ],
+  "status": "pass"
+}

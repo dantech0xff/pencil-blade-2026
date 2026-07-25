@@ -5,7 +5,8 @@
 **As of:** 2026-07-25
 
 Technical reconstruction and maximal-recoverable-fidelity gates pass. Backup redundancy and
-per-asset rights clearance are owner-waived/out-of-scope; Pages deployment remains pending.
+per-asset rights clearance are owner-waived/out-of-scope. The audited GitHub Pages deployment
+and production runtime matrix pass.
 
 This report validates the clean-room Cocos Creator reconstruction against frozen static
 evidence, recovered contracts, exact resources, the selected Physics2D backend, and supported
@@ -112,10 +113,8 @@ exercise the integrated runtime.
 | Local H5 artifact/runtime | Pass | Build/prefix audit plus both frozen Chrome rows pass |
 | Evidence custody | Owner-waived | Only one source APK was supplied; no backup is claimed and the owner accepted the sole-source risk |
 | Rights authorization | Out of scope | Per-asset legal clearance is not an academic restoration acceptance gate; no license claim is made |
-| Public GitHub Pages | Pending | `main`, the online labeled runner, and exact Creator version/binary hash are configured; Pages/environment/deployment remain |
+| Public GitHub Pages | Pass | Run `30161202889`, attempt `2`, deployed commit `c942ba69283c3725856dfce177fb2268939bfbfd` through `github-pages`; `2,539/2,539` files and both Chrome rows pass |
 
 ## Closeout blockers
 
-1. Configure Pages source and the `github-pages` environment.
-2. Deploy the audited H5 build through the protected runner.
-3. Verify the production URL, eager/lazy assets, browser console, and supported runtime rows.
+None within the owner-approved academic restoration scope.
