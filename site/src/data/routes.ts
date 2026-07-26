@@ -4,7 +4,6 @@ import {
   isLocale,
   type Locale,
 } from "./locales.ts";
-import { aiLabRouteFragment } from "./route-fragments/ai-lab.ts";
 import { chaptersRouteFragment } from "./route-fragments/chapters.ts";
 import { playRouteFragment } from "./route-fragments/play.ts";
 
@@ -201,7 +200,6 @@ export const routes = mergeRouteFragments(
   [
     coreRouteFragment,
     chaptersRouteFragment,
-    aiLabRouteFragment,
     playRouteFragment,
   ],
   {

@@ -1,5 +1,4 @@
 ---
-import { localizedPath, withBase } from "../../data/routes.ts";
 import type { Locale } from "../../data/locales.ts";
 
 interface Props {
@@ -9,10 +8,29 @@ interface Props {
 }
 
 const { id, locale = "en", label = id } = Astro.props;
-const href = `${withBase(localizedPath(locale, "/evidence/"))}#${encodeURIComponent(id)}`;
+const referenceLabel = locale === "vi" ? "Bằng chứng" : "Evidence";
 ---
 
-<a class="evidence-ref" href={href} data-evidence-ref={id}>
-  <span aria-hidden="true">↗</span>
-  {label}
-</a>
+<span class="evidence-ref" role="note" data-evidence-ref={id}>
+  <span class="evidence-ref__label">{referenceLabel}</span>
+  <code translate="no">{label}</code>
+</span>
+
+<style>
+  .evidence-ref {
+    display: inline-flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-block: var(--space-2);
+    border-left: 0.25rem solid var(--pencil);
+    padding: var(--space-2) var(--space-3);
+    color: var(--graphite);
+    background: color-mix(in srgb, var(--pencil) 13%, var(--paper));
+  }
+
+  .evidence-ref__label {
+    font-family: var(--font-mono);
+    font-weight: 800;
+  }
+</style>

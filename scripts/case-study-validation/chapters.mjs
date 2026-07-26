@@ -1,10 +1,6 @@
 export const fragmentId = 'chapters';
 
-const CHAPTER_KINDS = Object.freeze([
-  'story',
-  'forensics',
-  'reconstruction',
-]);
+const CHAPTER_KINDS = Object.freeze(['forensics']);
 const REQUIRED_RHYTHM = Object.freeze({
   en: Object.freeze([
     'question',
@@ -13,7 +9,7 @@ const REQUIRED_RHYTHM = Object.freeze({
     'contract',
     'proof',
     'limit',
-    'next chapter',
+    'next step',
   ]),
   vi: Object.freeze([
     'câu hỏi',
@@ -22,7 +18,7 @@ const REQUIRED_RHYTHM = Object.freeze({
     'hợp đồng',
     'kiểm chứng',
     'giới hạn',
-    'chương tiếp theo',
+    'bước tiếp theo',
   ]),
 });
 const PRIVATE_PATH_PATTERN =

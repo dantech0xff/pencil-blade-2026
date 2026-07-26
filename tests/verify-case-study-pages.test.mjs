@@ -52,6 +52,103 @@ test('missing required bilingual launch and chapter routes fail closed', async (
   );
 });
 
+test('removed routes fail verification in files, sitemap, and release metadata', async (t) => {
+  await t.test('candidate file', async () => {
+    const fixture = createComposedCandidate();
+    writeFixtureFile(fixture.candidate, 'story/index.html', '<p>stale story</p>');
+    await assert.rejects(
+      verifyCaseStudyPages(fixture.candidate, {
+        publicationManifest: fixture.publication,
+      }),
+      /contains removed public route \/story\//u,
+    );
+  });
+
+  await t.test('sitemap URL', async () => {
+    const fixture = createComposedCandidate();
+    writeFixtureFile(
+      fixture.candidate,
+      'sitemap-0.xml',
+      '<urlset><url><loc>https://example.test/pencil-blade-2026/vi/story/</loc></url></urlset>',
+    );
+    await assert.rejects(
+      verifyCaseStudyPages(fixture.candidate, {
+        publicationManifest: fixture.publication,
+      }),
+      /sitemap contains removed public route \/story\//u,
+    );
+  });
+
+  await t.test('release route set', async () => {
+    const fixture = createComposedCandidate();
+    writeFixtureFile(
+      fixture.candidate,
+      'case-study-release.json',
+      JSON.stringify({ publication: { routes: ['/story/'] } }),
+    );
+    await assert.rejects(
+      verifyCaseStudyPages(fixture.candidate, {
+        publicationManifest: fixture.publication,
+      }),
+      /release manifest has an unexpected public route set/u,
+    );
+  });
+});
+
+test('arbitrary extra routes fail verification in files and sitemap', async (t) => {
+  await t.test('candidate file', async () => {
+    const fixture = createComposedCandidate();
+    writeFixtureFile(fixture.candidate, 'unexpected/index.html', '<p>unexpected</p>');
+    await assert.rejects(
+      verifyCaseStudyPages(fixture.candidate, {
+        publicationManifest: fixture.publication,
+      }),
+      /contains unexpected public HTML route: unexpected\/index\.html/u,
+    );
+  });
+
+  await t.test('nested game HTML', async () => {
+    const fixture = createComposedCandidate();
+    writeFixtureFile(
+      fixture.candidate,
+      'play/game/unexpected/index.html',
+      '<p>unexpected</p>',
+    );
+    await assert.rejects(
+      verifyCaseStudyPages(fixture.candidate, {
+        publicationManifest: fixture.publication,
+      }),
+      /contains unexpected public HTML route: play\/game\/unexpected\/index\.html/u,
+    );
+  });
+
+  await t.test('HTM file', async () => {
+    const fixture = createComposedCandidate();
+    writeFixtureFile(fixture.candidate, 'unexpected.htm', '<p>unexpected</p>');
+    await assert.rejects(
+      verifyCaseStudyPages(fixture.candidate, {
+        publicationManifest: fixture.publication,
+      }),
+      /contains unexpected public HTML route: unexpected\.htm/u,
+    );
+  });
+
+  await t.test('sitemap URL', async () => {
+    const fixture = createComposedCandidate();
+    writeFixtureFile(
+      fixture.candidate,
+      'sitemap-0.xml',
+      sitemapXml(['/unexpected/']),
+    );
+    await assert.rejects(
+      verifyCaseStudyPages(fixture.candidate, {
+        publicationManifest: fixture.publication,
+      }),
+      /sitemap contains unexpected public URL: .*\/unexpected\//u,
+    );
+  });
+});
+
 test('base bypasses and missing local references are rejected', async (t) => {
   await t.test('base bypass', async () => {
     const fixture = createComposedCandidate();
@@ -222,13 +319,14 @@ function createSite(siteDist, provenance) {
         `<html lang="${locale}"><head>`,
         '<link rel="stylesheet" href="/pencil-blade-2026/site.css">',
         '</head><body>',
-        '<a href="/pencil-blade-2026/story/">Story</a>',
+        '<a href="/pencil-blade-2026/forensics/">Forensics</a>',
         '<a href="https://example.org/citation">Citation</a>',
         '</body></html>',
       ].join('');
     writeFixtureFile(siteDist, path, source);
   }
   writeFixtureFile(siteDist, 'site.css', 'body { color: #111; }');
+  writeFixtureFile(siteDist, 'sitemap-0.xml', sitemapXml());
   writeFixtureFile(
     siteDist,
     'launcher.js',
@@ -240,6 +338,14 @@ function createSite(siteDist, provenance) {
       '});',
     ].join(''),
   );
+}
+
+function sitemapXml(extraRoutes = []) {
+  const routes = [...REQUIRED_CASE_STUDY_ROUTES, ...extraRoutes];
+  const urls = routes
+    .map((route) => `<url><loc>https://example.test/pencil-blade-2026${route}</loc></url>`)
+    .join('');
+  return `<urlset>${urls}</urlset>`;
 }
 
 function launchPage(locale, provenance) {

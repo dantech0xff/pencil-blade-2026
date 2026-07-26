@@ -115,11 +115,11 @@
   "workflowFiles": [
     {
       "path": ".github/workflows/deploy-web-mobile-pages.yml",
-      "sha256": "24f97dbb6fd4a6261c905dc210441e37da7476944df4641658169679888ee96d"
+      "sha256": "8b0c3cef77685055022278aa24ef61b425967ceb9667343561787c5b024e2849"
     },
     {
       "path": ".github/workflows/test-case-study-site.yml",
-      "sha256": "beae63a69697412a5d6151f5c44a6f9f29c289e0dd617c6898fc0804916d3236"
+      "sha256": "7b03623f448ca8cdce35e38598862c86123cedb6759a597466754a9d854496a4"
     }
   ],
   "siteBuild": {

@@ -17,19 +17,9 @@ interface RestrictedMdxOptions {
 }
 
 const DEFAULT_ALLOWED_COMPONENTS = Object.freeze([
-  "ApkDissection",
-  "CodeLens",
-  "DecisionPatch",
   "EvidenceChain",
   "EvidenceRef",
-  "EvidenceStatus",
-  "MetricLedger",
   "NativeContractTrace",
-  "ProofFigure",
-  "ReconstructionMap",
-  "RightsBoundary",
-  "RuntimeProofMatrix",
-  "SixModeAtlas",
 ]);
 
 const EXECUTABLE_NODE_TYPES = new Set([

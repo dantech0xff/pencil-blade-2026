@@ -15,26 +15,19 @@ import {
 import {
   collectCandidateFiles,
 } from './generate-case-study-release-manifest.mjs';
+import {
+  assertExactPublicRouteFiles,
+  assertExactSitemapRoutes,
+  assertNoForbiddenRouteFiles,
+  assertNoForbiddenSitemapUrls,
+  hasExpectedPublicRoutes,
+  PUBLIC_ROUTES,
+  REQUIRED_CASE_STUDY_ROUTES,
+  routeToFile,
+} from './case-study-public-routes.mjs';
 import { verifyWebMobileBuild } from './verify-web-mobile-build.mjs';
 
-export const REQUIRED_CASE_STUDY_ROUTES = Object.freeze([
-  '/',
-  '/about/',
-  '/ai-lab/',
-  '/evidence/',
-  '/forensics/',
-  '/play/',
-  '/reconstruction/',
-  '/story/',
-  '/vi/',
-  '/vi/about/',
-  '/vi/ai-lab/',
-  '/vi/evidence/',
-  '/vi/forensics/',
-  '/vi/play/',
-  '/vi/reconstruction/',
-  '/vi/story/',
-]);
+export { REQUIRED_CASE_STUDY_ROUTES };
 
 const REPOSITORY_ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const DEFAULT_PUBLICATION_MANIFEST = resolve(
@@ -78,11 +71,6 @@ function normalizePagesPrefix(value) {
     throw new Error('pagesPrefix must contain a non-root path without traversal');
   }
   return `/${segments.join('/')}/`;
-}
-
-function routeToFile(route) {
-  const segments = route.split('/').filter(Boolean);
-  return segments.length === 0 ? 'index.html' : `${segments.join('/')}/index.html`;
 }
 
 function decodeEntities(value) {
@@ -342,6 +330,27 @@ export async function verifyCaseStudyPages(outDir, options = {}) {
   ]));
   const filePaths = new Set(filesByPath.keys());
   assertRequiredRoutes(filePaths);
+  assertNoForbiddenRouteFiles(filePaths, 'case-study candidate');
+  assertExactPublicRouteFiles(filePaths, 'case-study candidate');
+  const sitemapSources = [...filesByPath.values()]
+    .filter((file) => /(?:^|\/)sitemap[^/]*\.xml$/u.test(file.path))
+    .map((file) => file.bytes.toString('utf8'));
+  assertNoForbiddenSitemapUrls(
+    sitemapSources,
+    'case-study candidate sitemap',
+  );
+  assertExactSitemapRoutes(
+    sitemapSources,
+    pagesPrefix,
+    'case-study candidate sitemap',
+  );
+  const releaseRecord = filesByPath.get('case-study-release.json');
+  if (releaseRecord) {
+    const release = JSON.parse(releaseRecord.bytes.toString('utf8'));
+    if (!hasExpectedPublicRoutes(release.publication?.routes)) {
+      throw new Error('case-study release manifest has an unexpected public route set');
+    }
+  }
 
   for (const file of files) {
     if (contentTypeForWebPath(file.path) === undefined) {

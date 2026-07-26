@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const routes = ["", "vi/", "about/", "vi/about/"] as const;
+const routes = ["", "vi/", "forensics/", "vi/forensics/"] as const;
 
 for (const route of routes) {
   test(`${route || "home"} has a semantic, keyboard-safe shell`, async ({ page }) => {
@@ -19,13 +19,3 @@ for (const route of routes) {
     expect(gameRequests).toEqual([]);
   });
 }
-
-test("About exposes confirmed sole-owner accountability without a draft blocker", async ({ page }) => {
-  await page.goto("about/");
-  await expect(page.locator(".draft-flag")).toHaveCount(0);
-  await expect(page.locator("main")).toContainText("Authenticated sole-owner review");
-  await expect(page.getByRole("link", { name: "GitHub Issues" })).toHaveAttribute(
-    "href",
-    "https://github.com/dantech0xff/pencil-blade-2026/issues",
-  );
-});

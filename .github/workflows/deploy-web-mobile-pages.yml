@@ -67,7 +67,6 @@ jobs:
           npm --prefix site run validate:content
           npm --prefix site run check
           node --test \
-            tests/ai-lab-content.test.mjs \
             tests/case-study-chapters.test.mjs \
             tests/case-study-content.test.mjs \
             tests/case-study-design-system.test.mjs \

@@ -19,29 +19,27 @@ The original APK was not installed, executed, or observed. The documentary must 
 the reconstruction as recovered original source, an emulator, a port of the original binary, or
 proof of pixel-, waveform-, frame-, or trajectory-level identity with the historical runtime.
 
-## Seven-chapter narrative and calls to action
+## Three-section public narrative
 
-| Order | Chapter | Reader promise | Next action |
+| Order | Section | Reader promise | Next action |
 |---:|---|---|---|
-| 1 | The Lost Game | Establish the sole surviving APK, unknown acquisition history, and static-only constraint. | Inspect the evidence boundary. |
-| 2 | Reading a Game That Cannot Run | Explain the ARM/Thumb, Java/JNI, resource, and symbol views without publishing raw binaries or decompiler output. | Follow one registered claim. |
-| 3 | Reconstructing the Rules | Show how facts become reviewed contracts and how unknowns remain explicit. | Compare a claim with its contract. |
-| 4 | Clean-room Rebuild | Explain the TypeScript/Cocos reconstruction and the prohibition on original executable code. | Inspect the rebuilt architecture. |
-| 5 | How AI Participated | Present edited, source-backed investigation episodes; AI assists evidence processing, implementation, testing, and review but is never the authority. | Open an evidence-backed episode. |
-| 6 | Proof, Not Claims | Separate canonical-claim coverage, resource reconciliation, fidelity domains, runtime rows, rights, and production deployment. | Verify a frozen metric and its denominator. |
-| 7 | Play the Reconstruction | Offer the exact audited H5 demonstration only after explicit reader action and restate its academic/noncommercial boundary. | Launch or leave the player. |
+| 1 | Open the APK | Show the bounded extraction method and the resulting Java, native, and resource surfaces. | Continue to the native evidence. |
+| 2 | Read `libgame.so` | Explain how native facts connect to recovered resources and reviewed contracts. | Inspect the retained Forensics route. |
+| 3 | Try the game | Offer the audited H5 reconstruction only after explicit reader action. | Launch or leave the player. |
 
-The chapter arc progresses from uncertainty to method, implementation, verification, and a
-bounded playable proof. It must not progress from uncertainty to a marketing claim of
-historical identity.
+The public route surface is Home, Forensics, and Play in English and Vietnamese, plus the
+direct `/play/game/` mount. Story, Reconstruction, AI Lab, Evidence Explorer, and About are
+not public routes. Source forensic records and release evidence remain repository artifacts,
+not additional website sections.
 
 ### Home entry
 
 Both Home routes summarize the work in exactly three sections: extract the APK, read
 `libgame.so` and connect it to recovered resources, then try the reconstruction. Each section
 shows only the method, one bounded source/output sample, and the result. Detailed metrics,
-rights records, AI episodes, and contract traces stay on their dedicated routes. Home keeps
-the playable build behind the localized Play launcher and does not load game bytes eagerly.
+rights records, and AI records stay in repository evidence rather than additional public
+sections; the retained native contract trace lives on Forensics. Home keeps the playable build
+behind the localized Play launcher and does not load game bytes eagerly.
 
 ## Evidence labels
 

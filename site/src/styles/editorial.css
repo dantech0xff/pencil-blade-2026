@@ -270,36 +270,10 @@
   }
 }
 
-.evidence-sequence,
-.chapter-map,
-.metric-grid {
-  display: grid;
-  gap: var(--space-5);
-  margin-block: var(--space-7);
-}
-
-.evidence-sequence {
-  counter-reset: evidence-step;
-}
-
-.evidence-step,
-.ledger-card,
-.rights-boundary,
-.proof-figure,
-.code-lens {
+.rights-boundary {
   border: var(--line);
   padding: var(--space-5);
   background: color-mix(in srgb, var(--paper) 92%, var(--white));
-}
-
-.evidence-step {
-  counter-increment: evidence-step;
-}
-
-.evidence-step::before {
-  content: "0" counter(evidence-step);
-  font: 800 var(--step-2) / 1 var(--font-mono);
-  color: var(--graphite-2);
 }
 
 .status {
@@ -375,30 +349,6 @@
   gap: var(--space-4);
 }
 
-.metric-grid {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
-}
-
-.ledger-card strong {
-  display: block;
-  font: 800 var(--step-2) / 1 var(--font-mono);
-}
-
-.proof-figure {
-  margin-inline: 0;
-}
-
-.proof-figure figcaption {
-  padding-top: var(--space-3);
-  border-top: var(--line);
-}
-
-.code-lens {
-  border-left: 0.45rem solid var(--measured);
-  color: var(--white);
-  background: var(--lab);
-}
-
 .table-region {
   max-width: 100%;
   overflow-x: auto;
@@ -420,7 +370,6 @@ td {
 }
 
 @media (min-width: 48rem) {
-  .chapter-map,
   .rights-boundary__columns {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

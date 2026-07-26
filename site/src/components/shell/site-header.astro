@@ -10,8 +10,8 @@ interface Props {
 
 const { locale, route } = Astro.props;
 const labels = locale === "vi"
-  ? { title: "Pencil Blade · hồ sơ phục dựng", about: "Giới thiệu" }
-  : { title: "Pencil Blade · restoration case file", about: "About" };
+  ? { title: "Pencil Blade · hồ sơ phục dựng" }
+  : { title: "Pencil Blade · restoration case file" };
 ---
 
 <header class="site-header">
@@ -23,8 +23,7 @@ const labels = locale === "vi"
       </svg>
       <span>{labels.title}</span>
     </a>
-    <nav class="site-nav" aria-label={locale === "vi" ? "Điều hướng chính" : "Primary"}>
-      <a href={withBase(localizedPath(locale, "/about/"))}>{labels.about}</a>
+    <nav class="site-nav" aria-label={locale === "vi" ? "Ngôn ngữ" : "Language"}>
       <LocaleSwitcher locale={locale} route={route} />
     </nav>
   </div>

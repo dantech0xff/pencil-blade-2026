@@ -65,6 +65,11 @@ The last job verifies every manifest-listed production file, all required Englis
 Vietnamese routes, launcher isolation, iframe load/reload/removal, storage preservation, and
 direct plus embedded game canvases at `480x800` and `720x1280`.
 
+The required public route set is `/`, `/forensics/`, `/play/`, `/vi/`,
+`/vi/forensics/`, `/vi/play/`, and `/play/game/`. Candidate, sitemap, release-manifest,
+tree-manifest, and live-production checks fail if Story, Reconstruction, AI Lab, Evidence
+Explorer, or About routes reappear in either locale.
+
 ## Verify
 
 The workflow uploads two final nondeployable evidence artifacts:

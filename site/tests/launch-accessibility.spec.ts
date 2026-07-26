@@ -3,21 +3,11 @@ import { expect, test } from "@playwright/test";
 
 const representativeRoutes = [
   "",
-  "story/",
   "forensics/",
-  "reconstruction/",
-  "ai-lab/",
-  "evidence/",
   "play/",
-  "about/",
   "vi/",
-  "vi/story/",
   "vi/forensics/",
-  "vi/reconstruction/",
-  "vi/ai-lab/",
-  "vi/evidence/",
   "vi/play/",
-  "vi/about/",
 ] as const;
 
 for (const route of representativeRoutes) {
@@ -32,7 +22,7 @@ for (const route of representativeRoutes) {
 
 test("launch shell remains keyboard-usable at 200% zoom and 320 CSS pixels", async ({ page }) => {
   await page.setViewportSize({ width: 640, height: 900 });
-  await page.goto("reconstruction/");
+  await page.goto("forensics/");
   await page.evaluate(() => {
     document.documentElement.style.zoom = "2";
   });

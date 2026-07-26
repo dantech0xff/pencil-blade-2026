@@ -12,28 +12,20 @@ import {
 import { basename, isAbsolute, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {
+  assertExactPublicRouteFiles,
+  assertExactSitemapRoutes,
+  assertNoForbiddenRouteFiles,
+  assertNoForbiddenSitemapUrls,
+  assertRequiredPublicRouteFiles,
+  hasExpectedPublicRoutes,
+  PUBLIC_ROUTES,
+} from './case-study-public-routes.mjs';
+
 export const RELEASE_MANIFEST_PATH = 'case-study-release.json';
 export const TREE_MANIFEST_PATH = 'case-study-tree-manifest.json';
 export const RELEASE_SCHEMA_VERSION = 1;
-export const PUBLIC_ROUTES = Object.freeze([
-  '/',
-  '/about/',
-  '/ai-lab/',
-  '/evidence/',
-  '/forensics/',
-  '/play/',
-  '/play/game/',
-  '/reconstruction/',
-  '/story/',
-  '/vi/',
-  '/vi/about/',
-  '/vi/ai-lab/',
-  '/vi/evidence/',
-  '/vi/forensics/',
-  '/vi/play/',
-  '/vi/reconstruction/',
-  '/vi/story/',
-]);
+export { PUBLIC_ROUTES };
 
 const REPOSITORY_ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const DEFAULT_PUBLICATION_MANIFEST = resolve(
@@ -315,6 +307,30 @@ export function generateCaseStudyReleaseManifest(options = {}) {
   }
 
   const contentFiles = contentFilesFor(candidateDir);
+  assertRequiredPublicRouteFiles(
+    contentFiles.map((file) => file.path),
+    'case-study candidate',
+  );
+  assertNoForbiddenRouteFiles(
+    contentFiles.map((file) => file.path),
+    'case-study candidate',
+  );
+  assertExactPublicRouteFiles(
+    contentFiles.map((file) => file.path),
+    'case-study candidate',
+  );
+  const sitemapSources = contentFiles
+    .filter((file) => /(?:^|\/)sitemap[^/]*\.xml$/u.test(file.path))
+    .map((file) => readFileSync(file.absolutePath, 'utf8'));
+  assertNoForbiddenSitemapUrls(
+    sitemapSources,
+    'case-study candidate sitemap',
+  );
+  assertExactSitemapRoutes(
+    sitemapSources,
+    pagesPrefix,
+    'case-study candidate sitemap',
+  );
   const inputs = readReleaseInputs(contentFiles, options);
   const siteSummary = summarize(inputs.siteFiles);
   const gameSummary = summarize(inputs.gameFiles);
@@ -501,7 +517,7 @@ export function verifyCaseStudyReleaseManifest(candidateDirectory) {
     !summaryMatches(siteSummary, release.inputs?.site)
     || !summaryMatches(gameSummary, release.inputs?.game)
     || JSON.stringify(release.publication.supportedLocales) !== JSON.stringify(['en', 'vi'])
-    || JSON.stringify(release.publication.routes) !== JSON.stringify(PUBLIC_ROUTES)
+    || !hasExpectedPublicRoutes(release.publication.routes)
   ) {
     throw new Error('release input digests or public locale/route set do not match candidate bytes');
   }

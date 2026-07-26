@@ -13,6 +13,9 @@ import test, { after } from 'node:test';
 
 import { composeCaseStudyPages } from '../scripts/compose-case-study-pages.mjs';
 import {
+  REQUIRED_CASE_STUDY_ROUTES,
+} from '../scripts/case-study-public-routes.mjs';
+import {
   collectCandidateFiles,
   digestFileRecords,
   generateCaseStudyReleaseManifest,
@@ -128,6 +131,69 @@ test('commit, workflow run, toolchain, and publication bindings fail closed', ()
   );
 });
 
+test('release generation rejects missing, forbidden, unexpected, and stale routes', () => {
+  const missing = createFixture();
+  rmSync(join(missing.candidate, 'forensics/index.html'));
+  assert.throws(
+    () => generate(missing),
+    /missing required public route \/forensics\//u,
+  );
+
+  const forbidden = createFixture();
+  writeFixtureFile(forbidden.candidate, 'story/index.html', '<p>stale story</p>');
+  assert.throws(
+    () => generate(forbidden),
+    /contains removed public route \/story\//u,
+  );
+
+  const unexpected = createFixture();
+  writeFixtureFile(unexpected.candidate, 'unexpected/index.html', '<p>unexpected</p>');
+  assert.throws(
+    () => generate(unexpected),
+    /contains unexpected public HTML route: unexpected\/index\.html/u,
+  );
+
+  const nestedGameRoute = createFixture();
+  writeFixtureFile(
+    nestedGameRoute.candidate,
+    'play/game/unexpected/index.html',
+    '<p>unexpected</p>',
+  );
+  assert.throws(
+    () => generate(nestedGameRoute),
+    /contains unexpected public HTML route: play\/game\/unexpected\/index\.html/u,
+  );
+
+  const htmRoute = createFixture();
+  writeFixtureFile(htmRoute.candidate, 'unexpected.htm', '<p>unexpected</p>');
+  assert.throws(
+    () => generate(htmRoute),
+    /contains unexpected public HTML route: unexpected\.htm/u,
+  );
+
+  const staleSitemap = createFixture();
+  writeFixtureFile(
+    staleSitemap.candidate,
+    'sitemap-0.xml',
+    '<urlset><url><loc>https://example.test/pencil-blade-2026/vi/story/</loc></url></urlset>',
+  );
+  assert.throws(
+    () => generate(staleSitemap),
+    /sitemap contains removed public route \/story\//u,
+  );
+
+  const unexpectedSitemap = createFixture();
+  writeFixtureFile(
+    unexpectedSitemap.candidate,
+    'sitemap-0.xml',
+    sitemapXml(['/unexpected/']),
+  );
+  assert.throws(
+    () => generate(unexpectedSitemap),
+    /sitemap contains unexpected public URL: .*\/unexpected\//u,
+  );
+});
+
 test('candidate server exposes only immutable GET/HEAD bytes at the exact prefix', async () => {
   const fixture = createFixture();
   generate(fixture);
@@ -174,19 +240,30 @@ function createFixture() {
   const gameDist = join(root, 'game');
   for (const path of [
     'index.html',
+    'forensics/index.html',
     'play/index.html',
     'vi/index.html',
+    'vi/forensics/index.html',
     'vi/play/index.html',
   ]) {
     writeFixtureFile(siteDist, path, `<p>${path}</p>`);
   }
   writeFixtureFile(siteDist, 'assets/site.css', 'body { color: black; }');
+  writeFixtureFile(siteDist, 'sitemap-0.xml', sitemapXml());
   writeFixtureFile(gameDist, 'index.html', '<canvas></canvas>');
   writeFixtureFile(gameDist, 'assets/game.bin', Buffer.from([0, 1, 2, 3]));
   const publication = publicationFor(gameDist);
   const candidate = join(root, 'candidate');
   composeCaseStudyPages({ gameDist, outDir: candidate, siteDist });
   return { candidate, gameDist, publication, siteDist };
+}
+
+function sitemapXml(extraRoutes = []) {
+  const routes = [...REQUIRED_CASE_STUDY_ROUTES, ...extraRoutes];
+  const urls = routes
+    .map((route) => `<url><loc>https://example.test/pencil-blade-2026${route}</loc></url>`)
+    .join('');
+  return `<urlset>${urls}</urlset>`;
 }
 
 function publicationFor(gameDist) {

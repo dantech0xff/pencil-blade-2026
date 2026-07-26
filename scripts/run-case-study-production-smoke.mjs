@@ -12,6 +12,14 @@ import { basename, dirname, extname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { fileURLToPath } from 'node:url';
 
+import {
+  assertExactPublicRouteFiles,
+  assertExactSitemapRoutes,
+  assertNoForbiddenRouteFiles,
+  FORBIDDEN_PUBLIC_ROUTES,
+  hasExpectedPublicRoutes,
+  PUBLIC_ROUTES,
+} from './case-study-public-routes.mjs';
 import { serveCaseStudyCandidate } from './serve-case-study-candidate.mjs';
 
 const SCRIPT_DIRECTORY = dirname(fileURLToPath(import.meta.url));
@@ -22,25 +30,9 @@ const DEFAULT_CONCURRENCY = 12;
 const DEFAULT_FETCH_ATTEMPTS = 4;
 const DEFAULT_FETCH_RETRY_DELAY_MS = 250;
 const TRANSIENT_HTTP_STATUSES = Object.freeze(new Set([429, 502, 503, 504]));
-const REQUIRED_ROUTES = Object.freeze([
-  '',
-  'story/',
-  'forensics/',
-  'reconstruction/',
-  'ai-lab/',
-  'evidence/',
-  'play/',
-  'about/',
-  'vi/',
-  'vi/story/',
-  'vi/forensics/',
-  'vi/reconstruction/',
-  'vi/ai-lab/',
-  'vi/evidence/',
-  'vi/play/',
-  'vi/about/',
-  'play/game/',
-]);
+const REQUIRED_ROUTES = Object.freeze(
+  PUBLIC_ROUTES.map((route) => route.slice(1)),
+);
 const MIME_TYPES = Object.freeze({
   '.aac': 'audio/aac',
   '.avif': 'image/avif',
@@ -223,6 +215,50 @@ async function fetchBytes(fetchImpl, url, label, {
     });
   }
   throw new Error(`${label} exhausted production fetch attempts.`);
+}
+
+async function assertRemovedRoutesUnavailable(
+  fetchImpl,
+  baseUrl,
+  cacheToken,
+  fetchOptions,
+) {
+  for (const route of FORBIDDEN_PUBLIC_ROUTES) {
+    const url = cacheBusted(
+      baseUrl,
+      route.slice(1),
+      `${cacheToken}-removed-route`,
+    );
+    for (let attempt = 1; attempt <= fetchOptions.attempts; attempt += 1) {
+      const response = await fetchImpl(url, {
+        headers: {
+          accept: 'text/html',
+          'cache-control': 'no-cache',
+        },
+        redirect: 'error',
+      });
+      if (response?.status === 404 || response?.status === 410) {
+        await response.arrayBuffer().catch(() => {});
+        break;
+      }
+      if (
+        TRANSIENT_HTTP_STATUSES.has(response?.status)
+        && attempt < fetchOptions.attempts
+      ) {
+        await response.arrayBuffer().catch(() => {});
+        await new Promise((resolvePromise) => {
+          setTimeout(
+            resolvePromise,
+            fetchOptions.retryDelayMs * (2 ** (attempt - 1)),
+          );
+        });
+        continue;
+      }
+      throw new Error(
+        `Removed production route is still public or returned an unexpected status: ${route} (HTTP ${response?.status ?? 'no response'}).`,
+      );
+    }
+  }
 }
 
 function validateFetchRetryOptions(attempts, retryDelayMs) {
@@ -680,6 +716,14 @@ export async function smokeProductionPages({
   }
   const treeManifest = JSON.parse(treeResponse.bytes.toString('utf8'));
   const files = normalizeManifestFiles(treeManifest);
+  assertNoForbiddenRouteFiles(
+    files.map((file) => file.path),
+    'production tree manifest',
+  );
+  assertExactPublicRouteFiles(
+    files.map((file) => file.path),
+    'production tree manifest',
+  );
   const releaseFile = files.find((file) => file.path === 'case-study-release.json');
   if (!releaseFile) {
     throw new Error('Tree manifest does not list case-study-release.json.');
@@ -710,8 +754,19 @@ export async function smokeProductionPages({
         bytes: file.bytes,
         sha256: digest,
         contentType: result.contentType,
+        sitemapSource: /(?:^|\/)sitemap[^/]*\.xml$/u.test(file.path)
+          ? result.bytes.toString('utf8')
+          : undefined,
       });
     },
+  );
+  const sitemapSources = observations
+    .map((record) => record.sitemapSource)
+    .filter((source) => source !== undefined);
+  assertExactSitemapRoutes(
+    sitemapSources,
+    new URL(normalizedBase).pathname,
+    'production sitemap',
   );
 
   const releaseObservation = observations.find((record) =>
@@ -729,6 +784,11 @@ export async function smokeProductionPages({
     throw new Error('Release record changed between manifest-wide fetch and identity recheck.');
   }
   const releaseRecord = JSON.parse(releaseResponse.bytes.toString('utf8'));
+  if (
+    !hasExpectedPublicRoutes(releaseRecord.publication?.routes)
+  ) {
+    throw new Error('Live release record has an unexpected public route set.');
+  }
   const identity = validateExpectedIdentity(releaseRecord, {
     commitSha: expectedCommit,
     workflowRunId: expectedRunId,
@@ -747,6 +807,12 @@ export async function smokeProductionPages({
       throw new Error(`Required production route is absent from the tree manifest: ${route || '/'}.`);
     }
   }
+  await assertRemovedRoutesUnavailable(
+    fetchImpl,
+    normalizedBase,
+    cacheToken,
+    fetchOptions,
+  );
 
   let journeys = Object.freeze({ status: 'not-run-files-only' });
   if (!filesOnly) {

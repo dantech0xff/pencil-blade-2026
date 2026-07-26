@@ -35,15 +35,12 @@
     overflow-wrap: anywhere;
   }
 
-  .proof-figure,
-  .ledger-card,
   .rights-boundary,
   blockquote,
   pre {
     break-inside: avoid;
   }
 
-  .proof-figure figcaption,
   .rights-boundary,
   cite,
   .status {

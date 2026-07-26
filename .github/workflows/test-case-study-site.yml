@@ -72,7 +72,6 @@ jobs:
         run: |
           set -euo pipefail
           node --test \
-            tests/ai-lab-content.test.mjs \
             tests/audit-case-study-build.test.mjs \
             tests/case-study-approval.test.mjs \
             tests/case-study-chapters.test.mjs \

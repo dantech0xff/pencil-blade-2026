@@ -1,26 +1,14 @@
 import { expect, test } from "@playwright/test";
 
-test("skeptical engineer can trace a chapter claim into its canonical evidence", async ({ page }) => {
+test("skeptical engineer can reach Forensics and inspect canonical evidence IDs", async ({ page }) => {
   await page.goto("");
   await page.getByRole("link", { name: /detailed forensics/i }).click();
   await expect(page).toHaveURL(/\/forensics\/$/u);
   await expect(page.getByRole("heading", { name: "Reading a Game That Cannot Run" })).toBeVisible();
-  await page.getByRole("link", { name: "CLM-NATIVE-PROFILE" }).first().click();
-  await expect(page).toHaveURL(/\/evidence\/#CLM-NATIVE-PROFILE$/u);
-  await expect(page.locator("#CLM-NATIVE-PROFILE")).toBeVisible();
-  await expect(page.locator("#CLM-NATIVE-PROFILE")).toContainText(/recovered|inferred|unknown/iu);
-});
-
-test("story learner can follow the documentary sequence without losing locale", async ({ page }) => {
-  await page.goto("story/");
-  await expect(page.getByRole("heading", { name: "The Lost Game" })).toBeVisible();
-  await page.getByRole("link", { name: "Open the static evidence workbench" }).click();
-  await expect(page).toHaveURL(/\/forensics\/$/u);
-  await page.getByRole("link", { name: /Follow the contract into the clean-room build/iu }).click();
-  await expect(page).toHaveURL(/\/reconstruction\/$/u);
-
+  await expect(page.locator('[data-evidence-ref="CLM-NATIVE-PROFILE"]').first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Tiếng Việt" })).toBeVisible();
   await page.getByRole("link", { name: "Tiếng Việt" }).click();
-  await expect(page).toHaveURL(/\/vi\/reconstruction\/$/u);
+  await expect(page).toHaveURL(/\/vi\/forensics\/$/u);
   await expect(page.locator("html")).toHaveAttribute("lang", "vi");
 });
 
@@ -60,19 +48,9 @@ test("non-play documentary routes never request the game subtree", async ({ page
   });
   for (const path of [
     "",
-    "story/",
     "forensics/",
-    "reconstruction/",
-    "ai-lab/",
-    "evidence/",
-    "about/",
     "vi/",
-    "vi/story/",
     "vi/forensics/",
-    "vi/reconstruction/",
-    "vi/ai-lab/",
-    "vi/evidence/",
-    "vi/about/",
   ]) {
     await page.goto(path);
     await expect(page.locator("main h1")).toBeVisible();
@@ -83,21 +61,11 @@ test("non-play documentary routes never request the game subtree", async ({ page
 test("every launch route publishes canonical, reciprocal locale, and x-default metadata", async ({ page }) => {
   for (const path of [
     "",
-    "story/",
     "forensics/",
-    "reconstruction/",
-    "ai-lab/",
-    "evidence/",
     "play/",
-    "about/",
     "vi/",
-    "vi/story/",
     "vi/forensics/",
-    "vi/reconstruction/",
-    "vi/ai-lab/",
-    "vi/evidence/",
     "vi/play/",
-    "vi/about/",
   ]) {
     await page.goto(path);
     await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);

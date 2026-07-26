@@ -28,27 +28,27 @@ function jsx(name, attributes = []) {
 
 test('Pages helpers apply one base and preserve locale-aware directory routes', () => {
   assert.equal(withBase('/'), '/pencil-blade-2026/');
-  assert.equal(withBase('/story/'), '/pencil-blade-2026/story/');
+  assert.equal(withBase('/forensics/'), '/pencil-blade-2026/forensics/');
   assert.equal(
-    withBase('/pencil-blade-2026/story/?claim=CLM-APK-BYTES#proof'),
-    '/pencil-blade-2026/story/?claim=CLM-APK-BYTES#proof',
+    withBase('/pencil-blade-2026/forensics/?claim=CLM-APK-BYTES#proof'),
+    '/pencil-blade-2026/forensics/?claim=CLM-APK-BYTES#proof',
   );
-  assert.equal(localizedPath('en', '/vi/story/'), '/story/');
-  assert.equal(localizedPath('vi', '/story/'), '/vi/story/');
-  assert.equal(alternateLocalePath('vi', '/story/#proof'), '/vi/story/#proof');
-  assert.throws(() => withBase('https://example.com/story/'), /site-local path/u);
-  assert.throws(() => withBase('/../story/'), /traversal/u);
+  assert.equal(localizedPath('en', '/vi/forensics/'), '/forensics/');
+  assert.equal(localizedPath('vi', '/forensics/'), '/vi/forensics/');
+  assert.equal(alternateLocalePath('vi', '/forensics/#proof'), '/vi/forensics/#proof');
+  assert.throws(() => withBase('https://example.com/forensics/'), /site-local path/u);
+  assert.throws(() => withBase('/../forensics/'), /traversal/u);
 });
 
 test('route fragment merge rejects duplicate IDs, paths, and missing locale pairs', () => {
   const valid = [
-    { id: 'story.en', localePairId: 'story', locale: 'en', path: '/story/' },
-    { id: 'story.vi', localePairId: 'story', locale: 'vi', path: '/vi/story/' },
+    { id: 'forensics.en', localePairId: 'forensics', locale: 'en', path: '/forensics/' },
+    { id: 'forensics.vi', localePairId: 'forensics', locale: 'vi', path: '/vi/forensics/' },
   ];
   assert.equal(mergeRouteFragments([valid]).length, 2);
 
   assert.throws(
-    () => mergeRouteFragments([[valid[0], { ...valid[1], id: 'story.en' }]]),
+    () => mergeRouteFragments([[valid[0], { ...valid[1], id: 'forensics.en' }]]),
     /Duplicate route ID/u,
   );
   assert.throws(
@@ -60,7 +60,7 @@ test('route fragment merge rejects duplicate IDs, paths, and missing locale pair
             id: 'other.en',
             localePairId: 'other',
             locale: 'en',
-            path: '/story/',
+            path: '/forensics/',
           },
         ],
       ], { requireLocalePairs: false }),
@@ -84,7 +84,6 @@ test('restricted MDX permits semantic Markdown and allowlisted literal component
     },
     jsx('EvidenceRef', [
       { type: 'mdxJsxAttribute', name: 'claimId', value: 'CLM-APK-BYTES' },
-      { type: 'mdxJsxAttribute', name: 'href', value: '/evidence/#CLM-APK-BYTES' },
     ]),
   );
   assert.doesNotThrow(() => assertRestrictedMdxTree(tree));
@@ -156,7 +155,7 @@ for (const [name, tree, expected] of [
   [
     'Astro raw directive',
     root(
-      jsx('CodeLens', [
+      jsx('EvidenceRef', [
         { type: 'mdxJsxAttribute', name: 'set:html', value: '<b>unsafe</b>' },
       ]),
     ),
@@ -174,7 +173,7 @@ for (const [name, tree, expected] of [
   [
     'external resource request',
     root(
-      jsx('ProofFigure', [
+      jsx('EvidenceRef', [
         {
           type: 'mdxJsxAttribute',
           name: 'src',
@@ -196,7 +195,7 @@ test('content configuration keeps authored copy separate and loads canonical joi
     'utf8',
   );
   assert.match(source, /const chapters = defineCollection/u);
-  assert.match(source, /const aiEpisodes = defineCollection/u);
+  assert.doesNotMatch(source, /const aiEpisodes = defineCollection/u);
   assert.match(source, /const claimPresentations = defineCollection/u);
   assert.match(source, /src\/generated\/facts\.json/u);
   const generatedCollectionSource = source.slice(

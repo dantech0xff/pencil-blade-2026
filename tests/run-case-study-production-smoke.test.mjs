@@ -6,6 +6,10 @@ import { join } from 'node:path';
 import test from 'node:test';
 
 import {
+  PUBLIC_ROUTES,
+  REQUIRED_CASE_STUDY_ROUTES,
+} from '../scripts/case-study-public-routes.mjs';
+import {
   fetchBrowserRouteWithRetries,
   safeReportDirectory,
   smokeProductionPages,
@@ -15,21 +19,11 @@ const commitSha = '1'.repeat(40);
 const contentDigest = 'a'.repeat(64);
 const requiredFiles = [
   'index.html',
-  'story/index.html',
   'forensics/index.html',
-  'reconstruction/index.html',
-  'ai-lab/index.html',
-  'evidence/index.html',
   'play/index.html',
-  'about/index.html',
   'vi/index.html',
-  'vi/story/index.html',
   'vi/forensics/index.html',
-  'vi/reconstruction/index.html',
-  'vi/ai-lab/index.html',
-  'vi/evidence/index.html',
   'vi/play/index.html',
-  'vi/about/index.html',
   'play/game/index.html',
 ];
 
@@ -48,6 +42,9 @@ function fixture(options = {}) {
     content: {
       contentTreeDigest: contentDigest,
     },
+    publication: {
+      routes: PUBLIC_ROUTES,
+    },
     ...options.release,
   };
   const files = new Map();
@@ -61,6 +58,10 @@ function fixture(options = {}) {
       Buffer.from(`<!doctype html><title>${path}</title><main>verified</main>\n`),
     );
   }
+  files.set(
+    'sitemap-0.xml',
+    Buffer.from(sitemapXml(options.extraSitemapRoutes)),
+  );
   files.set('assets/site.css', Buffer.from('body{color:#171a18}\n'));
   files.set('play/game/assets/audio/cut.mp3', Buffer.from('verified-mp3-bytes'));
   if (options.deletePath) files.delete(options.deletePath);
@@ -84,11 +85,20 @@ function fixture(options = {}) {
   };
 }
 
+function sitemapXml(extraRoutes = []) {
+  const routes = [...REQUIRED_CASE_STUDY_ROUTES, ...(extraRoutes ?? [])];
+  const urls = routes
+    .map((route) => `<url><loc>https://example.test/pencil-blade-2026${route}</loc></url>`)
+    .join('');
+  return `<urlset>${urls}</urlset>`;
+}
+
 function contentType(path) {
   if (path.endsWith('.html')) return 'text/html; charset=utf-8';
   if (path.endsWith('.json')) return 'application/json; charset=utf-8';
   if (path.endsWith('.css')) return 'text/css; charset=utf-8';
   if (path.endsWith('.mp3')) return 'audio/mpeg';
+  if (path.endsWith('.xml')) return 'application/xml; charset=utf-8';
   return 'application/octet-stream';
 }
 
@@ -104,6 +114,12 @@ function fakeFetch(input, fixtureState, options = {}) {
     bytes[0] ^= 0xff;
   }
   if (!bytes) {
+    if (options.liveRemovedPath === path) {
+      return Promise.resolve(new Response('<!doctype html><title>stale route</title>', {
+        status: 200,
+        headers: { 'content-type': 'text/html' },
+      }));
+    }
     return Promise.resolve(new Response('missing', {
       status: 404,
       headers: { 'content-type': 'text/plain' },
@@ -315,7 +331,7 @@ test('production smoke rejects wrong manifest, file bytes, MIME, missing route, 
     /unacceptable live MIME/u,
   );
 
-  const missingRoute = fixture({ deletePath: 'vi/about/index.html' });
+  const missingRoute = fixture({ deletePath: 'vi/forensics/index.html' });
   await assert.rejects(
     () => smokeProductionPages(smokeOptions(missingRoute)),
     /Required production route/u,
@@ -331,6 +347,52 @@ test('production smoke rejects wrong manifest, file bytes, MIME, missing route, 
   await assert.rejects(
     () => smokeProductionPages(smokeOptions(wrongIdentity)),
     /identity does not match/u,
+  );
+});
+
+test('production smoke rejects removed routes in the manifest and on the live site', async () => {
+  const staleManifest = fixture({ addPath: 'story/index.html' });
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(staleManifest)),
+    /contains removed public route \/story\//u,
+  );
+
+  const staleLiveRoute = fixture();
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(staleLiveRoute, {
+      fetchImpl: (url) => fakeFetch(url, staleLiveRoute, {
+        liveRemovedPath: 'story/',
+      }),
+    })),
+    /Removed production route is still public.*\/story\//u,
+  );
+});
+
+test('production smoke rejects arbitrary extra public routes in files and sitemap', async () => {
+  const unexpectedManifest = fixture({ addPath: 'unexpected/index.html' });
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(unexpectedManifest)),
+    /contains unexpected public HTML route: unexpected\/index\.html/u,
+  );
+
+  const nestedGameRoute = fixture({
+    addPath: 'play/game/unexpected/index.html',
+  });
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(nestedGameRoute)),
+    /contains unexpected public HTML route: play\/game\/unexpected\/index\.html/u,
+  );
+
+  const htmRoute = fixture({ addPath: 'unexpected.htm' });
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(htmRoute)),
+    /contains unexpected public HTML route: unexpected\.htm/u,
+  );
+
+  const unexpectedSitemap = fixture({ extraSitemapRoutes: ['/unexpected/'] });
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(unexpectedSitemap)),
+    /production sitemap contains unexpected public URL: .*\/unexpected\//u,
   );
 });
 

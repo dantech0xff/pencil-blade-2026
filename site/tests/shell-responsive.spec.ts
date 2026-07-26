@@ -71,9 +71,11 @@ for (const home of [
   });
 }
 
-test("print preserves citations and rights boundaries", async ({ page }) => {
-  await page.goto("reconstruction/");
+test("print preserves retained evidence and rights boundaries", async ({ page }) => {
+  await page.goto("forensics/");
+  await page.emulateMedia({ media: "print" });
+  await expect(page.locator(".evidence-ref").first()).toBeVisible();
+  await page.goto("play/");
   await page.emulateMedia({ media: "print" });
   await expect(page.locator(".rights-boundary")).toBeVisible();
-  await expect(page.locator(".evidence-ref").first()).toBeVisible();
 });

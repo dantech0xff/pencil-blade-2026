@@ -100,10 +100,9 @@ test("project-authored SVG assets are script-free and self-contained", async () 
   }
 });
 
-test("localized Home pages and About preserve their reviewed content contracts", async () => {
+test("localized Home pages preserve the three-section content contract", async () => {
   const home = await read("site/src/pages/index.astro");
   const viHome = await read("site/src/pages/vi/index.astro");
-  const about = await read("site/src/pages/about/index.astro");
   assert.match(home, /APK[\s\S]*libgame\.so[\s\S]*Try the game/u);
   assert.match(home, /862 resources[\s\S]*Bomb::onEnter\(\)[\s\S]*6 game modes/u);
   assert.match(viHome, /APK[\s\S]*libgame\.so[\s\S]*Chơi thử game/u);
@@ -112,9 +111,8 @@ test("localized Home pages and About preserve their reviewed content contracts",
   assert.doesNotMatch(viHome, /MetricLedger|RightsBoundary|Quyền thương mại/u);
   assert.match(home, /not the original runtime/u);
   assert.match(viHome, /không phải môi trường chạy gốc/u);
-  assert.match(about, /Authenticated sole-owner review/u);
-  assert.match(about, /Confirmed channel/u);
-  assert.match(about, /commercial distribution clearance is asserted/u);
+  assert.match(home, /data-home-part/g);
+  assert.match(viHome, /data-home-part/g);
 });
 
 test("browser tooling is exactly pinned", async () => {
