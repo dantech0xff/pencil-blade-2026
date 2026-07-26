@@ -115,7 +115,7 @@
   "workflowFiles": [
     {
       "path": ".github/workflows/deploy-web-mobile-pages.yml",
-      "sha256": "78920f9f5d7490bf64688945735fe665bfa239c591f87bdfd03bf590009ebd6b"
+      "sha256": "24f97dbb6fd4a6261c905dc210441e37da7476944df4641658169679888ee96d"
     },
     {
       "path": ".github/workflows/test-case-study-site.yml",

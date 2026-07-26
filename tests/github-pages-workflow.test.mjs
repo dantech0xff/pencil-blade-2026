@@ -301,6 +301,14 @@ test('approval request is separate and the exact candidate is uploaded for revie
   );
   assert.match(
     composeJob,
+    /qa_artifact_name="case-study-qa-\$GITHUB_RUN_ID-\$GITHUB_RUN_ATTEMPT"[\s\S]*--report "\$qa_artifact_name\/candidate-audit\.txt"[\s\S]*--report "\$qa_artifact_name\/runtime-nested\/case-study-h5-runtime-matrix\.json"[\s\S]*--report "\$qa_artifact_name\/candidate-smoke\/case-study-production-smoke\.json"/u,
+  );
+  assert.doesNotMatch(
+    composeJob,
+    /--report "\$REVIEW_REPORT_DIR\//u,
+  );
+  assert.match(
+    composeJob,
     /case-study-approval\.mjs verify[\s\S]*--request "\$NONDEPLOYABLE_DIR\/candidate-approval-request\.json"/u,
   );
   assert.match(
@@ -322,7 +330,7 @@ test('approval request is separate and the exact candidate is uploaded for revie
   const qaUpload = workflow.jobs['compose-pages'].steps.find(
     (step) => step.name === 'Upload nondeployable candidate QA reports',
   );
-  assert.equal(qaUpload.with.path, '.case-study-work');
+  assert.equal(qaUpload.with.path, '${{ runner.temp }}/case-study-work');
   assert.equal(qaUpload.with['include-hidden-files'], true);
   assert.match(
     composeJob,

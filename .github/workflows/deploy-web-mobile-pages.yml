@@ -444,6 +444,7 @@ jobs:
             --report-dir "$REVIEW_REPORT_DIR/candidate-smoke" \
             --ci
           requested_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          qa_artifact_name="case-study-qa-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
           node scripts/case-study-approval.mjs prepare \
             --release "$CANDIDATE_DIR/case-study-release.json" \
             --tree-manifest-digest "$tree_manifest_digest" \
@@ -453,9 +454,9 @@ jobs:
             --checklist vietnamese-factual-review \
             --checklist rights-and-attribution-review \
             --checklist accessibility-and-performance-review \
-            --report "$REVIEW_REPORT_DIR/candidate-audit.txt" \
-            --report "$REVIEW_REPORT_DIR/runtime-nested/case-study-h5-runtime-matrix.json" \
-            --report "$REVIEW_REPORT_DIR/candidate-smoke/case-study-production-smoke.json" \
+            --report "$qa_artifact_name/candidate-audit.txt" \
+            --report "$qa_artifact_name/runtime-nested/case-study-h5-runtime-matrix.json" \
+            --report "$qa_artifact_name/candidate-smoke/case-study-production-smoke.json" \
             --out "$NONDEPLOYABLE_DIR/candidate-approval-request.json"
           node scripts/case-study-approval.mjs verify \
             --release "$CANDIDATE_DIR/case-study-release.json" \
@@ -502,7 +503,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: case-study-qa-${{ github.run_id }}-${{ github.run_attempt }}
-          path: .case-study-work
+          path: ${{ runner.temp }}/case-study-work
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 30
