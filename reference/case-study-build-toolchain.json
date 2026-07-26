@@ -22,7 +22,7 @@
       "packagePath": "site/package.json",
       "packageSha256": "411df73b0c2ce55bb21ed630c781b1e1ad9ab4ca696a44d2421d8a47c36935e1",
       "lockPath": "site/package-lock.json",
-      "lockSha256": "65d351597781c8cf89a837e687786b1cd42c61ad05d2ea813d9b5492a975e268",
+      "lockSha256": "0f1d8e43f00dcbbdb75662bd6ce14de352ef05ef84d81ce02eb1afad68de5cdb",
       "installCommand": "npm ci --ignore-scripts --no-audit --no-fund"
     }
   ],

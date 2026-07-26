@@ -530,5 +530,14 @@ test('both npm owners require the exact repository Node and npm versions', () =>
       npm: '11.6.2',
     });
     assert.deepEqual(packageLock.packages[''].engines, packageJson.engines);
+    for (const [packagePath, packageRecord] of Object.entries(packageLock.packages)) {
+      if (packagePath) {
+        assert.match(
+          packageRecord.version ?? '',
+          /^\d+\.\d+\.\d+(?:[-+].+)?$/u,
+          `${packageDirectory}/${packagePath} must have a concrete version`,
+        );
+      }
+    }
   }
 });
