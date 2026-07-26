@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "node": {
+    "version": "24.18.0",
+    "versionFile": ".node-version",
+    "versionFileSha256": "55075b5ec4e8b31936cbbc282b8829116d1fd48f2f2f1856dee592a6650700ce"
+  },
+  "npm": {
+    "version": "11.6.2"
+  },
+  "packageLocks": [
+    {
+      "owner": "game",
+      "packagePath": "game/package.json",
+      "packageSha256": "9693d8d83b673d0077c74c6989b2e903dd55760baa3c3d8d7f7634c7d9ce1e4b",
+      "lockPath": "game/package-lock.json",
+      "lockSha256": "393456dae0cd77399899a7e488fd51699b9a7da77a68ac343b4b3a818abd2f5e",
+      "installCommand": "npm ci --ignore-scripts --no-audit --no-fund"
+    },
+    {
+      "owner": "site",
+      "packagePath": "site/package.json",
+      "packageSha256": "411df73b0c2ce55bb21ed630c781b1e1ad9ab4ca696a44d2421d8a47c36935e1",
+      "lockPath": "site/package-lock.json",
+      "lockSha256": "65d351597781c8cf89a837e687786b1cd42c61ad05d2ea813d9b5492a975e268",
+      "installCommand": "npm ci --ignore-scripts --no-audit --no-fund"
+    }
+  ],
+  "cocosCreator": {
+    "version": "3.8.8",
+    "runnerLabels": [
+      "self-hosted",
+      "macOS",
+      "ARM64",
+      "cocos-creator-3.8.8"
+    ],
+    "applicationPath": "/Applications/Cocos/Creator/3.8.8/CocosCreator.app",
+    "executablePath": "/Applications/Cocos/Creator/3.8.8/CocosCreator.app/Contents/MacOS/CocosCreator",
+    "executableSha256": "3a8452496c03e85f2784e64679a1fd203701b0b245125efee02c7923f2bd3464",
+    "buildConfigPath": "game/build-configs/web-mobile-pages.json",
+    "buildConfigSha256": "03771175a37d3637cb5c72f9ca0db98fcbe20d86f83ae58418f925b539cc8643"
+  },
+  "playwright": {
+    "testPackage": {
+      "name": "@playwright/test",
+      "version": "1.61.1",
+      "integrity": "sha512-8nKv6+0RJSL9FE4jYOEGXnPeM/Hg12qZpmqzZjRh3qM0Y7c3z1mrOTfFLids72RDQYVh9WpLEfR5WdpNX4fkig=="
+    },
+    "runtimePackage": {
+      "name": "playwright",
+      "version": "1.61.1",
+      "integrity": "sha512-DWnY5o3YbLWK4GovuAVwpqL+1VwGNdUGrRr++8j8PtQQzvAVZUIMjKQ90fY689sEJZJBbZVw1rXaOKSTitkzPQ=="
+    },
+    "corePackage": {
+      "name": "playwright-core",
+      "version": "1.61.1",
+      "integrity": "sha512-h7Qlt6m4REp25qvIdvbDtVmD4LqVXfpRxhORv9L0jzETM05p4fuPJ3dKyuSXQxDSbXnmS79HAgi9589lGSpLkg=="
+    },
+    "browserManifest": {
+      "dependencyPath": "node_modules/playwright-core/browsers.json",
+      "sha256": "ee39bc924bc3d1bd895626c2910f1292d109bbfeeb5abd113acb45e1951cc942"
+    },
+    "chromium": {
+      "revision": "1228",
+      "browserVersion": "149.0.7827.55"
+    },
+    "chromiumHeadlessShell": {
+      "revision": "1228",
+      "browserVersion": "149.0.7827.55"
+    },
+    "installCommand": "npx --no-install playwright install --with-deps chromium"
+  },
+  "workflowParser": {
+    "package": "yaml",
+    "version": "2.9.0",
+    "integrity": "sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA=="
+  },
+  "actions": [
+    {
+      "identity": "actions/checkout",
+      "tag": "v7.0.1",
+      "commitSha": "3d3c42e5aac5ba805825da76410c181273ba90b1"
+    },
+    {
+      "identity": "actions/setup-node",
+      "tag": "v7.0.0",
+      "commitSha": "820762786026740c76f36085b0efc47a31fe5020"
+    },
+    {
+      "identity": "actions/upload-artifact",
+      "tag": "v7.0.1",
+      "commitSha": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+    },
+    {
+      "identity": "actions/download-artifact",
+      "tag": "v8.0.1",
+      "commitSha": "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"
+    },
+    {
+      "identity": "actions/configure-pages",
+      "tag": "v6.0.0",
+      "commitSha": "45bfe0192ca1faeb007ade9deae92b16b8254a0d"
+    },
+    {
+      "identity": "actions/upload-pages-artifact",
+      "tag": "v5.0.0",
+      "commitSha": "fc324d3547104276b827a68afc52ff2a11cc49c9"
+    },
+    {
+      "identity": "actions/deploy-pages",
+      "tag": "v5.0.0",
+      "commitSha": "cd2ce8fcbc39b97be8ca5fce6e763baed58fa128"
+    }
+  ],
+  "workflowFiles": [
+    {
+      "path": ".github/workflows/deploy-web-mobile-pages.yml",
+      "sha256": "b010b55d17ce4ea7529ee20f7fdab11b2ac62ea35d985906d9f103f8c964ab13"
+    },
+    {
+      "path": ".github/workflows/test-case-study-site.yml",
+      "sha256": "4cdb495fa464047b4fae1c1bc97d61a4460197f2ed3b3c064de1ea729331eaec"
+    }
+  ],
+  "siteBuild": {
+    "runner": "ubuntu-24.04",
+    "astroConfigPath": "site/astro.config.mjs",
+    "astroConfigSha256": "6996785d2ad53efc89c1141def5603cf0a7dbaed3a0c8520e215fc94ee22e93d"
+  },
+  "gameReleaseTests": {
+    "manifestPath": "reference/game-release-test-manifest.json",
+    "manifestSha256": "69b323311eadedc9fad208dad9e081919cfd92f66e3ee460b6aaa9c1800571eb"
+  },
+  "pages": {
+    "prefix": "/pencil-blade-2026/",
+    "gameMount": "play/game/",
+    "environment": "github-pages"
+  }
+}

@@ -1,0 +1,102 @@
+name: Test Case Study Site
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: case-study-site-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  site-checks:
+    name: Validate, build, and test site
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up exact Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Verify exact Node and npm
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = "v24.18.0"
+          test "$(npm --version)" = "11.6.2"
+
+      - name: Install locked site dependencies
+        working-directory: site
+        shell: bash
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Validate recursive workflow trust
+        shell: bash
+        run: |
+          set -euo pipefail
+          node site/scripts/validate-workflow-trust.mjs \
+            .github/workflows/test-case-study-site.yml \
+            .github/workflows/deploy-web-mobile-pages.yml
+
+      - name: Validate publication and site source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/validate-case-study-publication.mjs \
+            --manifest reference/case-study-publication-manifest.json \
+            --verify-snapshot
+          npm --prefix site run prepare:data
+          npm --prefix site run validate:content
+          npm --prefix site run check
+
+      - name: Run portable site and release-contract tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test \
+            tests/ai-lab-content.test.mjs \
+            tests/audit-case-study-build.test.mjs \
+            tests/case-study-approval.test.mjs \
+            tests/case-study-chapters.test.mjs \
+            tests/case-study-content.test.mjs \
+            tests/case-study-design-system.test.mjs \
+            tests/case-study-publication-policy.test.mjs \
+            tests/case-study-site-workflow.test.mjs \
+            tests/compose-case-study-pages.test.mjs \
+            tests/generate-case-study-data.test.mjs \
+            tests/generate-case-study-release-manifest.test.mjs \
+            tests/github-pages-workflow.test.mjs \
+            tests/play-launcher.test.mjs \
+            tests/run-case-study-production-smoke.test.mjs \
+            tests/run-game-release-tests.test.mjs \
+            tests/validate-workflow-trust.test.mjs \
+            tests/verify-case-study-pages.test.mjs
+
+      - name: Build static site
+        working-directory: site
+        shell: bash
+        run: npm run build
+
+      - name: Install locked Playwright Chromium
+        working-directory: site
+        shell: bash
+        run: npx --no-install playwright install --with-deps chromium
+
+      - name: Run documentary browser checks
+        working-directory: site
+        shell: bash
+        run: npm run test:browser
