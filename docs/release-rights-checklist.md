@@ -12,6 +12,11 @@ The GitHub repository was verified as public on 2026-07-24. That existing reposi
 visibility is not rights evidence. The owner separately approved the academic Pages deployment;
 that decision does not make the records below ship-ready for a commercial release.
 
+On 2026-07-26, the project owner expanded that same academic, noncommercial display decision
+to the three exact README runtime captures identified by path and SHA-256 in
+[`reference/case-study-academic-display-decision.json`](../reference/case-study-academic-display-decision.json).
+This bounded documentation decision does not change the blocked commercial-release verdict.
+
 ## Current Records
 
 | Record | Category | Current rights state | Current release state |
@@ -56,6 +61,7 @@ The overall release decision also needs a separately approved manifest-level ver
 | `Fonts/CooperBlackStd.otf` | Byte-preserved but unsupported; it needs an explicit release decision. |
 | Approved release exceptions | None. The manifest's `releaseExceptions.approved` list is empty. |
 | Public Pages deployment | Deployed under the owner-approved academic waiver; no commercial-clearance claim. |
+| README runtime gallery | Three exact H5 captures owner-approved for academic, noncommercial display on 2026-07-26; no standalone recovered asset approval. |
 | Clean-room source | Still unreviewed for public distribution purposes. |
 | Cocos-generated Web runtime | Unreviewed; engine runtime is not implicitly cleared by technical build success. |
 

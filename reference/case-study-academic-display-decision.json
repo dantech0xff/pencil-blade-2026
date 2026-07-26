@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "decisionId": "pencil-blade-academic-case-study-display-2026-07-25",
-  "decisionVersion": "1.0.0",
-  "decisionStatus": "owner-approved-existing-scope",
-  "decisionDate": "2026-07-25",
+  "decisionId": "pencil-blade-academic-case-study-display-2026-07-26",
+  "decisionVersion": "1.1.0",
+  "decisionStatus": "owner-approved-expanded-scope",
+  "decisionDate": "2026-07-26",
   "decisionActorRoleId": "project-owner",
-  "purpose": "Machine-readable projection of the existing owner decision for the academic, noncommercial Pencil Blade GitHub Pages demonstration and its exact production-runtime documentary captures. This record is not a new license or commercial-rights review.",
+  "purpose": "Machine-readable projection of the owner decision for the academic, noncommercial Pencil Blade GitHub Pages demonstration, its production-runtime documentary captures, and the exact README runtime gallery approved on 2026-07-26. This record is not a new license or commercial-rights review.",
   "evidenceSource": {
     "path": "docs/release-rights-checklist.md",
-    "sha256": "c2f0ca7ef11aab437a1c2353473e3c056e554c39ace4cb29fd17f1d08210d869",
-    "statement": "Commercial clearance unresolved; academic Pages release owner-approved."
+    "sha256": "cef3e5cd26c03b1557c3eca81d8400d3a7e30bd0456f182561ae4707999fc967",
+    "statement": "Commercial clearance unresolved; academic Pages and exact README runtime-gallery display owner-approved."
   },
   "academicDisplayScope": {
     "purpose": "research, education, preservation, and noncommercial engineering documentation",
@@ -61,12 +61,36 @@
         "captureId": "chrome-720x1280-classic",
         "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-720x1280-classic.png",
         "sha256": "80efc4c60ee39ae020fce7cff3ce2d6519d3c6393e777dd9889d1f4f39477991"
+      },
+      {
+        "mediaId": "MEDIA-README-CAPTURE-720-MODE-SELECT-SETTLED",
+        "captureId": "readme-720-mode-select-settled",
+        "path": "plans/260726-1633-star-worthy-readme/reports/runtime-captures/readme-720-mode-select-settled.png",
+        "sha256": "da0383da6b768bf049ea93840f22d1566c0883094724e9db89bc304257c4b75e"
+      },
+      {
+        "mediaId": "MEDIA-README-CAPTURE-720-CLASSIC-READY",
+        "captureId": "readme-720-classic-ready",
+        "path": "plans/260726-1633-star-worthy-readme/reports/runtime-captures/readme-720-classic-ready.png",
+        "sha256": "0b57f56e22b17eb11bfbb31ae56386c81293cf5dd8bfaad7fc69137755ca39b6"
+      },
+      {
+        "mediaId": "MEDIA-README-CAPTURE-720-CLASSIC-ACTION",
+        "captureId": "readme-720-classic-action",
+        "path": "plans/260726-1633-star-worthy-readme/reports/runtime-captures/readme-720-classic-action.png",
+        "sha256": "2af52d4d647e402a30fa569d15a5097c3af680c7cbc38cde8a4365b36e37dbe0"
       }
     ],
     "captureSourceReport": {
       "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/production-pages-runtime.json",
       "sha256": "a2e9b67f970eff9eb4c516aa0a94e6ba472af480f3d39838fca3001e5cc8e7e4",
       "status": "pass"
+    },
+    "readmeCaptureSourceReport": {
+      "path": "plans/260726-1633-star-worthy-readme/reports/readme-gallery-capture-manifest.json",
+      "sha256": "c4a04db76fff13f539b106ff5e7b6e3b86efe3001bf5ecb68a3ba3c63d6ae5e9",
+      "status": "pass",
+      "stateProof": "RecoveredAppShellController state observed as mode-select and classic before capture."
     }
   },
   "commercialRightsRecordRef": {
@@ -100,7 +124,7 @@
     }
   ],
   "displayDisclaimer": {
-    "en": "Academic display is a bounded owner decision for the exact audited H5 demonstration and six hashed production captures. It is not a license or commercial clearance.",
-    "vi": "Hiển thị học thuật là quyết định có phạm vi giới hạn của chủ dự án cho đúng bản H5 đã kiểm toán và sáu ảnh chụp production có hàm băm. Đây không phải giấy phép hoặc sự chấp thuận thương mại."
+    "en": "Academic display is a bounded owner decision for the exact audited H5 demonstration, six hashed production captures, and three hashed README runtime captures. It is not a license or commercial clearance.",
+    "vi": "Hiển thị học thuật là quyết định có phạm vi giới hạn của chủ dự án cho đúng bản H5 đã kiểm toán, sáu ảnh chụp production có hàm băm và ba ảnh runtime README có hàm băm. Đây không phải giấy phép hoặc sự chấp thuận thương mại."
   }
 }

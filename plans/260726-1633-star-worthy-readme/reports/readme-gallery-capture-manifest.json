@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "reportKind": "readme-runtime-captures",
+  "generatedAt": "2026-07-26T10:08:52.187Z",
+  "academicDisplayDecision": {
+    "decisionActorRoleId": "project-owner",
+    "decisionDate": "2026-07-26",
+    "decisionId": "pencil-blade-academic-case-study-display-2026-07-26",
+    "scopeExpansion": "README runtime gallery"
+  },
+  "captures": [
+    {
+      "captureId": "readme-720-mode-select-settled",
+      "displayPath": "site/src/assets/media/runtime/readme-720-mode-select-settled.png",
+      "entryPath": [
+        "main-menu-state",
+        "new-game-swipe",
+        "mode-select-state",
+        "3-second-visual-settle"
+      ],
+      "height": 1280,
+      "pixelTransformation": "none",
+      "reportPath": "plans/260726-1633-star-worthy-readme/reports/runtime-captures/readme-720-mode-select-settled.png",
+      "sha256": "da0383da6b768bf049ea93840f22d1566c0883094724e9db89bc304257c4b75e",
+      "state": "mode-select-settled",
+      "width": 720
+    },
+    {
+      "captureId": "readme-720-classic-ready",
+      "displayPath": "site/src/assets/media/runtime/readme-720-classic-ready.png",
+      "entryPath": [
+        "main-menu-state",
+        "new-game-swipe",
+        "mode-select-state",
+        "vertical-cut-probes",
+        "classic-state",
+        "4-second-gameplay-settle"
+      ],
+      "height": 1280,
+      "pixelTransformation": "none",
+      "reportPath": "plans/260726-1633-star-worthy-readme/reports/runtime-captures/readme-720-classic-ready.png",
+      "sha256": "0b57f56e22b17eb11bfbb31ae56386c81293cf5dd8bfaad7fc69137755ca39b6",
+      "state": "classic-active-ready",
+      "width": 720
+    },
+    {
+      "captureId": "readme-720-classic-action",
+      "displayPath": "site/src/assets/media/runtime/readme-720-classic-action.png",
+      "entryPath": [
+        "main-menu-state",
+        "new-game-swipe",
+        "mode-select-state",
+        "vertical-cut-probes",
+        "classic-state",
+        "gameplay-settle",
+        "two-cut-swipes"
+      ],
+      "height": 1280,
+      "pixelTransformation": "none",
+      "reportPath": "plans/260726-1633-star-worthy-readme/reports/runtime-captures/readme-720-classic-action.png",
+      "sha256": "2af52d4d647e402a30fa569d15a5097c3af680c7cbc38cde8a4365b36e37dbe0",
+      "state": "classic-active-after-cut-input",
+      "width": 720
+    }
+  ],
+  "runtime": {
+    "browserVersion": "150.0.7871.182",
+    "devicePixelRatio": 1,
+    "playwrightVersion": "1.61.1",
+    "viewport": {
+      "height": 1280,
+      "id": "chrome-720x1280",
+      "width": 720
+    }
+  },
+  "sourceBuild": {
+    "buildPath": "game/build/web-mobile-pages",
+    "bytes": 39613694,
+    "files": 2539,
+    "pagesPrefix": "/pencil-blade-2026/",
+    "treeDigestSha256": "90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54"
+  },
+  "transformationPolicy": "No pixel modification, crop, resize, re-encode, or color change."
+}

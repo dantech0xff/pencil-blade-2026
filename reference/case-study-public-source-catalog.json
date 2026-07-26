@@ -13,18 +13,30 @@
     {
       "sourceId": "SRC-PUBLIC-README",
       "path": "README.md",
-      "sha256": "1631da0fab3379504780a9b0c7ba86fdf4318e723e6d75a699b95184e974fa91",
+      "sha256": "0842705f3ff2c0f011d006729e033e045d2edd3b73ec07c2856e373e404113b4",
       "publicSafeExcerpt": {
-        "en": "The repository reconstructs Pencil Blade 1.5 through a static-evidence clean-room method and supports Android debug and Web Mobile outputs.",
-        "vi": "Kho lưu trữ phục dựng Pencil Blade 1.5 theo phương pháp clean-room dựa trên bằng chứng tĩnh và hỗ trợ đầu ra Android debug cùng Web Mobile."
+        "en": "Pencil Blade is a clean-room reconstruction built from reviewed static evidence into verified Android debug and playable Web Mobile outputs without executing or embedding the original APK.",
+        "vi": "Pencil Blade là bản phục dựng clean-room, được xây dựng từ bằng chứng tĩnh đã rà soát thành đầu ra Android debug đã kiểm chứng và Web Mobile có thể chơi mà không chạy hoặc nhúng APK gốc."
       },
       "lineRange": {
         "start": 1,
-        "end": 26
+        "end": 34
       },
-      "transitiveLinks": [],
+      "transitiveLinks": [
+        "site/public/social/pencil-blade-en.png",
+        "site/src/assets/media/runtime/chrome-720x1280-main-menu.png",
+        "site/src/assets/media/runtime/readme-720-mode-select-settled.png",
+        "site/src/assets/media/runtime/readme-720-classic-ready.png",
+        "site/src/assets/media/runtime/readme-720-classic-action.png",
+        "docs/project-overview-pdr.md",
+        "docs/reconstruction-report.md",
+        "docs/system-architecture.md",
+        "docs/compatibility-matrix.md",
+        "docs/release-rights-checklist.md",
+        "LICENSE"
+      ],
       "publicLinkAllowed": false,
-      "linkDecisionReason": "Use the hash-bound excerpt until the complete Markdown link graph is reviewed under this catalog."
+      "linkDecisionReason": "Use the hash-bound excerpt for case-study citations; the README landing page's local hero, runtime gallery, documentation, and license destinations are explicitly reviewed in transitiveLinks."
     },
     {
       "sourceId": "SRC-PUBLIC-STATIC-METHOD",
@@ -230,14 +242,14 @@
     {
       "sourceId": "SRC-PUBLIC-RIGHTS-CHECKLIST",
       "path": "docs/release-rights-checklist.md",
-      "sha256": "c2f0ca7ef11aab437a1c2353473e3c056e554c39ace4cb29fd17f1d08210d869",
+      "sha256": "cef3e5cd26c03b1557c3eca81d8400d3a7e30bd0456f182561ae4707999fc967",
       "publicSafeExcerpt": {
-        "en": "Commercial clearance is unresolved while the exact academic Pages demonstration is owner-approved; the academic decision is explicitly not a license conclusion.",
-        "vi": "Chấp thuận thương mại chưa được làm rõ trong khi đúng bản trình diễn Pages học thuật đã được chủ dự án đồng ý; quyết định học thuật rõ ràng không phải kết luận cấp phép."
+        "en": "Commercial clearance remains unresolved while the exact academic Pages demonstration and three hashed README runtime captures are owner-approved for bounded noncommercial display; that decision is not a license.",
+        "vi": "Chấp thuận thương mại vẫn chưa được làm rõ trong khi đúng bản trình diễn Pages học thuật và ba ảnh runtime README có hàm băm được chủ dự án đồng ý hiển thị phi thương mại trong phạm vi giới hạn; quyết định đó không phải giấy phép."
       },
       "lineRange": {
         "start": 1,
-        "end": 12
+        "end": 17
       },
       "transitiveLinks": [],
       "publicLinkAllowed": false,

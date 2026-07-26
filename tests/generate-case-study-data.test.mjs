@@ -137,7 +137,7 @@ test('snapshot hash drift blocks public data generation', () => {
 
 test('Phase 1 loader validates and returns the reviewed publication manifest', () => {
   const loaded = loadPublicationManifest();
-  assert.equal(loaded.manifestVersion, '1.2.0');
+  assert.equal(loaded.manifestVersion, '1.3.0');
   assert.equal(loaded.claimPresentations.length, 39);
 
   const invalid = clone(publicationManifest);

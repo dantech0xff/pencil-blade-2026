@@ -1,69 +1,129 @@
-# Pencil Blade Reconstruction
+<h1 align="center">Pencil Blade: Reconstructing a Lost Game</h1>
 
-Kho lưu trữ này là bản phục dựng *Pencil Blade 1.5* theo phương pháp clean-room, dựa trên bằng chứng tĩnh. APK gốc không chạy được trên các thiết bị Android hiện đại mà dự án có thể kiểm chứng. APK và runtime gốc chỉ được dùng làm bằng chứng; sản phẩm phục dựng không chạy hoặc đóng gói lại runtime đó, đồng thời không tuyên bố giống hệt tuyệt đối với phiên bản lịch sử.
+<p align="center">
+  <img src="./site/public/social/pencil-blade-en.png" width="100%" alt="Pencil Blade evidence-to-reconstruction social preview.">
+</p>
 
-Mục tiêu của dự án là phục vụ học tập, nghiên cứu và bảo tồn. Phần mã phục dựng được công khai theo mô hình source-available, không phải open source theo định nghĩa OSI, và **không được dùng cho mục đích thương mại**.
+<p align="center">
+  <strong>A non-runnable Android game, reconstructed from static evidence into a playable Cocos Creator project—without executing or embedding the original APK.</strong>
+</p>
 
-Đây là dự án phục dựng không chính thức, không đại diện và không tuyên bố có liên kết với chủ sở hữu, nhà phát triển hoặc nhà phát hành ban đầu.
+<p align="center">
+  <a href="https://dantech0xff.github.io/pencil-blade-2026/play/"><strong>▶ Play the reconstruction</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://dantech0xff.github.io/pencil-blade-2026/forensics/"><strong>Explore the forensics</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://dantech0xff.github.io/pencil-blade-2026/vi/">Tiếng Việt</a>
+</p>
 
-## Phạm vi
+<p align="center">
+  <code>Cocos Creator 3.8.8</code>
+  <code>TypeScript</code>
+  <code>Web Mobile + Android</code>
+  <code>Source-available · Noncommercial</code>
+</p>
 
-- Phục dựng hành vi và phần trình bày từ bằng chứng tĩnh, manifest tài nguyên và các contract đã trích xuất.
-- Dùng Cocos Creator `3.8.8` + TypeScript làm nền tảng triển khai hiện tại.
-- Chỉ hỗ trợ hai đầu ra kỹ thuật: Android debug APK nội bộ và Web Mobile H5.
-- Không đóng gói APK gốc, `libgame.so`, emulator, compatibility layer hoặc runtime native cũ làm phụ thuộc khi chạy.
-- Không khẳng định đã đo kiểm thực nghiệm để chứng minh sản phẩm giống hệt runtime gốc.
+## Why this project exists
 
-## Thành phần trong repo
+The original *Pencil Blade 1.5* package could not run on the modern Android devices available to this project. Instead of wrapping the old binary in an emulator or guessing from memory, this reconstruction follows a stricter path:
 
-| Khu vực | Vai trò |
+1. **Extract static evidence** from the preserved package and resource inventory.
+2. **Recover behavioral contracts** from Java, native, and asset relationships.
+3. **Rewrite the game clean-room** in TypeScript, then verify the new Android and Web Mobile runtimes independently.
+
+Every conclusion remains labeled as **recovered**, **inferred**, or **unknown**. The result is a playable reconstruction and a reproducible engineering case study—not a claim of historical-runtime identity.
+
+## Playable reconstruction
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="./site/src/assets/media/runtime/chrome-720x1280-main-menu.png" width="320" alt="Production reconstruction Main Menu at 720 by 1280; not the original runtime."><br>
+      <sub><strong>01 · Main Menu</strong></sub>
+    </td>
+    <td align="center">
+      <img src="./site/src/assets/media/runtime/readme-720-mode-select-settled.png" width="320" alt="Clean-room Pencil Blade reconstruction showing the settled Classic card on Mode Select at 720 by 1280."><br>
+      <sub><strong>02 · Settled Mode Select</strong></sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./site/src/assets/media/runtime/readme-720-classic-ready.png" width="320" alt="Clean-room Pencil Blade Classic reconstruction with score, best score, three lives, pause control, and one strawberry in play at 720 by 1280."><br>
+      <sub><strong>03 · Classic Ready</strong></sub>
+    </td>
+    <td align="center">
+      <img src="./site/src/assets/media/runtime/readme-720-classic-action.png" width="320" alt="Clean-room Pencil Blade Classic reconstruction after cut input, showing score one and fruit in motion at 720 by 1280."><br>
+      <sub><strong>04 · Slice in Action</strong></sub>
+    </td>
+  </tr>
+</table>
+
+> These are exact-pixel captures from the audited reconstruction H5 build. They are not captures of the original runtime and do not prove pixel-, frame-, or trajectory-level identity with it.
+
+## Evidence, not vibes
+
+| Surface | Reviewed result |
 |---|---|
-| `game/` | Dự án Cocos Creator, mã TypeScript, scene và tài nguyên được đưa vào từ tập dữ liệu phục hồi |
-| `docs/` | PDR, kiến trúc, khả năng tương thích, kiểm tra quyền, sổ bằng chứng và báo cáo phục dựng |
-| `release/` | Hai manifest tách bạch việc bảo tồn với quyền phát hành công khai |
-| `forensics/` | Bằng chứng tĩnh, contract và kết quả phân tích |
-| `scripts/` | Công cụ audit, chuẩn bị tài nguyên và kiểm chứng bản build |
+| Native analysis | `713/713` allowlisted application functions enriched with calls, constants, string references, and review state |
+| Resource accounting | `862/862` staged assets classified; `761` connected to live runtime consumers |
+| Claim ledger | `39` reviewed claims: `38` recovered technical claims and `1` unresolved rights claim |
+| Supported outputs | Android debug APK for internal verification and audited Web Mobile H5 |
 
-## Clean-room và nội dung hồi phục
+These denominators describe different evidence surfaces. They are deliberately kept separate and must not be compressed into a “100% restored” claim.
 
-Repo này tách rõ hai lớp:
+## How the reconstruction is organized
 
-1. **Phần triển khai clean-room**: mã TypeScript, scene, cấu hình, test và tài liệu do dự án phục dựng tạo ra.
-2. **Nội dung phục hồi hoặc của bên thứ ba**: PNG, WAV, MP3, font, tên/nhận diện và mọi thành phần có nguồn gốc ngoài phần triển khai clean-room.
+```text
+static evidence
+    ↓
+reviewed contracts + resource ledger
+    ↓
+clean-room TypeScript implementation
+    ↓
+Cocos Creator 3.8.8
+    ↓
+Android debug + Web Mobile H5 verification
+```
 
-Việc repo được cấp phép phi thương mại **không tự động cấp quyền** tái phân phối các tài nguyên phục hồi hoặc nội dung bên thứ ba. Quyền phân phối từng tài nguyên vẫn phải đến từ chủ sở hữu hoặc nguồn hợp lệ tương ứng.
+| Path | What you will find |
+|---|---|
+| `game/` | Cocos Creator project, TypeScript gameplay, scenes, and the reconstructed resource set |
+| `forensics/` | Reviewed claims, native/resource analysis, fidelity records, and runtime observations |
+| `scripts/` | Fail-closed audits, data generation, build checks, and capture verification |
+| `docs/` | Method, architecture, compatibility, rights, and reconstruction reports |
+| `release/` | Separate technical-preservation and public/commercial release decisions |
 
-## Giấy phép
+## Explore locally
 
-Phần nội dung mà các contributor thực sự sở hữu được cấp phép theo [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0). Đây là giấy phép source-available, không phải giấy phép open source được OSI phê duyệt.
+The fastest path is the hosted **[Play launcher](https://dantech0xff.github.io/pencil-blade-2026/play/)**. To inspect the repository:
 
-- Cho phép nghiên cứu, thử nghiệm, học tập và các mục đích phi thương mại.
-- Không cấp quyền sử dụng thương mại.
-- Không giới hạn quyền fair use hoặc các quyền khác được pháp luật quy định.
+```bash
+git clone https://github.com/dantech0xff/pencil-blade-2026.git
+cd pencil-blade-2026
 
-Xem chi tiết ở [LICENSE](./LICENSE).
+# Run the documentary site locally.
+npm --prefix site ci
+npm --prefix site run dev
+```
 
-## Đầu ra được hỗ trợ
+To inspect the game project, open `game/` with **Cocos Creator 3.8.8**. The repository intentionally does not advertise an unverified one-command Creator build.
 
-- Android debug APK nội bộ
-- Web Mobile H5
+## Read the case study
 
-## Tài liệu liên quan
+- [Project overview](./docs/project-overview-pdr.md)
+- [Reconstruction report](./docs/reconstruction-report.md)
+- [System architecture](./docs/system-architecture.md)
+- [Compatibility matrix](./docs/compatibility-matrix.md)
+- [Release-rights checklist](./docs/release-rights-checklist.md)
 
-- [Project Overview PDR](./docs/project-overview-pdr.md)
-- [Code Standards](./docs/code-standards.md)
-- [System Architecture](./docs/system-architecture.md)
-- [GitHub Pages Deployment](./docs/deployment.md)
-- [Codebase Summary](./docs/codebase-summary.md)
-- [Compatibility Matrix](./docs/compatibility-matrix.md)
-- [Release Rights Checklist](./docs/release-rights-checklist.md)
-- [Evidence Register](./docs/evidence-register.md)
-- [Reconstruction Report](./docs/reconstruction-report.md)
+## Scope and license
 
-## Cách xem project
+This is an **unofficial, noncommercial, clean-room reconstruction**. It is not affiliated with the original owner, developer, or publisher.
 
-Mở thư mục `game/` bằng Cocos Creator `3.8.8`. Không có script build trong `game/package.json`, nên README này không đưa ra lệnh build chưa được repo xác minh.
+- The original APK was used only as static evidence; it was never executed or embedded in the reconstruction.
+- The project does not claim recovered original source or identity with the historical runtime.
+- Contributor-owned reconstruction code and documentation are available under the [PolyForm Noncommercial License 1.0.0](./LICENSE). This is source-available, not OSI open source.
+- Recovered or third-party artwork, audio, fonts, names, and identity are not licensed merely because they appear in this repository.
+- The academic demonstration does not grant commercial rights. Public/commercial release remains blocked pending separate rights clearance.
 
-## Ghi chú pháp lý
-
-Nội dung trong repo được cung cấp như hiện trạng, không có bảo đảm. Tài liệu này không phải tư vấn pháp lý. Nếu bạn cần dùng lại tài sản, tên, thương hiệu, âm thanh, font, hoặc nội dung hồi phục trong ngữ cảnh khác, hãy kiểm tra quyền riêng cho từng mục trước khi phát hành.
+If evidence-first game preservation, clean-room reconstruction, or Cocos reverse engineering is useful to you, consider starring the repository—it helps more preservation-minded developers find the work.

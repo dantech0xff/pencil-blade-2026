@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "manifestId": "pencil-blade-interactive-case-study",
-  "manifestVersion": "1.2.0",
+  "manifestVersion": "1.3.0",
   "workingTitle": {
     "en": "Pencil Blade: Reconstructing a Lost Game",
     "vi": "Pencil Blade: Phục dựng một trò chơi thất lạc"
@@ -1428,6 +1428,84 @@
       "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
     },
     {
+      "mediaId": "MEDIA-README-CAPTURE-720-MODE-SELECT-SETTLED",
+      "kind": "runtime-capture",
+      "publishable": true,
+      "provenance": {
+        "path": "plans/260726-1633-star-worthy-readme/reports/runtime-captures/readme-720-mode-select-settled.png",
+        "sha256": "da0383da6b768bf049ea93840f22d1566c0883094724e9db89bc304257c4b75e",
+        "width": 720,
+        "height": 1280,
+        "state": "mode-select-settled"
+      },
+      "alt": {
+        "en": "Clean-room Pencil Blade reconstruction showing the settled Classic card on Mode Select at 720 by 1280.",
+        "vi": "Bản phục dựng clean-room Pencil Blade hiển thị thẻ Classic đã ổn định trên Mode Select ở 720 x 1280."
+      },
+      "caption": {
+        "en": "Audited H5 reconstruction after the app shell reached Mode Select; not the original runtime.",
+        "vi": "Bản phục dựng H5 đã kiểm toán sau khi app shell đạt trạng thái Mode Select; không phải môi trường chạy gốc."
+      },
+      "transformationHistory": [
+        "captured from audited H5 after RecoveredAppShellController state mode-select",
+        "no pixel modification, crop, resize, re-encode, or color change"
+      ],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-README-CAPTURE-720-CLASSIC-READY",
+      "kind": "runtime-capture",
+      "publishable": true,
+      "provenance": {
+        "path": "plans/260726-1633-star-worthy-readme/reports/runtime-captures/readme-720-classic-ready.png",
+        "sha256": "0b57f56e22b17eb11bfbb31ae56386c81293cf5dd8bfaad7fc69137755ca39b6",
+        "width": 720,
+        "height": 1280,
+        "state": "classic-active-ready"
+      },
+      "alt": {
+        "en": "Clean-room Pencil Blade Classic reconstruction with score, best score, three lives, pause control, and one strawberry in play at 720 by 1280.",
+        "vi": "Bản phục dựng Classic clean-room của Pencil Blade với điểm, điểm cao nhất, ba mạng, nút tạm dừng và một quả dâu đang xuất hiện ở 720 x 1280."
+      },
+      "caption": {
+        "en": "Active Classic gameplay after the app shell reached its Classic state; not the original runtime.",
+        "vi": "Gameplay Classic đang hoạt động sau khi app shell đạt trạng thái Classic; không phải môi trường chạy gốc."
+      },
+      "transformationHistory": [
+        "captured from audited H5 after RecoveredAppShellController state classic",
+        "no pixel modification, crop, resize, re-encode, or color change"
+      ],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-README-CAPTURE-720-CLASSIC-ACTION",
+      "kind": "runtime-capture",
+      "publishable": true,
+      "provenance": {
+        "path": "plans/260726-1633-star-worthy-readme/reports/runtime-captures/readme-720-classic-action.png",
+        "sha256": "2af52d4d647e402a30fa569d15a5097c3af680c7cbc38cde8a4365b36e37dbe0",
+        "width": 720,
+        "height": 1280,
+        "state": "classic-active-after-cut-input"
+      },
+      "alt": {
+        "en": "Clean-room Pencil Blade Classic reconstruction after cut input, showing score one and fruit in motion at 720 by 1280.",
+        "vi": "Bản phục dựng Classic clean-room của Pencil Blade sau thao tác cắt, hiển thị một điểm và trái cây đang chuyển động ở 720 x 1280."
+      },
+      "caption": {
+        "en": "Active Classic gameplay after two cut swipes in the audited H5 reconstruction; not the original runtime.",
+        "vi": "Gameplay Classic đang hoạt động sau hai thao tác cắt trong bản phục dựng H5 đã kiểm toán; không phải môi trường chạy gốc."
+      },
+      "transformationHistory": [
+        "captured from audited H5 after RecoveredAppShellController state classic and two cut swipes",
+        "no pixel modification, crop, resize, re-encode, or color change"
+      ],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
       "mediaId": "MEDIA-BRAND-CASE-STUDY-MARK",
       "kind": "project-authored-brand-svg",
       "publishable": true,
@@ -1522,7 +1600,7 @@
       "publishable": true,
       "provenance": {
         "path": "site/public/social/pencil-blade-en.svg",
-        "sha256": "4662ff5656ffbaa312f24c76bc5772bce53f0d1cdc5394838db87053192a5ada",
+        "sha256": "e2da8b50da5bed8f7b077c7766e08f7b348dc9943a3de3d1b96b85ecaeef69ba",
         "width": 1200,
         "height": 630,
         "locale": "en",
@@ -1570,7 +1648,7 @@
       "publishable": true,
       "provenance": {
         "path": "site/public/social/pencil-blade-en.png",
-        "sha256": "07b6a5139c9d0f0fabed9280c7757182e0ced02bea47761b2a34d954f90a1608",
+        "sha256": "55d960a7e68f49caea1dd5d920c3b06a50e41dafe770aaff65d8dabe2a30bd9d",
         "width": 1200,
         "height": 630,
         "locale": "en",
@@ -1763,6 +1841,84 @@
       },
       "transformationHistory": [
         "exact byte copy from MEDIA-PRODUCTION-720-CLASSIC",
+        "no pixel modification, crop, resize, re-encode, or color change"
+      ],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-README-RUNTIME-720-MODE-SELECT-SETTLED",
+      "kind": "runtime-display-derivative",
+      "publishable": true,
+      "provenance": {
+        "path": "site/src/assets/media/runtime/readme-720-mode-select-settled.png",
+        "sha256": "da0383da6b768bf049ea93840f22d1566c0883094724e9db89bc304257c4b75e",
+        "width": 720,
+        "height": 1280,
+        "sourceMediaId": "MEDIA-README-CAPTURE-720-MODE-SELECT-SETTLED"
+      },
+      "alt": {
+        "en": "Clean-room Pencil Blade reconstruction showing the settled Classic card on Mode Select at 720 by 1280.",
+        "vi": "Bản phục dựng clean-room Pencil Blade hiển thị thẻ Classic đã ổn định trên Mode Select ở 720 x 1280."
+      },
+      "caption": {
+        "en": "Exact-byte display copy of the owner-approved Mode Select capture; not the original runtime.",
+        "vi": "Bản sao hiển thị đúng byte của ảnh Mode Select đã được chủ dự án phê duyệt; không phải môi trường chạy gốc."
+      },
+      "transformationHistory": [
+        "exact byte copy from MEDIA-README-CAPTURE-720-MODE-SELECT-SETTLED",
+        "no pixel modification, crop, resize, re-encode, or color change"
+      ],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-README-RUNTIME-720-CLASSIC-READY",
+      "kind": "runtime-display-derivative",
+      "publishable": true,
+      "provenance": {
+        "path": "site/src/assets/media/runtime/readme-720-classic-ready.png",
+        "sha256": "0b57f56e22b17eb11bfbb31ae56386c81293cf5dd8bfaad7fc69137755ca39b6",
+        "width": 720,
+        "height": 1280,
+        "sourceMediaId": "MEDIA-README-CAPTURE-720-CLASSIC-READY"
+      },
+      "alt": {
+        "en": "Clean-room Pencil Blade Classic reconstruction with score, best score, three lives, pause control, and one strawberry in play at 720 by 1280.",
+        "vi": "Bản phục dựng Classic clean-room của Pencil Blade với điểm, điểm cao nhất, ba mạng, nút tạm dừng và một quả dâu đang xuất hiện ở 720 x 1280."
+      },
+      "caption": {
+        "en": "Exact-byte display copy of the owner-approved active Classic capture; not the original runtime.",
+        "vi": "Bản sao hiển thị đúng byte của ảnh Classic đang hoạt động đã được chủ dự án phê duyệt; không phải môi trường chạy gốc."
+      },
+      "transformationHistory": [
+        "exact byte copy from MEDIA-README-CAPTURE-720-CLASSIC-READY",
+        "no pixel modification, crop, resize, re-encode, or color change"
+      ],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-README-RUNTIME-720-CLASSIC-ACTION",
+      "kind": "runtime-display-derivative",
+      "publishable": true,
+      "provenance": {
+        "path": "site/src/assets/media/runtime/readme-720-classic-action.png",
+        "sha256": "2af52d4d647e402a30fa569d15a5097c3af680c7cbc38cde8a4365b36e37dbe0",
+        "width": 720,
+        "height": 1280,
+        "sourceMediaId": "MEDIA-README-CAPTURE-720-CLASSIC-ACTION"
+      },
+      "alt": {
+        "en": "Clean-room Pencil Blade Classic reconstruction after cut input, showing score one and fruit in motion at 720 by 1280.",
+        "vi": "Bản phục dựng Classic clean-room của Pencil Blade sau thao tác cắt, hiển thị một điểm và trái cây đang chuyển động ở 720 x 1280."
+      },
+      "caption": {
+        "en": "Exact-byte display copy after two cut swipes in active Classic; not the original runtime.",
+        "vi": "Bản sao hiển thị đúng byte sau hai thao tác cắt trong Classic đang hoạt động; không phải môi trường chạy gốc."
+      },
+      "transformationHistory": [
+        "exact byte copy from MEDIA-README-CAPTURE-720-CLASSIC-ACTION",
         "no pixel modification, crop, resize, re-encode, or color change"
       ],
       "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
