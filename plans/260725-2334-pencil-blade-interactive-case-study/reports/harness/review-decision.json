@@ -1,0 +1,22 @@
+{
+  "decision": "PASS",
+  "score": 10,
+  "criticalCount": 0,
+  "acceptanceCoverage": [
+    "Bilingual static site, evidence, AI disclosure, publication, and playable-launch contracts.",
+    "Raw-game isolation, byte-preserving composition, exact Pages prefix, manifest provenance, and approval lifecycle.",
+    "Pinned workflow graph, least privilege, PR trust isolation, hidden QA artifact upload, and inline provider-script syntax.",
+    "Immutable candidate identity across later deploy-only attempts.",
+    "Real embedded and direct H5 behavior at both supported viewports."
+  ],
+  "regressionProof": [
+    "Full serial repository suite passed 299 of 299.",
+    "Focused repaired-contract suite passed 42 of 42.",
+    "Documentary Playwright suite passed 52 of 52.",
+    "Exact game release allowlist passed 1,722 subtests.",
+    "Actual immutable candidate smoke verified all 2,668 manifest entries and both embedded/direct H5 viewports.",
+    "Fresh composite audit passed 2,667 files and workflow trust passed for both workflows."
+  ],
+  "blockingReasons": [],
+  "contractStatus": "OK"
+}

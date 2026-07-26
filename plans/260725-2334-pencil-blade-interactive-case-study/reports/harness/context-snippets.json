@@ -1,0 +1,40 @@
+{
+  "skill": "ck:cook",
+  "mode": "auto",
+  "task": "Execute the interactive case-study plan through locally verified Phase 7 release tooling, then stop before protected release and Phase 8 human gates.",
+  "scoutSummary": "Repository contracts, historical restoration evidence, frozen H5 output, publication policy, and the existing Pages workflow were inspected before implementation. Phases 1 through 6 supplied the bilingual Astro case study and playable H5 integration; Phase 7 now composes, audits, verifies, reviews, and smoke-tests an immutable local candidate.",
+  "acceptanceCriteria": [
+    "Bilingual documentary routes, evidence joins, AI disclosures, and playable launch paths build as a static Astro site.",
+    "The audited raw Cocos output is copied byte-for-byte under /play/game/ without weakening the game-only audit.",
+    "The composed candidate is prefix-safe, deterministic, provenance-bound, and free of unapproved executable or media fetches.",
+    "The actual launcher performs no eager game request and preserves parent DOM, navigation, and storage while the embedded H5 loads, reloads, and is removed.",
+    "Release workflows keep untrusted site work off the Creator runner, pin actions and runtimes, bind human approval to immutable candidate identity, and preserve that identity across deploy-only retries.",
+    "Auto mode stops before live repository mutation, protected deployment, rollback, or human approval."
+  ],
+  "touchpoints": [
+    ".github/workflows/deploy-web-mobile-pages.yml",
+    ".github/workflows/test-case-study-site.yml",
+    "site/",
+    "scripts/case-study-validation/",
+    "scripts/run-h5-runtime-matrix.mjs",
+    "scripts/run-case-study-production-smoke.mjs",
+    "scripts/case-study-approval.mjs",
+    "reference/case-study-approval.schema.json",
+    "reference/case-study-build-toolchain.json",
+    "tests/",
+    "plans/260725-2334-pencil-blade-interactive-case-study/"
+  ],
+  "publicContracts": [
+    "GitHub Pages base /pencil-blade-2026/ with the playable H5 at /pencil-blade-2026/play/game/.",
+    "Candidate approval request and post-deployment evidence are separate schema-valid nondeployable artifacts.",
+    "The release record binds commit, workflow run, candidate attempt, content digest, tree-manifest digest, site digest, and game digest.",
+    "A later deploy attempt may reuse the immutable candidate attempt but may not rebuild or silently change candidate identity.",
+    "Academic display permission and commercial release rights remain separate fail-closed dimensions."
+  ],
+  "blastRadius": [
+    "Static site content, routes, assets, browser behavior, and accessibility.",
+    "Raw and nested H5 verification, runtime evidence, and shared-origin launcher behavior.",
+    "GitHub Actions trust boundaries, artifacts, protected Pages deployment, evidence collection, production smoke, and rollback procedure.",
+    "Publication, source, media, approval, and toolchain contracts."
+  ]
+}

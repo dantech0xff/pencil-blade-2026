@@ -1,0 +1,95 @@
+{
+  "commands": [
+    {
+      "command": "node --test --test-concurrency=1 tests/*.test.mjs",
+      "status": "pass",
+      "exitCode": 0,
+      "timestamp": "2026-07-26T01:30:19Z",
+      "summary": "Full serial repository suite passed: 299 tests, 299 passed, 0 failed, 0 skipped."
+    },
+    {
+      "command": "node --test --test-concurrency=1 tests/case-study-approval.test.mjs tests/run-case-study-production-smoke.test.mjs tests/github-pages-workflow.test.mjs tests/validate-workflow-trust.test.mjs",
+      "status": "pass",
+      "exitCode": 0,
+      "timestamp": "2026-07-26T01:30:19Z",
+      "summary": "Focused approval, retry, smoke, workflow, inline-module syntax, hidden-upload, and trust contracts passed 42 of 42."
+    },
+    {
+      "command": "npm --prefix site run prepare:data && npm --prefix site run validate:content && npm --prefix site run check && npm --prefix site run build",
+      "status": "pass",
+      "exitCode": 0,
+      "timestamp": "2026-07-26T01:30:19Z",
+      "summary": "Generated 36 facts and 39 presentations, passed content validation and Astro check with zero diagnostics, and built 107 static pages."
+    },
+    {
+      "command": "npm --prefix site exec playwright test",
+      "status": "pass",
+      "exitCode": 0,
+      "timestamp": "2026-07-26T01:30:19Z",
+      "summary": "Documentary browser suite passed 52 of 52 accessibility, locale, interaction, no-preload, responsive, reduced-motion, zoom, and print checks."
+    },
+    {
+      "command": "node scripts/run-game-release-tests.mjs --manifest reference/game-release-test-manifest.json",
+      "status": "pass",
+      "exitCode": 0,
+      "timestamp": "2026-07-26T01:30:19Z",
+      "summary": "Exact game-owned release allowlist passed: 206 Node files plus 2 shell suites, 1,722 subtests, 0 failures."
+    },
+    {
+      "command": "node scripts/compose-case-study-pages.mjs ... && node scripts/audit-case-study-build.mjs ...",
+      "status": "pass",
+      "exitCode": 0,
+      "timestamp": "2026-07-26T01:30:19Z",
+      "summary": "Fresh immutable site plus frozen H5 candidate composed and audited successfully: 2,667 audited files, 43,617,284 bytes."
+    },
+    {
+      "command": "node scripts/run-case-study-production-smoke.mjs --candidate-dir /private/tmp/pencil-blade-case-study.liVwJz/candidate ... --ci",
+      "status": "pass",
+      "exitCode": 0,
+      "timestamp": "2026-07-26T01:30:19Z",
+      "summary": "Local immutable-candidate smoke verified 2,668 manifest entries and 43,624,401 bytes; real embedded and direct H5 passed at 480x800 and 720x1280 with no-preload, parent DOM/navigation/storage, reload, and removal predicates."
+    },
+    {
+      "command": "node site/scripts/validate-workflow-trust.mjs .github/workflows/test-case-study-site.yml && node site/scripts/validate-workflow-trust.mjs .github/workflows/deploy-web-mobile-pages.yml",
+      "status": "pass",
+      "exitCode": 0,
+      "timestamp": "2026-07-26T01:30:19Z",
+      "summary": "Both workflow graphs passed trust validation with pinned actions and no PR-reachable self-hosted execution."
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass",
+      "exitCode": 0,
+      "timestamp": "2026-07-26T01:30:19Z",
+      "summary": "No whitespace errors were found."
+    },
+    {
+      "command": "Run the protected GitHub Actions deployment workflow on main",
+      "status": "skipped",
+      "exitCode": 0,
+      "timestamp": "2026-07-26T01:30:19Z",
+      "summary": "Skipped at the Cook auto-mode human gate; no workflow was dispatched and no production deployment occurred."
+    },
+    {
+      "command": "Inspect and approve the live github-pages environment policy and exact candidate",
+      "status": "skipped",
+      "exitCode": 0,
+      "timestamp": "2026-07-26T01:30:19Z",
+      "summary": "Pending external repository settings inspection and named human review."
+    },
+    {
+      "command": "Run pinned Cocos Creator 3.8.8 build and H5 matrix on the protected self-hosted runner",
+      "status": "skipped",
+      "exitCode": 0,
+      "timestamp": "2026-07-26T01:30:19Z",
+      "summary": "Pending protected CI execution under exact Node 24.18.0, npm 11.6.2, Creator, and Chromium pins."
+    },
+    {
+      "command": "Run production manifest smoke and full-rebuild rollback drill",
+      "status": "skipped",
+      "exitCode": 0,
+      "timestamp": "2026-07-26T01:30:19Z",
+      "summary": "Pending deployment, authenticated provider evidence, production hosting, and explicit rollback authorization."
+    }
+  ]
+}

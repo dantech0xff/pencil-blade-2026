@@ -1,0 +1,13 @@
+{
+  "highRisk": true,
+  "autoStopRequired": true,
+  "humanApproved": false,
+  "largeDiff": true,
+  "reasons": [
+    "The change introduces a large bilingual public site and a protected production deployment workflow.",
+    "The production path uses a privileged self-hosted Cocos Creator runner and GitHub Pages environment protection.",
+    "Repository environment policy, required reviewers, exact-candidate approval, production bytes, and rollback behavior require live external proof.",
+    "Phase 8 requires named owner, editorial, Vietnamese factual, rights, accessibility, and performance review.",
+    "Cook auto mode may not stage, commit, push, deploy, alter repository settings, approve an environment, or claim rollback proof without explicit human authorization."
+  ]
+}
