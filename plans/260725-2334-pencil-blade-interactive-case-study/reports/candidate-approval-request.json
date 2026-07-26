@@ -1,0 +1,54 @@
+{
+  "candidate": {
+    "candidateArtifactName": "case-study-candidate-30190536530-1",
+    "commitSha": "10851abb9499a439c099bc427fffe165c54840e1",
+    "contentTreeDigestSha256": "f8951b611c2edf86ebeb209075378df7088cb691657016cbe669580bf1b88419",
+    "treeManifestDigestSha256": "a410f6d9fe3a16a75621bd2a0edc591c58009a40ffd09b6aefe35a7788372821",
+    "workflowRunAttempt": 1,
+    "workflowRunId": "30190536530"
+  },
+  "recordType": "candidate-approval-request",
+  "requestId": "case-study-approval-f2a57de46e2d0a49",
+  "requestedAt": "2026-07-26T06:16:56Z",
+  "requiredChecklistIds": [
+    "accessibility-and-performance-review",
+    "editorial-factual-review",
+    "owner-candidate-review",
+    "rights-and-attribution-review",
+    "vietnamese-factual-review"
+  ],
+  "requiredReviewerRoles": [
+    "editorial-reviewer",
+    "project-owner",
+    "rights-reviewer",
+    "vietnamese-factual-reviewer"
+  ],
+  "schemaVersion": 1,
+  "supportingReports": [
+    "case-study-qa-30190536530-1/candidate-audit.txt",
+    "case-study-qa-30190536530-1/candidate-smoke/case-study-production-smoke.json",
+    "case-study-qa-30190536530-1/runtime-nested/case-study-h5-runtime-matrix.json"
+  ],
+  "unresolvedChecks": [
+    {
+      "id": "accessibility-and-performance-review",
+      "state": "pending-human-review"
+    },
+    {
+      "id": "editorial-factual-review",
+      "state": "pending-human-review"
+    },
+    {
+      "id": "owner-candidate-review",
+      "state": "pending-human-review"
+    },
+    {
+      "id": "rights-and-attribution-review",
+      "state": "pending-human-review"
+    },
+    {
+      "id": "vietnamese-factual-review",
+      "state": "pending-human-review"
+    }
+  ]
+}

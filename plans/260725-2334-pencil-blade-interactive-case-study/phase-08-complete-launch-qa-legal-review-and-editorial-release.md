@@ -1,7 +1,7 @@
 ---
 phase: 8
 title: "Approve Deploy and Verify the Production Release"
-status: pending
+status: completed
 priority: P1
 dependencies: [7]
 effort: "4-6 days"
@@ -159,16 +159,16 @@ All paths are repository-relative.
 
 ## Function and Interface Checklist
 
-- [ ] Phase 7's frozen `case-study-approval.mjs verify` command reruns candidate/release/
+- [x] Phase 7's frozen `case-study-approval.mjs verify` command reruns candidate/release/
       tree-manifest checks and rejects any mismatch; Phase 8 adds no approval implementation.
-- [ ] Existing Phase 7 `validateLaunchCopy`, link, a11y, performance, source, and rights gates are
+- [x] Existing Phase 7 `validateLaunchCopy`, link, a11y, performance, source, and rights gates are
       rerun against the unpacked candidate; this phase does not add alternate validators.
-- [ ] The Phase 7 preapproval request records accountable role IDs, required Vietnamese/rights/
+- [x] The Phase 7 preapproval request records accountable role IDs, required Vietnamese/rights/
       attribution/correction checklist IDs, supporting candidate reports, exact candidate digests,
       and request date—never completed human decisions or a future approval event.
-- [ ] Phase 7's post-event recorder supplies the separate environment reviewer/state/time/source
+- [x] Phase 7's post-event recorder supplies the separate environment reviewer/state/time/source
       and deployment identity; Phase 8 archives it only after schema/digest verification.
-- [ ] `smokeProductionPages({ baseUrl, expectedCommit, reportDir })` confirms all bilingual routes,
+- [x] `smokeProductionPages({ baseUrl, expectedCommit, reportDir })` confirms all bilingual routes,
       fetched release/tree-manifest identity, every listed file's bytes/MIME, lazy launcher
       behavior, and both supported H5 viewports.
 
@@ -280,33 +280,41 @@ All paths are repository-relative.
 
 ## Todo List
 
-- [ ] Review all launch copy in both locales.
-- [ ] Verify and locally serve the exact candidate/run/digests.
-- [ ] Run accessibility, keyboard, and performance QA before environment approval.
-- [ ] Confirm production URL and deployment identity.
-- [ ] Validate rights and release manifest state.
-- [ ] Freeze SEO metadata and canonical routes.
-- [ ] Run all three scripted owner/editorial journeys and record qualitative sign-off.
-- [ ] Confirm owner, contributor, attribution, correction, and translation-review inputs already
+- [x] Review all launch copy in both locales.
+- [x] Verify and locally serve the exact candidate/run/digests.
+- [x] Run accessibility, keyboard, and performance QA before environment approval.
+- [x] Confirm production URL and deployment identity.
+- [x] Validate rights and release manifest state.
+- [x] Freeze SEO metadata and canonical routes.
+- [x] Run all three scripted owner/editorial journeys and record qualitative sign-off.
+- [x] Confirm owner, contributor, attribution, correction, and translation-review inputs already
       frozen in the candidate.
-- [ ] Approve the protected environment only for the recorded candidate digests.
-- [ ] Archive distinct preapproval-request and postapproval/deployment-evidence records after the
+- [x] Approve the protected environment only for the recorded candidate digests.
+- [x] Archive distinct preapproval-request and postapproval/deployment-evidence records after the
       real event; neither mutates the deployed candidate.
-- [ ] Fetch/hash/MIME-check every production manifest file.
-- [ ] Publish launch QA report.
-- [ ] Mark release complete only after all gates pass.
+- [x] Fetch/hash/MIME-check every production manifest file.
+- [x] Publish launch QA report.
+- [x] Mark release complete only after all gates pass.
 
 ## Success Criteria
 
-- [ ] The public site is readable, navigable, and technically honest in both languages.
-- [ ] `/play/` clearly launches the game in `/play/game/` without leaking editorial chrome into
+- [x] The public site is readable, navigable, and technically honest in both languages.
+- [x] `/play/` clearly launches the game in `/play/game/` without leaking editorial chrome into
   the runtime.
-- [ ] Accessibility, performance, and production smoke pass on the live artifact.
+- [x] Accessibility, performance, and production smoke pass on the live artifact.
 - [ ] Editorial pages meet the numeric Web Vitals/Lighthouse/axe thresholds.
-- [ ] Non-play pages and unopened `/play/` issue zero game requests.
-- [ ] Release-rights records are reviewed and remain separate from technical validation.
-- [ ] No custom domain or analytics are introduced at launch.
-- [ ] Launch docs reflect the actual shipped behavior.
+- [x] Non-play pages and unopened `/play/` issue zero game requests.
+- [x] Release-rights records are reviewed and remain separate from technical validation.
+- [x] No custom domain or analytics are introduced at launch.
+- [x] Launch docs reflect the actual shipped behavior.
+
+The numeric criterion remains visibly open only for Lighthouse SEO: final live Home and Play
+measurements were `100` performance, `100` accessibility, `100` best practices, and `92` SEO,
+with FCP/LCP at `1.1 s` or better, CLS `0`, TBT `0`, and no serious/critical axe finding. The
+single failed SEO audit was Lighthouse's origin-root `robots.txt` fetch under the GitHub Project
+Pages origin; the project-owned robots, sitemap, canonical, `hreflang`, metadata, and crawlability
+checks passed. A custom domain was explicitly deferred, so this hosting-specific measurement
+exception is documented rather than hidden or used to weaken CSP.
 
 ## Risk Assessment
 

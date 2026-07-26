@@ -1,0 +1,29 @@
+{
+  "candidate": {
+    "candidateArtifactName": "case-study-candidate-30190536530-1",
+    "commitSha": "10851abb9499a439c099bc427fffe165c54840e1",
+    "contentTreeDigestSha256": "f8951b611c2edf86ebeb209075378df7088cb691657016cbe669580bf1b88419",
+    "treeManifestDigestSha256": "a410f6d9fe3a16a75621bd2a0edc591c58009a40ffd09b6aefe35a7788372821",
+    "workflowRunAttempt": 1,
+    "workflowRunId": "30190536530"
+  },
+  "deployment": {
+    "deploymentId": 5607847060,
+    "environmentUrl": "https://dantech0xff.github.io/pencil-blade-2026/",
+    "sourceUrl": "https://github.com/dantech0xff/pencil-blade-2026/actions/runs/30190536530/job/89763572653",
+    "state": "success",
+    "workflowRunAttempt": 1
+  },
+  "environment": "github-pages",
+  "recordType": "deployment-approval-evidence",
+  "requestId": "case-study-approval-f2a57de46e2d0a49",
+  "review": {
+    "approvalObservedAt": "2026-07-26T06:20:16.360Z",
+    "authorizationMode": "solo-owner-self-review",
+    "provider": "github-actions-api",
+    "reviewerId": "dantech0xff",
+    "sourceUrl": "https://github.com/dantech0xff/pencil-blade-2026/actions/runs/30190536530",
+    "state": "approved"
+  },
+  "schemaVersion": 2
+}

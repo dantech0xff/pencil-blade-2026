@@ -1,7 +1,7 @@
 ---
 title: "Pencil Blade Interactive Reverse Engineering Case Study"
 description: "Build an evidence-backed bilingual engineering documentary around the restored Pencil Blade H5 game and deploy both as one audited GitHub Pages artifact."
-status: in_progress
+status: completed
 priority: P1
 branch: "main"
 tags: [feature, frontend, docs, infra, experimental, reverse-engineering, ai-case-study, astro, github-pages, web-h5]
@@ -133,8 +133,8 @@ protected main ──> Cocos 3.8.8 build ──> strict game audit ───┤
 | 4 | [Produce Story Forensics and Reconstruction Chapters](./phase-04-produce-story-forensics-and-reconstruction-chapters.md) | Complete |
 | 5 | [Build AI Lab and Evidence Explorer](./phase-05-build-ai-lab-and-evidence-explorer.md) | Complete |
 | 6 | [Integrate Playable H5 Game Experience](./phase-06-integrate-playable-h5-game-experience.md) | Complete |
-| 7 | [Build Audited Release Candidate and GitHub Pages Pipeline](./phase-07-unify-testing-build-and-github-pages-deployment.md) | In Progress |
-| 8 | [Approve Deploy and Verify the Production Release](./phase-08-complete-launch-qa-legal-review-and-editorial-release.md) | Pending |
+| 7 | [Build Audited Release Candidate and GitHub Pages Pipeline](./phase-07-unify-testing-build-and-github-pages-deployment.md) | Complete |
+| 8 | [Approve Deploy and Verify the Production Release](./phase-08-complete-launch-qa-legal-review-and-editorial-release.md) | Complete with documented GitHub Pages SEO measurement exception |
 
 ## Dependencies
 
@@ -218,22 +218,26 @@ import `game/assets/`, and gameplay code does not depend on the documentary shel
 
 ## Program Acceptance Criteria
 
-- [ ] Both locales expose all launch routes with locale-preserving navigation and `hreflang`.
-- [ ] Every public claim resolves to an approved source and visible evidence status.
-- [ ] Public claim status/evidence fields are projections of the canonical 39-record ledger, not
+- [x] Both locales expose all launch routes with locale-preserving navigation and `hreflang`.
+- [x] Every public claim resolves to an approved source and visible evidence status.
+- [x] Public claim status/evidence fields are projections of the canonical 39-record ledger, not
       independently authored duplicates.
-- [ ] Raw APK/native/decompiler/private-path material is absent from the composed artifact.
-- [ ] Every public repository citation passes full-file/transitive-link safety review or is
+- [x] Raw APK/native/decompiler/private-path material is absent from the composed artifact.
+- [x] Every public repository citation passes full-file/transitive-link safety review or is
       replaced by a sanitized local excerpt.
-- [ ] Editorial shell passes WCAG 2.2 AA review, keyboard flow, reduced motion, and screen-reader checks.
-- [ ] Non-play routes issue zero requests for Cocos/game assets.
-- [ ] `/play/` lazy-loads a working H5 iframe from `/play/game/`, supports touch, mouse, and fullscreen.
-- [ ] Original strict Cocos build audit still passes unchanged in meaning.
-- [ ] Composed site passes content, route, link, MIME, artifact, Playwright, and runtime gates.
-- [ ] Manual protected-main workflow exposes one immutable candidate digest for review, pins all
+- [x] Editorial shell passes WCAG 2.2 AA review, keyboard flow, reduced motion, and screen-reader checks.
+- [x] Non-play routes issue zero requests for Cocos/game assets.
+- [x] `/play/` lazy-loads a working H5 iframe from `/play/game/`, supports touch, mouse, and fullscreen.
+- [x] Original strict Cocos build audit still passes unchanged in meaning.
+- [x] Composed site passes content, route, link, MIME, artifact, Playwright, and runtime gates.
+- [x] Manual protected-main workflow exposes one immutable candidate digest for review, pins all
       actions to full SHAs, and deploys the same artifact with least privilege.
-- [ ] Production smoke tests pass at both supported game viewports and representative site viewports.
-- [ ] Public copy states clean-room, static-only, noncommercial/academic, unofficial, and rights limits.
+- [x] Production smoke tests pass at both supported game viewports and representative site viewports.
+- [x] Public copy states clean-room, static-only, noncommercial/academic, unofficial, and rights limits.
+
+Release evidence: [launch QA report](./reports/launch-qa-report.md), [candidate approval
+request](./reports/candidate-approval-request.json), and [authenticated deployment approval
+evidence](./reports/deployment-approval-evidence.json).
 
 ## Research Inputs
 
@@ -314,8 +318,8 @@ English canonical/default locale, current Pages URL, system serif/sans/mono stac
 no launch bridge, full-rebuild rollback, and working title “Pencil Blade: Reconstructing a Lost
 Game.”
 
-Three named release inputs must be recorded during Phase 1 and may block candidate approval, not
-platform implementation: accountable project owner/approver, public correction/contact channel,
-and Vietnamese factual reviewer. The current single Creator runner means rollback has no bounded
-RTO during runner outage; Phase 8 records that accepted limitation. The 15-person moderated study
-is post-launch research with separate recruitment/consent ownership, not a hidden release gate.
+The sole accountable owner `dantech0xff`, GitHub Issues correction channel, and Vietnamese factual
+review decision are recorded under the authenticated `solo-owner-self-review` policy. The current
+single Creator runner means rollback has no bounded RTO during runner outage; Phase 8 records that
+accepted limitation. The 15-person moderated study remains post-launch research with separate
+recruitment/consent ownership, not a launch gate.

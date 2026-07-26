@@ -1,7 +1,7 @@
 ---
 phase: 7
 title: "Build Audited Release Candidate and GitHub Pages Pipeline"
-status: in_progress
+status: completed
 priority: P1
 dependencies: [4, 5, 6]
 effort: "8-11 days"
@@ -406,7 +406,7 @@ All paths are repository-relative.
 - [x] Replace root test discovery with an exact game-owned manifest.
 - [x] Add artifact composition script and tests.
 - [x] Add separate composed audit and exact-base verifier.
-- [ ] Run configured runtime matrix for composed `/play/` and `/play/game/` smoke.
+- [x] Run configured runtime matrix for composed `/play/` and `/play/game/` smoke.
 - [x] Generate public release provenance/tree manifests and expose approval digests.
 - [x] Add frozen approval request/verifier/recorder tooling and separate post-event evidence.
 - [x] Add manifest-wide live bytes/MIME/identity production smoke.
@@ -416,24 +416,32 @@ All paths are repository-relative.
 
 ## Success Criteria
 
-- [ ] Site build and game build run on their proper runners.
-- [ ] The raw game tree is audited before merge.
+- [x] Site build and game build run on their proper runners.
+- [x] The raw game tree is audited before merge.
 - [x] All launch source—including About, SEO/robots/social media, and QA tools—exists before
       composition.
 - [x] A local immutable candidate serves `/`, content pages, `/play/`, and `/play/game/`.
 - [x] Environment approval is visibly bound to candidate content/tree-manifest digests, and
       deployment uses only that immutable artifact.
-- [ ] Repository/API inspection proves the `github-pages` environment has the required reviewer
+- [x] Repository/API inspection proves the `github-pages` environment has the required reviewer
       and protected-main deployment policy before any candidate is approved.
 - [x] Preapproval request and postapproval evidence are separate, schema-valid, digest-bound
       artifacts; neither is part of or mutates the deployable candidate.
-- [ ] Public provenance binds expected commit/run/site/game/content/tree digests and is verified
+- [x] Public provenance binds expected commit/run/site/game/content/tree digests and is verified
       against GitHub deployment metadata.
-- [ ] Every manifest-listed production file is reachable with acceptable MIME and matching bytes.
-- [ ] The current clean-room boundary remains intact and there is no bridge back to the source
+- [x] Every manifest-listed production file is reachable with acceptable MIME and matching bytes.
+- [x] The current clean-room boundary remains intact and there is no bridge back to the source
   APK or native runtime.
-- [ ] A rollback drill proves a full pinned rebuild reproduces the known-good content digest;
+- [x] A rollback drill proves a full pinned rebuild reproduces the known-good content digest;
       documentation explicitly states the single-runner RTO limitation.
+
+Completion evidence: workflow
+[`30190536530`](https://github.com/dantech0xff/pencil-blade-2026/actions/runs/30190536530)
+passed the split runners, duplicate deterministic builds, raw/composed audits, runtime matrices,
+authenticated environment gate, immutable deployment, and manifest-wide production smoke. The
+same pinned source was also rebuilt and smoked locally before release; later content-digest
+changes came only from reviewed source changes. See the
+[launch QA report](./reports/launch-qa-report.md).
 
 ## Risk Assessment
 
