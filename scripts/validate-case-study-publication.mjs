@@ -651,6 +651,191 @@ export function validateEvidenceSnapshot(snapshot, options = {}) {
   return sortFindings(findings);
 }
 
+function validateReleaseInputs(releaseInputs, options = {}) {
+  const findings = [];
+  const pointer = '$.releaseInputs';
+  if (releaseInputs?.candidateStatus !== 'ready') {
+    findings.push(
+      finding(
+        'UNVERIFIED_RELEASE_INPUT_STATUS',
+        `${pointer}.candidateStatus`,
+        'Candidate must be ready and bound to a confirmed launch-ownership decision.',
+      ),
+    );
+  }
+
+  const launchDecision = releaseInputs?.launchDecision;
+  if (
+    typeof launchDecision?.path !== 'string'
+    || !/^[a-f0-9]{64}$/u.test(launchDecision?.sha256 ?? '')
+  ) {
+    findings.push(
+      finding(
+        'INVALID_LAUNCH_DECISION_REF',
+        `${pointer}.launchDecision`,
+        'Launch decision requires a repository-relative path and lowercase SHA-256.',
+      ),
+    );
+    return sortFindings(findings);
+  }
+
+  let decision = options.launchDecision;
+  try {
+    const bytes = readFileSync(resolveRepositoryPath(launchDecision.path));
+    if (sha256(bytes) !== launchDecision.sha256) {
+      findings.push(
+        finding(
+          'LAUNCH_DECISION_HASH_DRIFT',
+          `${pointer}.launchDecision.sha256`,
+          'Tracked launch-ownership decision hash does not match.',
+        ),
+      );
+    }
+    decision ??= JSON.parse(bytes.toString('utf8'));
+  } catch (error) {
+    findings.push(
+      finding(
+        'INVALID_LAUNCH_DECISION_PATH',
+        `${pointer}.launchDecision.path`,
+        error.message,
+      ),
+    );
+    return sortFindings(findings);
+  }
+
+  const ownerId = decision?.owner?.githubLogin;
+  const expectedValues = [
+    [launchDecision.decisionId, decision?.decisionId, `${pointer}.launchDecision.decisionId`],
+    [launchDecision.decisionStatus, 'confirmed', `${pointer}.launchDecision.decisionStatus`],
+    [decision?.recordType, 'case-study-launch-ownership-decision', '$launchDecision.recordType'],
+    [decision?.decisionStatus, 'confirmed', '$launchDecision.decisionStatus'],
+    [decision?.authorizationMode, 'solo-owner-self-review', '$launchDecision.authorizationMode'],
+    [ownerId, 'dantech0xff', '$launchDecision.owner.githubLogin'],
+    [
+      releaseInputs?.accountableReleaseOwner?.roleId,
+      'accountable-release-owner',
+      `${pointer}.accountableReleaseOwner.roleId`,
+    ],
+    [
+      releaseInputs?.accountableReleaseOwner?.reviewerId,
+      ownerId,
+      `${pointer}.accountableReleaseOwner.reviewerId`,
+    ],
+    [
+      releaseInputs?.accountableReleaseOwner?.evidenceStatus,
+      'confirmed',
+      `${pointer}.accountableReleaseOwner.evidenceStatus`,
+    ],
+    [
+      releaseInputs?.publicCorrections?.roleId,
+      'public-corrections-owner',
+      `${pointer}.publicCorrections.roleId`,
+    ],
+    [
+      releaseInputs?.publicCorrections?.ownerId,
+      ownerId,
+      `${pointer}.publicCorrections.ownerId`,
+    ],
+    [
+      releaseInputs?.publicCorrections?.channel,
+      decision?.reviewedScope?.correctionChannel?.url,
+      `${pointer}.publicCorrections.channel`,
+    ],
+    [
+      releaseInputs?.publicCorrections?.channelStatus,
+      'confirmed',
+      `${pointer}.publicCorrections.channelStatus`,
+    ],
+    [
+      releaseInputs?.vietnameseFactualReview?.roleId,
+      'vietnamese-factual-reviewer',
+      `${pointer}.vietnameseFactualReview.roleId`,
+    ],
+    [
+      releaseInputs?.vietnameseFactualReview?.reviewerId,
+      ownerId,
+      `${pointer}.vietnameseFactualReview.reviewerId`,
+    ],
+    [
+      releaseInputs?.vietnameseFactualReview?.reviewMode,
+      'solo-owner-self-review',
+      `${pointer}.vietnameseFactualReview.reviewMode`,
+    ],
+    [
+      releaseInputs?.vietnameseFactualReview?.evidenceStatus,
+      'confirmed',
+      `${pointer}.vietnameseFactualReview.evidenceStatus`,
+    ],
+    [
+      decision?.authenticatedEvidence?.reviewerId,
+      ownerId,
+      '$launchDecision.authenticatedEvidence.reviewerId',
+    ],
+    [
+      decision?.authenticatedEvidence?.reviewState,
+      'approved',
+      '$launchDecision.authenticatedEvidence.reviewState',
+    ],
+    [
+      decision?.authenticatedEvidence?.deploymentState,
+      'success',
+      '$launchDecision.authenticatedEvidence.deploymentState',
+    ],
+    [
+      decision?.reviewedScope?.commercialRightsStatus,
+      'unchanged and fail-closed',
+      '$launchDecision.reviewedScope.commercialRightsStatus',
+    ],
+  ];
+  for (const [actual, expected, valuePointer] of expectedValues) {
+    if (actual !== expected) {
+      findings.push(
+        finding(
+          'INVALID_LAUNCH_DECISION_BINDING',
+          valuePointer,
+          `Expected ${JSON.stringify(expected)}, found ${JSON.stringify(actual)}.`,
+        ),
+      );
+    }
+  }
+
+  const expectedRoles = [
+    'accountable-release-owner',
+    'public-corrections-owner',
+    'vietnamese-factual-reviewer',
+  ];
+  if (
+    JSON.stringify(decision?.owner?.roleIds) !== JSON.stringify(expectedRoles)
+    || JSON.stringify(decision?.reviewedScope?.locales) !== JSON.stringify(['en', 'vi'])
+  ) {
+    findings.push(
+      finding(
+        'INVALID_SOLO_OWNER_SCOPE',
+        '$launchDecision.owner',
+        'Solo owner decision must cover the exact release roles and English/Vietnamese locales.',
+      ),
+    );
+  }
+
+  for (const role of [
+    releaseInputs?.accountableReleaseOwner,
+    releaseInputs?.publicCorrections,
+    releaseInputs?.vietnameseFactualReview,
+  ]) {
+    if (role?.decisionRef !== launchDecision.path) {
+      findings.push(
+        finding(
+          'LAUNCH_DECISION_REF_DRIFT',
+          `${pointer}.${role?.roleId ?? 'unknown'}.decisionRef`,
+          'Every launch role must reference the same tracked ownership decision.',
+        ),
+      );
+    }
+  }
+
+  return sortFindings(findings);
+}
+
 export function validatePublicationManifest(manifest, options = {}) {
   const findings = [];
   const canonicalClaims = options.canonicalClaims ?? readClaims();
@@ -774,15 +959,7 @@ export function validatePublicationManifest(manifest, options = {}) {
     });
   }
 
-  if (manifest?.releaseInputs?.candidateStatus !== 'blocked-pending-evidence') {
-    findings.push(
-      finding(
-        'UNVERIFIED_RELEASE_INPUT_STATUS',
-        '$.releaseInputs.candidateStatus',
-        'Candidate must remain blocked pending accountable release evidence.',
-      ),
-    );
-  }
+  findings.push(...validateReleaseInputs(manifest?.releaseInputs, options));
 
   return sortFindings(findings);
 }

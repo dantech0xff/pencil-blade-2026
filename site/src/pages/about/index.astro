@@ -41,17 +41,23 @@ const description = "Method, scope, credits, attribution, correction channel, tr
       <h2>Credits and release responsibility</h2>
       <dl>
         <dt>Accountable release owner</dt>
-        <dd><EvidenceStatus status="blocked" /> Pending evidence; no name has been invented.</dd>
+        <dd>
+          <EvidenceStatus status="measured" /> Authenticated sole-owner review by
+          <strong>{release.accountableReleaseOwner.reviewerId}</strong>.
+        </dd>
         <dt>Vietnamese factual reviewer</dt>
-        <dd><EvidenceStatus status="blocked" /> Pending evidence; translated qualifiers are not yet release-approved.</dd>
+        <dd>
+          <EvidenceStatus status="measured" /> Confirmed by the same sole project owner under
+          <strong>{release.vietnameseFactualReview.reviewMode}</strong>.
+        </dd>
       </dl>
     </section>
     <section>
       <h2>Corrections</h2>
       <p>
-        Proposed channel: <a href={release.publicCorrections.channel}>GitHub Issues</a>.
-        Its status is <strong>{release.publicCorrections.channelStatus}</strong>; candidate mode
-        remains blocked until an accountable owner confirms it.
+        Confirmed channel: <a href={release.publicCorrections.channel}>GitHub Issues</a>.
+        Release questions, factual corrections, attribution concerns, and rights notices can be
+        filed there for the accountable owner.
       </p>
     </section>
   </article>

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "recordType": "case-study-launch-ownership-decision",
+  "decisionId": "pencil-blade-case-study-solo-owner-launch-2026-07-26",
+  "decisionDate": "2026-07-26",
+  "decisionStatus": "confirmed",
+  "authorizationMode": "solo-owner-self-review",
+  "owner": {
+    "githubLogin": "dantech0xff",
+    "roleIds": [
+      "accountable-release-owner",
+      "public-corrections-owner",
+      "vietnamese-factual-reviewer"
+    ]
+  },
+  "reviewedScope": {
+    "release": "academic, noncommercial GitHub Pages case study",
+    "locales": [
+      "en",
+      "vi"
+    ],
+    "vietnameseFactualReview": "confirmed by the sole project owner",
+    "correctionChannel": {
+      "url": "https://github.com/dantech0xff/pencil-blade-2026/issues",
+      "status": "confirmed"
+    },
+    "commercialRightsStatus": "unchanged and fail-closed"
+  },
+  "authenticatedEvidence": {
+    "provider": "github-actions-api",
+    "workflowRunUrl": "https://github.com/dantech0xff/pencil-blade-2026/actions/runs/30189705919",
+    "deploymentJobUrl": "https://github.com/dantech0xff/pencil-blade-2026/actions/runs/30189705919/job/89761321854",
+    "approvalRequestId": "case-study-approval-9c50aa88d2d3d753",
+    "candidateArtifactName": "case-study-candidate-30189705919-1",
+    "candidateCommitSha": "2d0aabc6b0cd34dfea39c760dec9bb4fa7a9034f",
+    "contentTreeDigestSha256": "25933d5181f6bad5159e88698ebb8977577fb1cd180c940ad096dc07c747c3b6",
+    "treeManifestDigestSha256": "f5211989688a30b8469c298523c0021d3ffd3404cf1bed923e478f119535d3c5",
+    "deploymentId": 5607691050,
+    "reviewerId": "dantech0xff",
+    "reviewState": "approved",
+    "deploymentState": "success"
+  },
+  "declarations": [
+    "The project has one accountable owner and no independent launch reviewer.",
+    "The same owner accepts responsibility for the English and Vietnamese factual release review.",
+    "GitHub Issues is the confirmed public correction channel.",
+    "This decision does not create commercial distribution rights or change the separate rights manifest."
+  ]
+}

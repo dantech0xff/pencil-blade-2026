@@ -42,17 +42,23 @@ const description = "Phương pháp, phạm vi, ghi công, kênh chỉnh sửa, 
       <h2>Ghi công và trách nhiệm phát hành</h2>
       <dl>
         <dt>Chủ sở hữu trách nhiệm phát hành</dt>
-        <dd><EvidenceStatus status="blocked" locale="vi" /> Đang chờ bằng chứng; không tự tạo tên.</dd>
+        <dd>
+          <EvidenceStatus status="measured" locale="vi" /> Lần duyệt sole-owner đã xác thực bởi
+          <strong>{release.accountableReleaseOwner.reviewerId}</strong>.
+        </dd>
         <dt>Người duyệt dữ kiện tiếng Việt</dt>
-        <dd><EvidenceStatus status="blocked" locale="vi" /> Đang chờ bằng chứng; các qualifier bản dịch chưa được duyệt phát hành.</dd>
+        <dd>
+          <EvidenceStatus status="measured" locale="vi" /> Được xác nhận bởi cùng chủ dự án duy nhất
+          theo chế độ <strong>{release.vietnameseFactualReview.reviewMode}</strong>.
+        </dd>
       </dl>
     </section>
     <section>
       <h2>Chỉnh sửa</h2>
       <p>
-        Kênh đề xuất: <a href={release.publicCorrections.channel}>GitHub Issues</a>.
-        Trạng thái hiện tại là <strong>{release.publicCorrections.channelStatus}</strong>; chế độ
-        candidate bị chặn cho tới khi có chủ sở hữu trách nhiệm xác nhận.
+        Kênh đã xác nhận: <a href={release.publicCorrections.channel}>GitHub Issues</a>.
+        Câu hỏi phát hành, chỉnh sửa dữ kiện, vấn đề ghi công và thông báo quyền có thể được gửi
+        tại đó cho chủ sở hữu trách nhiệm.
       </p>
     </section>
   </article>

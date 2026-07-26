@@ -196,16 +196,18 @@ test('field authority resolution is explicit and fail-closed', () => {
   assert.equal(unknown.finding.code, 'UNKNOWN_FIELD_AUTHORITY');
 });
 
-test('release inputs remain a candidate blocker without invalidating base publication', () => {
-  assert.equal(manifest.releaseInputs.candidateStatus, 'blocked-pending-evidence');
+test('release inputs require the tracked authenticated solo-owner decision', () => {
+  assert.equal(manifest.releaseInputs.candidateStatus, 'ready');
   assert.equal(
     manifest.releaseInputs.accountableReleaseOwner.evidenceStatus,
-    'pending',
+    'confirmed',
   );
   assert.equal(
     manifest.releaseInputs.vietnameseFactualReview.evidenceStatus,
-    'pending',
+    'confirmed',
   );
+  assert.equal(manifest.releaseInputs.publicCorrections.channelStatus, 'confirmed');
+  assert.equal(validatePublicationManifest(manifest).length, 0);
 
   const inventedApproval = clone(manifest);
   inventedApproval.releaseInputs.candidateStatus = 'approved';
@@ -213,6 +215,26 @@ test('release inputs remain a candidate blocker without invalidating base public
     hasCode(
       validatePublicationManifest(inventedApproval),
       'UNVERIFIED_RELEASE_INPUT_STATUS',
+    ),
+    true,
+  );
+
+  const driftedDecision = clone(manifest);
+  driftedDecision.releaseInputs.launchDecision.sha256 = 'f'.repeat(64);
+  assert.equal(
+    hasCode(
+      validatePublicationManifest(driftedDecision),
+      'LAUNCH_DECISION_HASH_DRIFT',
+    ),
+    true,
+  );
+
+  const substitutedReviewer = clone(manifest);
+  substitutedReviewer.releaseInputs.vietnameseFactualReview.reviewerId = 'someone-else';
+  assert.equal(
+    hasCode(
+      validatePublicationManifest(substitutedReviewer),
+      'INVALID_LAUNCH_DECISION_BINDING',
     ),
     true,
   );

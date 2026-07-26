@@ -100,14 +100,15 @@ test("project-authored SVG assets are script-free and self-contained", async () 
   }
 });
 
-test("Home and About expose qualifiers, rights separation, and human-input blockers", async () => {
+test("Home and About expose qualifiers, rights separation, and accountable review", async () => {
   const home = await read("site/src/pages/index.astro");
   const viHome = await read("site/src/pages/vi/index.astro");
   const about = await read("site/src/pages/about/index.astro");
   assert.match(home, /39[\s\S]*862[\s\S]*25[\s\S]*Commercial clearance/u);
   assert.match(viHome, /39[\s\S]*862[\s\S]*25[\s\S]*Quyền thương mại/u);
   assert.match(home, /not the original runtime/u);
-  assert.match(about, /Non-production draft/u);
+  assert.match(about, /Authenticated sole-owner review/u);
+  assert.match(about, /Confirmed channel/u);
   assert.match(about, /commercial distribution clearance is asserted/u);
 });
 

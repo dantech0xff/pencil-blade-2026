@@ -53,6 +53,7 @@ Xem chi tiết ở [LICENSE](./LICENSE).
 - [Project Overview PDR](./docs/project-overview-pdr.md)
 - [Code Standards](./docs/code-standards.md)
 - [System Architecture](./docs/system-architecture.md)
+- [GitHub Pages Deployment](./docs/deployment.md)
 - [Codebase Summary](./docs/codebase-summary.md)
 - [Compatibility Matrix](./docs/compatibility-matrix.md)
 - [Release Rights Checklist](./docs/release-rights-checklist.md)

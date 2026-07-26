@@ -13,7 +13,7 @@
     {
       "sourceId": "SRC-PUBLIC-README",
       "path": "README.md",
-      "sha256": "468f751286e40e71ddb9a7640f541d06076fe92d1ee575a67918a712a7dca394",
+      "sha256": "1631da0fab3379504780a9b0c7ba86fdf4318e723e6d75a699b95184e974fa91",
       "publicSafeExcerpt": {
         "en": "The repository reconstructs Pencil Blade 1.5 through a static-evidence clean-room method and supports Android debug and Web Mobile outputs.",
         "vi": "Kho lưu trữ phục dựng Pencil Blade 1.5 theo phương pháp clean-room dựa trên bằng chứng tĩnh và hỗ trợ đầu ra Android debug cùng Web Mobile."

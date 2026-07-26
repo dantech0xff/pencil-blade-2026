@@ -20,7 +20,12 @@ for (const route of routes) {
   });
 }
 
-test("About stays visibly blocked while human release inputs are pending", async ({ page }) => {
+test("About exposes confirmed sole-owner accountability without a draft blocker", async ({ page }) => {
   await page.goto("about/");
-  await expect(page.locator(".draft-flag")).toContainText("Non-production draft");
+  await expect(page.locator(".draft-flag")).toHaveCount(0);
+  await expect(page.locator("main")).toContainText("Authenticated sole-owner review");
+  await expect(page.getByRole("link", { name: "GitHub Issues" })).toHaveAttribute(
+    "href",
+    "https://github.com/dantech0xff/pencil-blade-2026/issues",
+  );
 });

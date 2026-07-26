@@ -1800,19 +1800,32 @@
   },
   "aiEpisodes": [],
   "releaseInputs": {
-    "candidateStatus": "blocked-pending-evidence",
+    "candidateStatus": "ready",
+    "launchDecision": {
+      "path": "reference/case-study-launch-ownership-decision.json",
+      "sha256": "dab456fd4e0f29b0ecc03e709846025a76a9921a451ffc649050a8bf8a2e1656",
+      "decisionId": "pencil-blade-case-study-solo-owner-launch-2026-07-26",
+      "decisionStatus": "confirmed"
+    },
     "accountableReleaseOwner": {
       "roleId": "accountable-release-owner",
-      "evidenceStatus": "pending"
+      "reviewerId": "dantech0xff",
+      "evidenceStatus": "confirmed",
+      "decisionRef": "reference/case-study-launch-ownership-decision.json"
     },
     "publicCorrections": {
       "roleId": "public-corrections-owner",
+      "ownerId": "dantech0xff",
       "channel": "https://github.com/dantech0xff/pencil-blade-2026/issues",
-      "channelStatus": "proposed-unconfirmed"
+      "channelStatus": "confirmed",
+      "decisionRef": "reference/case-study-launch-ownership-decision.json"
     },
     "vietnameseFactualReview": {
       "roleId": "vietnamese-factual-reviewer",
-      "evidenceStatus": "pending"
+      "reviewerId": "dantech0xff",
+      "reviewMode": "solo-owner-self-review",
+      "evidenceStatus": "confirmed",
+      "decisionRef": "reference/case-study-launch-ownership-decision.json"
     },
     "attributionTemplate": {
       "en": "Unofficial, noncommercial clean-room reconstruction. Not affiliated with the original owner, developer, or publisher. Recovered third-party content remains subject to its own rights.",
