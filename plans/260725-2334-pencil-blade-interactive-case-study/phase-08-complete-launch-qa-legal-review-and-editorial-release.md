@@ -231,9 +231,10 @@ All paths are repository-relative.
    confirm its commit/run/artifact/content/tree-manifest digests, required checklist IDs, roles,
    and supporting reports exactly match the waiting workflow. Complete every requested
    Vietnamese/rights/attribution/correction check, inspect repository environment/branch
-   protection state, and require the configured human reviewer; then approve the protected
-   `github-pages` environment. That protected review event is the human decision—the request
-   contains no approval-event placeholder, and a plain workflow input is not approval.
+   protection state, and require the configured sole owner reviewer; then approve the protected
+   `github-pages` environment. The authenticated owner review is recorded explicitly as
+   `solo-owner-self-review`. That protected review event is the human decision—the request contains
+   no approval-event placeholder, and a plain workflow input is not approval.
 10. After deployment, require the Phase 7 post-event job to emit
     `deployment-approval-evidence.json` from authenticated environment-review/deployment history.
     Verify actual approved state, reviewer/time/source reference, deployment identity, and the

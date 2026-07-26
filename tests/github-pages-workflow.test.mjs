@@ -372,6 +372,10 @@ test('protected deploy has no source mutation and production smoke binds live by
     deploy.steps[0].run,
     /environments\/github-pages[\s\S]*required_reviewers[\s\S]*prevent_self_review[\s\S]*protected_branches/u,
   );
+  assert.match(deploy.steps[0].run, /prevent_self_review !== false/u);
+  assert.match(deploy.steps[0].run, /reviewers\.length !== 1/u);
+  assert.match(deploy.steps[0].run, /GITHUB_ACTOR\.toLowerCase\(\)/u);
+  assert.doesNotMatch(deploy.steps[0].run, /prevent_self_review !== true/u);
   assert.match(deploy.steps[0].run, /custom_branch_policies/u);
   assert.equal(
     deploy.steps[1].uses,
@@ -412,6 +416,7 @@ test('post-deploy evidence uses authenticated review history and stays out of Pa
     evidenceJob,
     /--provider-history "\$EVIDENCE_OUTPUT\/provider-history\.json"/u,
   );
+  assert.match(evidenceJob, /--allow-self-approval true/u);
   assert.match(evidenceJob, /deployment-statuses-api\.json/u);
   assert.match(evidenceJob, /run\.run_started_at/u);
   assert.match(evidenceJob, /isCurrentRunUrl\(record\.log_url\)/u);

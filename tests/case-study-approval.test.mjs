@@ -5,6 +5,7 @@ import {
   readFileSync,
   writeFileSync,
 } from 'node:fs';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -17,6 +18,17 @@ import {
   validateDeploymentApprovalEvidence,
   verifyCandidateApprovalRequest,
 } from '../scripts/case-study-approval.mjs';
+
+const siteRequire = createRequire(new URL('../site/package.json', import.meta.url));
+const Ajv2020 = siteRequire('ajv/dist/2020').default;
+const approvalSchema = JSON.parse(readFileSync(
+  new URL('../reference/case-study-approval.schema.json', import.meta.url),
+  'utf8',
+));
+const validateApprovalSchema = new Ajv2020({
+  allowUnionTypes: true,
+  validateFormats: false,
+}).compile(approvalSchema);
 
 const digestA = 'a'.repeat(64);
 const digestB = 'b'.repeat(64);
@@ -176,7 +188,7 @@ test('request rejects any field that tries to pre-record approval or deployment'
   }
 });
 
-test('post-event recorder requires authenticated approved non-self-attested history', () => {
+test('post-event recorder requires authenticated approved history and blocks self-review by default', () => {
   const request = prepare();
   const args = {
     request,
@@ -188,8 +200,10 @@ test('post-event recorder requires authenticated approved non-self-attested hist
     ...args,
     providerRecord: providerRecord(),
   });
+  assert.equal(evidence.schemaVersion, 2);
   assert.equal(evidence.recordType, 'deployment-approval-evidence');
   assert.equal(evidence.review.reviewerId, 'release-owner');
+  assert.equal(evidence.review.authorizationMode, 'independent-review');
   assert.equal(evidence.deployment.state, 'success');
   assert.equal(evidence.deployment.workflowRunAttempt, 2);
   assert.doesNotThrow(() => validateDeploymentApprovalEvidence(evidence, request));
@@ -211,6 +225,49 @@ test('post-event recorder requires authenticated approved non-self-attested hist
       pattern,
     );
   }
+});
+
+test('solo-owner mode explicitly permits authenticated self-review of the exact candidate', () => {
+  const request = prepare();
+  const evidence = recordEnvironmentApprovalEvidence({
+    request,
+    releaseRecord,
+    treeManifestDigestSha256: digestB,
+    providerRecord: providerRecord({ reviewerId: 'release-owner' }),
+    workflowActorId: 'RELEASE-OWNER',
+    allowSelfApproval: true,
+  });
+
+  assert.equal(evidence.review.reviewerId, 'release-owner');
+  assert.equal(evidence.review.authorizationMode, 'solo-owner-self-review');
+  assert.doesNotThrow(() => validateDeploymentApprovalEvidence(evidence, request));
+});
+
+test('generated solo-owner evidence conforms to the published JSON schema', () => {
+  const request = prepare();
+  const evidence = recordEnvironmentApprovalEvidence({
+    request,
+    releaseRecord,
+    treeManifestDigestSha256: digestB,
+    providerRecord: providerRecord({ reviewerId: 'release-owner' }),
+    workflowActorId: 'release-owner',
+    allowSelfApproval: true,
+  });
+
+  assert.equal(
+    validateApprovalSchema(evidence),
+    true,
+    JSON.stringify(validateApprovalSchema.errors),
+  );
+
+  const invalidEvidence = {
+    ...evidence,
+    review: {
+      ...evidence.review,
+      authorizationMode: 'workflow-input',
+    },
+  };
+  assert.equal(validateApprovalSchema(invalidEvidence), false);
 });
 
 test('post-event evidence permits a later deploy retry without changing candidate identity', () => {
@@ -262,9 +319,15 @@ test('CLI accepts controlled runner-temp inputs and atomically refuses an existi
   const temporaryRoot = mkdtempSync(join(tmpdir(), 'case-study-approval-cli-'));
   const releasePath = join(temporaryRoot, 'candidate', 'case-study-release.json');
   const outputPath = join(temporaryRoot, 'review', 'candidate-approval-request.json');
+  const providerPath = join(temporaryRoot, 'review', 'provider-history.json');
+  const evidencePath = join(temporaryRoot, 'review', 'deployment-approval-evidence.json');
   mkdirSync(join(temporaryRoot, 'candidate'));
   mkdirSync(join(temporaryRoot, 'review'));
   writeFileSync(releasePath, `${JSON.stringify(releaseRecord)}\n`);
+  writeFileSync(
+    providerPath,
+    `${JSON.stringify(providerRecord({ reviewerId: 'release-owner' }))}\n`,
+  );
 
   const arguments_ = [
     'prepare',
@@ -278,5 +341,17 @@ test('CLI accepts controlled runner-temp inputs and atomically refuses an existi
   assert.equal(runCli(arguments_), 0);
   const request = JSON.parse(readFileSync(outputPath, 'utf8'));
   assert.equal(request.candidate.candidateArtifactName, 'case-study-candidate-91357-2');
+  assert.equal(runCli([
+    'record-environment-evidence',
+    '--release', releasePath,
+    '--tree-manifest-digest', digestB,
+    '--request', outputPath,
+    '--provider-history', providerPath,
+    '--workflow-actor', 'release-owner',
+    '--allow-self-approval', 'true',
+    '--out', evidencePath,
+  ]), 0);
+  const evidence = JSON.parse(readFileSync(evidencePath, 'utf8'));
+  assert.equal(evidence.review.authorizationMode, 'solo-owner-self-review');
   assert.equal(runCli(arguments_), 1);
 });

@@ -20,9 +20,9 @@
     {
       "owner": "site",
       "packagePath": "site/package.json",
-      "packageSha256": "411df73b0c2ce55bb21ed630c781b1e1ad9ab4ca696a44d2421d8a47c36935e1",
+      "packageSha256": "850a3a08efc42bb5b8b3fdef410debe3e3876d027dc879a8f83d14efc2833447",
       "lockPath": "site/package-lock.json",
-      "lockSha256": "0f1d8e43f00dcbbdb75662bd6ce14de352ef05ef84d81ce02eb1afad68de5cdb",
+      "lockSha256": "887c23f5977dd1cc43b455aa6fb0427fb4ee739961a456ecaddf00c84b205a2e",
       "installCommand": "npm ci --ignore-scripts --no-audit --no-fund"
     }
   ],
@@ -115,7 +115,7 @@
   "workflowFiles": [
     {
       "path": ".github/workflows/deploy-web-mobile-pages.yml",
-      "sha256": "cb37c0567619529ad3b8731b34406e23c9ecdb015add58b5baecc7f027f920b5"
+      "sha256": "dc7d1b78e2b5c8d008634ad429314aa8ef7bd20e81db10b194a72f4536b8aebd"
     },
     {
       "path": ".github/workflows/test-case-study-site.yml",

@@ -93,10 +93,11 @@ phase begins.
   smoke tool to exist before candidate composition.
 - Hold the deploy job at the protected `github-pages` environment until Phase 8 approves the
   exact `contentTreeDigest` and tree-manifest digest shown in the workflow summary.
-- Configure and verify repository settings so `github-pages` has a required human reviewer and
-  only protected `main` can deploy. If the current GitHub plan/repository visibility cannot
-  enforce this protection rule, production release is blocked; do not replace it with a
-  self-attested workflow input.
+- Configure and verify repository settings so `github-pages` has the sole project owner as its
+  required human reviewer and only protected `main` can deploy. Because this repository has no
+  independent reviewer, the environment may permit that owner to review their own dispatch, but
+  authorization must still be an authenticated environment approval of the exact candidate after
+  its digests are published; do not replace it with a plain workflow input.
 
 ### Non-functional
 
@@ -236,8 +237,9 @@ All paths are repository-relative.
 - [x] `recordEnvironmentApprovalEvidence(...)` runs only after the protected review/deploy event,
       reads the authenticated environment-review/deployment history for the current run, and emits
       a separate non-deployable evidence record with reviewer/state/observation-time/source URL
-      plus deployment identity. It rejects missing/pending/self-attested approval and never
-      modifies the candidate.
+      plus deployment identity. It rejects missing/pending approval and self-review by default;
+      the explicit solo-owner mode accepts only the authenticated configured-owner environment
+      review and records `solo-owner-self-review` without modifying the candidate.
       GitHub's run-approvals response does not expose the approval event timestamp, so the schema
       names the authenticated post-event observation time explicitly and does not synthesize a
       `reviewedAt` value from deployment status metadata.

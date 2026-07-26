@@ -360,6 +360,7 @@ export function recordEnvironmentApprovalEvidence({
   treeManifestDigestSha256,
   providerRecord,
   workflowActorId,
+  allowSelfApproval = false,
 }) {
   const validatedRequest = verifyCandidateApprovalRequest({
     request,
@@ -381,7 +382,11 @@ export function recordEnvironmentApprovalEvidence({
     throw new Error('Environment review history is not approved.');
   }
   const reviewerId = requireString(providerRecord.reviewerId, 'reviewerId');
-  if (workflowActorId && reviewerId === workflowActorId) {
+  const isSelfApproval = Boolean(
+    workflowActorId
+    && reviewerId.toLowerCase() === workflowActorId.toLowerCase(),
+  );
+  if (isSelfApproval && allowSelfApproval !== true) {
     throw new Error('Environment approval cannot be self-attested by the workflow actor.');
   }
   const approvalObservedAt = requireIsoDate(
@@ -437,7 +442,7 @@ export function recordEnvironmentApprovalEvidence({
   requireString(deployment.sourceUrl, 'deployment sourceUrl', /^https:\/\/github\.com\//u);
 
   return Object.freeze({
-    schemaVersion: 1,
+    schemaVersion: 2,
     recordType: 'deployment-approval-evidence',
     requestId: validatedRequest.requestId,
     candidate: validatedRequest.candidate,
@@ -446,6 +451,9 @@ export function recordEnvironmentApprovalEvidence({
       provider: 'github-actions-api',
       state: 'approved',
       reviewerId,
+      authorizationMode: isSelfApproval
+        ? 'solo-owner-self-review'
+        : 'independent-review',
       approvalObservedAt,
       sourceUrl,
       ...(providerRecord.providerEventId === undefined
@@ -466,7 +474,7 @@ export function validateDeploymentApprovalEvidence(evidence, request) {
   if (
     !evidence
     || typeof evidence !== 'object'
-    || evidence.schemaVersion !== 1
+    || evidence.schemaVersion !== 2
     || evidence.recordType !== 'deployment-approval-evidence'
   ) {
     throw new Error('Invalid deployment approval evidence record.');
@@ -487,6 +495,12 @@ export function validateDeploymentApprovalEvidence(evidence, request) {
     throw new Error('Deployment approval evidence is not an approved successful Pages event.');
   }
   requireString(evidence.review.reviewerId, 'reviewerId');
+  if (
+    evidence.review.authorizationMode !== 'independent-review'
+    && evidence.review.authorizationMode !== 'solo-owner-self-review'
+  ) {
+    throw new Error('Deployment approval evidence has an invalid authorization mode.');
+  }
   requireIsoDate(evidence.review.approvalObservedAt, 'approvalObservedAt');
   requireString(evidence.review.sourceUrl, 'review sourceUrl', /^https:\/\/github\.com\//u);
   if (
@@ -604,6 +618,7 @@ export function runCli(arguments_ = process.argv.slice(2)) {
         treeManifestDigestSha256: options.tree_manifest_digest,
         providerRecord: readJson(options.provider_history),
         workflowActorId: options.workflow_actor,
+        allowSelfApproval: options.allow_self_approval === 'true',
       });
       writeJsonAtomic(options.out, evidence);
       process.stdout.write('Recorded authenticated deployment approval evidence.\n');

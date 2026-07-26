@@ -560,15 +560,18 @@ jobs:
             const reviewerRule = environment.protection_rules?.find(
               (rule) => rule.type === "required_reviewers",
             );
+            const configuredReviewer =
+              reviewerRule?.reviewers?.[0]?.reviewer?.login?.toLowerCase();
             if (
               environment.name !== "github-pages"
               || !reviewerRule
-              || reviewerRule.prevent_self_review !== true
+              || reviewerRule.prevent_self_review !== false
               || !Array.isArray(reviewerRule.reviewers)
-              || reviewerRule.reviewers.length === 0
+              || reviewerRule.reviewers.length !== 1
+              || configuredReviewer !== process.env.GITHUB_ACTOR.toLowerCase()
             ) {
               throw new Error(
-                "github-pages must require a non-self human environment review.",
+                "github-pages must require the triggering solo owner as its human reviewer.",
               );
             }
             if (
@@ -857,6 +860,7 @@ jobs:
             --request "$EVIDENCE_REQUEST/candidate-approval-request.json" \
             --provider-history "$EVIDENCE_OUTPUT/provider-history.json" \
             --workflow-actor "$GITHUB_ACTOR" \
+            --allow-self-approval true \
             --out "$EVIDENCE_OUTPUT/deployment-approval-evidence.json"
 
       - name: Upload nondeployable approval evidence
