@@ -15,6 +15,7 @@ import test, { after } from 'node:test';
 
 import {
   createH5RuntimeMatrixConfig,
+  H5_NEW_GAME_GESTURES,
   runViewport,
   runH5RuntimeMatrix,
 } from '../scripts/run-h5-runtime-matrix.mjs';
@@ -266,6 +267,20 @@ test('CI accepts GitHub runner temp paths nested under the runner home', () => {
       process.env.RUNNER_TEMP = previousRunnerTemp;
     }
   }
+});
+
+test('New Game runtime gestures cross the reconstructed target with bounded fallbacks', () => {
+  assert.deepEqual(H5_NEW_GAME_GESTURES, [
+    { start: { x: 0.38, y: 0.625 }, end: { x: 0.78, y: 0.625 } },
+    { start: { x: 0.38, y: 0.60 }, end: { x: 0.78, y: 0.60 } },
+    { start: { x: 0.38, y: 0.65 }, end: { x: 0.78, y: 0.65 } },
+  ]);
+  assert.ok(H5_NEW_GAME_GESTURES.every((gesture) => (
+    gesture.start.x < 0.60
+    && gesture.end.x > 0.60
+    && Math.abs(gesture.start.y - 0.625) <= 0.026
+    && gesture.start.y === gesture.end.y
+  )));
 });
 
 function runtimeOptions(reportDirectory) {

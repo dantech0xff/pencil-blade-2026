@@ -41,6 +41,20 @@ export const H5_RUNTIME_MATRIX_VIEWPORTS = Object.freeze([
   Object.freeze({ id: 'chrome-480x800', width: 480, height: 800 }),
   Object.freeze({ id: 'chrome-720x1280', width: 720, height: 1280 }),
 ]);
+export const H5_NEW_GAME_GESTURES = Object.freeze([
+  Object.freeze({
+    start: Object.freeze({ x: 0.38, y: 0.625 }),
+    end: Object.freeze({ x: 0.78, y: 0.625 }),
+  }),
+  Object.freeze({
+    start: Object.freeze({ x: 0.38, y: 0.60 }),
+    end: Object.freeze({ x: 0.78, y: 0.60 }),
+  }),
+  Object.freeze({
+    start: Object.freeze({ x: 0.38, y: 0.65 }),
+    end: Object.freeze({ x: 0.78, y: 0.65 }),
+  }),
+]);
 
 export function createH5RuntimeMatrixConfig(options = {}) {
   const ci = options.ci === true;
@@ -213,6 +227,7 @@ async function dispatchSwipe(context, page, viewport, start, end) {
         id: 1,
       }],
     });
+    await page.waitForTimeout(16);
   }
   await session.send('Input.dispatchTouchEvent', {
     type: 'touchEnd',
@@ -484,17 +499,17 @@ export async function runViewport(
     const initialSha256 = sha256(readFileSync(initialScreenshot));
     const audioBeforeInput = await audioSnapshot(page);
 
-    await dispatchSwipe(
-      context,
-      page,
-      viewport,
-      { x: 0.38, y: 0.64 },
-      { x: 0.78, y: 0.64 },
-    );
-    await page.waitForTimeout(2_000);
     const modeSelectScreenshot = resolve(outputDirectory, `${viewport.id}-mode-select.png`);
-    await page.screenshot({ path: modeSelectScreenshot, fullPage: false });
-    const modeSelectSha256 = sha256(readFileSync(modeSelectScreenshot));
+    let modeSelectSha256 = initialSha256;
+    for (const gesture of H5_NEW_GAME_GESTURES) {
+      await dispatchSwipe(context, page, viewport, gesture.start, gesture.end);
+      await page.waitForTimeout(2_000);
+      await page.screenshot({ path: modeSelectScreenshot, fullPage: false });
+      modeSelectSha256 = sha256(readFileSync(modeSelectScreenshot));
+      if (modeSelectSha256 !== initialSha256) {
+        break;
+      }
+    }
     if (modeSelectSha256 === initialSha256) {
       throw new Error(`${viewport.id} New Game touch gesture did not change the rendered frame`);
     }
