@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 
 import {
+  fetchBrowserRouteWithRetries,
   safeReportDirectory,
   smokeProductionPages,
 } from '../scripts/run-case-study-production-smoke.mjs';
@@ -199,6 +200,67 @@ test('production smoke retries bounded transient CDN responses without weakening
     /assets\/site\.css returned HTTP 503/u,
   );
   assert.equal(persistentAttempts, 3);
+});
+
+test('browser routes retry transient HTTP responses and expose persistent failures', async () => {
+  const observedDelays = [];
+  const disposedStatuses = [];
+  const statuses = [503, 429, 200];
+  let fetchCount = 0;
+  const route = {
+    async fetch() {
+      const status = statuses[fetchCount];
+      fetchCount += 1;
+      return {
+        status: () => status,
+        async dispose() {
+          disposedStatuses.push(status);
+        },
+      };
+    },
+  };
+  const recovered = await fetchBrowserRouteWithRetries(route, {
+    attempts: 4,
+    retryDelayMs: 10,
+    delayImpl: async (delayMs) => observedDelays.push(delayMs),
+  });
+  assert.equal(recovered.status(), 200);
+  assert.equal(fetchCount, 3);
+  assert.deepEqual(disposedStatuses, [503, 429]);
+  assert.deepEqual(observedDelays, [10, 20]);
+
+  let persistentFetches = 0;
+  const persistent = await fetchBrowserRouteWithRetries({
+    async fetch() {
+      persistentFetches += 1;
+      return {
+        status: () => 503,
+        async dispose() {},
+      };
+    },
+  }, {
+    attempts: 3,
+    retryDelayMs: 0,
+    delayImpl: async () => {},
+  });
+  assert.equal(persistent.status(), 503);
+  assert.equal(persistentFetches, 3);
+
+  let nonTransientFetches = 0;
+  const nonTransient = await fetchBrowserRouteWithRetries({
+    async fetch() {
+      nonTransientFetches += 1;
+      return {
+        status: () => 404,
+      };
+    },
+  }, {
+    attempts: 4,
+    retryDelayMs: 0,
+    delayImpl: async () => {},
+  });
+  assert.equal(nonTransient.status(), 404);
+  assert.equal(nonTransientFetches, 1);
 });
 
 test('production smoke runs an explicit complete browser journey contract', async () => {

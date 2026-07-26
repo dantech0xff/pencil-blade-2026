@@ -225,6 +225,65 @@ async function fetchBytes(fetchImpl, url, label, {
   throw new Error(`${label} exhausted production fetch attempts.`);
 }
 
+function validateFetchRetryOptions(attempts, retryDelayMs) {
+  if (!Number.isInteger(attempts) || attempts < 1 || attempts > 8) {
+    throw new Error('Production smoke fetch attempts must be between 1 and 8.');
+  }
+  if (
+    !Number.isInteger(retryDelayMs)
+    || retryDelayMs < 0
+    || retryDelayMs > 5_000
+  ) {
+    throw new Error('Production smoke fetch retry delay must be between 0 and 5000 ms.');
+  }
+}
+
+export async function fetchBrowserRouteWithRetries(route, {
+  attempts = DEFAULT_FETCH_ATTEMPTS,
+  retryDelayMs = DEFAULT_FETCH_RETRY_DELAY_MS,
+  delayImpl = (delayMs) => new Promise((resolvePromise) => {
+    setTimeout(resolvePromise, delayMs);
+  }),
+} = {}) {
+  validateFetchRetryOptions(attempts, retryDelayMs);
+  if (typeof route?.fetch !== 'function') {
+    throw new Error('Production browser retry requires a Playwright route.');
+  }
+  if (typeof delayImpl !== 'function') {
+    throw new Error('Production browser retry requires a delay implementation.');
+  }
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const response = await route.fetch();
+    const status = response.status();
+    if (!TRANSIENT_HTTP_STATUSES.has(status) || attempt === attempts) {
+      return response;
+    }
+    if (typeof response.dispose === 'function') {
+      await response.dispose().catch(() => {});
+    } else if (typeof response.body === 'function') {
+      await response.body().catch(() => {});
+    }
+    await delayImpl(retryDelayMs * (2 ** (attempt - 1)));
+  }
+  throw new Error('Production browser route exhausted fetch attempts.');
+}
+
+async function installBrowserTransientRetries(page, baseUrl, retryOptions, onPersistentFailure) {
+  const releaseBase = normalizedBaseUrl(baseUrl);
+  await page.route(
+    (url) =>
+      url.origin === releaseBase.origin
+      && url.pathname.startsWith(releaseBase.pathname),
+    async (route) => {
+      const response = await fetchBrowserRouteWithRetries(route, retryOptions);
+      if (TRANSIENT_HTTP_STATUSES.has(response.status())) {
+        onPersistentFailure?.(response);
+      }
+      await route.fulfill({ response });
+    },
+  );
+}
+
 function cacheBusted(baseUrl, pathValue, token) {
   const url = new URL(pathValue, baseUrl);
   if (url.origin !== baseUrl.origin || !url.pathname.startsWith(baseUrl.pathname)) {
@@ -287,10 +346,17 @@ export async function runProductionBrowserJourneys({
   playwrightModuleDir,
   browserExecutable,
   timeoutMs = 90_000,
+  fetchAttempts = DEFAULT_FETCH_ATTEMPTS,
+  fetchRetryDelayMs = DEFAULT_FETCH_RETRY_DELAY_MS,
 }) {
   if (typeof playwrightModuleDir !== 'string' || playwrightModuleDir.length === 0) {
     throw new Error('Production browser journeys require an explicit Playwright module directory.');
   }
+  validateFetchRetryOptions(fetchAttempts, fetchRetryDelayMs);
+  const fetchRetryOptions = {
+    attempts: fetchAttempts,
+    retryDelayMs: fetchRetryDelayMs,
+  };
   const modulePath = resolve(playwrightModuleDir, 'index.mjs');
   const { chromium } = await import(pathToFileURL(modulePath).href);
   let browser;
@@ -315,6 +381,12 @@ export async function runProductionBrowserJourneys({
       const failures = [];
       const gameRequests = [];
       let expectedNavigationAbort = false;
+      await installBrowserTransientRetries(
+        launcherPage,
+        baseUrl,
+        fetchRetryOptions,
+        (response) => failures.push(`http ${response.status()}: ${response.url()}`),
+      );
       launcherPage.on('console', (message) => {
         if (
           message.type() === 'error'
@@ -336,7 +408,10 @@ export async function runProductionBrowserJourneys({
         failures.push(`requestfailed: ${request.url()} ${errorText}`);
       });
       launcherPage.on('response', (response) => {
-        if (response.status() >= 400) {
+        if (
+          response.status() >= 400
+          && !TRANSIENT_HTTP_STATUSES.has(response.status())
+        ) {
           failures.push(`http ${response.status()}: ${response.url()}`);
         }
       });
@@ -496,6 +571,7 @@ export async function runProductionBrowserJourneys({
         }
         embeddedGameViewports.push(viewport.id);
       } finally {
+        await launcherPage.unrouteAll({ behavior: 'ignoreErrors' });
         await context.close();
       }
     }
@@ -506,11 +582,20 @@ export async function runProductionBrowserJourneys({
         viewport: { width: viewport.width, height: viewport.height },
       });
       const failures = [];
+      await installBrowserTransientRetries(
+        page,
+        baseUrl,
+        fetchRetryOptions,
+        (response) => failures.push(`http ${response.status()}: ${response.url()}`),
+      );
       page.on('pageerror', (error) => failures.push(`pageerror: ${error.message}`));
       page.on('requestfailed', (request) =>
         failures.push(`requestfailed: ${request.url()} ${request.failure()?.errorText ?? ''}`));
       page.on('response', (response) => {
-        if (response.status() >= 400) {
+        if (
+          response.status() >= 400
+          && !TRANSIENT_HTTP_STATUSES.has(response.status())
+        ) {
           failures.push(`http ${response.status()}: ${response.url()}`);
         }
       });
@@ -531,6 +616,7 @@ export async function runProductionBrowserJourneys({
         }
         directGameViewports.push(viewport.id);
       } finally {
+        await page.unrouteAll({ behavior: 'ignoreErrors' });
         await page.close();
       }
     }
@@ -571,16 +657,7 @@ export async function smokeProductionPages({
   if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 32) {
     throw new Error('Production smoke concurrency must be between 1 and 32.');
   }
-  if (!Number.isInteger(fetchAttempts) || fetchAttempts < 1 || fetchAttempts > 8) {
-    throw new Error('Production smoke fetch attempts must be between 1 and 8.');
-  }
-  if (
-    !Number.isInteger(fetchRetryDelayMs)
-    || fetchRetryDelayMs < 0
-    || fetchRetryDelayMs > 5_000
-  ) {
-    throw new Error('Production smoke fetch retry delay must be between 0 and 5000 ms.');
-  }
+  validateFetchRetryOptions(fetchAttempts, fetchRetryDelayMs);
   const fetchOptions = {
     attempts: fetchAttempts,
     retryDelayMs: fetchRetryDelayMs,
