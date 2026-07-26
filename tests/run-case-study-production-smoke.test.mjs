@@ -61,6 +61,7 @@ function fixture(options = {}) {
     );
   }
   files.set('assets/site.css', Buffer.from('body{color:#171a18}\n'));
+  files.set('play/game/assets/audio/cut.mp3', Buffer.from('verified-mp3-bytes'));
   if (options.deletePath) files.delete(options.deletePath);
   if (options.addPath) files.set(options.addPath, Buffer.from('unsafe'));
 
@@ -86,6 +87,7 @@ function contentType(path) {
   if (path.endsWith('.html')) return 'text/html; charset=utf-8';
   if (path.endsWith('.json')) return 'application/json; charset=utf-8';
   if (path.endsWith('.css')) return 'text/css; charset=utf-8';
+  if (path.endsWith('.mp3')) return 'audio/mpeg';
   return 'application/octet-stream';
 }
 
@@ -108,7 +110,7 @@ function fakeFetch(input, fixtureState, options = {}) {
   }
   const type = options.wrongMimePath === path
     ? 'text/plain'
-    : contentType(path);
+    : options.mimeByPath?.[path] ?? contentType(path);
   return Promise.resolve(new Response(bytes, {
     status: 200,
     headers: { 'content-type': type },
@@ -139,6 +141,64 @@ test('production smoke verifies identity, every manifest byte/MIME, and required
   assert.equal(report.identity.contentTreeDigestSha256, contentDigest);
   assert.equal(report.treeManifestDigestSha256, state.treeDigest);
   assert.equal(report.journeys.status, 'not-run-files-only');
+});
+
+test('production smoke accepts the GitHub Pages audio/mp3 alias for MP3 assets', async () => {
+  const state = fixture();
+  const report = await smokeProductionPages(smokeOptions(state, {
+    fetchImpl: (url) => fakeFetch(url, state, {
+      mimeByPath: {
+        'play/game/assets/audio/cut.mp3': 'audio/mp3',
+      },
+    }),
+  }));
+  assert.equal(report.status, 'pass');
+});
+
+test('production smoke retries bounded transient CDN responses without weakening failures', async () => {
+  const state = fixture();
+  let transientAttempts = 0;
+  const transientFetch = async (url) => {
+    const path = decodeURIComponent(new URL(url).pathname)
+      .slice('/pencil-blade-2026/'.length);
+    if (path === 'assets/site.css' && transientAttempts < 2) {
+      transientAttempts += 1;
+      return new Response('temporarily unavailable', {
+        status: 503,
+        headers: { 'content-type': 'text/plain' },
+      });
+    }
+    return fakeFetch(url, state);
+  };
+  const report = await smokeProductionPages(smokeOptions(state, {
+    fetchImpl: transientFetch,
+    fetchAttempts: 3,
+    fetchRetryDelayMs: 0,
+  }));
+  assert.equal(report.status, 'pass');
+  assert.equal(transientAttempts, 2);
+
+  let persistentAttempts = 0;
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(state, {
+      fetchImpl: async (url) => {
+        const path = decodeURIComponent(new URL(url).pathname)
+          .slice('/pencil-blade-2026/'.length);
+        if (path === 'assets/site.css') {
+          persistentAttempts += 1;
+          return new Response('still unavailable', {
+            status: 503,
+            headers: { 'content-type': 'text/plain' },
+          });
+        }
+        return fakeFetch(url, state);
+      },
+      fetchAttempts: 3,
+      fetchRetryDelayMs: 0,
+    })),
+    /assets\/site\.css returned HTTP 503/u,
+  );
+  assert.equal(persistentAttempts, 3);
 });
 
 test('production smoke runs an explicit complete browser journey contract', async () => {

@@ -19,6 +19,9 @@ const REPOSITORY_ROOT = resolve(SCRIPT_DIRECTORY, '..');
 const DIGEST_PATTERN = /^[a-f0-9]{64}$/u;
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const DEFAULT_CONCURRENCY = 12;
+const DEFAULT_FETCH_ATTEMPTS = 4;
+const DEFAULT_FETCH_RETRY_DELAY_MS = 250;
+const TRANSIENT_HTTP_STATUSES = Object.freeze(new Set([429, 502, 503, 504]));
 const REQUIRED_ROUTES = Object.freeze([
   '',
   'story/',
@@ -132,6 +135,9 @@ function contentTypeMatches(pathValue, actual) {
   if (expected === 'application/xml') {
     return normalized === 'application/xml' || normalized === 'text/xml';
   }
+  if (expected === 'audio/mpeg') {
+    return normalized === 'audio/mpeg' || normalized === 'audio/mp3';
+  }
   return normalized === expected;
 }
 
@@ -187,22 +193,36 @@ function validateExpectedIdentity(releaseRecord, expected) {
   return Object.freeze(observed);
 }
 
-async function fetchBytes(fetchImpl, url, label) {
-  const response = await fetchImpl(url, {
-    headers: {
-      accept: '*/*',
-      'cache-control': 'no-cache',
-    },
-    redirect: 'error',
-  });
-  if (!response || response.status !== 200) {
-    throw new Error(`${label} returned HTTP ${response?.status ?? 'no response'}.`);
+async function fetchBytes(fetchImpl, url, label, {
+  attempts = DEFAULT_FETCH_ATTEMPTS,
+  retryDelayMs = DEFAULT_FETCH_RETRY_DELAY_MS,
+} = {}) {
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const response = await fetchImpl(url, {
+      headers: {
+        accept: '*/*',
+        'cache-control': 'no-cache',
+      },
+      redirect: 'error',
+    });
+    if (response?.status === 200) {
+      return {
+        bytes: Buffer.from(await response.arrayBuffer()),
+        contentType: response.headers.get('content-type') ?? '',
+        response,
+      };
+    }
+    const status = response?.status;
+    const retryable = TRANSIENT_HTTP_STATUSES.has(status);
+    if (!retryable || attempt === attempts) {
+      throw new Error(`${label} returned HTTP ${status ?? 'no response'}.`);
+    }
+    await response.arrayBuffer().catch(() => {});
+    await new Promise((resolvePromise) => {
+      setTimeout(resolvePromise, retryDelayMs * (2 ** (attempt - 1)));
+    });
   }
-  return {
-    bytes: Buffer.from(await response.arrayBuffer()),
-    contentType: response.headers.get('content-type') ?? '',
-    response,
-  };
+  throw new Error(`${label} exhausted production fetch attempts.`);
 }
 
 function cacheBusted(baseUrl, pathValue, token) {
@@ -539,6 +559,8 @@ export async function smokeProductionPages({
   expectedTreeManifestDigest,
   fetchImpl = globalThis.fetch,
   concurrency = DEFAULT_CONCURRENCY,
+  fetchAttempts = DEFAULT_FETCH_ATTEMPTS,
+  fetchRetryDelayMs = DEFAULT_FETCH_RETRY_DELAY_MS,
   cacheToken = `${expectedRunId}-${expectedRunAttempt}`,
   journeyRunner,
   filesOnly = false,
@@ -549,6 +571,20 @@ export async function smokeProductionPages({
   if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 32) {
     throw new Error('Production smoke concurrency must be between 1 and 32.');
   }
+  if (!Number.isInteger(fetchAttempts) || fetchAttempts < 1 || fetchAttempts > 8) {
+    throw new Error('Production smoke fetch attempts must be between 1 and 8.');
+  }
+  if (
+    !Number.isInteger(fetchRetryDelayMs)
+    || fetchRetryDelayMs < 0
+    || fetchRetryDelayMs > 5_000
+  ) {
+    throw new Error('Production smoke fetch retry delay must be between 0 and 5000 ms.');
+  }
+  const fetchOptions = {
+    attempts: fetchAttempts,
+    retryDelayMs: fetchRetryDelayMs,
+  };
   if (!DIGEST_PATTERN.test(expectedTreeManifestDigest ?? '')) {
     throw new Error('Expected tree-manifest digest must be a SHA-256.');
   }
@@ -557,6 +593,7 @@ export async function smokeProductionPages({
     fetchImpl,
     cacheBusted(normalizedBase, 'case-study-tree-manifest.json', cacheToken),
     'case-study-tree-manifest.json',
+    fetchOptions,
   );
   if (!contentTypeMatches('case-study-tree-manifest.json', treeResponse.contentType)) {
     throw new Error('Tree manifest has an unacceptable live MIME type.');
@@ -579,6 +616,7 @@ export async function smokeProductionPages({
         fetchImpl,
         cacheBusted(normalizedBase, file.path, cacheToken),
         file.path,
+        fetchOptions,
       );
       if (result.bytes.length !== file.bytes) {
         throw new Error(`${file.path} live byte size does not match the tree manifest.`);
@@ -608,6 +646,7 @@ export async function smokeProductionPages({
     fetchImpl,
     cacheBusted(normalizedBase, 'case-study-release.json', `${cacheToken}-identity`),
     'case-study-release.json identity recheck',
+    fetchOptions,
   );
   if (sha256(releaseResponse.bytes) !== releaseFile.sha256) {
     throw new Error('Release record changed between manifest-wide fetch and identity recheck.');
