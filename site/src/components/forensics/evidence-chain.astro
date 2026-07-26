@@ -1,0 +1,171 @@
+---
+import evidencePipeline from "../../assets/diagrams/evidence-pipeline.svg";
+
+interface Props {
+  locale?: "en" | "vi";
+}
+
+const { locale = "en" } = Astro.props;
+const labels = {
+  en: {
+    eyebrow: "Stable, shareable chain",
+    title: "Follow one claim from source to proof",
+    intro: "Each node is a normal deep link. Selecting it keeps the upstream source, downstream verification, evidence status, and limit in the same reading context.",
+    alt: "Seven connected nodes: source APK, derived view, labeled claim, reviewed contract, clean-room TypeScript owner, deterministic test or probe, and reconstruction runtime proof.",
+    table: "Complete evidence-chain table",
+    layer: "Layer",
+    artifact: "Artifact or decision",
+    status: "Status",
+    limit: "What it does not prove",
+  },
+  vi: {
+    eyebrow: "Chuỗi ổn định, có thể chia sẻ",
+    title: "Theo một khẳng định từ nguồn đến kiểm chứng",
+    intro: "Mỗi nút là liên kết sâu thông thường. Khi chọn, nguồn phía trước, kiểm chứng phía sau, trạng thái bằng chứng và giới hạn vẫn nằm trong cùng ngữ cảnh đọc.",
+    alt: "Bảy nút nối nhau: APK nguồn, view dẫn xuất, khẳng định có nhãn, hợp đồng đã rà soát, chủ sở hữu TypeScript clean-room, kiểm thử hoặc probe xác định và kiểm chứng runtime của bản phục dựng.",
+    table: "Bảng chuỗi bằng chứng đầy đủ",
+    layer: "Lớp",
+    artifact: "Hiện vật hoặc quyết định",
+    status: "Trạng thái",
+    limit: "Điều không được chứng minh",
+  },
+} as const;
+
+const nodes = locale === "vi"
+  ? [
+      ["source", "Nguồn", "SRC-APK-001 · APK bất biến đã hash", "đã phục hồi", "Không có quan sát runtime gốc."],
+      ["derived", "View dẫn xuất", "DER-NATIVE-CORPUS-001 · corpus tĩnh tái lập", "đã phục hồi", "Không công bố byte native."],
+      ["claim", "Khẳng định", "CLM-CLASSIC-BLADE-QUERY", "đã phục hồi", "Tag 1437 vẫn chưa rõ nghĩa sản phẩm."],
+      ["contract", "Hợp đồng", "DER-CLASSIC-PHYSICS-001 · hợp đồng vật lý đã rà soát", "đã rà soát", "Không phải mã nguồn C++ gốc."],
+      ["owner", "Chủ sở hữu", "TypeScript domain + ClassicPhysicsAdapter", "clean-room", "Không nhúng hay gọi libgame.so."],
+      ["test", "Kiểm thử", "Adapter tests + DER-PHYSICS2D-EQUIVALENCE-001", "đã đo", "Chỉ đo backend của bản phục dựng."],
+      ["runtime", "Môi trường chạy", "Android debug + Web Mobile H5", "đã đo", "Không chứng minh danh tính runtime lịch sử."],
+    ]
+  : [
+      ["source", "Source", "SRC-APK-001 · hash-identified immutable APK", "recovered", "No original-runtime observation."],
+      ["derived", "Derived view", "DER-NATIVE-CORPUS-001 · reproducible static corpus", "recovered", "No native bytes are published."],
+      ["claim", "Claim", "CLM-CLASSIC-BLADE-QUERY", "recovered", "Product meaning of tag 1437 remains unknown."],
+      ["contract", "Contract", "DER-CLASSIC-PHYSICS-001 · reviewed physics contract", "reviewed", "Not original C++ source."],
+      ["owner", "Owner", "TypeScript domain + ClassicPhysicsAdapter", "clean-room", "Does not embed or call libgame.so."],
+      ["test", "Test", "Adapter tests + DER-PHYSICS2D-EQUIVALENCE-001", "measured", "Measures the reconstruction backend only."],
+      ["runtime", "Runtime", "Android debug + Web Mobile H5", "measured", "Does not prove historical-runtime identity."],
+    ];
+---
+
+<section class="evidence-chain" aria-labelledby="evidence-chain-heading">
+  <p class="eyebrow">{labels[locale].eyebrow}</p>
+  <h2 id="evidence-chain-heading">{labels[locale].title}</h2>
+  <p>{labels[locale].intro}</p>
+  <figure>
+    <img src={evidencePipeline.src} width="1080" height="360" alt={labels[locale].alt} />
+    <figcaption>{labels[locale].alt}</figcaption>
+  </figure>
+  <ol class="evidence-chain__nodes">
+    {
+      nodes.map(([id, layer, artifact, status, limit], index) => (
+        <li id={`chain-${id}`} tabindex="-1">
+          <a href={`#chain-${id}`} aria-label={`${layer}: ${artifact}`}>
+            <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+            <strong>{layer}</strong>
+          </a>
+          <p>{artifact}</p>
+          <p><b>{labels[locale].status}:</b> {status}</p>
+          <p><b>{labels[locale].limit}:</b> {limit}</p>
+        </li>
+      ))
+    }
+  </ol>
+  <details open>
+    <summary>{labels[locale].table}</summary>
+    <div class="table-region">
+      <table>
+        <thead>
+          <tr>
+            <th>{labels[locale].layer}</th>
+            <th>{labels[locale].artifact}</th>
+            <th>{labels[locale].status}</th>
+            <th>{labels[locale].limit}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            nodes.map(([, layer, artifact, status, limit]) => (
+              <tr>
+                <th scope="row">{layer}</th>
+                <td>{artifact}</td>
+                <td>{status}</td>
+                <td>{limit}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+<style>
+  .evidence-chain {
+    border: 2px solid var(--graphite);
+    padding: clamp(1rem, 3vw, 2rem);
+    color: var(--white);
+    background: var(--lab);
+  }
+
+  .evidence-chain figure {
+    margin-inline: 0;
+  }
+
+  .evidence-chain figcaption {
+    color: var(--paper);
+    font-size: var(--step--1);
+  }
+
+  .evidence-chain__nodes {
+    display: grid;
+    gap: var(--space-3);
+    padding: 0;
+    list-style: none;
+  }
+
+  .evidence-chain__nodes li {
+    border: 1px solid var(--paper);
+    padding: var(--space-4);
+  }
+
+  .evidence-chain__nodes li:target {
+    outline: 0.35rem solid var(--pencil);
+    outline-offset: 0.15rem;
+  }
+
+  .evidence-chain__nodes a {
+    display: flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--pencil);
+  }
+
+  .evidence-chain .table-region {
+    border-color: var(--paper);
+  }
+
+  .evidence-chain th,
+  .evidence-chain td {
+    border-color: color-mix(in srgb, var(--paper) 35%, transparent);
+  }
+
+  @media (min-width: 64rem) {
+    .evidence-chain__nodes {
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+
+    .evidence-chain__nodes li {
+      min-width: 0;
+    }
+
+    .evidence-chain__nodes p {
+      overflow-wrap: anywhere;
+    }
+  }
+</style>

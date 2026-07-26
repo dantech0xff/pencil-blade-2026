@@ -1,0 +1,30 @@
+---
+interface Props {
+  locale?: "en" | "vi";
+  technical: string;
+  academic: string;
+  commercial: string;
+}
+
+const { locale = "en", technical, academic, commercial } = Astro.props;
+---
+
+<aside class="rights-boundary" aria-labelledby="rights-boundary-heading">
+  <h2 id="rights-boundary-heading">
+    {locale === "vi" ? "Ranh giới kiểm chứng và quyền" : "Proof and rights boundary"}
+  </h2>
+  <div class="rights-boundary__columns">
+    <section>
+      <h3>{locale === "vi" ? "Kiểm chứng kỹ thuật" : "Technical proof"}</h3>
+      <p>{technical}</p>
+    </section>
+    <section>
+      <h3>{locale === "vi" ? "Phạm vi học thuật" : "Academic display"}</h3>
+      <p>{academic}</p>
+    </section>
+    <section>
+      <h3>{locale === "vi" ? "Quyền thương mại" : "Commercial rights"}</h3>
+      <p>{commercial}</p>
+    </section>
+  </div>
+</aside>

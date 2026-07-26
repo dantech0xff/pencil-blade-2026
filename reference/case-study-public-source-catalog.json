@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "pencil-blade-case-study-public-sources",
+  "catalogVersion": "1.0.0",
+  "policy": {
+    "directLinksAreAllowlisted": true,
+    "hashAlgorithm": "sha256",
+    "scanScope": "whole-linkable-file-plus-transitive-markdown-destinations",
+    "unsafeSourcesUseSanitizedExcerptOnly": true,
+    "symlinksAllowed": false
+  },
+  "sources": [
+    {
+      "sourceId": "SRC-PUBLIC-README",
+      "path": "README.md",
+      "sha256": "468f751286e40e71ddb9a7640f541d06076fe92d1ee575a67918a712a7dca394",
+      "publicSafeExcerpt": {
+        "en": "The repository reconstructs Pencil Blade 1.5 through a static-evidence clean-room method and supports Android debug and Web Mobile outputs.",
+        "vi": "Kho lưu trữ phục dựng Pencil Blade 1.5 theo phương pháp clean-room dựa trên bằng chứng tĩnh và hỗ trợ đầu ra Android debug cùng Web Mobile."
+      },
+      "lineRange": {
+        "start": 1,
+        "end": 26
+      },
+      "transitiveLinks": [],
+      "publicLinkAllowed": false,
+      "linkDecisionReason": "Use the hash-bound excerpt until the complete Markdown link graph is reviewed under this catalog."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-STATIC-METHOD",
+      "path": "docs/static-reconstruction-method.md",
+      "sha256": "9338a1de1301659e1dcd319cc5d2a2c1a44a93e3fcc3e7ee91b1eee5a1b641e9",
+      "publicSafeExcerpt": {
+        "en": "The original runtime was never executed. Contracts are recovered from immutable static evidence, cross-checked, and rewritten behind a clean-room Cocos Creator boundary.",
+        "vi": "Môi trường chạy gốc chưa từng được thực thi. Các hợp đồng hành vi được phục hồi từ bằng chứng tĩnh bất biến, đối chiếu chéo và viết lại sau ranh giới clean-room của Cocos Creator."
+      },
+      "lineRange": {
+        "start": 1,
+        "end": 18
+      },
+      "transitiveLinks": [],
+      "publicLinkAllowed": false,
+      "linkDecisionReason": "The source discusses restricted raw evidence and ignored working storage; publish only the sanitized excerpt."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-EVIDENCE-REGISTER",
+      "path": "docs/evidence-register.md",
+      "sha256": "b4a4c573276a533efb387f1c734d6dfef3f6dc7829632b4de9e464967ab3d03b",
+      "publicSafeExcerpt": {
+        "en": "The evidence register separates immutable source artifacts, reproducible ignored working output, and curated conclusions, each with a stable identifier.",
+        "vi": "Sổ bằng chứng tách hiện vật nguồn bất biến, đầu ra làm việc có thể tái tạo nhưng bị bỏ qua, và kết luận đã tuyển chọn; mỗi mục có mã định danh ổn định."
+      },
+      "lineRange": {
+        "start": 1,
+        "end": 14
+      },
+      "transitiveLinks": [],
+      "publicLinkAllowed": false,
+      "linkDecisionReason": "The complete file contains machine-local and restricted raw-evidence pointers; use the sanitized excerpt."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-CLAIMS",
+      "path": "forensics/claims.jsonl",
+      "sha256": "40ebb9ce4fa15bfd0a513f0d1e461985a989f8f05b074cc17a284f77ded630a0",
+      "publicSafeExcerpt": {
+        "en": "The canonical ledger contains 39 reviewed claim records: 38 recovered technical claims and one unknown rights claim.",
+        "vi": "Sổ chuẩn chứa 39 bản ghi tuyên bố đã rà soát: 38 tuyên bố kỹ thuật đã phục hồi và một tuyên bố quyền chưa xác định."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": false,
+      "linkDecisionReason": "Several canonical records necessarily name restricted original/native artifacts; the site projects the ledger instead of linking it directly."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-NATIVE-SUMMARY",
+      "path": "forensics/native/function-enrichment-summary.json",
+      "sha256": "d72cbdaf8306286ead76145db8beca7b30a0bafbbc66b18af37bc8ea57ab8d24",
+      "publicSafeExcerpt": {
+        "en": "The curated native-function projection indexes 713 allowlisted application functions and reports direct-call, numeric-constant, and high-confidence string-reference coverage.",
+        "vi": "Phép chiếu hàm native đã tuyển chọn lập chỉ mục 713 hàm ứng dụng trong danh sách cho phép và báo cáo độ phủ lời gọi trực tiếp, hằng số số học cùng tham chiếu chuỗi độ tin cậy cao."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": true,
+      "linkDecisionReason": "The complete structured summary contains no private path, raw executable content, or transitive link."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-RESOURCE-MAP",
+      "path": "forensics/resources/resource-usage-map.json",
+      "sha256": "165238f13f4186a9ab429c9c5a8bab07b4a42e941d0608f757d9e41a44d2ce67",
+      "publicSafeExcerpt": {
+        "en": "The structured resource map owns the 862-item APK-derived game-resource inventory and its per-entry technical metadata.",
+        "vi": "Bản đồ tài nguyên có cấu trúc sở hữu danh mục 862 tài nguyên game dẫn xuất từ gói nguồn và siêu dữ liệu kỹ thuật theo từng mục."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": false,
+      "linkDecisionReason": "The complete ledger includes ignored analysis-root pointers and is represented by a sanitized excerpt."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-RESOURCE-RECONCILIATION",
+      "path": "assets/catalog/resource-reconciliation-ledger.json",
+      "sha256": "18ea8ef7ae3fb3751d530dd89426979d601fd8e918d5e9b539a1b8d969daacae",
+      "publicSafeExcerpt": {
+        "en": "The reconciliation ledger classifies the canonical resource denominator into 761 consumed, 100 excluded, one unsupported, and zero unknown items.",
+        "vi": "Sổ đối soát phân loại mẫu số tài nguyên chuẩn thành 761 mục được dùng, 100 mục bị loại, một mục không được hỗ trợ và không có mục chưa xác định."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": true,
+      "linkDecisionReason": "The complete tracked metadata ledger contains repository-relative resource records but no raw source bytes or private roots."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-FIDELITY",
+      "path": "forensics/fidelity/fidelity-report-v1.json",
+      "sha256": "e04e1eeb7796855b92b46c27a01384af42cc36252d3a3d9154a185eae9ee2b96",
+      "publicSafeExcerpt": {
+        "en": "Version 1.1.0 of the maximal-recoverable-fidelity metric passes all five frozen domains at 100 percent while explicitly denying an original-runtime identity claim.",
+        "vi": "Phiên bản 1.1.0 của chỉ số độ trung thực phục dựng tối đa vượt qua cả năm miền đóng băng ở mức 100 phần trăm đồng thời phủ nhận rõ ràng tuyên bố giống hệt môi trường chạy gốc."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": true,
+      "linkDecisionReason": "The complete structured metric contains only tracked repository-relative evidence references."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-RESIDUALS",
+      "path": "forensics/fidelity/residual-gap-ledger.json",
+      "sha256": "ef56251e2cc089357f81786f073ce69106aabf5ec4d5574084040fd046a7589e",
+      "publicSafeExcerpt": {
+        "en": "Twenty-five separately classified residual, exception, divergence, waiver, and rights records remain outside recovered-credit inflation; unexplained divergences are zero.",
+        "vi": "Hai mươi lăm bản ghi tồn dư, ngoại lệ, sai khác, miễn trừ và quyền được phân loại riêng nằm ngoài phần điểm phục hồi; số sai khác không giải thích là không."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": true,
+      "linkDecisionReason": "The complete structured residual ledger contains only tracked repository-relative evidence references."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-PHYSICS-EQUIVALENCE",
+      "path": "forensics/runtime/physics2d-backend-equivalence.json",
+      "sha256": "a1aaa73727f800153a0b187177d67855a7f05cf2a305fb68a547883bd08c8efa",
+      "publicSafeExcerpt": {
+        "en": "The pinned Physics2D backend passes deterministic trajectory, raycast, contact-filter, and locked-world lifecycle probes.",
+        "vi": "Backend Physics2D đã ghim vượt qua các phép dò xác định về quỹ đạo, raycast, lọc va chạm và vòng đời khi world bị khóa."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": true,
+      "linkDecisionReason": "The complete structured probe report contains no private path or raw original evidence."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-RECONSTRUCTION-REPORT",
+      "path": "docs/reconstruction-report.md",
+      "sha256": "0e7153392e1f443183fa820c4218b8a4e28b3e5a49980f1f8d7c4697135c47d6",
+      "publicSafeExcerpt": {
+        "en": "The technical closeout separates resource classification, five-domain fidelity, supported runtime matrices, academic deployment, and unresolved commercial rights.",
+        "vi": "Báo cáo kết thúc kỹ thuật tách riêng phân loại tài nguyên, độ trung thực năm miền, ma trận môi trường chạy được hỗ trợ, triển khai học thuật và quyền thương mại chưa được làm rõ."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": false,
+      "linkDecisionReason": "The complete Markdown link graph has not been admitted transitively; publish its hash-bound excerpt."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-TECHNICAL-CLOSEOUT",
+      "path": "plans/260721-2253-pencil-blade-restoration/reports/technical-closeout-manifest.json",
+      "sha256": "3da6e3dabf7674a8c000572b7628e1b13363af0c8120dda04051015182ae252b",
+      "publicSafeExcerpt": {
+        "en": "The tracked closeout marks technical reconstruction and program closeout as pass, records exact Android and H5 artifact facts, and keeps commercial clearance outside technical acceptance.",
+        "vi": "Bản kết thúc được theo dõi đánh dấu phục dựng kỹ thuật và kết thúc chương trình là đạt, ghi lại dữ kiện chính xác của hiện vật Android và H5, đồng thời giữ chấp thuận thương mại ngoài tiêu chí kỹ thuật."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": false,
+      "linkDecisionReason": "The structured report contains a machine-local browser executable path; publish only the sanitized excerpt."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-H5-RUNTIME",
+      "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/h5-runtime-matrix.json",
+      "sha256": "1f4454e919790f76d46cd7c47372793c46f7f25b82f13e5da3e817cd491cd8d0",
+      "publicSafeExcerpt": {
+        "en": "Chrome runtime rows at 480 by 800 and 720 by 1280 passed input, audio, storage, lifecycle, orientation, offline, and error checks against the audited H5 tree.",
+        "vi": "Các hàng kiểm thử Chrome ở 480 x 800 và 720 x 1280 đã đạt kiểm tra đầu vào, âm thanh, lưu trữ, vòng đời, hướng màn hình, ngoại tuyến và lỗi trên cây H5 đã kiểm toán."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": false,
+      "linkDecisionReason": "The report contains a machine-local browser executable path; publish only the sanitized excerpt."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-ANDROID-RUNTIME",
+      "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json",
+      "sha256": "c6d36330ae76b38ab7588500d4c157e2f346f4e19a48a8806fd67486e4a80688",
+      "publicSafeExcerpt": {
+        "en": "The Android 13 arm64 emulator row passed gameplay input, audio focus, storage, lifecycle, portrait policy, and offline cold start for the reconstruction build.",
+        "vi": "Hàng kiểm thử giả lập Android 13 arm64 đã đạt đầu vào gameplay, audio focus, lưu trữ, vòng đời, chính sách màn hình dọc và khởi động nguội ngoại tuyến của bản phục dựng."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": false,
+      "linkDecisionReason": "The atomic runtime report contains machine-specific diagnostic strings; publish only the sanitized excerpt."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-PRODUCTION-RUNTIME",
+      "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/production-pages-runtime.json",
+      "sha256": "a2e9b67f970eff9eb4c516aa0a94e6ba472af480f3d39838fca3001e5cc8e7e4",
+      "publicSafeExcerpt": {
+        "en": "The production Pages report checked all 2,539 published files and passed two Chrome runtime rows with six hash-identified captures.",
+        "vi": "Báo cáo Pages production đã kiểm tra đủ 2.539 tệp được phát hành và vượt qua hai hàng kiểm thử Chrome với sáu ảnh chụp được định danh bằng hàm băm."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": true,
+      "linkDecisionReason": "The complete structured production report is tracked, hash-bound, and contains no private path or raw evidence."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-COMMERCIAL-RIGHTS",
+      "path": "release/public-release-variant-manifest.json",
+      "sha256": "eadf75a39d0d7eb6ee9451718e13452586ffc42683ef6a38534d96a776a1daa6",
+      "publicSafeExcerpt": {
+        "en": "The commercial/public variant remains blocked because code, recovered assets, identity, and generated runtime lack the required documented rights approvals.",
+        "vi": "Biến thể thương mại/công khai vẫn bị chặn vì mã nguồn, tài nguyên phục hồi, nhận diện và môi trường chạy được tạo ra chưa có phê duyệt quyền bằng tài liệu theo yêu cầu."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": true,
+      "linkDecisionReason": "The complete fail-closed rights manifest is tracked, contains no private path, and is itself the commercial authority."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-RIGHTS-CHECKLIST",
+      "path": "docs/release-rights-checklist.md",
+      "sha256": "c2f0ca7ef11aab437a1c2353473e3c056e554c39ace4cb29fd17f1d08210d869",
+      "publicSafeExcerpt": {
+        "en": "Commercial clearance is unresolved while the exact academic Pages demonstration is owner-approved; the academic decision is explicitly not a license conclusion.",
+        "vi": "Chấp thuận thương mại chưa được làm rõ trong khi đúng bản trình diễn Pages học thuật đã được chủ dự án đồng ý; quyết định học thuật rõ ràng không phải kết luận cấp phép."
+      },
+      "lineRange": {
+        "start": 1,
+        "end": 12
+      },
+      "transitiveLinks": [],
+      "publicLinkAllowed": false,
+      "linkDecisionReason": "Keep the owner-decision excerpt hash-bound and avoid treating explanatory Markdown as the commercial-rights authority."
+    },
+    {
+      "sourceId": "SRC-PUBLIC-COMPATIBILITY",
+      "path": "docs/compatibility-matrix.md",
+      "sha256": "08d1cfe0fbc35568522d856d58c2d85b011176efd81a62f88f278713acded17b",
+      "publicSafeExcerpt": {
+        "en": "The reconstruction supports exactly Android debug and Web Mobile H5, with platform-envelope differences disclosed separately from gameplay contracts.",
+        "vi": "Bản phục dựng chỉ hỗ trợ Android debug và Web Mobile H5; các khác biệt về phạm vi nền tảng được công bố riêng khỏi hợp đồng gameplay."
+      },
+      "lineRange": null,
+      "transitiveLinks": [],
+      "publicLinkAllowed": false,
+      "linkDecisionReason": "The complete Markdown link graph is not transitively admitted; publish its sanitized excerpt."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+---
+import EvidenceStatus from "./evidence-status.astro";
+
+interface Props {
+  locale?: "en" | "vi";
+}
+
+const { locale = "en" } = Astro.props;
+const statuses = ["recovered", "measured", "inferred", "unknown", "blocked"] as const;
+---
+
+<aside aria-labelledby="evidence-status-legend">
+  <h2 id="evidence-status-legend">
+    {locale === "vi" ? "Từ vựng bằng chứng" : "Evidence vocabulary"}
+  </h2>
+  <ul>
+    {statuses.map((status) => (
+      <li><EvidenceStatus status={status} locale={locale} showDefinition /></li>
+    ))}
+  </ul>
+</aside>

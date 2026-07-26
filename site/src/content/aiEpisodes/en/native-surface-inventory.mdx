@@ -1,0 +1,19 @@
+---
+id: native-surface-inventory
+locale: en
+order: 1
+question: "Was Java the game implementation, or only the Android shell around a native game surface?"
+evidence: ["CLM-JAVA-BOUNDARY", "CLM-NATIVE-PROFILE", "CLM-ENGINE-FINGERPRINT", "CLM-NATIVE-PRODUCT-SURFACE"]
+hypothesis: "The Java layer was a thin shell while the recoverable application surface lived in an ARM/Thumb Cocos2d-x native library."
+reviewDecision: "The automated source projection retained that boundary and indexed 713 allowlisted application functions, while keeping direct-call, numeric-constant, and string-reference counts separate."
+decisionActorKind: automation
+decisionRef: SRC-PUBLIC-NATIVE-SUMMARY
+implementation: "The evidence index treats the Java/JNI boundary, native profile, engine fingerprint, and function-enrichment counters as separate joined records."
+verification: "Byte-for-byte regeneration and the native summary report verify 713 total functions, including 553 with direct calls, 684 with numeric constants, and 91 with high-confidence string references."
+failureLesson: "A large symbol count is an inventory, not recovered source code and not proof that every indirect behavior is understood."
+agentRoles: ["evidence-indexing-assistance"]
+publicSourceIds: ["SRC-PUBLIC-CLAIMS", "SRC-PUBLIC-NATIVE-SUMMARY", "SRC-PUBLIC-STATIC-METHOD"]
+draft: false
+---
+
+This edited case file shows the evidence boundary and the automated indexing result. It contains no conversation or prompt payload.

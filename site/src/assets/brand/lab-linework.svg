@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 320" role="img" aria-labelledby="title desc">
+  <title id="title">Evidence workbench linework</title>
+  <desc id="desc">An abstract APK package passes through evidence, contract, implementation, and proof stations.</desc>
+  <g fill="none" stroke="#171A18" stroke-width="4">
+    <path d="M40 70h150v180H40zM70 110h90M70 145h90M70 180h58"/>
+    <path d="M190 160h110m-18-18 18 18-18 18"/>
+    <circle cx="370" cy="160" r="68"/>
+    <path d="m330 160 28 28 56-66"/>
+    <path d="M438 160h104m-18-18 18 18-18 18"/>
+    <path d="M560 94h150v132H560zM580 120h110M580 154h70M580 188h96"/>
+    <path d="M710 160h104m-18-18 18 18-18 18"/>
+    <path d="M830 88h90v144h-90zM850 190l18-26 16 13 18-42"/>
+  </g>
+  <g fill="#F2C94C" stroke="#171A18" stroke-width="4">
+    <circle cx="370" cy="160" r="12"/>
+    <circle cx="875" cy="135" r="9"/>
+  </g>
+</svg>

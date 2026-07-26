@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 360" role="img" aria-labelledby="title description">
+  <title id="title">Evidence to proof pipeline</title>
+  <desc id="description">A stable seven-node chain connects the registered APK to a derived view, status-labeled claim, reviewed contract, clean-room owner, deterministic test, and reconstructed runtime proof.</desc>
+  <rect width="1080" height="360" fill="#16211e"/>
+  <g fill="none" stroke="#f2c94c" stroke-width="4">
+    <path d="M92 178h896"/>
+    <path d="M968 160l20 18-20 18"/>
+  </g>
+  <g font-family="ui-monospace, monospace" font-size="15" text-anchor="middle">
+    <g transform="translate(100 178)">
+      <circle r="42" fill="#f4f0e6" stroke="#f2c94c" stroke-width="4"/>
+      <text y="-3" fill="#171a18">SOURCE</text><text y="17" fill="#171a18">APK</text>
+    </g>
+    <g transform="translate(245 178)">
+      <rect x="-50" y="-34" width="100" height="68" fill="#f4f0e6" stroke="#f2c94c" stroke-width="3"/>
+      <text y="-3" fill="#171a18">DERIVED</text><text y="17" fill="#171a18">VIEW</text>
+    </g>
+    <g transform="translate(390 178)">
+      <path d="M0-42 46 34h-92z" fill="#f4f0e6" stroke="#f2c94c" stroke-width="3"/>
+      <text y="8" fill="#171a18">CLAIM</text>
+    </g>
+    <g transform="translate(535 178)">
+      <rect x="-54" y="-38" width="108" height="76" rx="7" fill="#f4f0e6" stroke="#f2c94c" stroke-width="3"/>
+      <text y="-3" fill="#171a18">REVIEWED</text><text y="17" fill="#171a18">CONTRACT</text>
+    </g>
+    <g transform="translate(680 178)">
+      <rect x="-50" y="-34" width="100" height="68" fill="#f4f0e6" stroke="#f2c94c" stroke-width="3"/>
+      <text y="-3" fill="#171a18">CLEAN</text><text y="17" fill="#171a18">TS OWNER</text>
+    </g>
+    <g transform="translate(825 178)">
+      <circle r="42" fill="#f4f0e6" stroke="#f2c94c" stroke-width="4" stroke-dasharray="7 5"/>
+      <text y="-3" fill="#171a18">TEST /</text><text y="17" fill="#171a18">PROBE</text>
+    </g>
+    <g transform="translate(970 178)">
+      <rect x="-50" y="-34" width="100" height="68" fill="#f4f0e6" stroke="#f2c94c" stroke-width="3"/>
+      <text y="-3" fill="#171a18">RUNTIME</text><text y="17" fill="#171a18">PROOF</text>
+    </g>
+  </g>
+  <text x="540" y="308" text-anchor="middle" font-family="ui-monospace, monospace" font-size="16" fill="#f4f0e6">STATIC AUTHORITY → REVIEWED DECISION → RECONSTRUCTION OBSERVATION</text>
+</svg>

@@ -1,0 +1,48 @@
+---
+import BaseLayout from "../../layouts/base-layout.astro";
+import EvidenceCard from "../../components/evidence-explorer/evidence-card.astro";
+import ExplorerFilters from "../../components/evidence-explorer/explorer-filters.astro";
+import StatusLegend from "../../components/evidence/status-legend.astro";
+import {
+  buildEvidenceExplorerEntries,
+  buildExplorerFilters,
+  aiLabEvidenceSnapshotId,
+} from "../../data/ai-lab/index.ts";
+import { withBase } from "../../data/routes.ts";
+
+const entries = buildEvidenceExplorerEntries("en");
+const facets = buildExplorerFilters(entries);
+const title = "Evidence Explorer · 39 canonical records";
+const description = "A static-first, filterable index of canonical claims, sources, verification, academic-display scope, and commercial-rights state.";
+---
+
+<BaseLayout locale="en" route="/evidence/" routeId="evidence.en" title={title} description={description}>
+  <article class="evidence-explorer" data-evidence-explorer>
+    <header class="hero">
+      <p class="eyebrow">Frozen projection · {aiLabEvidenceSnapshotId}</p>
+      <h1>Evidence stays legible before it becomes a filter.</h1>
+      <p class="hero__lede">All 39 canonical records appear in deterministic order in static HTML. Optional JavaScript only filters the list and serializes state into the URL.</p>
+      <p><a href={withBase("/ai-lab/")}>See how selected records shaped AI-assisted episodes <span aria-hidden="true">→</span></a></p>
+    </header>
+
+    <StatusLegend />
+    <ExplorerFilters facets={facets} />
+    <noscript><p class="draft-flag">JavaScript is off. The complete evidence list remains available below; filters are an optional enhancement.</p></noscript>
+
+    <section class="evidence-explorer__list" aria-label="Canonical evidence records">
+      {entries.map((entry) => <EvidenceCard entry={entry} />)}
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .evidence-explorer {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .evidence-explorer__list {
+    display: grid;
+    gap: var(--space-5);
+  }
+</style>

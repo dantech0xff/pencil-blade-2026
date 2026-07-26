@@ -1,0 +1,33 @@
+---
+import { routes, withBase } from "../../data/routes.ts";
+import type { Locale } from "../../data/locales.ts";
+
+interface Props {
+  locale: Locale;
+  currentRouteId?: string;
+}
+
+const { locale, currentRouteId } = Astro.props;
+const visibleRoutes = routes.filter((route) =>
+  route.locale === locale
+  && !route.id.includes(".detail.")
+  && !route.path.includes("[")
+);
+---
+
+<nav class="chapter-rail" aria-label={locale === "vi" ? "Các chương" : "Chapters"}>
+  <p class="micro-label">{locale === "vi" ? "Hồ sơ" : "Case file"}</p>
+  <ol>
+    {visibleRoutes.map((route, index) => (
+      <li>
+        <a
+          href={withBase(route.path)}
+          aria-current={route.id === currentRouteId ? "page" : undefined}
+        >
+          <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+          <span>{route.localePairId.replaceAll("-", " ")}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</nav>

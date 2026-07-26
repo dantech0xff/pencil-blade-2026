@@ -1,0 +1,108 @@
+---
+import { getCollection } from "astro:content";
+
+import BaseLayout from "../../../layouts/base-layout.astro";
+import EvidenceStatus from "../../../components/evidence/evidence-status.astro";
+import RightsLabels from "../../../components/ai-lab/rights-labels.astro";
+import {
+  buildEvidenceExplorerEntries,
+  resolveRightsLabels,
+  type EvidenceExplorerEntry,
+} from "../../../data/ai-lab/index.ts";
+import { withBase } from "../../../data/routes.ts";
+
+export function getStaticPaths() {
+  return buildEvidenceExplorerEntries("vi").map((entry) => ({
+    params: { id: entry.id },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: EvidenceExplorerEntry;
+}
+
+const { entry } = Astro.props;
+const relatedEpisodes = (await getCollection("aiEpisodes", ({ data }) =>
+  data.locale === "vi" && !data.draft && data.evidence.includes(entry.id)))
+  .sort((left, right) => left.data.order - right.data.order);
+const rights = resolveRightsLabels();
+const title = `${entry.id} · Evidence Explorer`;
+---
+
+<BaseLayout locale="vi" route={`/evidence/${entry.id}/`} routeId="evidence.detail.vi" title={title} description={entry.excerpt}>
+  <article class="evidence-detail">
+    <header class="hero">
+      <p class="eyebrow">{entry.chapter} · {entry.sourceType}</p>
+      <h1>{entry.id}</h1>
+      <EvidenceStatus status={entry.status} locale="vi" />
+      <p class="hero__lede">{entry.copy}</p>
+      <p>{entry.qualifier}</p>
+    </header>
+
+    <section aria-labelledby="authority-heading">
+      <h2 id="authority-heading">Thẩm quyền chuẩn</h2>
+      <p>{entry.explanation}</p>
+      <dl class="evidence-detail__ledger">
+        <div><dt>Tầng bằng chứng</dt><dd>{entry.evidenceTier}</dd></div>
+        <div><dt>Độ tin cậy</dt><dd>{entry.confidence}</dd></div>
+        <div><dt>Hợp lệ cho hợp đồng</dt><dd>{String(entry.contractEligible)}</dd></div>
+        <div><dt>Kiểm chứng</dt><dd>{entry.verificationType}</dd></div>
+        <div><dt>Biên tập</dt><dd>{entry.redactionDisposition}: {entry.redactionReason}</dd></div>
+      </dl>
+    </section>
+
+    <section aria-labelledby="refs-heading">
+      <h2 id="refs-heading">Tham chiếu bằng chứng và nguồn</h2>
+      <p><strong>ID bằng chứng chuẩn:</strong> {entry.evidenceRefs.join(", ")}</p>
+      <ul>
+        {entry.sources.map((source) => (
+          <li id={`source-${source.sourceId}`}>
+            <code>{source.sourceId}</code>
+            <p>{source.excerpt}</p>
+            {source.href && <a href={source.href}>Mở nguồn đã ghim theo commit</a>}
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section aria-labelledby="episodes-heading">
+      <h2 id="episodes-heading">Các tập biên tập liên quan</h2>
+      {relatedEpisodes.length > 0
+        ? <ul>{relatedEpisodes.map((episode) => <li><a href={withBase(`/vi/ai-lab/${episode.data.id}/`)}>{episode.data.question}</a></li>)}</ul>
+        : <p>Không có tập AI Lab nào dùng tuyên bố này. Bản ghi vẫn có trong chỉ mục tĩnh đầy đủ.</p>}
+    </section>
+
+    <RightsLabels rights={rights} locale="vi" />
+    <p><a href={withBase(`/vi/evidence/#${entry.id}`)}>Quay lại chỉ mục explorer</a></p>
+  </article>
+</BaseLayout>
+
+<style>
+  .evidence-detail {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .evidence-detail__ledger {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+    gap: var(--space-3);
+  }
+
+  .evidence-detail__ledger div {
+    border-top: var(--line);
+    padding-top: var(--space-2);
+  }
+
+  .evidence-detail__ledger dt {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    text-transform: uppercase;
+  }
+
+  .evidence-detail__ledger dd {
+    margin: 0;
+    font-weight: 800;
+  }
+</style>

@@ -1,0 +1,38 @@
+---
+import BaseLayout from "../../layouts/base-layout.astro";
+import PlayPreflight from "../../components/play/play-preflight.astro";
+import PlayLauncher from "../../components/play/play-launcher.astro";
+import { playFacts } from "../../data/play.ts";
+
+const facts = playFacts.en;
+const title = "Play the audited Pencil Blade reconstruction";
+const description = "Review payload, provenance, rights, and original-runtime limits before explicitly loading the clean-room H5 reconstruction.";
+---
+
+<BaseLayout locale="en" route="/play/" routeId="play.en" title={title} description={description} surface="lab">
+  <article>
+    <p class="eyebrow">Playable proof · no preload</p>
+    <h1>{title}</h1>
+    <p class="hero__lede">
+      This same-origin iframe contains lifecycle and performance only. It is not a security
+      boundary, ships no parent↔game bridge, and receives no site secret or site-owned storage.
+    </p>
+    <PlayPreflight
+      locale="en"
+      files={facts.files ?? 0}
+      bytes={facts.bytes}
+      mebibytes={facts.mebibytes}
+      treeDigest={facts.treeDigestSha256 ?? ""}
+    />
+    <PlayLauncher locale="en" gameUrl={facts.gameUrl} />
+    <section>
+      <h2>Text walkthrough</h2>
+      <ol>
+        <li>The reconstructed Main Menu presents Play, options, review, and social-era shell controls.</li>
+        <li>Mode Select exposes six restored mode cards; availability follows recovered persistence contracts.</li>
+        <li>Classic uses touch or pointer blade gestures. The canvas itself is not keyboard accessible.</li>
+        <li>Use the launcher controls to leave fullscreen or the direct link when embedding fails.</li>
+      </ol>
+    </section>
+  </article>
+</BaseLayout>

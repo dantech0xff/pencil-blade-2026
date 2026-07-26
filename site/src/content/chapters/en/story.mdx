@@ -1,0 +1,135 @@
+---
+id: story.en
+locale: en
+order: 1
+slug: story.en
+title: "The Lost Game"
+dek: "The surviving APK could not become a runtime witness. It became a sealed source artifact instead."
+summary: "Static-only reconstruction begins by refusing to confuse an old executable with an observed historical runtime."
+chapterKind: story
+evidenceRefs:
+  - CLM-APK-BYTES
+  - CLM-APK-ZIP
+  - CLM-APK-SIGNING
+  - CLM-MANIFEST-IDENTITY
+  - CLM-MANIFEST-SURFACE
+  - CLM-JAVA-BOUNDARY
+  - CLM-NATIVE-PROFILE
+  - CLM-ENGINE-FINGERPRINT
+  - CLM-CONTENT-RIGHTS
+mediaRefs: []
+nextId: forensics.en
+seoTitle: "The Pencil Blade APK that could not run — restoration story"
+seoDescription: "Why the sole Pencil Blade APK was treated as static evidence, never executed, and separated from clean-room implementation and unresolved rights."
+draft: false
+---
+
+## Question 01 — What survived?
+
+The project began with one supplied Android package, not a source tree and not a working
+historical device. Its acquisition date and upstream custody record are unknown. The registered
+artifact is exact: **35,817,225 bytes** with SHA-256
+`95225733d46473f2b155737e8c83b567e028342257c747c0faac6ed4ab87e7aa`.
+
+<EvidenceRef id="CLM-APK-BYTES" locale="en" label="Inspect the immutable source claim" />
+
+### Artifact
+
+The sealed APK contains **985 file entries** and **41,007,977 uncompressed member bytes**. It
+has one v1 JAR signer. Those measurements identify the package; they do not reveal an executing
+game.
+
+<EvidenceRef id="CLM-APK-ZIP" locale="en" />
+<EvidenceRef id="CLM-APK-SIGNING" locale="en" />
+
+### Method
+
+The artifact was hash-verified and inspected through independent static views. The project did
+not install, launch, patch, re-sign, emulate, or embed it. “Static-only” means the package,
+native metadata, resources, app-owned Java, and registered derivations can answer questions
+without turning the unavailable original runtime into invented evidence.
+
+<ApkDissection locale="en" />
+
+### Contract or decision
+
+The APK remains immutable source evidence. Raw APK bytes, `libgame.so`, decompiler output, and
+ignored forensic workspaces stay outside the public site and outside the clean-room product.
+The one supplied copy is a disclosed custody risk; backup redundancy was owner-waived without
+claiming that another copy exists.
+
+### Proof
+
+Package identity, archive structure, signer metadata, Android manifest identity, and the narrow
+Java/JNI boundary are registered separately. Each claim exposes its own denominator and source.
+The proof is therefore the reproducible metadata chain—not a screenshot or memory of play.
+
+<EvidenceRef id="CLM-MANIFEST-IDENTITY" locale="en" />
+<EvidenceRef id="CLM-JAVA-BOUNDARY" locale="en" />
+
+### Limit
+
+The original runtime was never observed. There is no valid “original versus rebuilt” runtime
+comparison, no historical gameplay capture, and no basis for pixel-, waveform-, frame-, or
+trajectory-level identity. The unknown acquisition history remains visible.
+
+### Next chapter
+
+The next question is not “How do we run the binary?” It is “Which public-safe facts can a sealed
+binary support?”
+
+## Question 02 — What does “reconstruction” permit?
+
+A preservation project can still drift into a binary port or an unsourced imitation. The
+boundary had to be explicit before implementation began.
+
+### Artifact
+
+Static strings and metadata identify a stripped ELF32 little-endian ARM EABI5 native library,
+ARM v5TE, and Cocos2d-x 2.1.4. This is an engine and architecture fingerprint, not recovered
+original C++ source.
+
+<EvidenceRef id="CLM-NATIVE-PROFILE" locale="en" />
+<EvidenceRef id="CLM-ENGINE-FINGERPRINT" locale="en" />
+
+### Method
+
+Curated facts are classified as **recovered**, **inferred**, or **unknown**. Reviewed behavior
+contracts translate only those facts needed for a new implementation. Clean-room TypeScript and
+Cocos Creator adapters own the production behavior; the original executable remains evidence,
+never a dependency.
+
+### Contract or decision
+
+The product is an unofficial, source-available, noncommercial clean-room reconstruction. It
+does not load or call the old native library, mechanically translate its instructions, or claim
+the historical source code was recovered.
+
+> This unofficial reconstruction was rewritten from reviewed static evidence. The original APK
+> was never executed or embedded, and the project does not claim recovered original source or
+> identity with the historical runtime.
+
+### Proof
+
+The repository audits supported outputs for prohibited original-runtime paths. Android debug and
+Web Mobile H5 proof belong to the rebuilt system and will appear only after contracts and owners
+are shown.
+
+### Limit
+
+Technical reconstruction and publication rights are different ledgers. Rights to the product
+name, artwork, audio, fonts, identity, code, and other historical content remain unknown and
+not commercially cleared.
+
+<EvidenceRef id="CLM-CONTENT-RIGHTS" locale="en" />
+
+<RightsBoundary
+  technical="The repository can verify the sealed source metadata and the clean-room implementation boundary."
+  academic="The exact audited H5 tree and six registered reconstructed-runtime captures have a bounded academic/noncommercial display decision."
+  commercial="No commercial clearance or license for the historical name, artwork, audio, fonts, identity, or other recovered content is asserted."
+/>
+
+### Next chapter
+
+Forensics opens the sealed artifact as public-safe metadata: package layers, ARM/Thumb views,
+function enrichment, resource census, and reviewed contracts.

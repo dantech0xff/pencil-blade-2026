@@ -1,0 +1,110 @@
+---
+import {
+  alternateLocalePath,
+  localizedPath,
+  SITE_BASE,
+  withBase,
+} from "../data/routes.ts";
+import {
+  DEFAULT_LOCALE,
+  otherLocale,
+  type Locale,
+} from "../data/locales.ts";
+import { buildEditorialCsp, hashInlineScript } from "../lib/editorial-csp.ts";
+import { serializeJsonLd } from "../lib/serialize-json-ld.ts";
+import { getDefaultSeo } from "../data/seo.ts";
+import SiteHeader from "../components/shell/site-header.astro";
+import SiteFooter from "../components/shell/site-footer.astro";
+import ChapterRail from "../components/shell/chapter-rail.astro";
+import "../styles/global.css";
+import "../styles/editorial.css";
+import "../styles/motion.css";
+import "../styles/print.css";
+
+interface Props {
+  locale: Locale;
+  route: string;
+  routeId?: string;
+  title: string;
+  description: string;
+  structuredData?: unknown;
+  surface?: "paper" | "lab";
+  noIndex?: boolean;
+  includeCanonical?: boolean;
+}
+
+const {
+  locale,
+  route,
+  routeId,
+  title,
+  description,
+  structuredData,
+  surface = "paper",
+  noIndex = false,
+  includeCanonical = true,
+} = Astro.props;
+
+const alternateLocale = otherLocale(locale);
+const canonicalUrl = new URL(withBase(localizedPath(locale, route)), Astro.site);
+const alternateUrl = new URL(withBase(alternateLocalePath(alternateLocale, route)), Astro.site);
+const defaultUrl = new URL(withBase(alternateLocalePath(DEFAULT_LOCALE, route)), Astro.site);
+const seo = getDefaultSeo(locale);
+const withBaseAsset = (path: string) => `${SITE_BASE}/${path.split("/").filter(Boolean).join("/")}`;
+const socialImage = new URL(withBaseAsset(seo.socialImage), Astro.site);
+const serializedJsonLd = structuredData === undefined ? undefined : serializeJsonLd(structuredData);
+const csp = buildEditorialCsp(
+  localizedPath(locale, route),
+  serializedJsonLd ? [hashInlineScript(serializedJsonLd)] : [],
+);
+const skipLabel = locale === "vi" ? "Đi đến nội dung chính" : "Skip to content";
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta http-equiv="Content-Security-Policy" content={csp} />
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+    {includeCanonical && <link rel="canonical" href={canonicalUrl} />}
+    {
+      includeCanonical && (
+        <>
+          <link rel="alternate" hreflang={locale} href={canonicalUrl} />
+          <link
+            rel="alternate"
+            hreflang={alternateLocale}
+            href={alternateUrl}
+          />
+          <link rel="alternate" hreflang="x-default" href={defaultUrl} />
+        </>
+      )
+    }
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Pencil Blade · Evidence to Reconstruction" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={socialImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+    <link rel="icon" href={withBaseAsset("/favicon.svg")} type="image/svg+xml" />
+    <title>{title}</title>
+    {serializedJsonLd && <script is:inline type="application/ld+json" set:html={serializedJsonLd} />}
+    <slot name="head" />
+  </head>
+  <body data-surface={surface}>
+    <a class="skip-link" href="#main-content">{skipLabel}</a>
+    <SiteHeader locale={locale} route={route} />
+    <main id="main-content" class="main-content site-frame" tabindex="-1">
+      <ChapterRail locale={locale} currentRouteId={routeId} />
+      <slot />
+    </main>
+    <SiteFooter locale={locale} />
+    <script src="../scripts/editorial-enhancements.ts"></script>
+  </body>
+</html>

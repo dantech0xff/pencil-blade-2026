@@ -1,0 +1,19 @@
+---
+id: native-surface-inventory
+locale: vi
+order: 1
+question: "Java là phần triển khai trò chơi hay chỉ là lớp vỏ Android quanh bề mặt game native?"
+evidence: ["CLM-JAVA-BOUNDARY", "CLM-NATIVE-PROFILE", "CLM-ENGINE-FINGERPRINT", "CLM-NATIVE-PRODUCT-SURFACE"]
+hypothesis: "Lớp Java chỉ là vỏ mỏng, còn bề mặt ứng dụng có thể phục hồi nằm trong thư viện native Cocos2d-x ARM/Thumb."
+reviewDecision: "Phép chiếu nguồn tự động giữ nguyên ranh giới đó và lập chỉ mục 713 hàm ứng dụng trong allowlist, đồng thời tách riêng số lượng direct-call, hằng số số học và tham chiếu chuỗi."
+decisionActorKind: automation
+decisionRef: SRC-PUBLIC-NATIVE-SUMMARY
+implementation: "Chỉ mục bằng chứng xử lý ranh giới Java/JNI, hồ sơ native, dấu vết công cụ game và các bộ đếm làm giàu hàm như những bản ghi được nối riêng."
+verification: "Quá trình tạo lại byte-for-byte và báo cáo tóm tắt native xác minh tổng cộng 713 hàm, gồm 553 hàm có direct call, 684 hàm có hằng số số học và 91 hàm có tham chiếu chuỗi độ tin cậy cao."
+failureLesson: "Số lượng symbol lớn chỉ là bản kiểm kê, không phải mã nguồn đã phục hồi và không chứng minh mọi hành vi gián tiếp đã được hiểu."
+agentRoles: ["evidence-indexing-assistance"]
+publicSourceIds: ["SRC-PUBLIC-CLAIMS", "SRC-PUBLIC-NATIVE-SUMMARY", "SRC-PUBLIC-STATIC-METHOD"]
+draft: false
+---
+
+Hồ sơ biên tập này trình bày ranh giới bằng chứng và kết quả lập chỉ mục tự động. Hồ sơ không chứa hội thoại hoặc payload prompt.

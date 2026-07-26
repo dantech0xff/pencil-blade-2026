@@ -1,0 +1,23 @@
+---
+import { alternateLocalePath, withBase } from "../../data/routes.ts";
+import { otherLocale, type Locale } from "../../data/locales.ts";
+
+interface Props {
+  locale: Locale;
+  route: string;
+}
+
+const { locale, route } = Astro.props;
+const alternate = otherLocale(locale);
+const label = locale === "vi" ? "English" : "Tiếng Việt";
+---
+
+<a
+  class="locale-switcher"
+  data-locale-switcher
+  href={withBase(alternateLocalePath(alternate, route))}
+  hreflang={alternate}
+  lang={alternate}
+>
+  {label}
+</a>

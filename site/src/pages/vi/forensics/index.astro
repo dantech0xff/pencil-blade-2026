@@ -1,0 +1,45 @@
+---
+import { getCollection, getEntry } from "astro:content";
+
+import BaseLayout from "../../../layouts/base-layout.astro";
+import ChapterPage from "../../../components/chapter/chapter-page.astro";
+import sourceCatalog from "../../../../../reference/case-study-public-source-catalog.json";
+import manifest from "../../../../../reference/case-study-publication-manifest.json";
+
+const chapter = await getEntry("chapters", "forensics.vi");
+if (!chapter) throw new Error("Missing Vietnamese Forensics chapter.");
+const generatedFacts = await getCollection("claimPresentations");
+const localeReviewPending =
+  manifest.releaseInputs.vietnameseFactualReview.evidenceStatus !== "confirmed";
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  headline: chapter.data.title,
+  description: chapter.data.seoDescription,
+  inLanguage: "vi",
+  isAccessibleForFree: true,
+};
+---
+
+<BaseLayout
+  locale="vi"
+  route="/forensics/"
+  routeId="forensics.vi"
+  title={chapter.data.seoTitle}
+  description={chapter.data.seoDescription}
+  structuredData={structuredData}
+  surface="lab"
+>
+  <ChapterPage
+    chapter={chapter}
+    route={{
+      id: "forensics.vi",
+      path: "/vi/forensics/",
+      nextPath: "/vi/reconstruction/",
+      nextLabel: "Theo hợp đồng vào bản dựng clean-room",
+    }}
+    generatedFacts={generatedFacts}
+    publicEvidenceIndex={sourceCatalog.sources}
+    localeReviewPending={localeReviewPending}
+  />
+</BaseLayout>

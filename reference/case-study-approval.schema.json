@@ -1,0 +1,250 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dantech0xff.github.io/pencil-blade-2026/schemas/case-study-approval.schema.json",
+  "title": "Pencil Blade case-study approval lifecycle",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/candidateApprovalRequest"
+    },
+    {
+      "$ref": "#/$defs/deploymentApprovalEvidence"
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "commitSha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "reviewerRole": {
+      "type": "string",
+      "enum": [
+        "project-owner",
+        "editorial-reviewer",
+        "vietnamese-factual-reviewer",
+        "rights-reviewer"
+      ]
+    },
+    "candidateIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commitSha",
+        "workflowRunId",
+        "workflowRunAttempt",
+        "candidateArtifactName",
+        "contentTreeDigestSha256",
+        "treeManifestDigestSha256"
+      ],
+      "properties": {
+        "commitSha": {
+          "$ref": "#/$defs/commitSha"
+        },
+        "workflowRunId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "workflowRunAttempt": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "candidateArtifactName": {
+          "type": "string",
+          "pattern": "^case-study-candidate-[1-9][0-9]*-[1-9][0-9]*$"
+        },
+        "contentTreeDigestSha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "treeManifestDigestSha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "candidateApprovalRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "recordType",
+        "requestId",
+        "requestedAt",
+        "candidate",
+        "requiredReviewerRoles",
+        "requiredChecklistIds",
+        "supportingReports",
+        "unresolvedChecks"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "recordType": {
+          "const": "candidate-approval-request"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^case-study-approval-[a-f0-9]{16}$"
+        },
+        "requestedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "candidate": {
+          "$ref": "#/$defs/candidateIdentity"
+        },
+        "requiredReviewerRoles": {
+          "type": "array",
+          "minItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/reviewerRole"
+          }
+        },
+        "requiredChecklistIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "supportingReports": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
+          }
+        },
+        "unresolvedChecks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "state"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "state": {
+                "const": "pending-human-review"
+              }
+            }
+          }
+        }
+      }
+    },
+    "deploymentApprovalEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "recordType",
+        "requestId",
+        "candidate",
+        "environment",
+        "review",
+        "deployment"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "recordType": {
+          "const": "deployment-approval-evidence"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^case-study-approval-[a-f0-9]{16}$"
+        },
+        "candidate": {
+          "$ref": "#/$defs/candidateIdentity"
+        },
+        "environment": {
+          "const": "github-pages"
+        },
+        "review": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "provider",
+            "state",
+            "reviewerId",
+            "approvalObservedAt",
+            "sourceUrl"
+          ],
+          "properties": {
+            "provider": {
+              "const": "github-actions-api"
+            },
+            "state": {
+              "const": "approved"
+            },
+            "reviewerId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "approvalObservedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "sourceUrl": {
+              "type": "string",
+              "pattern": "^https://github\\.com/"
+            },
+            "providerEventId": {
+              "type": [
+                "string",
+                "integer"
+              ]
+            }
+          }
+        },
+        "deployment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "deploymentId",
+            "workflowRunAttempt",
+            "state",
+            "environmentUrl",
+            "sourceUrl"
+          ],
+          "properties": {
+            "deploymentId": {
+              "type": [
+                "string",
+                "integer"
+              ]
+            },
+            "workflowRunAttempt": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "state": {
+              "const": "success"
+            },
+            "environmentUrl": {
+              "type": "string",
+              "pattern": "^https://"
+            },
+            "sourceUrl": {
+              "type": "string",
+              "pattern": "^https://github\\.com/"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,287 @@
+---
+interface Props {
+  locale?: "en" | "vi";
+}
+
+const { locale = "en" } = Astro.props;
+const copy = {
+  en: {
+    eyebrow: "Representative blade / Physics2D trace",
+    title: "One rule, four accountable lanes",
+    intro: "Select a lane or replay the order. The complete trace remains visible below without JavaScript, and every transformation keeps its evidence status and limit.",
+    showAll: "Show all steps",
+    replay: "Replay order",
+    stop: "Stop",
+    table: "Complete static trace",
+    stage: "Stage",
+    facts: "Facts and ownership",
+    verification: "Verification or limit",
+  },
+  vi: {
+    eyebrow: "Trace đại diện lưỡi dao / Physics2D",
+    title: "Một quy tắc, bốn lane có trách nhiệm",
+    intro: "Chọn một lane hoặc phát lại thứ tự. Trace đầy đủ vẫn hiển thị bên dưới khi không có JavaScript, và mọi phép chuyển đổi giữ nguyên trạng thái bằng chứng cùng giới hạn.",
+    showAll: "Hiện tất cả bước",
+    replay: "Phát lại thứ tự",
+    stop: "Dừng",
+    table: "Trace tĩnh đầy đủ",
+    stage: "Giai đoạn",
+    facts: "Dữ kiện và sở hữu",
+    verification: "Kiểm chứng hoặc giới hạn",
+  },
+} as const;
+
+const lanes = locale === "vi"
+  ? [
+      {
+        id: "evidence",
+        label: "1 · Bằng chứng",
+        title: "Siêu dữ liệu ARM/Thumb đã đối chiếu",
+        items: [
+          "PTM: 32 đơn vị world Cocos cũ = 1 mét Box2D.",
+          "Một Step(frameDt * worldSpeed, 10, 10) biến thiên khi vật lý hoạt động.",
+          "Raycast xuôi rồi ngược; giữ thứ tự và lần xuất hiện fixture lặp.",
+          "Hủy body được hoãn đến khi world không còn khóa.",
+        ],
+        proof: "DER-NATIVE-CORPUS-001 · CLM-CLASSIC-PHYSICS-UNITS · CLM-CLASSIC-BLADE-QUERY",
+        limit: "Siêu dữ liệu disassembly không phải mã nguồn C++ gốc; runtime gốc chưa từng được quan sát.",
+      },
+      {
+        id: "contract",
+        label: "2 · Hợp đồng",
+        title: "Hành vi đã rà soát",
+        items: [
+          "Creator nhận tọa độ world; không chia PTM 32 lần thứ hai.",
+          "Bộ lọc gameplay loại user data null, tag 1437 và đối tượng disable-cut.",
+          "Nối kết quả ray xuôi rồi ngược mà không sort hay deduplicate theo collider.",
+          "Mọi mutation vòng đời đi qua hàng đợi sau step.",
+        ],
+        proof: "DER-CLASSIC-PHYSICS-001 · DER-CLASSIC-CUT-SCORE-001",
+        limit: "Ý nghĩa sản phẩm của tag 1437 và hành vi native không an toàn vẫn chưa xác định.",
+      },
+      {
+        id: "implementation",
+        label: "3 · Bản dựng",
+        title: "Chủ sở hữu clean-room TypeScript",
+        items: [
+          "classic-physics-rules.ts và classic-variable-step.ts sở hữu quy tắc thuần.",
+          "classic-physics-adapter.ts sở hữu PhysicsSystem2D, đồng bộ và PTM.",
+          "blade-input-controller.ts cùng classic-cut-query.ts sở hữu bốn track và hai query.",
+          "Creator dùng trọng lực công khai (0,-320) world unit/s² để biểu diễn (0,-10) m/s².",
+        ],
+        proof: "Cocos Creator 3.8.8 + TypeScript",
+        limit: "Bản dựng không nhúng, gọi hay dịch cơ học APK hoặc libgame.so.",
+      },
+      {
+        id: "proof",
+        label: "4 · Kiểm chứng",
+        title: "Kiểm thử xác định và probe backend",
+        items: [
+          "Trajectory pass tại 1/120, 1/60 và 1/30 với 10/10 iteration.",
+          "Kết quả ray: right, left, right, left; fixture lặp được giữ.",
+          "Contact song phương pass và phá hủy trực tiếp bị từ chối khi world khóa.",
+          "Hàng đợi hủy thành công sau khi Step trả về.",
+        ],
+        proof: "DER-PHYSICS2D-EQUIVALENCE-001 · adapter/backend/contact/raycast/lifecycle tests",
+        limit: "Đây là đo kiểm bản phục dựng; originalRuntimeObservation = false.",
+      },
+    ]
+  : [
+      {
+        id: "evidence",
+        label: "1 · Evidence",
+        title: "Cross-checked ARM/Thumb metadata",
+        items: [
+          "PTM: 32 legacy Cocos world units = 1 Box2D metre.",
+          "One variable Step(frameDt * worldSpeed, 10, 10) while physics is active.",
+          "Forward then reverse raycasts preserve order and repeated fixture occurrences.",
+          "Body destruction waits until the world is unlocked.",
+        ],
+        proof: "DER-NATIVE-CORPUS-001 · CLM-CLASSIC-PHYSICS-UNITS · CLM-CLASSIC-BLADE-QUERY",
+        limit: "Disassembly metadata is not original C++ source; the original runtime was never observed.",
+      },
+      {
+        id: "contract",
+        label: "2 · Contract",
+        title: "Reviewed behavioral boundary",
+        items: [
+          "Creator receives world coordinates; PTM 32 is not applied a second time.",
+          "Gameplay filters exclude null user data, tag 1437, and disable-cut objects.",
+          "Forward results precede reverse results without sorting or collider deduplication.",
+          "Every lifecycle mutation crosses the after-step queue.",
+        ],
+        proof: "DER-CLASSIC-PHYSICS-001 · DER-CLASSIC-CUT-SCORE-001",
+        limit: "The product meaning of tag 1437 and unsafe native behavior remain unresolved.",
+      },
+      {
+        id: "implementation",
+        label: "3 · Build",
+        title: "Clean-room TypeScript ownership",
+        items: [
+          "classic-physics-rules.ts and classic-variable-step.ts own pure rules.",
+          "classic-physics-adapter.ts owns PhysicsSystem2D, synchronization, and PTM.",
+          "blade-input-controller.ts and classic-cut-query.ts own four tracks and two queries.",
+          "Creator public gravity (0,-320) world units/s² represents (0,-10) m/s².",
+        ],
+        proof: "Cocos Creator 3.8.8 + TypeScript",
+        limit: "The build does not embed, call, or mechanically translate the APK or libgame.so.",
+      },
+      {
+        id: "proof",
+        label: "4 · Proof",
+        title: "Deterministic tests and backend probe",
+        items: [
+          "Trajectory passes at 1/120, 1/60, and 1/30 with 10/10 iterations.",
+          "Ray result sequence is right, left, right, left; repeats are retained.",
+          "Bilateral contact passes and direct destroy is rejected while locked.",
+          "Queued destruction succeeds after Step returns.",
+        ],
+        proof: "DER-PHYSICS2D-EQUIVALENCE-001 · adapter/backend/contact/raycast/lifecycle tests",
+        limit: "This measures the reconstruction; originalRuntimeObservation = false.",
+      },
+    ];
+---
+
+<section
+  class="native-contract-trace"
+  id="trace"
+  aria-labelledby="native-contract-trace-heading"
+  data-contract-trace
+>
+  <p class="eyebrow">{copy[locale].eyebrow}</p>
+  <h2 id="native-contract-trace-heading">{copy[locale].title}</h2>
+  <p>{copy[locale].intro}</p>
+  <div class="native-contract-trace__controls" data-enhancement-only>
+    <div role="tablist" aria-label={copy[locale].title}>
+      {
+        lanes.map((lane, index) => (
+          <button
+            type="button"
+            role="tab"
+            id={`trace-tab-${locale}-${lane.id}`}
+            aria-controls={`trace-panel-${locale}-${lane.id}`}
+            aria-selected={index === 0 ? "true" : "false"}
+            tabindex={index === 0 ? "0" : "-1"}
+            data-trace-tab={index}
+          >
+            {lane.label}
+          </button>
+        ))
+      }
+    </div>
+    <div class="native-contract-trace__actions">
+      <button type="button" data-trace-replay>{copy[locale].replay}</button>
+      <button type="button" data-trace-stop>{copy[locale].stop}</button>
+      <button type="button" data-trace-show-all>{copy[locale].showAll}</button>
+    </div>
+  </div>
+  <div class="native-contract-trace__lanes" aria-live="polite">
+    {
+      lanes.map((lane, index) => (
+        <section
+          id={`trace-panel-${locale}-${lane.id}`}
+          aria-labelledby={`trace-tab-${locale}-${lane.id}`}
+          tabindex="-1"
+          data-trace-step={index}
+        >
+          <p class="micro-label">{lane.label}</p>
+          <h3>{lane.title}</h3>
+          <ol>
+            {lane.items.map((item) => <li>{item}</li>)}
+          </ol>
+          <p><strong>{copy[locale].verification}:</strong> {lane.proof}</p>
+          <p class="native-contract-trace__limit"><strong>{copy[locale].stage} limit:</strong> {lane.limit}</p>
+        </section>
+      ))
+    }
+  </div>
+  <details open>
+    <summary>{copy[locale].table}</summary>
+    <div class="table-region">
+      <table>
+        <thead>
+          <tr>
+            <th>{copy[locale].stage}</th>
+            <th>{copy[locale].facts}</th>
+            <th>{copy[locale].verification}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            lanes.map((lane) => (
+              <tr>
+                <th scope="row">{lane.label}</th>
+                <td>{lane.items.join(" ")}</td>
+                <td>{lane.proof}. {lane.limit}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+<style>
+  .native-contract-trace {
+    border: 2px solid var(--graphite);
+    padding: clamp(1rem, 3vw, 2rem);
+    background: var(--paper);
+  }
+
+  .native-contract-trace__controls {
+    display: grid;
+    gap: var(--space-3);
+    margin-block: var(--space-5);
+  }
+
+  .native-contract-trace [role="tablist"],
+  .native-contract-trace__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .native-contract-trace [role="tab"][aria-selected="true"] {
+    color: var(--white);
+    background: var(--lab);
+  }
+
+  .native-contract-trace__lanes {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .native-contract-trace__lanes > section {
+    border-top: 0.35rem solid var(--measured);
+    padding: var(--space-4);
+    background: color-mix(in srgb, var(--paper) 90%, var(--white));
+  }
+
+  .native-contract-trace__lanes > section:nth-child(2) {
+    border-color: var(--recovered);
+  }
+
+  .native-contract-trace__lanes > section:nth-child(3) {
+    border-color: var(--pencil);
+  }
+
+  .native-contract-trace__lanes > section:nth-child(4) {
+    border-color: var(--inferred);
+  }
+
+  .native-contract-trace__limit {
+    border-left: 0.3rem solid var(--blocked);
+    padding-left: var(--space-3);
+  }
+
+  .native-contract-trace[data-enhanced="true"] [data-trace-step][hidden] {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .native-contract-trace__lanes {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>

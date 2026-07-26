@@ -1,0 +1,97 @@
+---
+import EvidenceStatus from "../evidence/evidence-status.astro";
+import RightsLabels from "../ai-lab/rights-labels.astro";
+import { localizedPath, withBase } from "../../data/routes.ts";
+import { resolveRightsLabels, type EvidenceExplorerEntry } from "../../data/ai-lab/index.ts";
+
+interface Props {
+  entry: EvidenceExplorerEntry;
+}
+
+const { entry } = Astro.props;
+const locale = entry.locale;
+const rights = resolveRightsLabels();
+const searchText = [
+  entry.id,
+  entry.copy,
+  entry.excerpt,
+  entry.explanation,
+  ...entry.tags,
+  ...entry.publicSourceIds,
+].join(" ");
+---
+
+<article
+  class="evidence-card"
+  id={entry.id}
+  data-explorer-card
+  data-search-text={searchText}
+  data-chapter={entry.chapter}
+  data-status={entry.status}
+  data-locale={entry.locale}
+  data-source-type={entry.sourceType}
+  data-academic-display={entry.academicDisplay}
+  data-commercial-rights={entry.commercialRights}
+  data-verification-type={entry.verificationType}
+>
+  <header>
+    <p class="micro-label">{entry.chapter} · {entry.sourceType}</p>
+    <h2><a href={withBase(localizedPath(locale, `/evidence/${entry.id}/`))}>{entry.id}</a></h2>
+    <EvidenceStatus status={entry.status} locale={locale} />
+  </header>
+  <p><strong>{entry.excerpt}</strong></p>
+  <p>{entry.explanation}</p>
+  <dl class="evidence-card__metadata">
+    <div><dt>{locale === "vi" ? "Tầng bằng chứng" : "Evidence tier"}</dt><dd>{entry.evidenceTier}</dd></div>
+    <div><dt>{locale === "vi" ? "Độ tin cậy" : "Confidence"}</dt><dd>{entry.confidence}</dd></div>
+    <div><dt>{locale === "vi" ? "Hợp lệ cho hợp đồng" : "Contract eligible"}</dt><dd>{String(entry.contractEligible)}</dd></div>
+  </dl>
+  <details>
+    <summary>{locale === "vi" ? "Nguồn công khai an toàn" : "Public-safe sources"}</summary>
+    <ul>
+      {entry.sources.map((source) => (
+        <li>
+          <code>{source.sourceId}</code>
+          <p>{source.excerpt}</p>
+          {source.href && <a href={source.href}>{locale === "vi" ? "Mở nguồn đã ghim" : "Open pinned source"}</a>}
+        </li>
+      ))}
+    </ul>
+  </details>
+  <RightsLabels rights={rights} locale={locale} />
+</article>
+
+<style>
+  .evidence-card {
+    scroll-margin-top: var(--space-7);
+    border: var(--line);
+    padding: var(--space-5);
+    background: color-mix(in srgb, var(--paper) 96%, var(--white));
+  }
+
+  .evidence-card[hidden] {
+    display: none;
+  }
+
+  .evidence-card__metadata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .evidence-card__metadata div {
+    border-top: 1px solid currentColor;
+    min-width: 8rem;
+  }
+
+  .evidence-card__metadata dt {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    text-transform: uppercase;
+  }
+
+  .evidence-card__metadata dd {
+    margin: 0;
+    font-weight: 800;
+  }
+</style>

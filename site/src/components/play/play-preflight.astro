@@ -1,0 +1,39 @@
+---
+import EvidenceStatus from "../evidence/evidence-status.astro";
+import RightsBoundary from "../editorial/rights-boundary.astro";
+
+interface Props {
+  locale: "en" | "vi";
+  files: number;
+  bytes: number;
+  mebibytes: string;
+  treeDigest: string;
+}
+
+const { locale, files, bytes, mebibytes, treeDigest } = Astro.props;
+---
+
+<section class="play-preflight" aria-labelledby="play-preflight-heading">
+  <p class="eyebrow">{locale === "vi" ? "Kiểm tra trước khi tải" : "Preflight before load"}</p>
+  <h2 id="play-preflight-heading">
+    {locale === "vi" ? "Bạn sắp tải bản phục dựng đã kiểm toán" : "You are about to load the audited reconstruction"}
+  </h2>
+  <dl class="play-preflight__ledger">
+    <div><dt>{locale === "vi" ? "Payload" : "Payload"}</dt><dd>{files.toLocaleString(locale)} files · {mebibytes} MiB · {bytes.toLocaleString(locale)} bytes</dd></div>
+    <div><dt>{locale === "vi" ? "Nguồn runtime" : "Runtime source"}</dt><dd>Cocos Creator 3.8.8 Web Mobile clean-room build</dd></div>
+    <div><dt>SHA-256 tree</dt><dd><code>{treeDigest}</code></dd></div>
+    <div><dt>{locale === "vi" ? "Danh tính lịch sử" : "Historical identity"}</dt><dd><EvidenceStatus status="unknown" locale={locale} /> {locale === "vi" ? "Runtime gốc chưa từng được quan sát." : "The original runtime was never observed."}</dd></div>
+  </dl>
+  <RightsBoundary
+    locale={locale}
+    technical={locale === "vi"
+      ? "Cây H5 vượt qua kiểm toán raw-build và ma trận runtime của bản phục dựng."
+      : "The H5 tree passes the raw-build audit and reconstruction runtime matrix."}
+    academic={locale === "vi"
+      ? "Quyết định đã đóng băng cho phép hiển thị học thuật/phi thương mại đúng cây đã kiểm toán."
+      : "The frozen decision permits academic/noncommercial display of this exact audited tree."}
+    commercial={locale === "vi"
+      ? "Quyền thương mại đối với nội dung gốc vẫn chưa biết và chưa được cho phép."
+      : "Commercial rights to original content remain unknown and not cleared."}
+  />
+</section>

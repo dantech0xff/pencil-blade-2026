@@ -1,0 +1,21 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  summary: string;
+  locale?: "en" | "vi";
+}
+
+const { id, title, summary, locale = "en" } = Astro.props;
+---
+
+<details class="evidence-drawer" id={id} data-evidence-drawer>
+  <summary>{title}</summary>
+  <div class="evidence-drawer__content">
+    <p>{summary}</p>
+    <slot />
+    <button type="button" data-evidence-close hidden>
+      {locale === "vi" ? "Đóng" : "Close"}
+    </button>
+  </div>
+</details>

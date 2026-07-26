@@ -1,0 +1,59 @@
+---
+import preview from "../../assets/media/shared/play-preview.png";
+
+interface Props {
+  locale: "en" | "vi";
+  gameUrl: string;
+}
+
+const { locale, gameUrl } = Astro.props;
+const labels = locale === "vi"
+  ? {
+      load: "Tải bản phục dựng H5",
+      fullscreen: "Toàn màn hình",
+      direct: "Mở trực tiếp bản H5 đã kiểm toán",
+      title: "Bản phục dựng Pencil Blade có thể chơi",
+      fallback: "Nếu canvas không dùng được, ảnh và mô tả này vẫn ghi lại Main Menu của bản phục dựng ở 480 × 800.",
+      error: "Không thể tải iframe. Dùng liên kết trực tiếp hoặc bằng chứng tĩnh.",
+    }
+  : {
+      load: "Load the H5 reconstruction",
+      fullscreen: "Enter fullscreen",
+      direct: "Open the audited H5 directly",
+      title: "Playable Pencil Blade reconstruction",
+      fallback: "If the canvas is unavailable, this image and description retain the reconstructed Main Menu at 480 × 800.",
+      error: "The iframe could not load. Use the direct link or static evidence.",
+    };
+---
+
+<section
+  class="play-launcher"
+  data-play-launcher
+  data-game-url={gameUrl}
+  data-frame-title={labels.title}
+>
+  <div class="play-launcher__stage" data-play-stage>
+    <img
+      src={preview.src}
+      width="480"
+      height="800"
+      alt={locale === "vi"
+        ? "Main Menu của bản phục dựng Pencil Blade ở 480 × 800; không phải runtime gốc."
+        : "Reconstructed Pencil Blade Main Menu at 480 × 800; not the original runtime."}
+    />
+    <p>{labels.fallback}</p>
+  </div>
+  <p class="play-launcher__error" data-play-error hidden role="status">{labels.error}</p>
+  <div class="play-launcher__controls">
+    <button type="button" data-play-load>{labels.load}</button>
+    <button type="button" data-play-fullscreen disabled>{labels.fullscreen}</button>
+    <a href={gameUrl} data-play-direct>{labels.direct}</a>
+  </div>
+  <noscript>
+    <p>
+      {locale === "vi"
+        ? "JavaScript đang tắt. Game không tự tải; dùng liên kết H5 trực tiếp ở trên."
+        : "JavaScript is disabled. The game does not auto-load; use the direct H5 link above."}
+    </p>
+  </noscript>
+</section>

@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "decisionId": "pencil-blade-academic-case-study-display-2026-07-25",
+  "decisionVersion": "1.0.0",
+  "decisionStatus": "owner-approved-existing-scope",
+  "decisionDate": "2026-07-25",
+  "decisionActorRoleId": "project-owner",
+  "purpose": "Machine-readable projection of the existing owner decision for the academic, noncommercial Pencil Blade GitHub Pages demonstration and its exact production-runtime documentary captures. This record is not a new license or commercial-rights review.",
+  "evidenceSource": {
+    "path": "docs/release-rights-checklist.md",
+    "sha256": "c2f0ca7ef11aab437a1c2353473e3c056e554c39ace4cb29fd17f1d08210d869",
+    "statement": "Commercial clearance unresolved; academic Pages release owner-approved."
+  },
+  "academicDisplayScope": {
+    "purpose": "research, education, preservation, and noncommercial engineering documentation",
+    "distribution": "github-pages",
+    "productionUrl": "https://dantech0xff.github.io/pencil-blade-2026/",
+    "h5Tree": {
+      "mediaId": "MEDIA-H5-AUDITED-TREE",
+      "sourceReportPath": "plans/260721-2253-pencil-blade-restoration/reports/technical-closeout-manifest.json",
+      "sourceReportSha256": "3da6e3dabf7674a8c000572b7628e1b13363af0c8120dda04051015182ae252b",
+      "directoryAtAudit": "game/build/web-mobile-pages",
+      "files": 2539,
+      "bytes": 39613694,
+      "treeDigestSha256": "90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54",
+      "pagesPrefixAtAudit": "/pencil-blade-2026/"
+    },
+    "productionRuntimeCaptures": [
+      {
+        "mediaId": "MEDIA-PRODUCTION-480-MAIN-MENU",
+        "captureId": "chrome-480x800-main-menu",
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-480x800-main-menu.png",
+        "sha256": "a78387d8d54b5b7de0176ef0722f4ce78092a7531a0863f560fa50e47d20608c"
+      },
+      {
+        "mediaId": "MEDIA-PRODUCTION-480-MODE-SELECT",
+        "captureId": "chrome-480x800-mode-select",
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-480x800-mode-select.png",
+        "sha256": "f5bc44358c043020709f99d28c6e3a5d16ce4623681084a286c45f4cb4f2a4c8"
+      },
+      {
+        "mediaId": "MEDIA-PRODUCTION-480-CLASSIC",
+        "captureId": "chrome-480x800-classic",
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-480x800-classic.png",
+        "sha256": "f8f9a6a2677fd4c86fc1212d5a15de2992676443b067744f553cbcfa56191a1e"
+      },
+      {
+        "mediaId": "MEDIA-PRODUCTION-720-MAIN-MENU",
+        "captureId": "chrome-720x1280-main-menu",
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-720x1280-main-menu.png",
+        "sha256": "81e53faeaa21b0b05ea2c7fefe6e7161fbecccaa21ea8131969ddcdbbe6daf70"
+      },
+      {
+        "mediaId": "MEDIA-PRODUCTION-720-MODE-SELECT",
+        "captureId": "chrome-720x1280-mode-select",
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-720x1280-mode-select.png",
+        "sha256": "87f55b4aafb01d346c7ce8a98a7b9ab4958ba9c5842b950ffff132b2b93055b5"
+      },
+      {
+        "mediaId": "MEDIA-PRODUCTION-720-CLASSIC",
+        "captureId": "chrome-720x1280-classic",
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-720x1280-classic.png",
+        "sha256": "80efc4c60ee39ae020fce7cff3ce2d6519d3c6393e777dd9889d1f4f39477991"
+      }
+    ],
+    "captureSourceReport": {
+      "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/production-pages-runtime.json",
+      "sha256": "a2e9b67f970eff9eb4c516aa0a94e6ba472af480f3d39838fca3001e5cc8e7e4",
+      "status": "pass"
+    }
+  },
+  "commercialRightsRecordRef": {
+    "path": "release/public-release-variant-manifest.json",
+    "sha256": "eadf75a39d0d7eb6ee9451718e13452586ffc42683ef6a38534d96a776a1daa6",
+    "manifestId": "pencil-blade-public-web-variant",
+    "manifestVersion": "0.1.0",
+    "releaseDecisionStatus": "blocked",
+    "mustRemainUnchangedForThisDecision": true
+  },
+  "excludedFromAcademicDisplayScope": [
+    {
+      "id": "standalone-recovered-png",
+      "scope": "Recovered or extracted PNG files used as standalone case-study media",
+      "reason": "The H5-tree decision does not independently authorize extracted artwork."
+    },
+    {
+      "id": "standalone-recovered-audio",
+      "scope": "Recovered or extracted WAV and MP3 files used as standalone case-study media or downloads",
+      "reason": "The H5-tree decision does not independently authorize extracted audio."
+    },
+    {
+      "id": "standalone-recovered-fonts",
+      "scope": "Recovered or extracted TTF and OTF files used as standalone case-study media, web fonts, or downloads",
+      "reason": "The H5-tree decision does not independently authorize extracted fonts."
+    },
+    {
+      "id": "raw-original-and-analysis-artifacts",
+      "scope": "Original APK, libgame.so, decompiler output, disassembly, analyzer databases, and ignored working evidence",
+      "reason": "Raw evidence is outside both the clean-room production boundary and the public case-study scope."
+    }
+  ],
+  "displayDisclaimer": {
+    "en": "Academic display is a bounded owner decision for the exact audited H5 demonstration and six hashed production captures. It is not a license or commercial clearance.",
+    "vi": "Hiển thị học thuật là quyết định có phạm vi giới hạn của chủ dự án cho đúng bản H5 đã kiểm toán và sáu ảnh chụp production có hàm băm. Đây không phải giấy phép hoặc sự chấp thuận thương mại."
+  }
+}

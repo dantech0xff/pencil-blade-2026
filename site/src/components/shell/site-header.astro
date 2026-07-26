@@ -1,0 +1,31 @@
+---
+import { localizedPath, withBase } from "../../data/routes.ts";
+import type { Locale } from "../../data/locales.ts";
+import LocaleSwitcher from "./locale-switcher.astro";
+
+interface Props {
+  locale: Locale;
+  route: string;
+}
+
+const { locale, route } = Astro.props;
+const labels = locale === "vi"
+  ? { title: "Pencil Blade · hồ sơ phục dựng", about: "Giới thiệu" }
+  : { title: "Pencil Blade · restoration case file", about: "About" };
+---
+
+<header class="site-header">
+  <div class="site-header__inner site-frame">
+    <a class="site-mark" href={withBase(localizedPath(locale, "/"))}>
+      <svg aria-hidden="true" viewBox="0 0 48 48">
+        <path d="M8 34 34 8l6 6-26 26H8v-6Z" fill="none" stroke="currentColor" stroke-width="3" />
+        <path d="m29 13 6 6M12 34l4 4" stroke="currentColor" stroke-width="3" />
+      </svg>
+      <span>{labels.title}</span>
+    </a>
+    <nav class="site-nav" aria-label={locale === "vi" ? "Điều hướng chính" : "Primary"}>
+      <a href={withBase(localizedPath(locale, "/about/"))}>{labels.about}</a>
+      <LocaleSwitcher locale={locale} route={route} />
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,104 @@
+---
+import { getCollection } from "astro:content";
+
+import BaseLayout from "../../../layouts/base-layout.astro";
+import AssistanceDisclosure from "../../../components/ai-lab/assistance-disclosure.astro";
+import DisclosureBadge from "../../../components/ai-lab/disclosure-badge.astro";
+import EpisodeTimeline from "../../../components/ai-lab/episode-timeline.astro";
+import RightsLabels from "../../../components/ai-lab/rights-labels.astro";
+import EvidenceStatus from "../../../components/evidence/evidence-status.astro";
+import {
+  buildAiLabIndex,
+  getAiLabPublicationManifest,
+  resolveCaseFileSources,
+  type AiEpisodeRecord,
+} from "../../../data/ai-lab/index.ts";
+import { withBase } from "../../../data/routes.ts";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("aiEpisodes", ({ data }) => data.locale === "vi" && !data.draft);
+  return entries.map((entry) => ({
+    params: { slug: entry.data.id },
+    props: { episode: entry.data },
+  }));
+}
+
+interface Props {
+  episode: AiEpisodeRecord;
+}
+
+const { episode } = Astro.props;
+const presentation = buildAiLabIndex(getAiLabPublicationManifest(), [episode])[0];
+const sources = resolveCaseFileSources(episode.publicSourceIds, "vi");
+const title = `${episode.question} · AI Lab`;
+---
+
+<BaseLayout
+  locale="vi"
+  route={`/ai-lab/${episode.id}/`}
+  routeId="ai-lab.detail.vi"
+  title={title}
+  description={episode.reviewDecision}
+  surface="lab"
+>
+  <article class="episode-detail">
+    <header class="hero">
+      <p class="eyebrow">Hồ sơ AI Lab {String(episode.order).padStart(2, "0")}</p>
+      <h1>{episode.question}</h1>
+      <p class="hero__lede">{episode.reviewDecision}</p>
+      <DisclosureBadge disclosure={presentation.disclosure} locale="vi" />
+    </header>
+
+    <AssistanceDisclosure locale="vi" />
+    <EpisodeTimeline episode={episode} />
+
+    <section aria-labelledby="claims-heading">
+      <h2 id="claims-heading">Nối tuyên bố chuẩn</h2>
+      <p>Trạng thái, độ tin cậy, tầng bằng chứng và tham chiếu dưới đây đến từ phép chiếu đóng băng đã tạo; tập này không thể ghi đè chúng.</p>
+      <div class="episode-detail__claims">
+        {presentation.claims.map((claim) => (
+          <article id={`claim-${claim.id}`}>
+            <EvidenceStatus status={claim.status} locale="vi" />
+            <h3><a href={withBase(`/vi/evidence/${claim.id}/`)}>{claim.id}</a></h3>
+            <p>{claim.copy}</p>
+            <p class="micro-label">Tầng {claim.evidenceTier} · độ tin cậy {claim.confidence} · hợp lệ cho hợp đồng {String(claim.contractEligible)}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section aria-labelledby="sources-heading">
+      <h2 id="sources-heading">Sổ nguồn công khai an toàn</h2>
+      <ul>
+        {sources.map((source) => (
+          <li id={`source-${source.sourceId}`}>
+            <code>{source.sourceId}</code>
+            <p>{source.excerpt}</p>
+            {source.href && <a href={source.href}>Mở nguồn đã ghim theo commit</a>}
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <RightsLabels rights={presentation.rights} locale="vi" />
+    <p><a href={withBase("/vi/ai-lab/")}>Quay lại tất cả các tập đã biên tập</a></p>
+  </article>
+</BaseLayout>
+
+<style>
+  .episode-detail {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .episode-detail__claims {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .episode-detail__claims article {
+    scroll-margin-top: var(--space-7);
+    border: var(--line);
+    padding: var(--space-4);
+  }
+</style>

@@ -1,0 +1,23 @@
+---
+import { localizedPath, withBase } from "../../data/routes.ts";
+import type { Locale } from "../../data/locales.ts";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner site-frame">
+    <p>
+      {locale === "vi"
+        ? "Nghiên cứu phục dựng clean-room không chính thức, phi thương mại; không phải môi trường chạy gốc."
+        : "Unofficial, noncommercial clean-room reconstruction study; not the original runtime."}
+    </p>
+    <a href={withBase(localizedPath(locale, "/about/"))}>
+      {locale === "vi" ? "Phương pháp, quyền và chỉnh sửa" : "Method, rights, and corrections"}
+    </a>
+  </div>
+</footer>

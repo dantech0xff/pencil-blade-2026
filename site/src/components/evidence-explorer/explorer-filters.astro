@@ -1,0 +1,93 @@
+---
+import type { ExplorerFacets } from "../../data/ai-lab/index.ts";
+
+interface Props {
+  facets: ExplorerFacets;
+  locale?: "en" | "vi";
+}
+
+const { facets, locale = "en" } = Astro.props;
+const vi = locale === "vi";
+const labels = {
+  q: vi ? "Tìm trong bằng chứng" : "Search evidence",
+  chapter: vi ? "Chương" : "Chapter",
+  status: vi ? "Trạng thái chuẩn" : "Canonical status",
+  locale: vi ? "Ngôn ngữ" : "Locale",
+  sourceType: vi ? "Loại nguồn" : "Source type",
+  academicDisplay: vi ? "Hiển thị học thuật" : "Academic display",
+  commercialRights: vi ? "Quyền thương mại" : "Commercial rights",
+  verificationType: vi ? "Loại kiểm chứng" : "Verification type",
+} as const;
+---
+
+<form class="explorer-filters" method="get" data-explorer-form>
+  <label class="explorer-filters__search">
+    <span>{labels.q}</span>
+    <input type="search" name="q" autocomplete="off" />
+  </label>
+  {(
+    [
+      ["chapter", facets.chapter],
+      ["status", facets.status],
+      ["locale", facets.locale],
+      ["sourceType", facets.sourceType],
+      ["academicDisplay", facets.academicDisplay],
+      ["commercialRights", facets.commercialRights],
+      ["verificationType", facets.verificationType],
+    ] as const
+  ).map(([name, options]) => (
+    <label>
+      <span>{labels[name]}</span>
+      <select name={name}>
+        <option value="">{vi ? "Tất cả" : "All"}</option>
+        {options.map((option) => <option value={option}>{option}</option>)}
+      </select>
+    </label>
+  ))}
+  <div class="explorer-filters__actions">
+    <button type="submit">{vi ? "Áp dụng" : "Apply"}</button>
+    <button type="button" data-explorer-reset>{vi ? "Đặt lại" : "Reset"}</button>
+  </div>
+  <p class="micro-label" aria-live="polite">
+    <span data-explorer-count>39</span>
+    {vi ? "bản ghi đang hiển thị" : "records visible"}
+  </p>
+</form>
+
+<style>
+  .explorer-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: var(--space-3);
+    border: var(--line);
+    padding: var(--space-4);
+    background: color-mix(in srgb, var(--paper) 90%, var(--pencil));
+  }
+
+  .explorer-filters label {
+    display: grid;
+    gap: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 700;
+  }
+
+  .explorer-filters input,
+  .explorer-filters select {
+    width: 100%;
+    border: 1px solid var(--graphite);
+    padding-inline: var(--space-2);
+    color: var(--graphite);
+    background: var(--white);
+  }
+
+  .explorer-filters__search {
+    grid-column: 1 / -1;
+  }
+
+  .explorer-filters__actions {
+    display: flex;
+    align-items: end;
+    gap: var(--space-2);
+  }
+</style>

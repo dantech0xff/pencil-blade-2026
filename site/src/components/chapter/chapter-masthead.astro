@@ -1,0 +1,85 @@
+---
+interface Props {
+  locale: "en" | "vi";
+  order: number;
+  title: string;
+  dek: string;
+  question: string;
+  localeReviewPending?: boolean;
+}
+
+const {
+  locale,
+  order,
+  title,
+  dek,
+  question,
+  localeReviewPending = false,
+} = Astro.props;
+---
+
+<header class="chapter-masthead">
+  <p class="eyebrow">
+    {locale === "vi" ? "Hồ sơ" : "Case file"} {String(order).padStart(2, "0")}
+  </p>
+  <h1>{title}</h1>
+  <p class="chapter-masthead__dek">{dek}</p>
+  <p class="chapter-masthead__question">
+    <strong>{locale === "vi" ? "Câu hỏi dẫn đường:" : "Guiding question:"}</strong>
+    {question}
+  </p>
+  {
+    localeReviewPending && (
+      <p class="draft-flag" data-locale-review="pending">
+        {locale === "vi"
+          ? "Nội dung tiếng Việt đã đủ cặp và giữ nguyên dữ kiện, nhưng bằng chứng về người duyệt dữ kiện tiếng Việt có tên vẫn đang chờ. Đây là yếu tố chặn ứng viên phát hành."
+          : "Vietnamese content parity is complete, but evidence of a named Vietnamese factual reviewer is still pending. This remains a release-candidate blocker."}
+      </p>
+    )
+  }
+</header>
+
+<style>
+  .chapter-masthead {
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--graphite);
+    padding: clamp(1.4rem, 4vw, 4rem);
+    background: var(--paper);
+    box-shadow: var(--shadow);
+  }
+
+  .chapter-masthead::after {
+    position: absolute;
+    inset: auto -5rem 1.1rem auto;
+    width: 15rem;
+    border-top: 0.22rem solid var(--pencil);
+    content: "";
+    rotate: -8deg;
+  }
+
+  .chapter-masthead > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .chapter-masthead__dek {
+    max-width: 46rem;
+    font-family: var(--font-serif);
+    font-size: var(--step-1);
+  }
+
+  .chapter-masthead__question {
+    max-width: 52rem;
+    border-left: 0.35rem solid var(--measured);
+    padding-left: var(--space-4);
+  }
+
+  .chapter-masthead__question strong {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+</style>

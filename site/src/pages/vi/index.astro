@@ -1,0 +1,87 @@
+---
+import BaseLayout from "../../layouts/base-layout.astro";
+import EvidenceRef from "../../components/evidence/evidence-ref.astro";
+import EvidenceStatus from "../../components/evidence/evidence-status.astro";
+import MetricLedger from "../../components/editorial/metric-ledger.astro";
+import RightsBoundary from "../../components/editorial/rights-boundary.astro";
+import { withBase } from "../../data/routes.ts";
+import linework from "../../assets/brand/lab-linework.svg";
+import playPreview from "../../assets/media/shared/play-preview.png";
+
+const title = "Pencil Blade · Từ bằng chứng đến bản phục dựng";
+const description = "Một APK không thể chạy đã trở thành hợp đồng bằng chứng, bản phục dựng TypeScript clean-room và kiểm chứng có thể chơi như thế nào.";
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: title,
+  description,
+  inLanguage: "vi",
+  isAccessibleForFree: true,
+};
+---
+
+<BaseLayout locale="vi" route="/" routeId="home.vi" title={title} description={description} structuredData={structuredData}>
+  <article>
+    <section class="hero">
+      <p class="eyebrow">Hồ sơ 01 · chỉ dùng bằng chứng tĩnh</p>
+      <h1>Một APK. Không có bản gốc chạy được. Một bản phục dựng có thể bảo vệ.</h1>
+      <p class="hero__lede">
+        APK duy nhất còn lại, dài 35.817.225 byte, chưa từng được cài đặt hay thực thi. Bề mặt
+        package, native, tài nguyên và hợp đồng của nó trở thành ranh giới cho bản phục dựng thuần
+        Cocos Creator 3.8.8 và TypeScript.
+      </p>
+      <p>
+        <EvidenceStatus status="recovered" locale="vi" /> <EvidenceRef locale="vi" id="CLM-APK-BYTES" label="Xem dữ kiện nguồn" />
+      </p>
+      <img src={linework.src} width="960" height="320" alt="Bằng chứng APK đi qua các trạm hợp đồng và triển khai tới kiểm chứng đo được." />
+    </section>
+
+    <section aria-labelledby="transformation-heading" data-reveal>
+      <p class="eyebrow">Quá trình chuyển đổi</p>
+      <h2 id="transformation-heading">Bằng chứng trước triển khai</h2>
+      <ol class="evidence-sequence">
+        <li class="evidence-step"><h3>Hiện vật</h3><p>Nguồn chuẩn duy nhất là APK bất biến với 985 thành phần.</p><EvidenceRef locale="vi" id="CLM-APK-ZIP" /></li>
+        <li class="evidence-step"><h3>Phương pháp</h3><p>Phân tích tĩnh package, ARM/Thumb, symbol, tài nguyên và trình bày—không quan sát runtime gốc.</p><EvidenceRef locale="vi" id="CLM-NATIVE-PROFILE" /></li>
+        <li class="evidence-step"><h3>Hợp đồng</h3><p>Giá trị phục hồi và suy luận có giới hạn trở thành hợp đồng hành vi có thể kiểm thử.</p><EvidenceRef locale="vi" id="CLM-CLASSIC-BLADE-QUERY" /></li>
+        <li class="evidence-step"><h3>Kiểm chứng</h3><p>Kiểm thử xác định cùng các lần chạy Android/H5 đã kiểm toán xác minh bản dựng—không phải danh tính lịch sử.</p><EvidenceStatus status="measured" locale="vi" /></li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="chapter-map-heading" data-reveal>
+      <p class="eyebrow">Mở bàn phục dựng</p>
+      <h2 id="chapter-map-heading">Theo chuỗi bằng chứng</h2>
+      <div class="chapter-map">
+        <a class="evidence-step" href={withBase("/vi/story/")}><strong>Câu chuyện</strong><br />Vì sao không thể quan sát bản gốc.</a>
+        <a class="evidence-step" href={withBase("/vi/forensics/")}><strong>Pháp chứng</strong><br />713 hàm được lập chỉ mục và 862 tài nguyên trở thành bằng chứng có giới hạn.</a>
+        <a class="evidence-step" href={withBase("/vi/reconstruction/")}><strong>Phục dựng</strong><br />Hợp đồng trở thành mã clean-room và kiểm chứng.</a>
+        <a class="evidence-step" href={withBase("/vi/ai-lab/")}><strong>AI Lab</strong><br />Quyết định, sửa sai và kiểm chứng được tuyển chọn—không phải transcript.</a>
+      </div>
+    </section>
+
+    <section aria-labelledby="ledger-heading" data-reveal>
+      <p class="eyebrow">Sổ kiểm chứng</p>
+      <h2 id="ledger-heading">Độ trung thực tối đa có thể phục hồi, luôn kèm mẫu số</h2>
+      <div class="metric-grid">
+        <MetricLedger label="Dữ kiện chuẩn" numerator="39" denominator="39" version="snapshot-v1" date="2026-07-25" qualifier="Chiếu từ sổ dữ kiện đã đóng băng." source="forensics/claims.jsonl" />
+        <MetricLedger label="Kiểm kê tài nguyên" numerator="862" denominator="862" version="closure-v1" date="2026-07-25" qualifier="Tài nguyên đã đối soát; sự hiện diện không chứng minh việc dùng ở runtime." source="presentation/resource closure" />
+        <MetricLedger label="Bản ghi sai khác" numerator="25" denominator="25" version="fidelity-v1" date="2026-07-25" qualifier="Mọi sai khác vẫn được công khai; không có sai khác chưa giải thích." source="fidelity report" />
+        <MetricLedger label="Quyền thương mại" numerator="0" denominator="862" version="rights-v1" date="2026-07-25" qualifier="Chưa xác lập quyền thương mại theo từng tài sản." source="release rights record" />
+      </div>
+    </section>
+
+    <section aria-labelledby="play-glimpse-heading" data-reveal>
+      <p class="eyebrow">Kiểm chứng có thể chơi · chỉ tải khi xác nhận</p>
+      <h2 id="play-glimpse-heading">Game nằm ngoài payload biên tập</h2>
+      <img src={playPreview.src} width="480" height="800" loading="lazy" alt="Main Menu của bản phục dựng Pencil Blade ở 480 x 800; không phải runtime gốc." />
+      <p>Cây H5 đã kiểm toán, khoảng 40 MB, chỉ tải sau thao tác chủ động tại trang Chơi.</p>
+      <a href={withBase("/vi/play/")}>Đọc công bố trước khi tải <span aria-hidden="true">→</span></a>
+    </section>
+
+    <RightsBoundary
+      locale="vi"
+      technical="Runtime clean-room và kiểm thử của nó là kiểm chứng bản phục dựng có thể kiểm toán."
+      academic="Cây H5 đã kiểm toán chính xác và sáu ảnh có hash nằm trong quyết định hiển thị học thuật/phi thương mại đã đóng băng."
+      commercial="Quyền đối với tên sản phẩm, hình ảnh, font, âm nhạc, mã và nội dung gốc vẫn chưa biết và chưa được cho phép thương mại."
+    />
+  </article>
+</BaseLayout>

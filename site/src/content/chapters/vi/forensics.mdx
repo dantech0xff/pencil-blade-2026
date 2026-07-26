@@ -1,0 +1,133 @@
+---
+id: forensics.vi
+locale: vi
+order: 2
+slug: forensics.vi
+title: "Đọc một game không thể chạy"
+dek: "Các view gói, ARM/Thumb, symbol và tài nguyên trở thành corpus bằng chứng có giới hạn—không phải vật thay thế mã nguồn."
+summary: "Forensics chuyển siêu dữ liệu tĩnh thành khẳng định đã rà soát trong khi giữ rõ khác biệt giữa lập chỉ mục tự động và rà soát ngữ nghĩa."
+chapterKind: forensics
+evidenceRefs:
+  - CLM-MANIFEST-IDENTITY
+  - CLM-JAVA-BOUNDARY
+  - CLM-NATIVE-PROFILE
+  - CLM-ENGINE-FINGERPRINT
+  - CLM-ASSET-COUNTS
+  - CLM-NO-EXTERNAL-GAME-CONFIG
+  - CLM-NATIVE-PRODUCT-SURFACE
+  - CLM-PHYSICS-WORLD-DEFAULTS
+  - CLM-PHYSICS-STEP-DEFAULTS
+  - CLM-CLASSIC-PHYSICS-UNITS
+  - CLM-CLASSIC-FIXTURES
+  - CLM-CLASSIC-BLADE-QUERY
+mediaRefs: []
+nextId: reconstruction.vi
+seoTitle: "Forensics APK tĩnh và ARM/Thumb — Pencil Blade"
+seoDescription: "Siêu dữ liệu APK, 713 function auto-indexed, 862 tài nguyên và trace lưỡi dao/Physics2D trở thành hợp đồng đã rà soát mà không quan sát runtime gốc."
+draft: false
+---
+
+## Câu hỏi 01 — Siêu dữ liệu thật sự nói được bao nhiêu?
+
+Gói cung cấp nhiều view tĩnh độc lập: manifest Android và siêu dữ liệu chữ ký, ranh giới Java
+và JNI do ứng dụng sở hữu, một thư viện ARM đã strip, chuỗi in được, hình học tài nguyên và
+symbol còn lại. Sự đồng thuận giữa các view quan trọng hơn bất kỳ công cụ đơn lẻ nào.
+
+### Hiện vật
+
+`libgame.so` là ELF32 little-endian ARM EABI5 cho ARM v5TE. Function ứng dụng chủ yếu ở trạng
+thái Thumb; bit thấp của địa chỉ symbol định danh trạng thái Thumb và địa chỉ instruction được
+chuẩn hóa bằng `rawAddress & ~1`. GNU ARM và LLVM cấu hình cho Thumbv5TE là hai view
+instruction độc lập.
+
+<EvidenceRef id="CLM-NATIVE-PROFILE" locale="vi" />
+
+### Phương pháp
+
+Phép chiếu native xác định chứa đúng **713 function được allowlist tường minh và auto-indexed**.
+Trong số đó, **553** có call trực tiếp, **684** có hằng số và **91** có string cross-reference
+độ tin cậy cao tới vùng dữ liệu được cấp phát.
+
+Các con số này mô tả trường làm giàu, không phải 713 lần rà soát ngữ nghĩa thủ công. Cả 713 bản
+ghi đều có review state `auto-indexed`; lập chỉ mục tự động là bản đồ phục vụ rà soát, không
+phải bằng chứng một người đã hiểu mọi function.
+
+### Hợp đồng hoặc quyết định
+
+Văn bản công khai đã tuyển chọn có thể mô tả symbol, địa chỉ, quy tắc ARM/Thumb, hằng số, call,
+chuỗi và ranh giới subsystem. Nó không công bố byte instruction, dump decompiler, cơ sở dữ liệu
+phân tích hay đường dẫn riêng tư. Đầu ra giống decompiler và siêu dữ liệu disassembly không bao
+giờ được gọi là mã nguồn C++ gốc.
+
+<EvidenceRef id="CLM-NATIVE-PRODUCT-SURFACE" locale="vi" />
+
+### Kiểm chứng
+
+Analyzer v3 tái sinh corpus từ hash đã đăng ký và yêu cầu các phép chiếu đã tuyển chọn giống
+nhau từng byte. Một **kiểm kê 862 tài nguyên** riêng gồm **784 PNG**, **59 WAV**, **3 MP3** và
+**16 phông chữ**. Đối soát sau đó phân loại 761 được dùng, 100 bị loại đã rà soát, một không
+được hỗ trợ và không có disposition chưa xác định.
+
+<EvidenceRef id="CLM-ASSET-COUNTS" locale="vi" />
+<EvidenceRef id="CLM-NO-EXTERNAL-GAME-CONFIG" locale="vi" />
+
+### Giới hạn
+
+Phân tích tĩnh không thể cho thấy frame, dạng sóng, thứ tự draw hay hành vi thiết bị lịch sử đã
+được quan sát. Call gián tiếp không giải được đích nằm ngoài số call trực tiếp. Sự hiện diện tài
+nguyên không chứng minh việc dùng khi chạy, ý định lịch sử hay quyền tái phân phối.
+
+### Chương tiếp theo
+
+Corpus chỉ có ích khi người đọc hoài nghi có thể theo một dữ kiện xuyên qua mọi quyết định sau.
+
+<EvidenceChain locale="vi" />
+
+## Câu hỏi 02 — Một dữ kiện native trở thành hành vi production an toàn bằng cách nào?
+
+Đường đại diện lưỡi dao/Physics2D đi qua đơn vị, thời gian frame, thứ tự query, lọc, vòng đời
+đối tượng, sở hữu triển khai và kiểm chứng backend. Nó đủ hẹp để kiểm tra từ đầu đến cuối và đủ
+giàu để lộ mọi ranh giới.
+
+### Hiện vật
+
+Bằng chứng tĩnh phục hồi tỷ lệ PTM **32 đơn vị world Cocos cũ trên một mét Box2D**, trọng lực
+`(0,-10)` và một bước biến thiên
+`Step(frameDt * worldSpeed, 10, 10)` khi vật lý hoạt động. Đầu vào lưỡi dao sở hữu bốn touch
+slot, kéo dài từng đoạn đủ điều kiện rồi raycast xuôi và ngược sau bước vật lý.
+
+<EvidenceRef id="CLM-CLASSIC-PHYSICS-UNITS" locale="vi" />
+<EvidenceRef id="CLM-CLASSIC-BLADE-QUERY" locale="vi" />
+
+### Phương pháp
+
+Callback tiếp tục qua mọi hit. Kết quả được xử lý theo thứ tự thu thập, loại body metadata null,
+node tag `1437` và đối tượng bị tắt cắt. Guard trùng lặp biểu kiến so địa chỉ vùng lưu trữ thay
+vì giá trị fixture, nên mặc định độ trung thực đã rà soát giữ các lần xuất hiện fixture lặp từ
+hai hướng ray.
+
+### Hợp đồng hoặc quyết định
+
+Creator nhận tọa độ world công khai và áp dụng PTM một lần. Vì vậy bản viết lại không chia tọa
+độ ray cho 32 lần thứ hai. TypeScript thuần sở hữu quy tắc xác định còn Creator Physics2D sở
+hữu ranh giới công cụ game. Mọi yêu cầu hủy body/component/node trong step, contact hay ray đều
+được hoãn tới khi world mở khóa.
+
+### Kiểm chứng
+
+Probe `@cocos/box2d@1.0.2` đã pin vượt qua các hàng quỹ đạo tại `1/120`, `1/60` và `1/30` với
+iteration **10/10**; raycast xuôi/ngược giữ chuỗi lặp đã đo; bộ lọc contact song phương pass;
+hủy trực tiếp bị từ chối khi khóa; hủy trong hàng đợi thành công sau `Step`.
+
+<NativeContractTrace locale="vi" />
+
+### Giới hạn
+
+Probe backend chứng minh tương đương từ hợp đồng đã phục hồi đến backend bản phục dựng. Nó
+không quan sát hay định danh môi trường chạy gốc. Ý nghĩa sản phẩm của tag `1437`, thứ tự draw
+RNG native chính xác và layout electric-contact không an toàn vẫn là giới hạn tường minh.
+
+### Chương tiếp theo
+
+Phần Phục dựng giữ nguyên trace bốn lane này khi mở rộng sở hữu sang sáu chế độ production,
+tài nguyên, kiểm thử và đầu ra được hỗ trợ.

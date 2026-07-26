@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-labelledby="title desc">
+  <title id="title">Pencil Blade case-study mark</title>
+  <desc id="desc">A pencil intersects an evidence registration cross.</desc>
+  <rect x="8" y="8" width="176" height="176" rx="4" fill="#F4F0E6" stroke="#171A18" stroke-width="8"/>
+  <path d="m42 137 86-86 22 22-86 86H42v-22Z" fill="#F2C94C" stroke="#171A18" stroke-width="8" stroke-linejoin="round"/>
+  <path d="m111 68 22 22M51 137l13 13M96 24v28M82 38h28" fill="none" stroke="#171A18" stroke-width="8"/>
+</svg>

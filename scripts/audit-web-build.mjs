@@ -474,12 +474,41 @@ function extractMarkupReferences(sourcePath, source) {
   const markup = source.replace(/<!--[\s\S]*?-->/gu, '');
   const attributePattern = /\b(src|href|poster|data-src|data-href)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/giu;
   for (const match of markup.matchAll(attributePattern)) {
-    addReference(references, sourcePath, match[2] ?? match[3] ?? match[4], `markup-${match[1].toLowerCase()}`);
+    const context = markupAttributeContext(markup, match.index);
+    if (context === undefined) {
+      continue;
+    }
+    const attribute = match[1].toLowerCase();
+    addReference(
+      references,
+      sourcePath,
+      match[2] ?? match[3] ?? match[4],
+      `markup-${attribute}`,
+      {
+        attribute,
+        element: context.element,
+        ...(context.rel === undefined ? {} : { rel: context.rel }),
+      },
+    );
   }
   const srcsetPattern = /\bsrcset\s*=\s*(?:"([^"]*)"|'([^']*)')/giu;
   for (const match of markup.matchAll(srcsetPattern)) {
+    const context = markupAttributeContext(markup, match.index);
+    if (context === undefined) {
+      continue;
+    }
     for (const candidate of (match[1] ?? match[2]).split(',')) {
-      addReference(references, sourcePath, candidate.trim().split(/\s+/u, 1)[0], 'markup-srcset');
+      addReference(
+        references,
+        sourcePath,
+        candidate.trim().split(/\s+/u, 1)[0],
+        'markup-srcset',
+        {
+          attribute: 'srcset',
+          element: context.element,
+          ...(context.rel === undefined ? {} : { rel: context.rel }),
+        },
+      );
     }
   }
   for (const match of markup.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/giu)) {
@@ -496,6 +525,30 @@ function extractMarkupReferences(sourcePath, source) {
     }
   }
   return references;
+}
+
+function markupAttributeContext(source, attributeIndex) {
+  const openingBracket = source.lastIndexOf('<', attributeIndex);
+  if (openingBracket < 0) {
+    return undefined;
+  }
+  const closingBracket = source.indexOf('>', openingBracket + 1);
+  if (closingBracket < attributeIndex) {
+    return undefined;
+  }
+  const tagSource = source.slice(openingBracket, closingBracket + 1);
+  const elementMatch = /^<\s*([A-Za-z][A-Za-z0-9:-]*)\b/u.exec(tagSource);
+  if (elementMatch === null) {
+    return undefined;
+  }
+  const relMatch =
+    /\brel\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/iu.exec(tagSource);
+  return {
+    element: elementMatch[1].toLowerCase(),
+    rel: relMatch === null
+      ? undefined
+      : (relMatch[1] ?? relMatch[2] ?? relMatch[3]).trim().toLowerCase(),
+  };
 }
 
 function extractCssReferences(sourcePath, source) {
@@ -1836,18 +1889,25 @@ function looksLikeLocalReference(value, kind) {
   return kind.startsWith('markup-') || kind.startsWith('css-');
 }
 
-function addReference(references, source, value, kind) {
+function addReference(references, source, value, kind, metadata = {}) {
   if (typeof value !== 'string' || value.trim().length === 0) {
     return;
   }
-  references.push({ kind, source, value: value.trim() });
+  references.push({ kind, source, value: value.trim(), ...metadata });
 }
 
 function freezeReferences(references) {
   const seen = new Set();
   return Object.freeze(references
     .filter((reference) => {
-      const key = `${reference.kind}\0${reference.source}\0${reference.value}`;
+      const key = [
+        reference.kind,
+        reference.source,
+        reference.value,
+        reference.element ?? '',
+        reference.attribute ?? '',
+        reference.rel ?? '',
+      ].join('\0');
       if (seen.has(key)) {
         return false;
       }

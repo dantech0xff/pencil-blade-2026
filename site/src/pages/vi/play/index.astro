@@ -1,0 +1,38 @@
+---
+import BaseLayout from "../../../layouts/base-layout.astro";
+import PlayPreflight from "../../../components/play/play-preflight.astro";
+import PlayLauncher from "../../../components/play/play-launcher.astro";
+import { playFacts } from "../../../data/play.ts";
+
+const facts = playFacts.vi;
+const title = "Chơi bản phục dựng Pencil Blade đã kiểm toán";
+const description = "Xem payload, provenance, quyền và giới hạn runtime gốc trước khi chủ động tải bản phục dựng H5 clean-room.";
+---
+
+<BaseLayout locale="vi" route="/play/" routeId="play.vi" title={title} description={description} surface="lab">
+  <article>
+    <p class="eyebrow">Kiểm chứng có thể chơi · không preload</p>
+    <h1>{title}</h1>
+    <p class="hero__lede">
+      Iframe cùng origin này chỉ chứa vòng đời và hiệu năng. Nó không phải ranh giới bảo mật,
+      không có bridge parent↔game và không nhận bí mật hay storage do trang sở hữu.
+    </p>
+    <PlayPreflight
+      locale="vi"
+      files={facts.files ?? 0}
+      bytes={facts.bytes}
+      mebibytes={facts.mebibytes}
+      treeDigest={facts.treeDigestSha256 ?? ""}
+    />
+    <PlayLauncher locale="vi" gameUrl={facts.gameUrl} />
+    <section>
+      <h2>Hướng dẫn bằng văn bản</h2>
+      <ol>
+        <li>Main Menu của bản phục dựng hiển thị Play, tùy chọn, đánh giá và các điều khiển shell thời kỳ mạng xã hội.</li>
+        <li>Mode Select có sáu thẻ chế độ đã phục dựng; trạng thái mở khóa theo hợp đồng persistence phục hồi.</li>
+        <li>Classic dùng cử chỉ lưỡi dao bằng touch hoặc pointer. Bản thân canvas không hỗ trợ bàn phím.</li>
+        <li>Dùng điều khiển launcher để thoát toàn màn hình hoặc liên kết trực tiếp khi iframe lỗi.</li>
+      </ol>
+    </section>
+  </article>
+</BaseLayout>

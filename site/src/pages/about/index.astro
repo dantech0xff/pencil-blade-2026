@@ -1,0 +1,58 @@
+---
+import BaseLayout from "../../layouts/base-layout.astro";
+import EvidenceStatus from "../../components/evidence/evidence-status.astro";
+import RightsBoundary from "../../components/editorial/rights-boundary.astro";
+import manifest from "../../../../reference/case-study-publication-manifest.json";
+
+const release = manifest.releaseInputs;
+const blocked = release.candidateStatus !== "ready"
+  || release.accountableReleaseOwner.evidenceStatus !== "confirmed"
+  || release.vietnameseFactualReview.evidenceStatus !== "confirmed"
+  || release.publicCorrections.channelStatus !== "confirmed";
+const title = "About the Pencil Blade case file";
+const description = "Method, scope, credits, attribution, correction channel, translation accountability, and publication-rights limits.";
+---
+
+<BaseLayout locale="en" route="/about/" title={title} description={description}>
+  <article>
+    <p class="eyebrow">Method and accountability</p>
+    <h1>{title}</h1>
+    {blocked && (
+      <p class="draft-flag">
+        Non-production draft: accountable owner, correction channel confirmation, and named
+        Vietnamese factual review remain candidate blockers.
+      </p>
+    )}
+    <section>
+      <h2>Method</h2>
+      <p>The original APK was not installed or run. This case file reports static evidence, reviewed behavioral contracts, clean-room implementation, deterministic tests, and reconstructed runtime proof as distinct layers.</p>
+    </section>
+    <section>
+      <h2>Scope and affiliation</h2>
+      <p>{release.attributionTemplate.en}</p>
+      <p>No page claims recovery of original C++ source or original-runtime identity.</p>
+    </section>
+    <RightsBoundary
+      technical="The repository can prove what was reconstructed and how the reconstructed build behaved under audit."
+      academic="The owner-approved waiver covers the exact audited H5 demonstration and its six hashed reconstructed-runtime captures for academic/noncommercial display."
+      commercial="The tracked rights record remains fail-closed. No commercial distribution clearance is asserted."
+    />
+    <section>
+      <h2>Credits and release responsibility</h2>
+      <dl>
+        <dt>Accountable release owner</dt>
+        <dd><EvidenceStatus status="blocked" /> Pending evidence; no name has been invented.</dd>
+        <dt>Vietnamese factual reviewer</dt>
+        <dd><EvidenceStatus status="blocked" /> Pending evidence; translated qualifiers are not yet release-approved.</dd>
+      </dl>
+    </section>
+    <section>
+      <h2>Corrections</h2>
+      <p>
+        Proposed channel: <a href={release.publicCorrections.channel}>GitHub Issues</a>.
+        Its status is <strong>{release.publicCorrections.channelStatus}</strong>; candidate mode
+        remains blocked until an accountable owner confirms it.
+      </p>
+    </section>
+  </article>
+</BaseLayout>

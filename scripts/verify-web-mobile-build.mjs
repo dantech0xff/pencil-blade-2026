@@ -17,6 +17,7 @@ import {
 } from './audit-web-build.mjs';
 
 export const PAGES_PREFIX = '/pencil-blade-2026/';
+export const DEFAULT_ENTRY_PATH = 'index.html';
 
 const MAX_CONCURRENT_REQUESTS = 16;
 const REFERENCE_TEXT_EXTENSIONS = new Set([
@@ -32,8 +33,74 @@ const REFERENCE_TEXT_EXTENSIONS = new Set([
   '.xml',
 ]);
 
-export async function verifyWebMobileBuild(buildDirectory) {
-  const audit = inspectWebBuildDirectory(buildDirectory);
+function normalizePagesPrefix(value) {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    throw new Error('pages prefix must be a non-empty absolute URL path');
+  }
+  const trimmed = value.trim();
+  if (
+    !trimmed.startsWith('/')
+    || trimmed.startsWith('//')
+    || trimmed.includes('\\')
+    || /[?#]/u.test(trimmed)
+    || /%(?:00|2e|2f|5c)/iu.test(trimmed)
+  ) {
+    throw new Error('pages prefix must be a safe absolute URL path');
+  }
+  const segments = trimmed.split('/').filter(Boolean);
+  if (
+    segments.length === 0
+    || segments.some((segment) => segment === '.' || segment === '..')
+  ) {
+    throw new Error('pages prefix must contain a non-root path without traversal');
+  }
+  return `/${segments.join('/')}/`;
+}
+
+function normalizeBuildPath(value, label) {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    throw new Error(`${label} must be a non-empty build-relative path`);
+  }
+  const trimmed = value.trim();
+  if (
+    trimmed.startsWith('/')
+    || trimmed.includes('\\')
+    || /[?#]/u.test(trimmed)
+    || /%(?:00|2e|2f|5c)/iu.test(trimmed)
+  ) {
+    throw new Error(`${label} must be a safe build-relative path`);
+  }
+  const segments = trimmed.split('/');
+  if (
+    segments.some((segment) => (
+      segment.length === 0 || segment === '.' || segment === '..'
+    ))
+  ) {
+    throw new Error(`${label} must not contain empty or traversal segments`);
+  }
+  return segments.join('/');
+}
+
+export function createWebBuildVerificationConfig(options = {}) {
+  const pagesPrefix = normalizePagesPrefix(options.pagesPrefix ?? PAGES_PREFIX);
+  const entryPath = normalizeBuildPath(options.entryPath ?? DEFAULT_ENTRY_PATH, 'entry path');
+  const buildDirectory = options.buildDirectory === undefined
+    ? undefined
+    : resolve(options.buildDirectory);
+
+  return Object.freeze({
+    pagesPrefix,
+    entryPath,
+    buildDirectory,
+  });
+}
+
+export async function verifyWebMobileBuild(buildDirectory, options = {}) {
+  const config = createWebBuildVerificationConfig({
+    ...options,
+    buildDirectory,
+  });
+  const audit = inspectWebBuildDirectory(config.buildDirectory);
   if (audit.findings.length > 0) {
     throw new Error(formatAuditFailure(audit.findings));
   }
@@ -52,21 +119,20 @@ export async function verifyWebMobileBuild(buildDirectory) {
   }
 
   const requests = [];
-  const server = createPagesPrefixServer(audit, requests);
-  await listenOnLoopback(server);
-  const address = server.address();
-  if (address === null || typeof address === 'string') {
-    await closeServer(server);
-    throw new Error('Pages-prefix verifier did not receive a loopback TCP address');
-  }
-
-  const origin = `http://127.0.0.1:${address.port}`;
-  const outboundRequests = [];
+  const server = createPagesPrefixServer(audit, config, requests);
   try {
+    await listenOnLoopback(server);
+    const address = server.address();
+    if (address === null || typeof address === 'string') {
+      throw new Error('Pages-prefix verifier did not receive a loopback TCP address');
+    }
+
+    const origin = `http://127.0.0.1:${address.port}`;
+    const outboundRequests = [];
     await assertNegativeRoute(origin, '/', 'site root', outboundRequests);
     await assertNegativeRoute(
       origin,
-      PAGES_PREFIX.slice(0, -1),
+      config.pagesPrefix.slice(0, -1),
       'prefix without trailing slash',
       outboundRequests,
     );
@@ -78,20 +144,29 @@ export async function verifyWebMobileBuild(buildDirectory) {
     );
     await assertNegativeRoute(
       origin,
-      `${PAGES_PREFIX}%2e%2e/index.html`,
+      `${config.pagesPrefix}%2e%2e/${config.entryPath}`,
       'percent-encoded traversal route',
       outboundRequests,
     );
 
-    const rootResponse = await requestLoopback(origin, PAGES_PREFIX, 'GET', outboundRequests);
-    assertResponse(rootResponse, 'index.html', filesByPath.get('index.html'));
+    const rootResponse = await requestLoopback(
+      origin,
+      config.pagesPrefix,
+      'GET',
+      outboundRequests,
+    );
+    assertResponse(
+      rootResponse,
+      config.entryPath,
+      filesByPath.get(config.entryPath),
+    );
 
     const checks = [...pathsToCheck]
       .sort((left, right) => left.localeCompare(right))
       .map((path) => async () => {
         const response = await requestLoopback(
           origin,
-          pagesUrlForPath(path),
+          pagesUrlForPath(path, config),
           'HEAD',
           outboundRequests,
         );
@@ -101,16 +176,18 @@ export async function verifyWebMobileBuild(buildDirectory) {
 
     const allowedNegativePaths = new Set([
       '/',
-      PAGES_PREFIX.slice(0, -1),
+      config.pagesPrefix.slice(0, -1),
       '/other-project/index.html',
-      `${PAGES_PREFIX}%2e%2e/index.html`,
+      `${config.pagesPrefix}%2e%2e/${config.entryPath}`,
     ]);
     const unexpectedRequests = requests.filter((entry) => (
       !allowedNegativePaths.has(entry.path)
-      && !entry.path.startsWith(PAGES_PREFIX)
+      && !entry.path.startsWith(config.pagesPrefix)
     ));
     if (unexpectedRequests.length > 0) {
-      throw new Error(`verifier made a request outside ${PAGES_PREFIX}: ${unexpectedRequests[0].path}`);
+      throw new Error(
+        `verifier made a request outside ${config.pagesPrefix}: ${unexpectedRequests[0].path}`,
+      );
     }
     const offOriginRequests = outboundRequests.filter((entry) => entry.origin !== origin);
     if (offOriginRequests.length > 0) {
@@ -125,7 +202,8 @@ export async function verifyWebMobileBuild(buildDirectory) {
         value: item.reference.value,
       }))),
       offOriginRequests: Object.freeze(offOriginRequests.map((entry) => Object.freeze({ ...entry }))),
-      prefix: PAGES_PREFIX,
+      entryPath: config.entryPath,
+      prefix: config.pagesPrefix,
       requests: Object.freeze(requests.map((entry) => Object.freeze({ ...entry }))),
     });
   } finally {
@@ -133,19 +211,23 @@ export async function verifyWebMobileBuild(buildDirectory) {
   }
 }
 
-export function createPagesPrefixServer(audit, requests = []) {
+export function createPagesPrefixServer(audit, options = {}, requestLog = []) {
+  const legacyRequests = Array.isArray(options) ? options : requestLog;
+  const config = createWebBuildVerificationConfig(
+    Array.isArray(options) ? {} : options,
+  );
   const filesByPath = new Map(audit.files.map((file) => [file.path, file]));
   return createServer((incoming, response) => {
     const method = incoming.method ?? 'GET';
     const rawTarget = incoming.url ?? '/';
     const rawPath = rawTarget.split('?', 1)[0];
-    requests.push({ method, path: rawPath });
+    legacyRequests.push({ method, path: rawPath });
 
     if (method !== 'GET' && method !== 'HEAD') {
       sendEmpty(response, 405);
       return;
     }
-    const relativePath = routeToBuildPath(rawPath);
+    const relativePath = routeToBuildPath(rawPath, config);
     if (relativePath === undefined) {
       sendEmpty(response, 404);
       return;
@@ -175,8 +257,10 @@ export function createPagesPrefixServer(audit, requests = []) {
   });
 }
 
-export function pagesUrlForPath(relativePath) {
-  return `${PAGES_PREFIX}${relativePath
+export function pagesUrlForPath(relativePath, options = {}) {
+  const config = createWebBuildVerificationConfig(options);
+  const normalizedPath = normalizeBuildPath(relativePath, 'build path');
+  return `${config.pagesPrefix}${normalizedPath
     .split('/')
     .map((segment) => encodeURIComponent(segment))
     .join('/')}`;
@@ -194,14 +278,14 @@ function discoverReferences(files) {
   return references;
 }
 
-function routeToBuildPath(rawPath) {
-  if (rawPath === PAGES_PREFIX) {
-    return 'index.html';
+function routeToBuildPath(rawPath, config) {
+  if (rawPath === config.pagesPrefix) {
+    return config.entryPath;
   }
-  if (!rawPath.startsWith(PAGES_PREFIX)) {
+  if (!rawPath.startsWith(config.pagesPrefix)) {
     return undefined;
   }
-  const rawRelativePath = rawPath.slice(PAGES_PREFIX.length);
+  const rawRelativePath = rawPath.slice(config.pagesPrefix.length);
   if (
     rawRelativePath.length === 0
     || /%(?:00|2e|2f|5c)/iu.test(rawRelativePath)
@@ -379,13 +463,24 @@ function formatAuditFailure(findings) {
 }
 
 async function main() {
-  if (process.argv.length !== 3) {
-    console.error('Usage: node scripts/verify-web-mobile-build.mjs <web-build-directory>');
+  let cli;
+  try {
+    cli = parseCliArguments(process.argv.slice(2));
+  } catch (error) {
+    console.error(`ERROR: ${error instanceof Error ? error.message : String(error)}`);
+    console.error(verificationUsage());
     process.exitCode = 2;
     return;
   }
+  if (cli.help) {
+    console.log(verificationUsage());
+    return;
+  }
   try {
-    const result = await verifyWebMobileBuild(process.argv[2]);
+    const result = await verifyWebMobileBuild(cli.buildDirectory, {
+      pagesPrefix: cli.pagesPrefix,
+      entryPath: cli.entryPath,
+    });
     console.log(
       `PASS: ${result.checkedFiles} files verified at exact Pages prefix ${result.prefix}`,
     );
@@ -393,6 +488,50 @@ async function main() {
     console.error(`ERROR: ${error instanceof Error ? error.message : String(error)}`);
     process.exitCode = 1;
   }
+}
+
+function parseCliArguments(args) {
+  if (args.length === 1 && (args[0] === '--help' || args[0] === '-h')) {
+    return Object.freeze({ help: true });
+  }
+  if (args.length === 0 || args[0].startsWith('-')) {
+    throw new Error('missing required <build-dir>');
+  }
+  const result = {
+    buildDirectory: args[0],
+    pagesPrefix: PAGES_PREFIX,
+    entryPath: DEFAULT_ENTRY_PATH,
+  };
+  const seen = new Set();
+  for (let index = 1; index < args.length; index += 1) {
+    const option = args[index];
+    if (option !== '--pages-prefix' && option !== '--entry-path') {
+      throw new Error(`unknown option "${option}"`);
+    }
+    if (seen.has(option)) {
+      throw new Error(`duplicate option "${option}"`);
+    }
+    seen.add(option);
+    const value = args[index + 1];
+    if (value === undefined || value.startsWith('--')) {
+      throw new Error(`missing value for ${option}`);
+    }
+    index += 1;
+    if (option === '--pages-prefix') {
+      result.pagesPrefix = value;
+    } else {
+      result.entryPath = value;
+    }
+  }
+  createWebBuildVerificationConfig(result);
+  return Object.freeze(result);
+}
+
+function verificationUsage() {
+  return [
+    'Usage: node scripts/verify-web-mobile-build.mjs <build-dir>',
+    '       [--pages-prefix <prefix>] [--entry-path <path>]',
+  ].join(' ');
 }
 
 if (process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

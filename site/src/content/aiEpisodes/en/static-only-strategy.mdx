@@ -1,0 +1,19 @@
+---
+id: static-only-strategy
+locale: en
+order: 2
+question: "Could the restoration begin with a run-and-compare loop against the original APK?"
+evidence: ["CLM-APK-BYTES", "CLM-MANIFEST-SURFACE", "CLM-ENGINE-FINGERPRINT"]
+hypothesis: "An early proposal assumed the original could be run and compared frame by frame."
+reviewDecision: "The proposal was rejected by the recorded static-only constraint: the original runtime remained unavailable, so implementation authority moved to reviewed contracts and clean-room code."
+decisionActorKind: unknown
+decisionRef: SRC-PUBLIC-STATIC-METHOD
+implementation: "The production boundary rewrites behavior in TypeScript and Cocos Creator without installing, embedding, translating, or bridging the original executable."
+verification: "The static method, evidence register, and reconstruction report independently preserve the non-execution and clean-room boundary."
+failureLesson: "Reconstruction-runtime measurements can test the rebuild, but they cannot be relabeled as observations of the historical runtime."
+agentRoles: ["constraint-analysis-assistance"]
+publicSourceIds: ["SRC-PUBLIC-STATIC-METHOD", "SRC-PUBLIC-EVIDENCE-REGISTER", "SRC-PUBLIC-RECONSTRUCTION-REPORT"]
+draft: false
+---
+
+This is the visible correction episode: an attractive proposal was discarded because the evidence boundary did not support it.

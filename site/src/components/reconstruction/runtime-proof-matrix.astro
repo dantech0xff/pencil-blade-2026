@@ -1,0 +1,254 @@
+---
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
+
+import manifest from "../../../../reference/case-study-publication-manifest.json";
+import runtime480Classic from "../../assets/media/runtime/chrome-480x800-classic.png";
+import runtime480MainMenu from "../../assets/media/runtime/chrome-480x800-main-menu.png";
+import runtime480ModeSelect from "../../assets/media/runtime/chrome-480x800-mode-select.png";
+import runtime720Classic from "../../assets/media/runtime/chrome-720x1280-classic.png";
+import runtime720MainMenu from "../../assets/media/runtime/chrome-720x1280-main-menu.png";
+import runtime720ModeSelect from "../../assets/media/runtime/chrome-720x1280-mode-select.png";
+
+interface Props {
+  locale?: "en" | "vi";
+}
+
+interface ImageAsset {
+  src: string;
+  width: number;
+  height: number;
+}
+
+const { locale = "en" } = Astro.props;
+const repositoryRoot = fileURLToPath(new URL("../../../../", import.meta.url));
+const assetsById = new Map<string, ImageAsset>([
+  ["MEDIA-CHAPTER-RUNTIME-480-MAIN-MENU", runtime480MainMenu],
+  ["MEDIA-CHAPTER-RUNTIME-480-MODE-SELECT", runtime480ModeSelect],
+  ["MEDIA-CHAPTER-RUNTIME-480-CLASSIC", runtime480Classic],
+  ["MEDIA-CHAPTER-RUNTIME-720-MAIN-MENU", runtime720MainMenu],
+  ["MEDIA-CHAPTER-RUNTIME-720-MODE-SELECT", runtime720ModeSelect],
+  ["MEDIA-CHAPTER-RUNTIME-720-CLASSIC", runtime720Classic],
+]);
+const approvedSources = new Map(
+  manifest.media
+    .filter((record) => record.kind === "runtime-capture")
+    .map((record) => [record.mediaId, record]),
+);
+
+async function resolveApprovedMedia(mediaId: string) {
+  const record = manifest.media.find((candidate) => candidate.mediaId === mediaId);
+  const asset = assetsById.get(mediaId);
+  if (!record || !asset) {
+    throw new Error(`Missing approved chapter media ${mediaId}.`);
+  }
+  if (
+    record.kind !== "runtime-display-derivative"
+    || record.publishable !== true
+    || record.academicDisplayDecisionRef !== manifest.academicDisplayDecisionRef
+    || record.commercialRightsRecordRef !== manifest.commercialRightsRecordRef
+  ) {
+    throw new Error(`Chapter media ${mediaId} is outside the frozen publication boundary.`);
+  }
+  const sourceId = record.provenance.sourceMediaId;
+  if (typeof sourceId !== "string") {
+    throw new Error(`Chapter media ${mediaId} is missing its approved source ID.`);
+  }
+  const source = approvedSources.get(sourceId);
+  if (!source || source.provenance.sha256 !== record.provenance.sha256) {
+    throw new Error(`Chapter media ${mediaId} is not an exact copy of an approved capture.`);
+  }
+  if (
+    asset.width !== record.provenance.width
+    || asset.height !== record.provenance.height
+    || record.transformationHistory[0] !== `exact byte copy from ${sourceId}`
+  ) {
+    throw new Error(`Chapter media ${mediaId} dimension or transformation drift.`);
+  }
+  const bytes = await readFile(resolve(repositoryRoot, record.provenance.path));
+  const digest = createHash("sha256").update(bytes).digest("hex");
+  if (digest !== record.provenance.sha256) {
+    throw new Error(`Chapter media ${mediaId} SHA-256 drift.`);
+  }
+  return { record, asset };
+}
+
+const media = await Promise.all(
+  [...assetsById.keys()].map((mediaId) => resolveApprovedMedia(mediaId)),
+);
+const mediaById = new Map(media.map((entry) => [entry.record.mediaId, entry]));
+const rows = [
+  {
+    id: "chrome-480x800",
+    platform: "Production GitHub Pages · Google Chrome 150.0.7871.182",
+    viewport: "480 × 800 · DPR 1",
+    build: "2,539 files · 39,613,694 bytes · tree 90f0fed3…cb2b54",
+    result: "PASS",
+    date: "2026-07-25",
+    failures: "0 console · 0 page · 0 request · 0 HTTP",
+    mediaIds: [
+      "MEDIA-CHAPTER-RUNTIME-480-MAIN-MENU",
+      "MEDIA-CHAPTER-RUNTIME-480-MODE-SELECT",
+      "MEDIA-CHAPTER-RUNTIME-480-CLASSIC",
+    ],
+  },
+  {
+    id: "chrome-720x1280",
+    platform: "Production GitHub Pages · Google Chrome 150.0.7871.182",
+    viewport: "720 × 1280 · DPR 1",
+    build: "2,539 files · 39,613,694 bytes · tree 90f0fed3…cb2b54",
+    result: "PASS",
+    date: "2026-07-25",
+    failures: "0 console · 0 page · 0 request · 0 HTTP",
+    mediaIds: [
+      "MEDIA-CHAPTER-RUNTIME-720-MAIN-MENU",
+      "MEDIA-CHAPTER-RUNTIME-720-MODE-SELECT",
+      "MEDIA-CHAPTER-RUNTIME-720-CLASSIC",
+    ],
+  },
+];
+const copy = {
+  en: {
+    eyebrow: "Reconstruction runtime proof",
+    title: "Measured rows, exact captures, visible limits",
+    intro: "Both production rows passed input, audio, storage, lifecycle, portrait restoration, and post-load offline checks. The Android 13/API 33 arm64 debug matrix also passed; no Android capture is shown because it is outside the six registered production-capture records.",
+    platform: "Platform",
+    viewport: "Viewport / device",
+    build: "Build / tree hash",
+    result: "Result",
+    date: "Date",
+    failures: "Failures",
+    screenshots: "Screenshot media IDs",
+    limitation: "Limitation",
+    limit: "These are observations of the reconstructed production build. They do not observe, compare with, or identify the historical runtime.",
+    long: "Capture provenance and transformation",
+  },
+  vi: {
+    eyebrow: "Kiểm chứng runtime bản phục dựng",
+    title: "Hàng đã đo, ảnh chính xác, giới hạn hiển thị",
+    intro: "Cả hai hàng production đều pass đầu vào, âm thanh, lưu trữ, vòng đời, khôi phục dọc và offline sau tải. Matrix Android 13/API 33 arm64 debug cũng pass; không hiển thị ảnh Android vì chúng nằm ngoài sáu bản ghi ảnh production đã đăng ký.",
+    platform: "Nền tảng",
+    viewport: "Viewport / thiết bị",
+    build: "Build / hash cây",
+    result: "Kết quả",
+    date: "Ngày",
+    failures: "Lỗi",
+    screenshots: "ID media ảnh chụp",
+    limitation: "Giới hạn",
+    limit: "Đây là quan sát của build production đã phục dựng. Chúng không quan sát, so sánh hay định danh môi trường chạy lịch sử.",
+    long: "Nguồn gốc và phép biến đổi ảnh",
+  },
+} as const;
+---
+
+<section class="runtime-proof-matrix" aria-labelledby="runtime-proof-matrix-heading">
+  <p class="eyebrow">{copy[locale].eyebrow}</p>
+  <h2 id="runtime-proof-matrix-heading">{copy[locale].title}</h2>
+  <p>{copy[locale].intro}</p>
+  <div class="table-region">
+    <table>
+      <thead>
+        <tr>
+          <th>{copy[locale].platform}</th>
+          <th>{copy[locale].viewport}</th>
+          <th>{copy[locale].build}</th>
+          <th>{copy[locale].result}</th>
+          <th>{copy[locale].date}</th>
+          <th>{copy[locale].failures}</th>
+          <th>{copy[locale].screenshots}</th>
+          <th>{copy[locale].limitation}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          rows.map((row) => (
+            <tr id={`runtime-${row.id}`}>
+              <th scope="row">{row.platform}</th>
+              <td>{row.viewport}</td>
+              <td>{row.build}</td>
+              <td><strong>{row.result}</strong></td>
+              <td><time datetime={row.date}>{row.date}</time></td>
+              <td>{row.failures}</td>
+              <td>{row.mediaIds.join(" · ")}</td>
+              <td>{copy[locale].limit}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="runtime-proof-matrix__gallery">
+    {
+      rows.flatMap((row) =>
+        row.mediaIds.map((mediaId) => {
+          const entry = mediaById.get(mediaId);
+          if (!entry) throw new Error(`Resolved media missing for ${mediaId}.`);
+          const { record, asset } = entry;
+          return (
+            <figure data-media-id={mediaId}>
+              <img
+                src={asset.src}
+                width={asset.width}
+                height={asset.height}
+                loading="lazy"
+                decoding="async"
+                alt={record.alt[locale]}
+              />
+              <figcaption>
+                <p>{record.caption[locale]}</p>
+                <details>
+                  <summary>{copy[locale].long}</summary>
+                  <p><code>{record.provenance.path}</code></p>
+                  <p>SHA-256 <code>{record.provenance.sha256}</code></p>
+                  <p>{record.provenance.width} × {record.provenance.height}</p>
+                  <p>{record.transformationHistory.join(" · ")}</p>
+                  <p>{copy[locale].limit}</p>
+                </details>
+                <p class="micro-label">{mediaId}</p>
+              </figcaption>
+            </figure>
+          );
+        }),
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .runtime-proof-matrix {
+    border: 2px solid var(--graphite);
+    padding: clamp(1rem, 3vw, 2rem);
+    background: var(--paper);
+  }
+
+  .runtime-proof-matrix__gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+  }
+
+  .runtime-proof-matrix figure {
+    margin: 0;
+    border: var(--line);
+    padding: var(--space-3);
+    background: var(--white);
+  }
+
+  .runtime-proof-matrix figure img {
+    width: 100%;
+    aspect-ratio: 3 / 5;
+    object-fit: contain;
+    background: var(--lab);
+  }
+
+  .runtime-proof-matrix figcaption {
+    padding-top: var(--space-3);
+  }
+
+  .runtime-proof-matrix code {
+    overflow-wrap: anywhere;
+  }
+</style>

@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../layouts/base-layout.astro";
+import { withBase } from "../data/routes.ts";
+---
+
+<BaseLayout
+  locale="en"
+  route="/"
+  title="Evidence route not found"
+  description="The requested case-study route does not exist."
+  noIndex
+  includeCanonical={false}
+>
+  <article>
+    <p class="eyebrow">404 · unresolved route</p>
+    <h1>This evidence trail ends here.</h1>
+    <p>The route is absent; no fallback claim has been inferred.</p>
+    <a href={withBase("/")}>Return to the case file</a>
+  </article>
+</BaseLayout>

@@ -1,0 +1,37 @@
+---
+type EvidenceStatus = "recovered" | "measured" | "inferred" | "unknown" | "blocked";
+
+interface Props {
+  status: EvidenceStatus;
+  locale?: "en" | "vi";
+  showDefinition?: boolean;
+}
+
+const { status, locale = "en", showDefinition = false } = Astro.props;
+const vocabulary = {
+  en: {
+    recovered: ["Recovered", "Directly supported by the frozen evidence."],
+    measured: ["Measured", "Observed in deterministic reconstruction proof."],
+    inferred: ["Inferred", "A bounded interpretation, not a recovered fact."],
+    unknown: ["Unknown", "The available evidence cannot resolve this."],
+    blocked: ["Blocked", "Release evidence or approval is still missing."],
+  },
+  vi: {
+    recovered: ["Đã phục hồi", "Được hỗ trợ trực tiếp bởi bằng chứng đã đóng băng."],
+    measured: ["Đã đo", "Được quan sát trong kiểm chứng bản phục dựng xác định."],
+    inferred: ["Suy luận", "Diễn giải có giới hạn, không phải dữ kiện phục hồi."],
+    unknown: ["Chưa biết", "Bằng chứng hiện có chưa thể kết luận."],
+    blocked: ["Bị chặn", "Vẫn thiếu bằng chứng hoặc phê duyệt phát hành."],
+  },
+} as const;
+const [label, definition] = vocabulary[locale][status];
+---
+
+<span
+  class:list={["status", `status--${status}`]}
+  data-evidence-status={status}
+  title={showDefinition ? undefined : definition}
+>
+  <span>{label}</span>
+  {showDefinition && <span class="status__definition">— {definition}</span>}
+</span>

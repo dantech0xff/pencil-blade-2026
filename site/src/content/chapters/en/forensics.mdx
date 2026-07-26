@@ -1,0 +1,135 @@
+---
+id: forensics.en
+locale: en
+order: 2
+slug: forensics.en
+title: "Reading a Game That Cannot Run"
+dek: "Package, ARM/Thumb, symbol, and resource views became a bounded evidence corpus—not a source-code substitute."
+summary: "Forensics turns static metadata into reviewed claims while preserving the difference between automatic indexing and semantic review."
+chapterKind: forensics
+evidenceRefs:
+  - CLM-MANIFEST-IDENTITY
+  - CLM-JAVA-BOUNDARY
+  - CLM-NATIVE-PROFILE
+  - CLM-ENGINE-FINGERPRINT
+  - CLM-ASSET-COUNTS
+  - CLM-NO-EXTERNAL-GAME-CONFIG
+  - CLM-NATIVE-PRODUCT-SURFACE
+  - CLM-PHYSICS-WORLD-DEFAULTS
+  - CLM-PHYSICS-STEP-DEFAULTS
+  - CLM-CLASSIC-PHYSICS-UNITS
+  - CLM-CLASSIC-FIXTURES
+  - CLM-CLASSIC-BLADE-QUERY
+mediaRefs: []
+nextId: reconstruction.en
+seoTitle: "Static APK and ARM/Thumb forensics — Pencil Blade"
+seoDescription: "How curated APK metadata, 713 auto-indexed functions, 862 resources, and a blade/Physics2D trace became reviewed contracts without original-runtime observation."
+draft: false
+---
+
+## Question 01 — How much can metadata really say?
+
+The package exposed several independent static views: Android manifest and signing metadata,
+app-owned Java and JNI boundaries, one stripped ARM library, printable strings, resource
+geometry, and surviving symbols. Agreement among views mattered more than any single tool.
+
+### Artifact
+
+`libgame.so` is ELF32 little-endian ARM EABI5 for ARM v5TE. Application functions are
+predominantly Thumb; the low symbol-address bit identifies Thumb state and the instruction
+address is normalized with `rawAddress & ~1`. GNU ARM and LLVM configured for Thumbv5TE were
+used as independent instruction views.
+
+<EvidenceRef id="CLM-NATIVE-PROFILE" locale="en" />
+
+### Method
+
+The deterministic native projection contains exactly **713 explicitly allowlisted,
+auto-indexed functions**. Of those, **553** have direct calls, **684** have numeric constants,
+and **91** have high-confidence allocated-data string cross-references.
+
+Those numbers describe enrichment fields, not 713 manual semantic reviews. All 713 records have
+review state `auto-indexed`; automatic indexing is a map for review, not evidence that a person
+understood every function.
+
+### Contract or decision
+
+Curated public text may describe symbols, addresses, ARM/Thumb rules, constants, calls, strings,
+and subsystem boundaries. It does not publish instruction bytes, decompiler dumps, analyzer
+databases, or private paths. Decompiler-like output and disassembly metadata are never labeled
+original C++ source.
+
+<EvidenceRef id="CLM-NATIVE-PRODUCT-SURFACE" locale="en" />
+
+### Proof
+
+Analyzer v3 regenerates the corpus from registered hashes and requires byte-for-byte equality
+for curated projections. A separate **862-resource census** contains **784 PNG**, **59 WAV**,
+**3 MP3**, and **16 fonts**. The reconciliation later classifies 761 consumed, 100 reviewed
+excluded, one unsupported, and zero unknown dispositions.
+
+<EvidenceRef id="CLM-ASSET-COUNTS" locale="en" />
+<EvidenceRef id="CLM-NO-EXTERNAL-GAME-CONFIG" locale="en" />
+
+### Limit
+
+Static analysis cannot reveal an observed frame, waveform, draw interleaving, or historical
+device behavior. Indirect calls without a resolved target remain outside the direct-call count.
+Asset presence does not prove runtime use, historical intent, or redistribution rights.
+
+### Next chapter
+
+The corpus becomes useful only when a skeptical reader can follow one fact through every later
+decision.
+
+<EvidenceChain locale="en" />
+
+## Question 02 — How does one native fact become safe production behavior?
+
+The representative blade/Physics2D path crosses units, frame timing, query order, filtering,
+object lifecycle, implementation ownership, and backend proof. It is narrow enough to inspect
+end to end and rich enough to expose every boundary.
+
+### Artifact
+
+Static evidence recovers a PTM ratio of **32 legacy Cocos world units per Box2D metre**,
+gravity `(0,-10)`, and a single variable
+`Step(frameDt * worldSpeed, 10, 10)` while physics is active. Blade input owns four touch slots,
+extends each eligible segment, then raycasts forward and reverse after the physics step.
+
+<EvidenceRef id="CLM-CLASSIC-PHYSICS-UNITS" locale="en" />
+<EvidenceRef id="CLM-CLASSIC-BLADE-QUERY" locale="en" />
+
+### Method
+
+The callback continues through all hits. Results are processed in collected order, with null
+body metadata, node tag `1437`, and disabled-cut objects filtered out. The apparent duplicate
+guard compares storage addresses rather than fixture values, so the reviewed fidelity default
+retains repeated fixture occurrences from the two ray directions.
+
+### Contract or decision
+
+Creator receives public world coordinates and applies PTM once. The rewrite therefore does not
+divide ray coordinates by 32 a second time. Pure TypeScript owns deterministic rules and
+Creator Physics2D owns the engine boundary. Any body/component/node destruction requested
+during step, contact, or ray work is deferred until the world is unlocked.
+
+### Proof
+
+The pinned `@cocos/box2d@1.0.2` probe passes trajectory rows at `1/120`, `1/60`, and `1/30`
+with iterations **10/10**; forward/reverse raycasts preserve the measured repeated sequence;
+bilateral contact filters pass; direct destroy is rejected while locked; queued destruction
+succeeds after `Step`.
+
+<NativeContractTrace locale="en" />
+
+### Limit
+
+The backend probe proves recovered-contract-to-reconstruction-backend equivalence. It does not
+observe or identify the original runtime. The product meaning of tag `1437`, exact native RNG
+draw interleaving, and memory-unsafe electric-contact layout remain explicit limits.
+
+### Next chapter
+
+Reconstruction keeps this four-lane trace intact while expanding ownership to all six production
+modes, resources, tests, and supported outputs.

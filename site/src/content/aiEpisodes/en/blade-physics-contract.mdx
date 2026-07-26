@@ -1,0 +1,19 @@
+---
+id: blade-physics-contract
+locale: en
+order: 3
+question: "Which physics details had to survive the move from the recovered Classic rules to Creator Physics2D?"
+evidence: ["CLM-PHYSICS-WORLD-DEFAULTS", "CLM-PHYSICS-STEP-DEFAULTS", "CLM-CLASSIC-PHYSICS-UNITS", "CLM-CLASSIC-BLADE-QUERY", "CLM-CLASSIC-ELECTRIC-CONTACT"]
+hypothesis: "A generic fixed-step port would be close enough if gravity and visible motion looked plausible."
+reviewDecision: "Deterministic probes required the explicit 32-unit boundary, variable step, forward-then-reverse raycasts, bilateral filters, and deferred destruction after the locked world step."
+decisionActorKind: automation
+decisionRef: SRC-PUBLIC-PHYSICS-EQUIVALENCE
+implementation: "The Creator adapter keeps unit conversion and post-step mutation at the boundary while TypeScript owns state, scoring, and input sequencing."
+verification: "The pinned Physics2D probe passes trajectories at three deltas, duplicate-preserving raycasts, contact filtering, locked-world rejection, and queued destruction."
+failureLesson: "Visual plausibility cannot replace a recovered timestep, query order, unit transform, or lifecycle contract."
+agentRoles: ["contract-extraction-assistance", "test-analysis-assistance"]
+publicSourceIds: ["SRC-PUBLIC-CLAIMS", "SRC-PUBLIC-PHYSICS-EQUIVALENCE", "SRC-PUBLIC-STATIC-METHOD"]
+draft: false
+---
+
+The case file keeps the recovered contract and the reconstruction-backend observation visibly separate.

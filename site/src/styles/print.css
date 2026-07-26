@@ -1,0 +1,52 @@
+@media print {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 10.5pt;
+  }
+
+  .site-header,
+  .chapter-rail,
+  .skip-link,
+  button,
+  [data-enhancement-only] {
+    display: none !important;
+  }
+
+  .main-content,
+  .site-frame {
+    display: block;
+    width: auto;
+    max-width: none;
+    padding: 0;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.82em;
+    overflow-wrap: anywhere;
+  }
+
+  .proof-figure,
+  .ledger-card,
+  .rights-boundary,
+  blockquote,
+  pre {
+    break-inside: avoid;
+  }
+
+  .proof-figure figcaption,
+  .rights-boundary,
+  cite,
+  .status {
+    display: block !important;
+  }
+}

@@ -1,0 +1,44 @@
+---
+import { getCollection, getEntry } from "astro:content";
+
+import BaseLayout from "../../layouts/base-layout.astro";
+import ChapterPage from "../../components/chapter/chapter-page.astro";
+import sourceCatalog from "../../../../reference/case-study-public-source-catalog.json";
+import manifest from "../../../../reference/case-study-publication-manifest.json";
+
+const chapter = await getEntry("chapters", "story.en");
+if (!chapter) throw new Error("Missing English Story chapter.");
+const generatedFacts = await getCollection("claimPresentations");
+const localeReviewPending =
+  manifest.releaseInputs.vietnameseFactualReview.evidenceStatus !== "confirmed";
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  headline: chapter.data.title,
+  description: chapter.data.seoDescription,
+  inLanguage: "en",
+  isAccessibleForFree: true,
+};
+---
+
+<BaseLayout
+  locale="en"
+  route="/story/"
+  routeId="story.en"
+  title={chapter.data.seoTitle}
+  description={chapter.data.seoDescription}
+  structuredData={structuredData}
+>
+  <ChapterPage
+    chapter={chapter}
+    route={{
+      id: "story.en",
+      path: "/story/",
+      nextPath: "/forensics/",
+      nextLabel: "Open the static evidence workbench",
+    }}
+    generatedFacts={generatedFacts}
+    publicEvidenceIndex={sourceCatalog.sources}
+    localeReviewPending={localeReviewPending}
+  />
+</BaseLayout>

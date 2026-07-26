@@ -1,0 +1,166 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { render } from "astro:content";
+
+import { withBase } from "../../data/routes.ts";
+import ApkDissection from "../forensics/apk-dissection.astro";
+import EvidenceChain from "../forensics/evidence-chain.astro";
+import NativeContractTrace from "../forensics/native-contract-trace.astro";
+import CodeLens from "../editorial/code-lens.astro";
+import MetricLedger from "../editorial/metric-ledger.astro";
+import NextChapter from "../editorial/next-chapter.astro";
+import ProofFigure from "../editorial/proof-figure.astro";
+import RightsBoundary from "../editorial/rights-boundary.astro";
+import EvidenceRef from "../evidence/evidence-ref.astro";
+import EvidenceStatus from "../evidence/evidence-status.astro";
+import ReconstructionMap from "../reconstruction/reconstruction-map.astro";
+import RuntimeProofMatrix from "../reconstruction/runtime-proof-matrix.astro";
+import SixModeAtlas from "../reconstruction/six-mode-atlas.astro";
+import ChapterMasthead from "./chapter-masthead.astro";
+import ChapterSummary from "./chapter-summary.astro";
+
+interface RouteMetadata {
+  id: string;
+  path: string;
+  nextPath: string | null;
+  nextLabel: string | null;
+}
+
+interface PublicEvidenceRecord {
+  sourceId: string;
+}
+
+interface Props {
+  chapter: CollectionEntry<"chapters">;
+  route: RouteMetadata;
+  generatedFacts: readonly CollectionEntry<"claimPresentations">[];
+  publicEvidenceIndex: readonly PublicEvidenceRecord[];
+  localeReviewPending: boolean;
+}
+
+const {
+  chapter,
+  route,
+  generatedFacts,
+  publicEvidenceIndex,
+  localeReviewPending,
+} = Astro.props;
+
+if (chapter.data.locale !== (route.id.endsWith(".vi") ? "vi" : "en")) {
+  throw new Error(`Chapter locale does not match route ${route.id}.`);
+}
+
+const factsById = new Map(
+  generatedFacts.map((entry) => [entry.data.canonicalClaimId, entry.data]),
+);
+const sourceIds = new Set(publicEvidenceIndex.map((entry) => entry.sourceId));
+const chapterFacts = chapter.data.evidenceRefs.map((id) => {
+  const fact = factsById.get(id);
+  if (!fact) {
+    throw new Error(`Chapter ${chapter.data.id} references unknown claim ${id}.`);
+  }
+  for (const citation of fact.citations) {
+    if (!sourceIds.has(citation.sourceId)) {
+      throw new Error(`Claim ${id} references unknown public source ${citation.sourceId}.`);
+    }
+  }
+  return {
+    id,
+    copy: fact.copy[chapter.data.locale],
+    qualifier: fact.displayQualifier[chapter.data.locale],
+    sourceIds: fact.citations.map((citation) => citation.sourceId),
+  };
+});
+
+const guidingQuestions = {
+  en: {
+    story: "What can be recovered when the only source must never be run?",
+    forensics: "How can static package, native, and resource facts become defensible behavior?",
+    reconstruction: "How can reviewed contracts become a playable system without original executable code?",
+  },
+  vi: {
+    story: "Có thể phục hồi điều gì khi nguồn duy nhất tuyệt đối không được chạy?",
+    forensics: "Dữ kiện tĩnh về gói, native và tài nguyên trở thành hành vi có thể bảo vệ bằng cách nào?",
+    reconstruction: "Hợp đồng đã rà soát trở thành hệ thống chơi được mà không dùng mã thực thi gốc bằng cách nào?",
+  },
+} as const;
+
+const { Content } = await render(chapter);
+const components = {
+  ApkDissection,
+  CodeLens,
+  EvidenceChain,
+  EvidenceRef,
+  EvidenceStatus,
+  MetricLedger,
+  NativeContractTrace,
+  ProofFigure,
+  ReconstructionMap,
+  RightsBoundary,
+  RuntimeProofMatrix,
+  SixModeAtlas,
+};
+---
+
+<article class:list={["chapter-page", `chapter-page--${chapter.data.chapterKind}`]}>
+  <ChapterMasthead
+    locale={chapter.data.locale}
+    order={chapter.data.order}
+    title={chapter.data.title}
+    dek={chapter.data.dek}
+    question={guidingQuestions[chapter.data.locale][chapter.data.chapterKind]}
+    localeReviewPending={localeReviewPending}
+  />
+  <ChapterSummary
+    locale={chapter.data.locale}
+    chapterId={chapter.data.id}
+    summary={chapter.data.summary}
+    claims={chapterFacts}
+  />
+  <div class="chapter-prose">
+    <Content components={components} />
+  </div>
+  {
+    route.nextPath && route.nextLabel && (
+      <NextChapter
+        href={withBase(route.nextPath)}
+        label={route.nextLabel}
+        eyebrow={chapter.data.locale === "vi" ? "Chương tiếp theo" : "Next chapter"}
+      />
+    )
+  }
+</article>
+
+<style>
+  .chapter-page {
+    min-width: 0;
+  }
+
+  .chapter-prose {
+    max-width: 100%;
+  }
+
+  .chapter-prose :global(section) {
+    margin-block: var(--space-8);
+  }
+
+  .chapter-prose :global(h2) {
+    padding-top: var(--space-4);
+    border-top: 0.2rem solid var(--graphite);
+  }
+
+  .chapter-prose :global(h3) {
+    margin-top: var(--space-6);
+  }
+
+  .chapter-prose :global(blockquote) {
+    margin-inline: 0;
+    border-left: 0.35rem solid var(--pencil);
+    padding: var(--space-3) var(--space-5);
+    background: color-mix(in srgb, var(--paper) 85%, var(--pencil));
+  }
+
+  .chapter-prose :global(.rhythm-limit) {
+    border-left: 0.35rem solid var(--blocked);
+  }
+</style>

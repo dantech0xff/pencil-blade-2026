@@ -23,6 +23,15 @@
 /game/profiles/
 /game/.creator/asset-template/
 
+# Astro case-study generated state and composed release candidates
+/site/node_modules/
+/site/.astro/
+/site/dist/
+/site/playwright-report/
+/site/test-results/
+/site/src/generated/
+/.case-study-candidate/
+
 # Local tooling, credentials, and OS files
 /repomix-output.xml
 .env

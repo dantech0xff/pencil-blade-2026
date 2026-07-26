@@ -1,0 +1,14 @@
+---
+interface Props {
+  href: string;
+  label: string;
+  eyebrow?: string;
+}
+
+const { href, label, eyebrow = "Next chapter" } = Astro.props;
+---
+
+<nav aria-label={eyebrow}>
+  <p class="micro-label">{eyebrow}</p>
+  <a class="next-chapter" href={href}>{label} <span aria-hidden="true">→</span></a>
+</nav>

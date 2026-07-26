@@ -1,0 +1,109 @@
+---
+import BaseLayout from "../layouts/base-layout.astro";
+import EvidenceRef from "../components/evidence/evidence-ref.astro";
+import EvidenceStatus from "../components/evidence/evidence-status.astro";
+import MetricLedger from "../components/editorial/metric-ledger.astro";
+import RightsBoundary from "../components/editorial/rights-boundary.astro";
+import { withBase } from "../data/routes.ts";
+import linework from "../assets/brand/lab-linework.svg";
+import playPreview from "../assets/media/shared/play-preview.png";
+
+const title = "Pencil Blade · Evidence to Reconstruction";
+const description = "How one non-runnable APK became explicit evidence contracts, a clean-room TypeScript reconstruction, and an audited playable proof.";
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: title,
+  description,
+  inLanguage: "en",
+  isAccessibleForFree: true,
+  about: ["reverse engineering", "clean-room reconstruction", "Cocos Creator"],
+};
+---
+
+<BaseLayout locale="en" route="/" routeId="home.en" title={title} description={description} structuredData={structuredData}>
+  <article>
+    <section class="hero">
+      <p class="eyebrow">Case file 01 · static evidence only</p>
+      <h1>One APK. No runnable original. A defensible reconstruction.</h1>
+      <p class="hero__lede">
+        The surviving 35,817,225-byte APK was never installed or executed. Its package, native
+        surface, resources, and contracts became the boundary for a pure Cocos Creator 3.8.8 and
+        TypeScript reconstruction.
+      </p>
+      <p>
+        <EvidenceStatus status="recovered" /> <EvidenceRef id="CLM-APK-BYTES" label="Inspect the source claim" />
+      </p>
+      <img src={linework.src} width="960" height="320" alt="APK evidence passes through contract and implementation stations to measured proof." />
+    </section>
+
+    <section aria-labelledby="transformation-heading" data-reveal>
+      <p class="eyebrow">The transformation</p>
+      <h2 id="transformation-heading">Evidence before implementation</h2>
+      <ol class="evidence-sequence">
+        <li class="evidence-step">
+          <h3>Artifact</h3>
+          <p>The sole canonical source is an immutable APK with 985 members.</p>
+          <EvidenceRef id="CLM-APK-ZIP" />
+        </li>
+        <li class="evidence-step">
+          <h3>Method</h3>
+          <p>Static package, ARM/Thumb, symbol, resource, and presentation analysis—never original-runtime observation.</p>
+          <EvidenceRef id="CLM-NATIVE-PROFILE" />
+        </li>
+        <li class="evidence-step">
+          <h3>Contract</h3>
+          <p>Recovered values and bounded inferences became reviewed, testable behavioral contracts.</p>
+          <EvidenceRef id="CLM-CLASSIC-BLADE-QUERY" />
+        </li>
+        <li class="evidence-step">
+          <h3>Proof</h3>
+          <p>Deterministic tests and audited Android/H5 reconstruction runs verify the build—not historical identity.</p>
+          <EvidenceStatus status="measured" />
+        </li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="chapter-map-heading" data-reveal>
+      <p class="eyebrow">Open the workbench</p>
+      <h2 id="chapter-map-heading">Follow the evidence chain</h2>
+      <div class="chapter-map">
+        <a class="evidence-step" href={withBase("/story/")}><strong>Story</strong><br />Why the original could not be observed.</a>
+        <a class="evidence-step" href={withBase("/forensics/")}><strong>Forensics</strong><br />How 713 indexed functions and 862 resources became bounded evidence.</a>
+        <a class="evidence-step" href={withBase("/reconstruction/")}><strong>Reconstruction</strong><br />How contracts became clean-room code and proof.</a>
+        <a class="evidence-step" href={withBase("/ai-lab/")}><strong>AI Lab</strong><br />Curated decisions, corrections, and verification—not transcripts.</a>
+      </div>
+    </section>
+
+    <section aria-labelledby="ledger-heading" data-reveal>
+      <p class="eyebrow">Proof ledger</p>
+      <h2 id="ledger-heading">Maximal recoverable fidelity, with the denominator visible</h2>
+      <div class="metric-grid">
+        <MetricLedger label="Canonical claims" numerator="39" denominator="39" version="snapshot-v1" date="2026-07-25" qualifier="Projected from the frozen claim ledger." source="forensics/claims.jsonl" />
+        <MetricLedger label="Resource census" numerator="862" denominator="862" version="closure-v1" date="2026-07-25" qualifier="Reconciled resources; presence is not proof of runtime use." source="presentation/resource closure" />
+        <MetricLedger label="Residual records" numerator="25" denominator="25" version="fidelity-v1" date="2026-07-25" qualifier="All residuals remain disclosed; zero are unexplained." source="fidelity report" />
+        <MetricLedger label="Commercial clearance" numerator="0" denominator="862" version="rights-v1" date="2026-07-25" qualifier="No per-asset commercial rights were established." source="release rights record" />
+      </div>
+    </section>
+
+    <section aria-labelledby="play-glimpse-heading" data-reveal>
+      <p class="eyebrow">Playable proof · explicit load only</p>
+      <h2 id="play-glimpse-heading">The game stays outside the editorial payload</h2>
+      <img
+        src={playPreview.src}
+        width="480"
+        height="800"
+        loading="lazy"
+        alt="Reconstructed Pencil Blade main menu at 480 by 800; not the original runtime."
+      />
+      <p>The approximately 40 MB audited H5 tree loads only after a deliberate action on the Play route.</p>
+      <a href={withBase("/play/")}>Review the disclosure before loading <span aria-hidden="true">→</span></a>
+    </section>
+
+    <RightsBoundary
+      technical="The clean-room runtime and its tests are auditable reconstruction proof."
+      academic="The exact audited H5 tree and six hashed captures have a frozen academic/noncommercial display decision."
+      commercial="Rights to the original product name, artwork, fonts, music, code, and other content remain unknown and not commercially cleared."
+    />
+  </article>
+</BaseLayout>

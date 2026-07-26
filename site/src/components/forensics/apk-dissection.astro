@@ -1,0 +1,262 @@
+---
+import apkLayers from "../../assets/diagrams/apk-layers.svg";
+
+interface Props {
+  locale?: "en" | "vi";
+}
+
+const { locale = "en" } = Astro.props;
+const copy = {
+  en: {
+    eyebrow: "Authored abstraction · no APK bytes",
+    title: "Dissect the package without executing it",
+    intro: "Each layer exposes curated metadata only. The sealed source artifact, native library, recovered media, and decompiler output are never embedded here.",
+    inspected: "Inspected, never executed.",
+    showAll: "Show all layers",
+    summary: "Complete static layer summary",
+    diagramAlt: "Five abstract APK metadata layers move from package identity through reviewed contracts. A separate line states no execution.",
+    diagramLong: "A project-authored packet outline contains five offset strips: package and signing; Java and JNI boundary; native metadata; resource census; reviewed contracts. No source bytes or historical game artwork appear.",
+    evidence: "Evidence",
+    limit: "Limit",
+  },
+  vi: {
+    eyebrow: "Mô hình tự tạo · không có byte APK",
+    title: "Mổ xẻ gói mà không chạy nó",
+    intro: "Mỗi lớp chỉ công bố siêu dữ liệu đã tuyển chọn. Hiện vật nguồn niêm phong, thư viện native, media phục hồi và đầu ra decompiler không được nhúng tại đây.",
+    inspected: "Đã kiểm tra, chưa từng chạy.",
+    showAll: "Hiện tất cả lớp",
+    summary: "Tóm tắt tĩnh đầy đủ theo lớp",
+    diagramAlt: "Năm lớp siêu dữ liệu APK trừu tượng đi từ danh tính gói đến hợp đồng đã rà soát. Một đường riêng ghi rõ không thực thi.",
+    diagramLong: "Đường viền gói do dự án tự tạo chứa năm dải lệch nhau: gói và chữ ký; ranh giới Java và JNI; siêu dữ liệu native; kiểm kê tài nguyên; hợp đồng đã rà soát. Không có byte nguồn hay hình ảnh game lịch sử.",
+    evidence: "Bằng chứng",
+    limit: "Giới hạn",
+  },
+} as const;
+
+const layers = locale === "vi"
+  ? [
+      {
+        id: "package",
+        title: "Gói và chữ ký",
+        fact: "APK nguồn bất biến có 985 mục tệp, kích thước 35.817.225 byte, một bên ký v1 và SHA-256 đã đăng ký.",
+        evidence: "CLM-APK-BYTES · CLM-APK-ZIP · CLM-APK-SIGNING",
+        limit: "Không có byte APK, khóa ký hay liên kết tải xuống.",
+      },
+      {
+        id: "java",
+        title: "Ranh giới Java / JNI",
+        fact: "Java do ứng dụng sở hữu là cầu nối hẹp cho launcher, thư viện native và các tích hợp nền tảng cũ.",
+        evidence: "CLM-JAVA-BOUNDARY · CLM-MANIFEST-SURFACE",
+        limit: "Bản tóm tắt không công bố đầu ra decompiler.",
+      },
+      {
+        id: "native",
+        title: "Bề mặt native",
+        fact: "Một tệp ELF32 little-endian ARM EABI5 đã strip nhắm ARM v5TE; siêu dữ liệu được đọc theo quy tắc ARM/Thumb.",
+        evidence: "CLM-NATIVE-PROFILE · CLM-ENGINE-FINGERPRINT",
+        limit: "Siêu dữ liệu disassembly không phải mã nguồn C++ gốc.",
+      },
+      {
+        id: "resources",
+        title: "Kiểm kê tài nguyên",
+        fact: "Kiểm kê chuẩn gồm 862 tài nguyên vật lý: 784 PNG, 59 WAV, 3 MP3 và 16 phông chữ.",
+        evidence: "CLM-ASSET-COUNTS",
+        limit: "Số lượng không cấp quyền tái phân phối từng tài nguyên.",
+      },
+      {
+        id: "contracts",
+        title: "Hợp đồng đã rà soát",
+        fact: "Dữ kiện được gắn nhãn đã phục hồi, suy luận hoặc chưa xác định trước khi ánh xạ sang chủ sở hữu TypeScript.",
+        evidence: "CLM-CLASSIC-PHYSICS-UNITS · CLM-CLASSIC-BLADE-QUERY",
+        limit: "Chỉ khẳng định đã phục hồi mới được tính vào độ phủ phục hồi.",
+      },
+    ]
+  : [
+      {
+        id: "package",
+        title: "Package and signing",
+        fact: "The immutable source APK has 985 file entries, 35,817,225 bytes, one v1 signer, and a registered SHA-256.",
+        evidence: "CLM-APK-BYTES · CLM-APK-ZIP · CLM-APK-SIGNING",
+        limit: "No APK bytes, signing keys, or download surface.",
+      },
+      {
+        id: "java",
+        title: "Java / JNI boundary",
+        fact: "App-owned Java is a narrow bridge for the launcher, native library, and retired platform integrations.",
+        evidence: "CLM-JAVA-BOUNDARY · CLM-MANIFEST-SURFACE",
+        limit: "The summary publishes no decompiler output.",
+      },
+      {
+        id: "native",
+        title: "Native surface",
+        fact: "One stripped ELF32 little-endian ARM EABI5 object targets ARM v5TE; metadata is decoded under the ARM/Thumb rule.",
+        evidence: "CLM-NATIVE-PROFILE · CLM-ENGINE-FINGERPRINT",
+        limit: "Disassembly metadata is not original C++ source.",
+      },
+      {
+        id: "resources",
+        title: "Resource census",
+        fact: "The canonical census contains 862 physical assets: 784 PNG, 59 WAV, 3 MP3, and 16 fonts.",
+        evidence: "CLM-ASSET-COUNTS",
+        limit: "Inventory does not grant redistribution rights for any asset.",
+      },
+      {
+        id: "contracts",
+        title: "Reviewed contracts",
+        fact: "Facts receive recovered, inferred, or unknown labels before they map to clean-room TypeScript owners.",
+        evidence: "CLM-CLASSIC-PHYSICS-UNITS · CLM-CLASSIC-BLADE-QUERY",
+        limit: "Only recovered claims can enter recovered coverage.",
+      },
+    ];
+---
+
+<section class="apk-dissection" aria-labelledby="apk-dissection-heading" data-apk-dissection>
+  <p class="eyebrow">{copy[locale].eyebrow}</p>
+  <h2 id="apk-dissection-heading">{copy[locale].title}</h2>
+  <p>{copy[locale].intro}</p>
+  <p class="apk-dissection__seal"><strong>{copy[locale].inspected}</strong></p>
+
+  <figure>
+    <img
+      src={apkLayers.src}
+      width="960"
+      height="420"
+      alt={copy[locale].diagramAlt}
+    />
+    <figcaption>{copy[locale].diagramLong}</figcaption>
+  </figure>
+
+  <div class="apk-dissection__controls" data-enhancement-only>
+    <label>
+      <span class="visually-hidden">{copy[locale].title}</span>
+      <input
+        type="range"
+        min="1"
+        max={layers.length}
+        value="1"
+        aria-valuemin="1"
+        aria-valuemax={layers.length}
+        aria-valuenow="1"
+        aria-valuetext={`1 / ${layers.length}: ${layers[0].title}`}
+        data-apk-range
+      />
+    </label>
+    <div role="group" aria-label={copy[locale].title}>
+      {
+        layers.map((layer, index) => (
+          <button
+            type="button"
+            data-apk-layer-button={index}
+            aria-controls={`apk-layer-${locale}-${layer.id}`}
+            aria-pressed={index === 0 ? "true" : "false"}
+          >
+            {String(index + 1).padStart(2, "0")} {layer.title}
+          </button>
+        ))
+      }
+    </div>
+    <button type="button" data-apk-show-all>{copy[locale].showAll}</button>
+  </div>
+
+  <div class="apk-dissection__panels" aria-live="polite">
+    {
+      layers.map((layer, index) => (
+        <article
+          id={`apk-layer-${locale}-${layer.id}`}
+          data-apk-layer={index}
+          tabindex="-1"
+        >
+          <p class="micro-label">{String(index + 1).padStart(2, "0")}</p>
+          <h3>{layer.title}</h3>
+          <p>{layer.fact}</p>
+          <p><strong>{copy[locale].evidence}:</strong> <code>{layer.evidence}</code></p>
+          <p><strong>{copy[locale].limit}:</strong> {layer.limit}</p>
+        </article>
+      ))
+    }
+  </div>
+
+  <details class="apk-dissection__fallback" open>
+    <summary>{copy[locale].summary}</summary>
+    <ol>
+      {
+        layers.map((layer) => (
+          <li>
+            <strong>{layer.title}.</strong> {layer.fact}
+            <span>{copy[locale].limit}: {layer.limit}</span>
+          </li>
+        ))
+      }
+    </ol>
+  </details>
+</section>
+
+<style>
+  .apk-dissection {
+    border: 2px solid var(--graphite);
+    padding: clamp(1rem, 3vw, 2rem);
+    background: var(--paper);
+  }
+
+  .apk-dissection__seal {
+    display: inline-block;
+    border: 2px solid var(--blocked);
+    padding: var(--space-2) var(--space-3);
+    color: var(--blocked);
+    font-family: var(--font-mono);
+    rotate: -1deg;
+  }
+
+  .apk-dissection figure {
+    margin-inline: 0;
+  }
+
+  .apk-dissection figcaption {
+    margin-top: var(--space-2);
+    font-size: var(--step--1);
+  }
+
+  .apk-dissection__controls {
+    display: grid;
+    gap: var(--space-3);
+    margin-block: var(--space-5);
+  }
+
+  .apk-dissection__controls input {
+    width: min(100%, 34rem);
+  }
+
+  .apk-dissection__controls [role="group"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .apk-dissection__controls [aria-pressed="true"] {
+    color: var(--white);
+    background: var(--lab);
+  }
+
+  .apk-dissection__panels {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .apk-dissection__panels article {
+    border-left: 0.35rem solid var(--measured);
+    padding: var(--space-4);
+    background: color-mix(in srgb, var(--paper) 88%, var(--white));
+  }
+
+  .apk-dissection[data-enhanced="true"] .apk-dissection__panels article[hidden] {
+    display: none;
+  }
+
+  .apk-dissection__fallback li {
+    margin-block: var(--space-3);
+  }
+
+  .apk-dissection__fallback li span {
+    display: block;
+  }
+</style>

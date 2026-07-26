@@ -1,0 +1,106 @@
+---
+interface Props {
+  locale?: "en" | "vi";
+}
+
+const { locale = "en" } = Astro.props;
+const copy = {
+  en: {
+    eyebrow: "Mode ownership atlas",
+    title: "Six routes share infrastructure without sharing every rule",
+    intro: "The shell, settings, resource, presentation, audio, input, and physics seams are common. Timers, toss graphs, blades, special entities, objectives, scoring, and result keys remain explicit mode ownership.",
+    shared: "Shared boundary",
+    id: "Mode ID",
+    mode: "Production mode",
+    owner: "Specific owner",
+    excluded: "Deliberate exclusion or limit",
+  },
+  vi: {
+    eyebrow: "Bản đồ sở hữu chế độ",
+    title: "Sáu route dùng chung hạ tầng nhưng không dùng chung mọi quy tắc",
+    intro: "Shell, settings, tài nguyên, trình bày, âm thanh, đầu vào và biên vật lý là phần chung. Timer, đồ thị toss, lưỡi dao, thực thể đặc biệt, objective, điểm và khóa kết quả vẫn thuộc sở hữu tường minh từng mode.",
+    shared: "Ranh giới dùng chung",
+    id: "ID chế độ",
+    mode: "Chế độ production",
+    owner: "Chủ sở hữu riêng",
+    excluded: "Loại trừ hay giới hạn có chủ ý",
+  },
+} as const;
+
+const modes = locale === "vi"
+  ? [
+      ["0", "Classic", "Session không tính giờ, chín toss controller, BasicBlade, ba-miss và luồng kết quả Classic.", "Không sở hữu TimeManager."],
+      ["1", "Crazy", "Session 60 giây, bomb, bonus, electric, magnet, Dragon, objective và kết quả Crazy.", "Không dùng BirdBlade."],
+      ["2", "Gangnam Style", "Đồ thị trái cây thường 150 giây, BasicBlade, nhạc riêng, choreography particle và late-cut tail.", "Loại Crazy bomb, bonus và special."],
+      ["3", "Classic Bird", "Họ Classic với BirdBlade type 1, session/kết quả/retry riêng.", "Dùng substrate Bird nhưng không dùng đồ thị Crazy."],
+      ["4", "Crazy Bird", "Profile Crazy 60 giây với BirdBlade type 2 và khóa leaderboard riêng.", "Toán hạng/thứ tự combo native chính xác vẫn là inference đã công bố."],
+      ["5", "Combo Bird", "Đồ thị thường Free/Wave/Concurrent 90 giây với BirdBlade type 3.", "Loại bomb, bonus, special, freeze, magnet, electric và Dragon."],
+    ]
+  : [
+      ["0", "Classic", "Untimed session, nine toss controllers, BasicBlade, three-miss flow, and Classic result.", "Owns no TimeManager."],
+      ["1", "Crazy", "60-second session, bombs, bonuses, electric, magnet, Dragon, objectives, and Crazy result.", "Does not use BirdBlade."],
+      ["2", "Gangnam Style", "150-second ordinary-fruit graph, BasicBlade, dedicated music, particle choreography, and late-cut tail.", "Excludes Crazy bombs, bonuses, and specials."],
+      ["3", "Classic Bird", "Classic-family session with BirdBlade type 1 and dedicated result/retry lifecycle.", "Uses the Bird substrate but not the Crazy graph."],
+      ["4", "Crazy Bird", "60-second Crazy profile with BirdBlade type 2 and distinct leaderboard keys.", "Exact native combo callback operand/order remains a disclosed inference."],
+      ["5", "Combo Bird", "90-second ordinary Free/Wave/Concurrent graph with BirdBlade type 3.", "Excludes bombs, bonuses, specials, freeze, magnet, electric, and Dragon."],
+    ];
+---
+
+<section class="six-mode-atlas" aria-labelledby="six-mode-atlas-heading">
+  <p class="eyebrow">{copy[locale].eyebrow}</p>
+  <h2 id="six-mode-atlas-heading">{copy[locale].title}</h2>
+  <p>{copy[locale].intro}</p>
+  <aside>
+    <h3>{copy[locale].shared}</h3>
+    <p>
+      {locale === "vi"
+        ? "RecoveredAppShellController giữ một màn hình active và transaction điều hướng. Physics2D adapter, process-owned Settings, loader tài nguyên, audio presenter, viewport và root trình bày là seam chung có giới hạn."
+        : "RecoveredAppShellController holds one active screen and navigation transactions. The Physics2D adapter, process-owned Settings, resource loaders, audio presenters, viewport, and presentation roots are bounded shared seams."}
+    </p>
+  </aside>
+  <div class="table-region">
+    <table>
+      <thead>
+        <tr>
+          <th>{copy[locale].id}</th>
+          <th>{copy[locale].mode}</th>
+          <th>{copy[locale].owner}</th>
+          <th>{copy[locale].excluded}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          modes.map(([id, mode, owner, excluded]) => (
+            <tr id={`mode-${id}`}>
+              <th scope="row">{id}</th>
+              <td><strong>{mode}</strong></td>
+              <td>{owner}</td>
+              <td>{excluded}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<style>
+  .six-mode-atlas {
+    border: 2px solid var(--graphite);
+    padding: clamp(1rem, 3vw, 2rem);
+    background: color-mix(in srgb, var(--paper) 92%, var(--white));
+  }
+
+  .six-mode-atlas aside {
+    margin-block: var(--space-5);
+    border-left: 0.4rem solid var(--pencil);
+    padding: var(--space-4);
+    color: var(--white);
+    background: var(--lab);
+  }
+
+  .six-mode-atlas tr:target {
+    outline: 0.25rem solid var(--pencil);
+    outline-offset: -0.25rem;
+  }
+</style>

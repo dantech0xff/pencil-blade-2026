@@ -1,0 +1,17 @@
+---
+interface Props {
+  title: string;
+  language?: string;
+  source: string;
+  limit: string;
+}
+
+const { title, language = "text", source, limit } = Astro.props;
+---
+
+<section class="code-lens">
+  <h3>{title}</h3>
+  <p class="micro-label">{language} · {source}</p>
+  <slot />
+  <p><strong>Limit:</strong> {limit}</p>
+</section>

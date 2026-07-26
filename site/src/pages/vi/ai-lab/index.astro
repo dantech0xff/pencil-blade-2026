@@ -1,0 +1,72 @@
+---
+import { getCollection } from "astro:content";
+
+import BaseLayout from "../../../layouts/base-layout.astro";
+import AssistanceDisclosure from "../../../components/ai-lab/assistance-disclosure.astro";
+import EpisodeCard from "../../../components/ai-lab/episode-card.astro";
+import RightsBoundary from "../../../components/editorial/rights-boundary.astro";
+import {
+  buildAiLabIndex,
+  getAiLabPublicationManifest,
+  aiLabEvidenceSnapshotId,
+  type AiEpisodeRecord,
+} from "../../../data/ai-lab/index.ts";
+import { withBase } from "../../../data/routes.ts";
+
+const records = (await getCollection("aiEpisodes"))
+  .filter((entry) => entry.data.locale === "vi")
+  .map((entry) => entry.data as AiEpisodeRecord);
+const episodes = buildAiLabIndex(getAiLabPublicationManifest(), records);
+const title = "AI Lab · Các quyết định bằng chứng đã biên tập";
+const description = "Sáu tập có nguồn trình bày hỗ trợ AI có giới hạn, quyết định rà soát có kiểu, kiểm chứng, sửa sai và giới hạn hiển thị—không phải hội thoại thô.";
+---
+
+<BaseLayout
+  locale="vi"
+  route="/ai-lab/"
+  routeId="ai-lab.vi"
+  title={title}
+  description={description}
+  surface="lab"
+>
+  <article class="ai-lab">
+    <header class="hero">
+      <p class="eyebrow">Chương 5 · snapshot {aiLabEvidenceSnapshotId}</p>
+      <h1>AI tham gia công việc. AI không trở thành thẩm quyền.</h1>
+      <p class="hero__lede">
+        Sáu khảo sát đã biên tập nối câu hỏi với tuyên bố chuẩn, nguồn công khai an toàn,
+        quyết định có kiểu, ranh giới triển khai, phép kiểm tra xác định và sửa sai.
+      </p>
+      <p><a href={withBase("/vi/evidence/")}>Mở toàn bộ 39 bản ghi bằng chứng chuẩn <span aria-hidden="true">→</span></a></p>
+    </header>
+
+    <AssistanceDisclosure locale="vi" />
+
+    <section aria-labelledby="episodes-heading">
+      <p class="eyebrow">Các tập đã biên tập</p>
+      <h2 id="episodes-heading">Từ đề xuất đến ranh giới được bằng chứng hỗ trợ</h2>
+      <div class="ai-lab__episodes">
+        {episodes.map((episode) => <EpisodeCard episode={episode} />)}
+      </div>
+    </section>
+
+    <RightsBoundary
+      locale="vi"
+      technical="Mỗi tập nối trạng thái tuyên bố chuẩn từ snapshot đóng băng đã tạo và chỉ trích dẫn ID nguồn công khai trong allowlist."
+      academic="Phase 5 chỉ công bố văn bản biên tập và CSS. Phase này không tạo bản ghi media và không tuyên bố phạm vi hiển thị tài nguyên phục hồi độc lập."
+      commercial="Manifest quyền thương mại riêng vẫn bị chặn. Kiểm chứng kỹ thuật và hiển thị học thuật không thay đổi manifest đó."
+    />
+  </article>
+</BaseLayout>
+
+<style>
+  .ai-lab {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .ai-lab__episodes {
+    display: grid;
+    gap: var(--space-6);
+  }
+</style>

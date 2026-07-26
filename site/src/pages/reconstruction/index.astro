@@ -1,0 +1,44 @@
+---
+import { getCollection, getEntry } from "astro:content";
+
+import BaseLayout from "../../layouts/base-layout.astro";
+import ChapterPage from "../../components/chapter/chapter-page.astro";
+import sourceCatalog from "../../../../reference/case-study-public-source-catalog.json";
+import manifest from "../../../../reference/case-study-publication-manifest.json";
+
+const chapter = await getEntry("chapters", "reconstruction.en");
+if (!chapter) throw new Error("Missing English Reconstruction chapter.");
+const generatedFacts = await getCollection("claimPresentations");
+const localeReviewPending =
+  manifest.releaseInputs.vietnameseFactualReview.evidenceStatus !== "confirmed";
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  headline: chapter.data.title,
+  description: chapter.data.seoDescription,
+  inLanguage: "en",
+  isAccessibleForFree: true,
+};
+---
+
+<BaseLayout
+  locale="en"
+  route="/reconstruction/"
+  routeId="reconstruction.en"
+  title={chapter.data.seoTitle}
+  description={chapter.data.seoDescription}
+  structuredData={structuredData}
+>
+  <ChapterPage
+    chapter={chapter}
+    route={{
+      id: "reconstruction.en",
+      path: "/reconstruction/",
+      nextPath: null,
+      nextLabel: null,
+    }}
+    generatedFacts={generatedFacts}
+    publicEvidenceIndex={sourceCatalog.sources}
+    localeReviewPending={localeReviewPending}
+  />
+</BaseLayout>

@@ -1,0 +1,98 @@
+---
+interface ClaimSummary {
+  id: string;
+  copy: string;
+  qualifier: string;
+  sourceIds: readonly string[];
+}
+
+interface Props {
+  locale: "en" | "vi";
+  chapterId: string;
+  summary: string;
+  claims: readonly ClaimSummary[];
+}
+
+const { locale, chapterId, summary, claims } = Astro.props;
+const sourceCount = new Set(claims.flatMap((claim) => claim.sourceIds)).size;
+---
+
+<aside class="chapter-summary" aria-labelledby={`${chapterId}-summary-heading`}>
+  <div>
+    <p class="micro-label">{locale === "vi" ? "Tóm tắt chương" : "Chapter summary"}</p>
+    <h2 id={`${chapterId}-summary-heading`}>{summary}</h2>
+  </div>
+  <dl>
+    <div>
+      <dt>{locale === "vi" ? "Khẳng định chuẩn" : "Canonical claims"}</dt>
+      <dd>{claims.length}</dd>
+    </div>
+    <div>
+      <dt>{locale === "vi" ? "Nguồn công khai" : "Public sources"}</dt>
+      <dd>{sourceCount}</dd>
+    </div>
+  </dl>
+  <details>
+    <summary>{locale === "vi" ? "Xem các khẳng định được nối" : "Inspect linked claims"}</summary>
+    <ol>
+      {
+        claims.map((claim) => (
+          <li>
+            <a href={`#${claim.id}`}>{claim.id}</a>
+            <span>{claim.copy}</span>
+            <small>{claim.qualifier}</small>
+          </li>
+        ))
+      }
+    </ol>
+  </details>
+</aside>
+
+<style>
+  .chapter-summary {
+    display: grid;
+    gap: var(--space-4);
+    margin-block: var(--space-6);
+    border: var(--line);
+    padding: var(--space-5);
+    background: color-mix(in srgb, var(--paper) 88%, var(--pencil));
+  }
+
+  .chapter-summary h2 {
+    max-width: 46rem;
+    font-size: var(--step-1);
+  }
+
+  .chapter-summary dl {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin: 0;
+  }
+
+  .chapter-summary dl div {
+    min-width: 9rem;
+    border-left: 0.25rem solid var(--graphite);
+    padding-left: var(--space-3);
+  }
+
+  .chapter-summary dt {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    text-transform: uppercase;
+  }
+
+  .chapter-summary dd {
+    margin: 0;
+    font: 800 var(--step-2) / 1.2 var(--font-mono);
+  }
+
+  .chapter-summary li {
+    margin-block: var(--space-3);
+  }
+
+  .chapter-summary li span,
+  .chapter-summary li small {
+    display: block;
+  }
+</style>

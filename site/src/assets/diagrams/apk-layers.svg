@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" role="img" aria-labelledby="title description">
+  <title id="title">Abstract APK evidence layers</title>
+  <desc id="description">Five authored metadata layers progress from package identity to reviewed contracts while executable bytes remain excluded.</desc>
+  <rect width="960" height="420" fill="#f4f0e6"/>
+  <g fill="none" stroke="#171a18" stroke-width="3">
+    <path d="M72 72h640l40 40v236H72z"/>
+    <path d="M712 72v40h40"/>
+    <path d="M112 120h540"/>
+  </g>
+  <g font-family="ui-monospace, monospace" font-size="18" fill="#171a18">
+    <text x="112" y="104">APK · INSPECTED / NEVER EXECUTED</text>
+  </g>
+  <g font-family="ui-monospace, monospace" font-size="16" font-weight="700">
+    <rect x="112" y="145" width="500" height="34" fill="#f2c94c" stroke="#171a18" stroke-width="2"/>
+    <text x="130" y="168" fill="#171a18">01 PACKAGE + SIGNING</text>
+    <rect x="132" y="190" width="500" height="34" fill="#e5ded0" stroke="#171a18" stroke-width="2"/>
+    <text x="150" y="213" fill="#171a18">02 JAVA / JNI BOUNDARY</text>
+    <rect x="152" y="235" width="500" height="34" fill="#d7e6e0" stroke="#171a18" stroke-width="2"/>
+    <text x="170" y="258" fill="#171a18">03 NATIVE METADATA</text>
+    <rect x="172" y="280" width="500" height="34" fill="#d4e8eb" stroke="#171a18" stroke-width="2"/>
+    <text x="190" y="303" fill="#171a18">04 RESOURCE CENSUS</text>
+    <rect x="192" y="325" width="500" height="34" fill="#f0dfc9" stroke="#171a18" stroke-width="2"/>
+    <text x="210" y="348" fill="#171a18">05 REVIEWED CONTRACTS</text>
+  </g>
+  <g fill="none" stroke="#a13a2b" stroke-width="4">
+    <path d="M804 104v224"/>
+    <path d="M782 306l22 22 22-22"/>
+  </g>
+  <text x="770" y="365" font-family="ui-monospace, monospace" font-size="14" fill="#a13a2b">NO EXECUTION</text>
+</svg>

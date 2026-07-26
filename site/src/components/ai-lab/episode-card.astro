@@ -1,0 +1,64 @@
+---
+import EvidenceStatus from "../evidence/evidence-status.astro";
+import DisclosureBadge from "./disclosure-badge.astro";
+import RightsLabels from "./rights-labels.astro";
+import { localizedPath, withBase } from "../../data/routes.ts";
+import type { AiLabIndexEntry } from "../../data/ai-lab/index.ts";
+
+interface Props {
+  episode: AiLabIndexEntry;
+}
+
+const { episode } = Astro.props;
+const locale = episode.locale;
+const href = withBase(localizedPath(locale, `/ai-lab/${episode.id}/`));
+---
+
+<article class="episode-card" id={`episode-${episode.id}`} data-episode-id={episode.id}>
+  <p class="eyebrow">
+    {String(episode.order).padStart(2, "0")} ·
+    {locale === "vi" ? "hồ sơ đã biên tập" : "curated case file"}
+  </p>
+  <h2><a href={href}>{episode.question}</a></h2>
+  <p>{episode.reviewDecision}</p>
+  <DisclosureBadge disclosure={episode.disclosure} locale={locale} />
+  <div class="episode-card__claims">
+    {episode.claims.map((claim) => (
+      <a href={withBase(localizedPath(locale, `/evidence/${claim.id}/`))}>
+        <EvidenceStatus status={claim.status} locale={locale} />
+        <code>{claim.id}</code>
+      </a>
+    ))}
+  </div>
+  <details>
+    <summary>{locale === "vi" ? "Giới hạn và bài học" : "Limit and lesson"}</summary>
+    <p>{episode.failureLesson}</p>
+  </details>
+  <RightsLabels rights={episode.rights} locale={locale} />
+  <p><a href={href}>{locale === "vi" ? "Mở chuỗi bằng chứng" : "Open the evidence chain"} <span aria-hidden="true">→</span></a></p>
+</article>
+
+<style>
+  .episode-card {
+    border: var(--line);
+    padding: var(--space-5);
+    background: color-mix(in srgb, var(--paper) 94%, var(--white));
+    box-shadow: var(--shadow);
+  }
+
+  .episode-card__claims {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-block: var(--space-4);
+  }
+
+  .episode-card__claims a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    border: 1px solid currentColor;
+    padding: var(--space-2);
+    text-decoration: none;
+  }
+</style>

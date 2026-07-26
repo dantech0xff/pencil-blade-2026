@@ -1,0 +1,135 @@
+---
+id: story.vi
+locale: vi
+order: 1
+slug: story.vi
+title: "Trò chơi thất lạc"
+dek: "APK còn lại không thể trở thành nhân chứng runtime. Thay vào đó, nó trở thành hiện vật nguồn được niêm phong."
+summary: "Phục dựng chỉ dùng bằng chứng tĩnh bắt đầu bằng việc không đánh đồng tệp thực thi cũ với môi trường chạy lịch sử đã được quan sát."
+chapterKind: story
+evidenceRefs:
+  - CLM-APK-BYTES
+  - CLM-APK-ZIP
+  - CLM-APK-SIGNING
+  - CLM-MANIFEST-IDENTITY
+  - CLM-MANIFEST-SURFACE
+  - CLM-JAVA-BOUNDARY
+  - CLM-NATIVE-PROFILE
+  - CLM-ENGINE-FINGERPRINT
+  - CLM-CONTENT-RIGHTS
+mediaRefs: []
+nextId: forensics.vi
+seoTitle: "APK Pencil Blade không thể chạy — câu chuyện phục dựng"
+seoDescription: "Vì sao APK Pencil Blade duy nhất được xem là bằng chứng tĩnh, chưa từng được chạy, và được tách khỏi triển khai clean-room cùng quyền chưa làm rõ."
+draft: false
+---
+
+## Câu hỏi 01 — Điều gì còn lại?
+
+Dự án bắt đầu bằng một gói Android được cung cấp, không phải cây mã nguồn và cũng không phải
+thiết bị lịch sử còn hoạt động. Ngày thu nhận và hồ sơ lưu ký từ nguồn thượng nguồn chưa xác
+định. Hiện vật đăng ký là chính xác: **35.817.225 byte** với SHA-256
+`95225733d46473f2b155737e8c83b567e028342257c747c0faac6ed4ab87e7aa`.
+
+<EvidenceRef id="CLM-APK-BYTES" locale="vi" label="Xem khẳng định nguồn bất biến" />
+
+### Hiện vật
+
+APK niêm phong chứa **985 mục tệp** và **41.007.977 byte thành viên chưa nén**. Nó có một bên
+ký JAR v1. Các phép đo này định danh gói; chúng không cho thấy một game đang chạy.
+
+<EvidenceRef id="CLM-APK-ZIP" locale="vi" />
+<EvidenceRef id="CLM-APK-SIGNING" locale="vi" />
+
+### Phương pháp
+
+Hiện vật được xác minh hash và kiểm tra qua các view tĩnh độc lập. Dự án không cài đặt, khởi
+chạy, vá, ký lại, giả lập hay nhúng nó. “Chỉ dùng bằng chứng tĩnh” nghĩa là gói, siêu dữ liệu
+native, tài nguyên, Java do ứng dụng sở hữu và các dẫn xuất đã đăng ký có thể trả lời câu hỏi
+mà không biến môi trường chạy gốc không còn quan sát được thành bằng chứng tưởng tượng.
+
+<ApkDissection locale="vi" />
+
+### Hợp đồng hoặc quyết định
+
+APK vẫn là bằng chứng nguồn bất biến. Byte APK thô, `libgame.so`, đầu ra decompiler và workspace
+forensics bị bỏ qua đều nằm ngoài trang công khai và ngoài sản phẩm clean-room. Một bản được
+cung cấp duy nhất là rủi ro lưu ký đã công bố; yêu cầu dự phòng đã được chủ sở hữu miễn trừ mà
+không tuyên bố có bản sao khác.
+
+### Kiểm chứng
+
+Danh tính gói, cấu trúc kho lưu trữ, siêu dữ liệu bên ký, danh tính manifest Android và ranh
+giới Java/JNI hẹp được đăng ký riêng. Mỗi khẳng định công bố mẫu số và nguồn riêng. Vì vậy,
+kiểm chứng là chuỗi siêu dữ liệu có thể tái lập—không phải ảnh chụp hay ký ức chơi game.
+
+<EvidenceRef id="CLM-MANIFEST-IDENTITY" locale="vi" />
+<EvidenceRef id="CLM-JAVA-BOUNDARY" locale="vi" />
+
+### Giới hạn
+
+Môi trường chạy gốc chưa từng được quan sát. Không có phép so sánh runtime “gốc với phục dựng”
+hợp lệ, không có ảnh gameplay lịch sử và không có cơ sở để tuyên bố giống hệt ở mức pixel,
+dạng sóng, frame hay quỹ đạo. Lịch sử thu nhận chưa xác định vẫn được giữ rõ.
+
+### Chương tiếp theo
+
+Câu hỏi kế tiếp không phải “Làm sao chạy binary?” mà là “Một binary niêm phong có thể hỗ trợ
+những dữ kiện công khai an toàn nào?”
+
+## Câu hỏi 02 — “Phục dựng” cho phép điều gì?
+
+Một dự án bảo tồn vẫn có thể trượt thành bản port binary hoặc bản mô phỏng không có nguồn.
+Ranh giới phải được nói rõ trước khi triển khai.
+
+### Hiện vật
+
+Chuỗi tĩnh và siêu dữ liệu định danh một thư viện native ELF32 little-endian ARM EABI5 đã
+strip, ARM v5TE và Cocos2d-x 2.1.4. Đây là dấu vân tay công cụ game và kiến trúc, không phải
+mã nguồn C++ gốc đã phục hồi.
+
+<EvidenceRef id="CLM-NATIVE-PROFILE" locale="vi" />
+<EvidenceRef id="CLM-ENGINE-FINGERPRINT" locale="vi" />
+
+### Phương pháp
+
+Dữ kiện đã tuyển chọn được phân loại **đã phục hồi**, **suy luận** hoặc **chưa xác định**. Hợp
+đồng hành vi đã rà soát chỉ chuyển những dữ kiện cần cho triển khai mới. TypeScript clean-room
+và adapter Cocos Creator sở hữu hành vi production; tệp thực thi gốc luôn là bằng chứng, không
+bao giờ là phụ thuộc.
+
+### Hợp đồng hoặc quyết định
+
+Sản phẩm là bản phục dựng clean-room không chính thức, mã nguồn được công khai có điều kiện,
+phi thương mại. Nó không nạp hay gọi thư viện native cũ, không dịch cơ học instruction và không
+tuyên bố đã phục hồi mã nguồn lịch sử.
+
+> Bản phục dựng không chính thức này được viết lại từ bằng chứng tĩnh đã qua rà soát. APK gốc
+> chưa từng được chạy hay nhúng vào sản phẩm, và dự án không tuyên bố đã phục hồi mã nguồn gốc
+> hoặc giống hệt môi trường chạy lịch sử.
+
+### Kiểm chứng
+
+Repository kiểm toán các đầu ra được hỗ trợ để tìm đường dẫn runtime gốc bị cấm. Kiểm chứng
+Android debug và Web Mobile H5 thuộc về hệ thống phục dựng và chỉ xuất hiện sau khi hợp đồng
+cùng chủ sở hữu đã được chỉ ra.
+
+### Giới hạn
+
+Phục dựng kỹ thuật và quyền xuất bản là hai sổ cái khác nhau. Quyền đối với tên sản phẩm, hình
+ảnh, âm thanh, phông chữ, nhận diện, mã và nội dung lịch sử khác chưa xác định và chưa được
+chấp thuận thương mại.
+
+<EvidenceRef id="CLM-CONTENT-RIGHTS" locale="vi" />
+
+<RightsBoundary
+  locale="vi"
+  technical="Repository có thể xác minh siêu dữ liệu nguồn niêm phong và ranh giới triển khai clean-room."
+  academic="Cây H5 đã kiểm toán chính xác cùng sáu ảnh môi trường chạy của bản phục dựng đã đăng ký có quyết định hiển thị học thuật/phi thương mại giới hạn."
+  commercial="Không tuyên bố có quyền thương mại hay giấy phép đối với tên, hình ảnh, âm thanh, phông chữ, nhận diện hoặc nội dung lịch sử đã phục hồi."
+/>
+
+### Chương tiếp theo
+
+Forensics mở hiện vật niêm phong dưới dạng siêu dữ liệu công khai an toàn: các lớp gói, view
+ARM/Thumb, làm giàu function, kiểm kê tài nguyên và hợp đồng đã rà soát.

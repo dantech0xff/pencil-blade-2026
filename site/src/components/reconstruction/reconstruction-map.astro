@@ -1,0 +1,103 @@
+---
+import reconstructionArchitecture from "../../assets/diagrams/reconstruction-architecture.svg";
+
+interface Props {
+  locale?: "en" | "vi";
+}
+
+const { locale = "en" } = Astro.props;
+const copy = {
+  en: {
+    eyebrow: "Dependency direction",
+    title: "Contracts point inward; engines stay at the edge",
+    intro: "The authoritative explanation is the ordered ownership map below. The authored SVG is a compact visual duplicate.",
+    alt: "Reviewed contracts feed pure TypeScript domain owners and narrow Cocos Creator 3.8.8 adapters, then six mode owners and deterministic Android and H5 proof.",
+    list: "Complete architecture description",
+    owner: "Owner",
+    responsibility: "Responsibility",
+    boundary: "Boundary",
+  },
+  vi: {
+    eyebrow: "Hướng phụ thuộc",
+    title: "Hợp đồng hướng vào trong; công cụ game nằm ở rìa",
+    intro: "Giải thích có thẩm quyền là bản đồ sở hữu có thứ tự bên dưới. SVG tự tạo là bản sao hình ảnh cô đọng.",
+    alt: "Hợp đồng đã rà soát cấp vào chủ sở hữu domain TypeScript thuần và adapter Cocos Creator 3.8.8 hẹp, sau đó tới sáu chủ sở hữu chế độ cùng kiểm chứng Android và H5 xác định.",
+    list: "Mô tả kiến trúc đầy đủ",
+    owner: "Chủ sở hữu",
+    responsibility: "Trách nhiệm",
+    boundary: "Ranh giới",
+  },
+} as const;
+
+const rows = locale === "vi"
+  ? [
+      ["Hợp đồng hành vi", "Đơn vị đã phục hồi, thứ tự sự kiện, trạng thái bằng chứng và unknown.", "Không chứa byte native hay đầu ra decompiler."],
+      ["Domain TypeScript thuần", "Quy tắc, điểm, thời gian, state machine, kế hoạch spawn và command xác định.", "Không import cc; clock, RNG, viewport và input là đầu vào tường minh."],
+      ["Adapter Cocos Creator 3.8.8", "Physics2D, scene/node, tài nguyên, âm thanh, lưu trữ và vòng đời.", "Chuyển PTM, đồng bộ và mutation hoãn chỉ xảy ra tại biên công khai."],
+      ["Shell và sáu chế độ", "Transaction màn hình, lease đầu vào/vật lý, owner chung và owner riêng từng mode.", "Controller mode thụ động cho tới khi commit route."],
+      ["Kiểm chứng", "Kiểm thử xác định, probe backend, Android debug và Web Mobile H5.", "Đo bản phục dựng; không quan sát runtime gốc."],
+    ]
+  : [
+      ["Behavioral contracts", "Recovered units, event order, evidence status, and explicit unknowns.", "Contains no native bytes or decompiler output."],
+      ["Pure TypeScript domain", "Deterministic rules, score, timing, state machines, spawn plans, and commands.", "Does not import cc; clock, RNG, viewport, and input are explicit inputs."],
+      ["Cocos Creator 3.8.8 adapters", "Physics2D, scene/node, resources, audio, storage, and lifecycle.", "PTM conversion, synchronization, and deferred mutation occur only at the public edge."],
+      ["Shell and six modes", "Screen transactions, input/physics leases, shared owners, and per-mode owners.", "Mode controllers remain passive until route commit."],
+      ["Verification", "Deterministic tests, backend probe, Android debug, and Web Mobile H5.", "Measures the reconstruction; does not observe the original runtime."],
+    ];
+---
+
+<section class="reconstruction-map" aria-labelledby="reconstruction-map-heading">
+  <p class="eyebrow">{copy[locale].eyebrow}</p>
+  <h2 id="reconstruction-map-heading">{copy[locale].title}</h2>
+  <p>{copy[locale].intro}</p>
+  <figure>
+    <img
+      src={reconstructionArchitecture.src}
+      width="1040"
+      height="520"
+      alt={copy[locale].alt}
+    />
+    <figcaption>{copy[locale].alt}</figcaption>
+  </figure>
+  <details open>
+    <summary>{copy[locale].list}</summary>
+    <div class="table-region">
+      <table>
+        <thead>
+          <tr>
+            <th>{copy[locale].owner}</th>
+            <th>{copy[locale].responsibility}</th>
+            <th>{copy[locale].boundary}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            rows.map(([owner, responsibility, boundary]) => (
+              <tr>
+                <th scope="row">{owner}</th>
+                <td>{responsibility}</td>
+                <td>{boundary}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+<style>
+  .reconstruction-map {
+    border: 2px solid var(--graphite);
+    padding: clamp(1rem, 3vw, 2rem);
+    background: var(--paper);
+  }
+
+  .reconstruction-map figure {
+    margin-inline: 0;
+  }
+
+  .reconstruction-map figcaption {
+    font-size: var(--step--1);
+  }
+</style>

@@ -1,0 +1,1822 @@
+{
+  "schemaVersion": 1,
+  "manifestId": "pencil-blade-interactive-case-study",
+  "manifestVersion": "1.2.0",
+  "workingTitle": {
+    "en": "Pencil Blade: Reconstructing a Lost Game",
+    "vi": "Pencil Blade: Phục dựng một trò chơi thất lạc"
+  },
+  "repository": {
+    "owner": "dantech0xff",
+    "name": "pencil-blade-2026",
+    "canonicalUrl": "https://github.com/dantech0xff/pencil-blade-2026",
+    "pagesUrl": "https://dantech0xff.github.io/pencil-blade-2026/",
+    "pagesBase": "/pencil-blade-2026/"
+  },
+  "supportedLocales": [
+    "en",
+    "vi"
+  ],
+  "restorationEvidenceSnapshot": {
+    "snapshotId": "restoration-evidence-2026-07-25-v1",
+    "snapshotVersion": "1.0.0",
+    "reviewStatus": "reviewed",
+    "repositoryCommit": "3cde42d6c05bad7c3e88d93a1780ae54fd8ab1ef",
+    "authoritativeInputs": [
+      {
+        "path": "forensics/claims.jsonl",
+        "sha256": "40ebb9ce4fa15bfd0a513f0d1e461985a989f8f05b074cc17a284f77ded630a0"
+      },
+      {
+        "path": "forensics/native/function-enrichment-summary.json",
+        "sha256": "d72cbdaf8306286ead76145db8beca7b30a0bafbbc66b18af37bc8ea57ab8d24"
+      },
+      {
+        "path": "forensics/resources/resource-usage-map.json",
+        "sha256": "165238f13f4186a9ab429c9c5a8bab07b4a42e941d0608f757d9e41a44d2ce67"
+      },
+      {
+        "path": "assets/catalog/resource-reconciliation-ledger.json",
+        "sha256": "18ea8ef7ae3fb3751d530dd89426979d601fd8e918d5e9b539a1b8d969daacae"
+      },
+      {
+        "path": "forensics/fidelity/fidelity-report-v1.json",
+        "sha256": "e04e1eeb7796855b92b46c27a01384af42cc36252d3a3d9154a185eae9ee2b96"
+      },
+      {
+        "path": "forensics/fidelity/residual-gap-ledger.json",
+        "sha256": "ef56251e2cc089357f81786f073ce69106aabf5ec4d5574084040fd046a7589e"
+      },
+      {
+        "path": "forensics/runtime/physics2d-backend-equivalence.json",
+        "sha256": "a1aaa73727f800153a0b187177d67855a7f05cf2a305fb68a547883bd08c8efa"
+      },
+      {
+        "path": "release/public-release-variant-manifest.json",
+        "sha256": "eadf75a39d0d7eb6ee9451718e13452586ffc42683ef6a38534d96a776a1daa6"
+      },
+      {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/technical-closeout-manifest.json",
+        "sha256": "3da6e3dabf7674a8c000572b7628e1b13363af0c8120dda04051015182ae252b"
+      },
+      {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/h5-runtime-matrix.json",
+        "sha256": "1f4454e919790f76d46cd7c47372793c46f7f25b82f13e5da3e817cd491cd8d0"
+      },
+      {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/android-runtime-matrix.json",
+        "sha256": "c6d36330ae76b38ab7588500d4c157e2f346f4e19a48a8806fd67486e4a80688"
+      },
+      {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/production-pages-runtime.json",
+        "sha256": "a2e9b67f970eff9eb4c516aa0a94e6ba472af480f3d39838fca3001e5cc8e7e4"
+      }
+    ]
+  },
+  "fieldAuthority": {
+    "canonicalClaims": {
+      "path": "forensics/claims.jsonl",
+      "fields": [
+        "claim",
+        "status",
+        "evidenceTier",
+        "confidence",
+        "evidenceRefs",
+        "contradictionIds",
+        "contractEligible"
+      ]
+    },
+    "nativeCounters": {
+      "path": "forensics/native/function-enrichment-summary.json"
+    },
+    "resourceInventory": {
+      "path": "forensics/resources/resource-usage-map.json"
+    },
+    "resourceReconciliation": {
+      "path": "assets/catalog/resource-reconciliation-ledger.json"
+    },
+    "fidelity": {
+      "path": "forensics/fidelity/fidelity-report-v1.json"
+    },
+    "runtime": {
+      "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/"
+    },
+    "commercialRights": {
+      "path": "release/public-release-variant-manifest.json"
+    },
+    "academicDisplay": {
+      "path": "reference/case-study-academic-display-decision.json"
+    }
+  },
+  "sourceCatalogRef": "reference/case-study-public-source-catalog.json",
+  "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+  "commercialRightsRecordRef": "release/public-release-variant-manifest.json",
+  "deniedPublicSurface": {
+    "roots": [
+      ".forensics-work/",
+      "offline-evidence/",
+      "jadx-output/",
+      "apktool-output/",
+      "reference/historical-media/raw/",
+      "reference/external-material/"
+    ],
+    "extensions": [
+      ".apk",
+      ".apks",
+      ".xapk",
+      ".so",
+      ".gpr",
+      ".i64",
+      ".idb",
+      ".jks",
+      ".keystore"
+    ],
+    "contentKinds": [
+      "raw-chat",
+      "raw-prompt",
+      "chain-of-thought",
+      "machine-local-path",
+      "credential"
+    ]
+  },
+  "claimPresentations": [
+    {
+      "canonicalClaimId": "CLM-APK-BYTES",
+      "order": 1,
+      "publicCopy": {
+        "en": "The immutable source APK is 35,817,225 bytes with SHA-256 95225733d46473f2b155737e8c83b567e028342257c747c0faac6ed4ab87e7aa.",
+        "vi": "APK nguồn bất biến có kích thước 35.817.225 byte và SHA-256 95225733d46473f2b155737e8c83b567e028342257c747c0faac6ed4ab87e7aa."
+      },
+      "publicExcerpt": {
+        "en": "The sole source artifact is identified by exact byte length and SHA-256.",
+        "vi": "Hiện vật nguồn duy nhất được định danh bằng kích thước byte và SHA-256 chính xác."
+      },
+      "publicExplanation": {
+        "en": "These immutable identifiers anchor the static-only investigation without publishing the APK.",
+        "vi": "Các mã định danh bất biến này neo quá trình khảo sát chỉ dùng bằng chứng tĩnh mà không công bố APK."
+      },
+      "displayQualifier": {
+        "en": "Recovered from registered static evidence.",
+        "vi": "Đã phục hồi từ bằng chứng tĩnh có đăng ký."
+      },
+      "tags": ["apk", "provenance"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Metadata only; source bytes are not public.",
+          "vi": "Chỉ công bố siêu dữ liệu; byte nguồn không được công khai."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-APK-ZIP",
+      "order": 2,
+      "publicCopy": {
+        "en": "The APK has 985 file entries, no explicit directory entries, 41,007,977 uncompressed member bytes, and passes ZIP integrity checks.",
+        "vi": "APK có 985 mục tệp, không có mục thư mục tường minh, tổng cộng 41.007.977 byte chưa nén và vượt qua kiểm tra toàn vẹn ZIP."
+      },
+      "publicExcerpt": {
+        "en": "The archive structure and uncompressed denominator were measured directly.",
+        "vi": "Cấu trúc kho lưu trữ và mẫu số byte chưa nén được đo trực tiếp."
+      },
+      "publicExplanation": {
+        "en": "Archive counts describe the source container, not reconstructed gameplay fidelity.",
+        "vi": "Số liệu kho lưu trữ mô tả vật chứa nguồn, không phải độ trung thực gameplay phục dựng."
+      },
+      "displayQualifier": {
+        "en": "Recovered from registered static evidence.",
+        "vi": "Đã phục hồi từ bằng chứng tĩnh có đăng ký."
+      },
+      "tags": ["apk", "inventory"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Aggregate archive facts are safe to publish.",
+          "vi": "Dữ kiện tổng hợp của kho lưu trữ an toàn để công bố."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-APK-SIGNING",
+      "order": 3,
+      "publicCopy": {
+        "en": "The APK has one signer and verifies with v1 JAR signing only; the certificate SHA-256 is df25b2f6affd78490bfb175a8b7fbdfd706f0024be5cc0495d988b4729941960.",
+        "vi": "APK có một bên ký và chỉ xác minh bằng chữ ký JAR v1; SHA-256 của chứng thư là df25b2f6affd78490bfb175a8b7fbdfd706f0024be5cc0495d988b4729941960."
+      },
+      "publicExcerpt": {
+        "en": "One v1 signer and its certificate digest identify the package history.",
+        "vi": "Một bên ký v1 cùng hàm băm chứng thư giúp định danh lịch sử gói."
+      },
+      "publicExplanation": {
+        "en": "Signing metadata is evidence of the artifact, not proof of current publisher identity.",
+        "vi": "Siêu dữ liệu chữ ký là bằng chứng về hiện vật, không chứng minh danh tính nhà phát hành hiện tại."
+      },
+      "displayQualifier": {
+        "en": "Recovered from registered static evidence.",
+        "vi": "Đã phục hồi từ bằng chứng tĩnh có đăng ký."
+      },
+      "tags": ["apk", "signing"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Certificate digest is metadata, not private key material.",
+          "vi": "Hàm băm chứng thư là siêu dữ liệu, không phải vật liệu khóa riêng."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-MANIFEST-IDENTITY",
+      "order": 4,
+      "publicCopy": {
+        "en": "The package is uit.dev.pencilblade, version name 1.5, version code 6, minimum SDK 9, target SDK 19, portrait, and OpenGL ES 2.0.",
+        "vi": "Gói là uit.dev.pencilblade, tên phiên bản 1.5, mã phiên bản 6, SDK tối thiểu 9, SDK đích 19, hướng dọc và OpenGL ES 2.0."
+      },
+      "publicExcerpt": {
+        "en": "Manifest identity fixes the historical Android envelope.",
+        "vi": "Danh tính manifest cố định phạm vi Android lịch sử."
+      },
+      "publicExplanation": {
+        "en": "These values describe the source package and do not expand supported reconstruction targets.",
+        "vi": "Các giá trị này mô tả gói nguồn và không mở rộng nền tảng được hỗ trợ của bản phục dựng."
+      },
+      "displayQualifier": {
+        "en": "Recovered from registered static evidence.",
+        "vi": "Đã phục hồi từ bằng chứng tĩnh có đăng ký."
+      },
+      "tags": ["manifest", "android"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Manifest metadata is safe to publish.",
+          "vi": "Siêu dữ liệu manifest an toàn để công bố."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-MANIFEST-SURFACE",
+      "order": 5,
+      "publicCopy": {
+        "en": "The manifest declares INTERNET and ACCESS_NETWORK_STATE, the uit.dev.pencilblade.PencilBlade launcher, and Google Ads AdActivity, with no service, receiver, or provider.",
+        "vi": "Manifest khai báo INTERNET và ACCESS_NETWORK_STATE, launcher uit.dev.pencilblade.PencilBlade và Google Ads AdActivity; không có service, receiver hoặc provider."
+      },
+      "publicExcerpt": {
+        "en": "The source package exposed a small activity and permission surface.",
+        "vi": "Gói nguồn có bề mặt activity và quyền hạn nhỏ."
+      },
+      "publicExplanation": {
+        "en": "Historical network declarations are documented but are not reproduced as launch-time services.",
+        "vi": "Các khai báo mạng lịch sử được ghi nhận nhưng không được phục dựng thành dịch vụ khi phát hành."
+      },
+      "displayQualifier": {
+        "en": "Recovered from registered static evidence.",
+        "vi": "Đã phục hồi từ bằng chứng tĩnh có đăng ký."
+      },
+      "tags": ["manifest", "boundary"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Manifest declarations are public-safe metadata.",
+          "vi": "Khai báo manifest là siêu dữ liệu an toàn để công bố."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-JAVA-BOUNDARY",
+      "order": 6,
+      "publicCopy": {
+        "en": "App-owned Java is confined to uit.dev.pencilblade and loads the native game library while exposing legacy ads, feedback, review, social, and network-state bridges.",
+        "vi": "Java do ứng dụng sở hữu chỉ nằm trong uit.dev.pencilblade, nạp thư viện game native và cung cấp các cầu nối quảng cáo, phản hồi, đánh giá, mạng xã hội cùng trạng thái mạng kiểu cũ."
+      },
+      "publicExcerpt": {
+        "en": "Java was a narrow platform bridge around a native game.",
+        "vi": "Java là cầu nối nền tảng hẹp bao quanh game native."
+      },
+      "publicExplanation": {
+        "en": "The clean-room build retires those obsolete service bridges.",
+        "vi": "Bản dựng clean-room loại bỏ các cầu nối dịch vụ lỗi thời đó."
+      },
+      "displayQualifier": {
+        "en": "Recovered from registered static evidence.",
+        "vi": "Đã phục hồi từ bằng chứng tĩnh có đăng ký."
+      },
+      "tags": ["java", "boundary"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Only the reviewed boundary is presented.",
+          "vi": "Chỉ ranh giới đã rà soát được trình bày."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-NATIVE-PROFILE",
+      "order": 7,
+      "publicCopy": {
+        "en": "The APK contains only lib/armeabi/libgame.so; it is a stripped ELF32 little-endian ARM EABI5 shared object targeting ARM v5TE.",
+        "vi": "APK chỉ chứa lib/armeabi/libgame.so; đây là shared object ELF32 little-endian ARM EABI5 đã loại symbol và nhắm ARM v5TE."
+      },
+      "publicExcerpt": {
+        "en": "One stripped ARM library held the native game surface.",
+        "vi": "Một thư viện ARM đã loại symbol chứa bề mặt game native."
+      },
+      "publicExplanation": {
+        "en": "The binary is described as evidence and is never shipped or executed by the reconstruction.",
+        "vi": "Tệp nhị phân chỉ được mô tả như bằng chứng và không bao giờ được bản phục dựng phát hành hoặc thực thi."
+      },
+      "displayQualifier": {
+        "en": "Recovered metadata; raw binary withheld.",
+        "vi": "Siêu dữ liệu đã phục hồi; tệp nhị phân thô không được công bố."
+      },
+      "tags": ["native", "arm"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Metadata is public; native bytes remain denied.",
+          "vi": "Siêu dữ liệu được công bố; byte native vẫn bị từ chối."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-ENGINE-FINGERPRINT",
+      "order": 8,
+      "publicCopy": {
+        "en": "Embedded native strings identify Cocos2d-x 2.1.4 and a PencilBlade project path.",
+        "vi": "Các chuỗi nhúng trong native định danh Cocos2d-x 2.1.4 và một đường dẫn dự án PencilBlade."
+      },
+      "publicExcerpt": {
+        "en": "Static strings identify the historical engine family and version.",
+        "vi": "Chuỗi tĩnh định danh họ và phiên bản công cụ game lịch sử."
+      },
+      "publicExplanation": {
+        "en": "Machine-local path text is redacted; only the engine conclusion is presented.",
+        "vi": "Nội dung đường dẫn cục bộ được che; chỉ kết luận về công cụ game được trình bày."
+      },
+      "displayQualifier": {
+        "en": "Recovered with private path redaction.",
+        "vi": "Đã phục hồi và che đường dẫn riêng tư."
+      },
+      "tags": ["engine", "native"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "The private path value is omitted.",
+          "vi": "Giá trị đường dẫn riêng tư bị lược bỏ."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-ASSET-COUNTS",
+      "order": 9,
+      "publicCopy": {
+        "en": "The APK has 784 PNG files under assets, 107 PNG files under res, 59 WAV, 3 MP3, 15 TTF, 1 OTF, and 392 files in each resolution tree.",
+        "vi": "APK có 784 tệp PNG trong assets, 107 PNG trong res, 59 WAV, 3 MP3, 15 TTF, 1 OTF và 392 tệp trong mỗi cây độ phân giải."
+      },
+      "publicExcerpt": {
+        "en": "Static inventory exposes two parallel presentation trees and their media counts.",
+        "vi": "Kiểm kê tĩnh cho thấy hai cây trình bày song song cùng số lượng media."
+      },
+      "publicExplanation": {
+        "en": "Counts do not grant redistribution rights to the underlying media.",
+        "vi": "Số lượng không cấp quyền phân phối lại media bên trong."
+      },
+      "displayQualifier": {
+        "en": "Recovered inventory; rights separate.",
+        "vi": "Kiểm kê đã phục hồi; quyền được tách riêng."
+      },
+      "tags": ["resources", "inventory"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Aggregate counts are safe; extracted assets remain excluded.",
+          "vi": "Số liệu tổng hợp an toàn; tài nguyên trích xuất vẫn bị loại."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-RESOURCE-MAP"]
+    },
+    {
+      "canonicalClaimId": "CLM-NO-EXTERNAL-GAME-CONFIG",
+      "order": 10,
+      "publicCopy": {
+        "en": "No asset filename uses plist, JSON, XML, TMX, CCBI, Lua, JavaScript, or CSV extensions, so no external level or gameplay configuration is present in those formats.",
+        "vi": "Không tên tệp tài nguyên nào dùng phần mở rộng plist, JSON, XML, TMX, CCBI, Lua, JavaScript hoặc CSV; vì vậy không có cấu hình level hay gameplay bên ngoài ở các định dạng đó."
+      },
+      "publicExcerpt": {
+        "en": "The inspected asset surface contains no external gameplay configuration in the named formats.",
+        "vi": "Bề mặt tài nguyên đã kiểm tra không có cấu hình gameplay ngoài ở các định dạng nêu trên."
+      },
+      "publicExplanation": {
+        "en": "This is a bounded negative finding, not proof that every rule lived in one function.",
+        "vi": "Đây là kết quả phủ định có phạm vi, không chứng minh mọi luật chơi nằm trong một hàm."
+      },
+      "displayQualifier": {
+        "en": "Recovered bounded absence.",
+        "vi": "Sự vắng mặt có phạm vi đã phục hồi."
+      },
+      "tags": ["resources", "configuration"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Only extension-level inventory is exposed.",
+          "vi": "Chỉ kiểm kê ở mức phần mở rộng được công bố."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-RESOURCE-MAP"]
+    },
+    {
+      "canonicalClaimId": "CLM-NATIVE-PRODUCT-SURFACE",
+      "order": 11,
+      "publicCopy": {
+        "en": "Surviving native dynamic symbols expose six named modes plus gameplay, scoring, timing, objectives, settings, and persistence systems.",
+        "vi": "Các symbol động native còn lại cho thấy sáu chế độ có tên cùng hệ thống gameplay, tính điểm, thời gian, mục tiêu, cài đặt và lưu trữ."
+      },
+      "publicExcerpt": {
+        "en": "Symbol names reveal the product's major system boundaries.",
+        "vi": "Tên symbol cho thấy các ranh giới hệ thống chính của sản phẩm."
+      },
+      "publicExplanation": {
+        "en": "Symbols establish a surface map, not recovered original source code.",
+        "vi": "Symbol tạo bản đồ bề mặt, không phải mã nguồn gốc đã phục hồi."
+      },
+      "displayQualifier": {
+        "en": "Recovered symbol surface.",
+        "vi": "Bề mặt symbol đã phục hồi."
+      },
+      "tags": ["native", "architecture"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Curated aggregate surface only.",
+          "vi": "Chỉ công bố bề mặt tổng hợp đã tuyển chọn."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-NATIVE-SUMMARY"]
+    },
+    {
+      "canonicalClaimId": "CLM-PHYSICS-WORLD-DEFAULTS",
+      "order": 12,
+      "publicCopy": {
+        "en": "PhysicsLayer creates a Box2D world with gravity (0.0, -10.0) and enables sleeping.",
+        "vi": "PhysicsLayer tạo world Box2D với trọng lực (0.0, -10.0) và bật chế độ sleeping."
+      },
+      "publicExcerpt": {
+        "en": "The base physics world uses the recovered gravity and sleep policy.",
+        "vi": "World vật lý cơ sở dùng trọng lực và chính sách sleep đã phục hồi."
+      },
+      "publicExplanation": {
+        "en": "The clean-room adapter reproduces this contract through supported Creator physics.",
+        "vi": "Adapter clean-room tái tạo hợp đồng này qua hệ vật lý Creator được hỗ trợ."
+      },
+      "displayQualifier": {
+        "en": "Recovered physics contract.",
+        "vi": "Hợp đồng vật lý đã phục hồi."
+      },
+      "tags": ["physics", "box2d"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Contract values are public-safe.",
+          "vi": "Giá trị hợp đồng an toàn để công bố."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS", "SRC-PUBLIC-PHYSICS-EQUIVALENCE"]
+    },
+    {
+      "canonicalClaimId": "CLM-PHYSICS-STEP-DEFAULTS",
+      "order": 13,
+      "publicCopy": {
+        "en": "PhysicsLayer uses 10 velocity and 10 position iterations, world-speed scale 1.0, and steps with deltaTime multiplied by world speed while active.",
+        "vi": "PhysicsLayer dùng 10 vòng lặp vận tốc, 10 vòng lặp vị trí, hệ số tốc độ world 1.0 và step với deltaTime nhân tốc độ world khi hoạt động."
+      },
+      "publicExcerpt": {
+        "en": "Physics stepping owns explicit iteration counts and a speed multiplier.",
+        "vi": "Bước vật lý sở hữu số vòng lặp tường minh và một hệ số tốc độ."
+      },
+      "publicExplanation": {
+        "en": "The reconstruction keeps these values explicit at the adapter boundary.",
+        "vi": "Bản phục dựng giữ các giá trị này tường minh tại ranh giới adapter."
+      },
+      "displayQualifier": {
+        "en": "Recovered physics contract.",
+        "vi": "Hợp đồng vật lý đã phục hồi."
+      },
+      "tags": ["physics", "step"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Contract values are public-safe.",
+          "vi": "Giá trị hợp đồng an toàn để công bố."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS", "SRC-PUBLIC-PHYSICS-EQUIVALENCE"]
+    },
+    {
+      "canonicalClaimId": "CLM-PHYSICS-WORLD-SPEED",
+      "order": 14,
+      "publicCopy": {
+        "en": "PhysicsLayer::FreezeeWorld sets world speed to 0.5, UnFreezeeWorld restores 1.0, and SetWorldSpeed stores the supplied multiplier.",
+        "vi": "PhysicsLayer::FreezeeWorld đặt tốc độ world thành 0.5, UnFreezeeWorld khôi phục 1.0 và SetWorldSpeed lưu hệ số được truyền vào."
+      },
+      "publicExcerpt": {
+        "en": "Freeze and thaw are world-speed changes, not a second simulation.",
+        "vi": "Đóng băng và rã băng là thay đổi tốc độ world, không phải mô phỏng thứ hai."
+      },
+      "publicExplanation": {
+        "en": "The named behavior was recovered despite the historical spelling.",
+        "vi": "Hành vi có tên này được phục hồi dù cách viết lịch sử khác thường."
+      },
+      "displayQualifier": {
+        "en": "Recovered physics contract.",
+        "vi": "Hợp đồng vật lý đã phục hồi."
+      },
+      "tags": ["physics", "time"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Contract values are public-safe.",
+          "vi": "Giá trị hợp đồng an toàn để công bố."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-PERSISTENCE-BACKEND",
+      "order": 15,
+      "publicCopy": {
+        "en": "Android persistence routes Cocos2d-x CCUserDefault operations through JNI to SharedPreferences named Cocos2dxPrefsFile; legacy UserDefault.xml is a separate read or migration path.",
+        "vi": "Lưu trữ Android chuyển các thao tác CCUserDefault của Cocos2d-x qua JNI tới SharedPreferences tên Cocos2dxPrefsFile; UserDefault.xml cũ là đường đọc hoặc di chuyển riêng."
+      },
+      "publicExcerpt": {
+        "en": "Typed preferences and legacy migration were distinct paths.",
+        "vi": "Preference có kiểu và đường di chuyển cũ là hai luồng riêng."
+      },
+      "publicExplanation": {
+        "en": "The reconstruction models the storage contract without embedding JNI or the old runtime.",
+        "vi": "Bản phục dựng mô hình hóa hợp đồng lưu trữ mà không nhúng JNI hay runtime cũ."
+      },
+      "displayQualifier": {
+        "en": "Recovered persistence contract.",
+        "vi": "Hợp đồng lưu trữ đã phục hồi."
+      },
+      "tags": ["storage", "android"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Behavioral contract only.",
+          "vi": "Chỉ công bố hợp đồng hành vi."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-SETTINGS-SAVE-SURFACE",
+      "order": 16,
+      "publicCopy": {
+        "en": "Settings::SaveData writes 50 integer and four boolean keys; LoadData supplies recovered defaults for currency, selections, scores, prices, objectives, audio, network sentinel, and rated state.",
+        "vi": "Settings::SaveData ghi 50 khóa số nguyên và bốn khóa boolean; LoadData cung cấp mặc định đã phục hồi cho tiền tệ, lựa chọn, điểm, giá, mục tiêu, âm thanh, sentinel mạng và trạng thái đánh giá."
+      },
+      "publicExcerpt": {
+        "en": "The settings surface has an exact typed-key denominator.",
+        "vi": "Bề mặt cài đặt có mẫu số khóa có kiểu chính xác."
+      },
+      "publicExplanation": {
+        "en": "Counts describe the recovered persistence surface, not public user data.",
+        "vi": "Số lượng mô tả bề mặt lưu trữ đã phục hồi, không phải dữ liệu người dùng công khai."
+      },
+      "displayQualifier": {
+        "en": "Recovered persistence contract.",
+        "vi": "Hợp đồng lưu trữ đã phục hồi."
+      },
+      "tags": ["storage", "settings"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Aggregate typed-key facts are public-safe.",
+          "vi": "Dữ kiện tổng hợp về khóa có kiểu an toàn để công bố."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-PHYSICS-UNITS",
+      "order": 17,
+      "publicCopy": {
+        "en": "Classic physics uses 32 legacy Cocos world units per Box2D metre, gravity (0,-10), and 10 velocity plus 10 position iterations.",
+        "vi": "Vật lý Classic dùng 32 đơn vị world Cocos cũ cho mỗi mét Box2D, trọng lực (0,-10), 10 vòng lặp vận tốc và 10 vòng lặp vị trí."
+      },
+      "publicExcerpt": {
+        "en": "A fixed 32-to-1 unit boundary connects presentation and physics.",
+        "vi": "Ranh giới đơn vị 32-đổi-1 cố định nối phần trình bày với vật lý."
+      },
+      "publicExplanation": {
+        "en": "Unit conversion remains explicit in the clean-room adapter.",
+        "vi": "Chuyển đổi đơn vị vẫn tường minh trong adapter clean-room."
+      },
+      "displayQualifier": {
+        "en": "Recovered Classic contract.",
+        "vi": "Hợp đồng Classic đã phục hồi."
+      },
+      "tags": ["classic", "physics"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Contract values are public-safe.",
+          "vi": "Giá trị hợp đồng an toàn để công bố."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS", "SRC-PUBLIC-PHYSICS-EQUIVALENCE"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-FIXTURES",
+      "order": 18,
+      "publicCopy": {
+        "en": "Classic Fruit and Bomb bodies use recovered shape formulas, density 1, friction 0.2, restitution 0, non-sensor fixtures, and bilateral filters rejecting normal Fruit-Fruit, Bomb-Bomb, and Fruit-Bomb contacts.",
+        "vi": "Body Fruit và Bomb của Classic dùng công thức hình dạng đã phục hồi, density 1, friction 0.2, restitution 0, fixture không phải sensor và bộ lọc hai chiều loại tiếp xúc Fruit-Fruit, Bomb-Bomb, Fruit-Bomb thông thường."
+      },
+      "publicExcerpt": {
+        "en": "Fixture material and collision rows are explicit recovered contracts.",
+        "vi": "Vật liệu fixture và các hàng va chạm là hợp đồng đã phục hồi tường minh."
+      },
+      "publicExplanation": {
+        "en": "Backend probes separately verify that the selected Creator implementation preserves the contract.",
+        "vi": "Phép dò backend xác minh riêng rằng cách triển khai Creator đã chọn giữ đúng hợp đồng."
+      },
+      "displayQualifier": {
+        "en": "Recovered and reconstruction-verified.",
+        "vi": "Đã phục hồi và được xác minh trên bản phục dựng."
+      },
+      "tags": ["classic", "fixtures"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Contract summary is public-safe.",
+          "vi": "Tóm tắt hợp đồng an toàn để công bố."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS", "SRC-PUBLIC-PHYSICS-EQUIVALENCE"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-ELECTRIC-CONTACT",
+      "order": 19,
+      "publicCopy": {
+        "en": "BombElectric uses node tag 1437 and a disabled static body with a zero-height box fixture, category 0x0003, mask 0x0002, and an electric contact listener.",
+        "vi": "BombElectric dùng node tag 1437 và body tĩnh bị vô hiệu với fixture hộp cao bằng 0, category 0x0003, mask 0x0002 cùng listener tiếp xúc điện."
+      },
+      "publicExcerpt": {
+        "en": "The electric boundary has exact tags, filters, and initial state.",
+        "vi": "Ranh giới điện có tag, bộ lọc và trạng thái ban đầu chính xác."
+      },
+      "publicExplanation": {
+        "en": "The static record is distinguished from later reconstruction backend verification.",
+        "vi": "Bản ghi tĩnh được tách biệt khỏi xác minh backend của bản phục dựng về sau."
+      },
+      "displayQualifier": {
+        "en": "Recovered Classic contract.",
+        "vi": "Hợp đồng Classic đã phục hồi."
+      },
+      "tags": ["classic", "electric"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Contract summary is public-safe.",
+          "vi": "Tóm tắt hợp đồng an toàn để công bố."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS", "SRC-PUBLIC-PHYSICS-EQUIVALENCE"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-TOSS-RNG",
+      "order": 20,
+      "publicCopy": {
+        "en": "Toss randomness lazily seeds process-global lrand48 from time(NULL); integer ranges are inclusive and nextFloat returns one of the ten deciles 0.0 through 0.9.",
+        "vi": "Ngẫu nhiên Toss khởi tạo lười lrand48 toàn tiến trình từ time(NULL); khoảng số nguyên bao gồm hai đầu và nextFloat trả về một trong mười mức từ 0.0 đến 0.9."
+      },
+      "publicExcerpt": {
+        "en": "Randomness uses one global stream and ten discrete float outcomes.",
+        "vi": "Ngẫu nhiên dùng một luồng toàn cục và mười kết quả số thực rời rạc."
+      },
+      "publicExplanation": {
+        "en": "The clean-room implementation exposes the random seam for deterministic tests.",
+        "vi": "Bản clean-room mở seam ngẫu nhiên để kiểm thử xác định."
+      },
+      "displayQualifier": {
+        "en": "Recovered randomness contract.",
+        "vi": "Hợp đồng ngẫu nhiên đã phục hồi."
+      },
+      "tags": ["classic", "random"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Behavioral contract only.",
+          "vi": "Chỉ công bố hợp đồng hành vi."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-TOSS-GRAPH",
+      "order": 21,
+      "publicCopy": {
+        "en": "Classic runs a fixed graph of nine Free, Concurrent, and Wave toss controllers with recovered intervals, strict greater-than expiry, object types, directions, ordering, and spawn formulas.",
+        "vi": "Classic chạy đồ thị cố định gồm chín bộ điều khiển tung Free, Concurrent và Wave với khoảng thời gian, điều kiện hết hạn lớn-hơn nghiêm ngặt, loại vật thể, hướng, thứ tự và công thức spawn đã phục hồi."
+      },
+      "publicExcerpt": {
+        "en": "Nine coordinated toss owners define the Classic spawn graph.",
+        "vi": "Chín chủ sở hữu tung phối hợp xác định đồ thị spawn của Classic."
+      },
+      "publicExplanation": {
+        "en": "The graph is reconstructed as reviewed behavior rather than copied native code.",
+        "vi": "Đồ thị được phục dựng như hành vi đã rà soát, không sao chép mã native."
+      },
+      "displayQualifier": {
+        "en": "Recovered orchestration contract.",
+        "vi": "Hợp đồng điều phối đã phục hồi."
+      },
+      "tags": ["classic", "toss"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Curated contract summary only.",
+          "vi": "Chỉ tóm tắt hợp đồng đã tuyển chọn."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-BLADE-QUERY",
+      "order": 22,
+      "publicCopy": {
+        "en": "Classic blade input owns four touch slots, extends active segments by trunc(viewportWidth/16), raycasts forward and reverse after physics, applies recovered filters, and performs no value-level fixture deduplication.",
+        "vi": "Đầu vào lưỡi dao Classic sở hữu bốn touch slot, kéo dài đoạn hoạt động thêm trunc(viewportWidth/16), raycast xuôi và ngược sau bước vật lý, áp dụng bộ lọc đã phục hồi và không khử trùng fixture theo giá trị."
+      },
+      "publicExcerpt": {
+        "en": "Four blade tracks feed two ordered raycasts without value-level deduplication.",
+        "vi": "Bốn track lưỡi dao cấp vào hai raycast có thứ tự mà không khử trùng theo giá trị."
+      },
+      "publicExplanation": {
+        "en": "Duplicate-preserving query order is part of the recovered scoring boundary.",
+        "vi": "Thứ tự truy vấn giữ trùng lặp là một phần ranh giới tính điểm đã phục hồi."
+      },
+      "displayQualifier": {
+        "en": "Recovered input and query contract.",
+        "vi": "Hợp đồng đầu vào và truy vấn đã phục hồi."
+      },
+      "tags": ["classic", "blade"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Behavioral contract only.",
+          "vi": "Chỉ công bố hợp đồng hành vi."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS", "SRC-PUBLIC-PHYSICS-EQUIVALENCE"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-FRUIT-SCORE",
+      "order": 23,
+      "publicCopy": {
+        "en": "Fruit scores 1 normally and 10 when critical; Classic IDs 13 and 14 start electric or magnet behavior and submit 10, while other IDs submit the supplied Fruit score.",
+        "vi": "Fruit ghi 1 điểm thông thường và 10 điểm khi critical; ID Classic 13 và 14 khởi động hành vi điện hoặc nam châm rồi gửi 10 điểm, còn ID khác gửi điểm Fruit được cung cấp."
+      },
+      "publicExcerpt": {
+        "en": "Special fruit IDs branch into effects while preserving exact score operands.",
+        "vi": "ID trái cây đặc biệt rẽ sang hiệu ứng nhưng giữ toán hạng điểm chính xác."
+      },
+      "publicExplanation": {
+        "en": "Score submission and presentation effects remain separate owners.",
+        "vi": "Gửi điểm và hiệu ứng trình bày vẫn do các chủ sở hữu riêng quản lý."
+      },
+      "displayQualifier": {
+        "en": "Recovered scoring contract.",
+        "vi": "Hợp đồng tính điểm đã phục hồi."
+      },
+      "tags": ["classic", "score"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Behavioral contract only.",
+          "vi": "Chỉ công bố hợp đồng hành vi."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-COMBO",
+      "order": 24,
+      "publicCopy": {
+        "en": "Classic combo scoring uses a rolling 0.25-second window; after a gap greater than 0.25 seconds, clusters of at least three cuts add a bonus equal to the cut count.",
+        "vi": "Tính điểm combo Classic dùng cửa sổ trượt 0,25 giây; sau khoảng cách lớn hơn 0,25 giây, cụm ít nhất ba lần cắt cộng bonus bằng số lần cắt."
+      },
+      "publicExcerpt": {
+        "en": "Combo closure uses a strict time boundary and minimum cluster size.",
+        "vi": "Kết thúc combo dùng ranh giới thời gian nghiêm ngặt và kích thước cụm tối thiểu."
+      },
+      "publicExplanation": {
+        "en": "Smaller clusters intentionally add no combo bonus.",
+        "vi": "Cụm nhỏ hơn chủ ý không cộng bonus combo."
+      },
+      "displayQualifier": {
+        "en": "Recovered scoring contract.",
+        "vi": "Hợp đồng tính điểm đã phục hồi."
+      },
+      "tags": ["classic", "combo"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Behavioral contract only.",
+          "vi": "Chỉ công bố hợp đồng hành vi."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-DOUBLE-SCORE",
+      "order": 25,
+      "publicCopy": {
+        "en": "Double score activates immediately, accumulates signed score during a 1-second intro and 15-second delay, then clears and flushes the pending value multiplied by two through normal AddScore.",
+        "vi": "Double score kích hoạt ngay, tích lũy điểm có dấu trong intro 1 giây và khoảng chờ 15 giây, sau đó tắt và đẩy giá trị chờ nhân hai qua AddScore thông thường."
+      },
+      "publicExcerpt": {
+        "en": "A pending bucket preserves score ordering across the timed effect.",
+        "vi": "Bucket chờ giữ thứ tự điểm xuyên suốt hiệu ứng có thời gian."
+      },
+      "publicExplanation": {
+        "en": "The recovered timing includes the intro and delayed flush, not only a multiplier.",
+        "vi": "Thời gian đã phục hồi gồm intro và lần flush trễ, không chỉ hệ số nhân."
+      },
+      "displayQualifier": {
+        "en": "Recovered scoring contract.",
+        "vi": "Hợp đồng tính điểm đã phục hồi."
+      },
+      "tags": ["classic", "score"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Behavioral contract only.",
+          "vi": "Chỉ công bố hợp đồng hành vi."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-FAIL-GAMEOVER",
+      "order": 26,
+      "publicCopy": {
+        "en": "Classic queues callbacks for the first three misses; outstanding callbacks can observe the shared count of three, while a guard keeps terminal GameOver idempotent. BombHit disables cuts, stops toss and physics, subtracts 10, and later enters guarded GameOver.",
+        "vi": "Classic xếp callback cho ba lần bỏ lỡ đầu; callback còn tồn tại có thể thấy bộ đếm chung bằng ba, còn guard giữ GameOver kết thúc idempotent. BombHit tắt cắt, dừng tung và vật lý, trừ 10 điểm rồi đi vào GameOver có guard."
+      },
+      "publicExcerpt": {
+        "en": "Shared miss callbacks and terminal guards are distinct lifecycle contracts.",
+        "vi": "Callback bỏ lỡ dùng chung và guard kết thúc là các hợp đồng vòng đời riêng."
+      },
+      "publicExplanation": {
+        "en": "The reconstruction preserves concurrency without allowing duplicate terminal ownership.",
+        "vi": "Bản phục dựng giữ hành vi đồng thời mà không cho phép sở hữu kết thúc trùng lặp."
+      },
+      "displayQualifier": {
+        "en": "Recovered lifecycle contract.",
+        "vi": "Hợp đồng vòng đời đã phục hồi."
+      },
+      "tags": ["classic", "game-over"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Curated lifecycle summary only.",
+          "vi": "Chỉ tóm tắt vòng đời đã tuyển chọn."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-UNTIMED-START",
+      "order": 27,
+      "publicCopy": {
+        "en": "Standard Classic is mode 0, owns no TimeManager, keeps cut input enabled through the 1.5-second Good/Luck intro, and starts its nine toss controllers when the Luck sequence completes.",
+        "vi": "Classic tiêu chuẩn là mode 0, không sở hữu TimeManager, giữ đầu vào cắt bật trong intro Good/Luck 1,5 giây và khởi động chín bộ điều khiển tung khi chuỗi Luck kết thúc."
+      },
+      "publicExcerpt": {
+        "en": "Classic is untimed and input remains live during its intro.",
+        "vi": "Classic không tính giờ và đầu vào vẫn hoạt động trong intro."
+      },
+      "publicExplanation": {
+        "en": "Intro presentation and gameplay activation have separate timing boundaries.",
+        "vi": "Trình bày intro và kích hoạt gameplay có ranh giới thời gian riêng."
+      },
+      "displayQualifier": {
+        "en": "Recovered mode lifecycle.",
+        "vi": "Vòng đời chế độ đã phục hồi."
+      },
+      "tags": ["classic", "lifecycle"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Behavioral contract only.",
+          "vi": "Chỉ công bố hợp đồng hành vi."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-WORLD-SPEED-PAUSE",
+      "order": 28,
+      "publicCopy": {
+        "en": "Classic rearms a 30-second action that adds float32 0.1 while pre-add world speed is below 2.0. Pause takes effect after a 0.25-second entrance; resume restarts the director before its 0.25-second exit.",
+        "vi": "Classic lặp lại action 30 giây, cộng float32 0.1 khi tốc độ world trước phép cộng dưới 2.0. Pause có hiệu lực sau đoạn vào 0,25 giây; resume khởi động director trước đoạn ra 0,25 giây."
+      },
+      "publicExcerpt": {
+        "en": "World acceleration and pause transitions retain their exact ordering.",
+        "vi": "Tăng tốc world và chuyển trạng thái pause giữ đúng thứ tự."
+      },
+      "publicExplanation": {
+        "en": "Float32 and pre-add comparison details are part of the contract.",
+        "vi": "Chi tiết float32 và so sánh trước phép cộng là một phần hợp đồng."
+      },
+      "displayQualifier": {
+        "en": "Recovered timing contract.",
+        "vi": "Hợp đồng thời gian đã phục hồi."
+      },
+      "tags": ["classic", "pause"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Behavioral contract only.",
+          "vi": "Chỉ công bố hợp đồng hành vi."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-BOMB-TERMINATION",
+      "order": 29,
+      "publicCopy": {
+        "en": "A Classic bomb hit stops physics before subtracting 10, then runs 0.25 seconds of delay, a 1.0-second white quad, and 1.25 seconds of white triangles before guarded GameOver and physics resume.",
+        "vi": "Bom Classic dừng vật lý trước khi trừ 10 điểm, sau đó chạy trễ 0,25 giây, quad trắng 1,0 giây và tam giác trắng 1,25 giây trước GameOver có guard và tiếp tục vật lý."
+      },
+      "publicExcerpt": {
+        "en": "Bomb termination has a fixed visual and lifecycle sequence.",
+        "vi": "Kết thúc do bom có chuỗi trình bày và vòng đời cố định."
+      },
+      "publicExplanation": {
+        "en": "Terminal guard, pending misses, and same-query explosions remain independent.",
+        "vi": "Guard kết thúc, lần bỏ lỡ chờ và vụ nổ cùng truy vấn vẫn độc lập."
+      },
+      "displayQualifier": {
+        "en": "Recovered terminal contract.",
+        "vi": "Hợp đồng kết thúc đã phục hồi."
+      },
+      "tags": ["classic", "bomb"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Curated lifecycle summary only.",
+          "vi": "Chỉ tóm tắt vòng đời đã tuyển chọn."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-TIME-MANAGER-LIFECYCLE",
+      "order": 30,
+      "publicCopy": {
+        "en": "Timed modes share a TimeManager with separately recovered scheduling, countdown, warning, expiry, callback, freeze, and thaw behavior; Start schedules, Stop unschedules, and Restart resets remaining time and warning second.",
+        "vi": "Các chế độ tính giờ dùng chung TimeManager với hành vi lập lịch, đếm ngược, cảnh báo, hết hạn, callback, đóng băng và rã băng được phục hồi riêng; Start lập lịch, Stop hủy lịch và Restart đặt lại thời gian còn lại cùng giây cảnh báo."
+      },
+      "publicExcerpt": {
+        "en": "TimeManager operations have deliberately narrow ownership.",
+        "vi": "Các thao tác TimeManager có phạm vi sở hữu hẹp có chủ ý."
+      },
+      "publicExplanation": {
+        "en": "Restart does not silently recreate every timer-owned state.",
+        "vi": "Restart không âm thầm tạo lại mọi trạng thái do bộ đếm giờ sở hữu."
+      },
+      "displayQualifier": {
+        "en": "Recovered shared timing contract.",
+        "vi": "Hợp đồng thời gian dùng chung đã phục hồi."
+      },
+      "tags": ["time", "modes"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Behavioral contract only.",
+          "vi": "Chỉ công bố hợp đồng hành vi."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-RESOLUTION-PROFILE",
+      "order": 31,
+      "publicCopy": {
+        "en": "Physical width at least 720 selects the 720x1280 tree and design resolution; lower widths select 480x800. Both use legacy policy argument 2 and content scale factor 1.0.",
+        "vi": "Chiều rộng vật lý từ 720 trở lên chọn cây và độ phân giải thiết kế 720x1280; thấp hơn chọn 480x800. Cả hai dùng đối số policy cũ 2 và content scale factor 1.0."
+      },
+      "publicExcerpt": {
+        "en": "Two exact presentation profiles are selected by physical width.",
+        "vi": "Hai profile trình bày chính xác được chọn theo chiều rộng vật lý."
+      },
+      "publicExplanation": {
+        "en": "The reconstruction preserves the branch while adapting it to supported Creator resolution APIs.",
+        "vi": "Bản phục dựng giữ nhánh lựa chọn và thích nghi với API độ phân giải Creator được hỗ trợ."
+      },
+      "displayQualifier": {
+        "en": "Recovered resolution contract.",
+        "vi": "Hợp đồng độ phân giải đã phục hồi."
+      },
+      "tags": ["classic", "resolution"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Profile values are public-safe.",
+          "vi": "Giá trị profile an toàn để công bố."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS", "SRC-PUBLIC-COMPATIBILITY"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-PRESENTATION-ASSETS",
+      "order": 32,
+      "publicCopy": {
+        "en": "Every minimum Classic presentation asset in the contract has registered 480x800 and 720x1280 metadata; shared fonts and recovered sounds are cataloged separately, and presence is not treated as recovered runtime use.",
+        "vi": "Mọi tài nguyên trình bày Classic tối thiểu trong hợp đồng đều có siêu dữ liệu 480x800 và 720x1280 đã đăng ký; font dùng chung và âm thanh phục hồi được lập danh mục riêng, và sự hiện diện không được xem là bằng chứng đã dùng khi chạy."
+      },
+      "publicExcerpt": {
+        "en": "Asset presence, runtime use, and rights are three separate questions.",
+        "vi": "Sự hiện diện tài nguyên, việc dùng khi chạy và quyền là ba câu hỏi riêng."
+      },
+      "publicExplanation": {
+        "en": "The presentation contract does not convert recovered assets into distributable editorial media.",
+        "vi": "Hợp đồng trình bày không biến tài nguyên phục hồi thành media biên tập có thể phân phối."
+      },
+      "displayQualifier": {
+        "en": "Recovered inventory; usage and rights qualified.",
+        "vi": "Kiểm kê đã phục hồi; việc dùng và quyền có điều kiện."
+      },
+      "tags": ["classic", "resources"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Aggregate contract only; recovered files stay excluded.",
+          "vi": "Chỉ công bố hợp đồng tổng hợp; tệp phục hồi vẫn bị loại."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS", "SRC-PUBLIC-RESOURCE-RECONCILIATION"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-PRESENTATION-FLOW",
+      "order": 33,
+      "publicCopy": {
+        "en": "Classic presentation recovers same-parent mode handoff, Good/Luck tracks, score and fail HUD formulas, bomb flash, guarded Game/Over tracks, and DisplayScore replacement ordering with anchors, z-order, and nominal timings.",
+        "vi": "Trình bày Classic phục hồi handoff mode cùng parent, track Good/Luck, công thức HUD điểm và lỗi, flash bom, track Game/Over có guard cùng thứ tự thay DisplayScore với anchor, z-order và thời gian danh nghĩa."
+      },
+      "publicExcerpt": {
+        "en": "Presentation is a timed ownership graph, not a screenshot match.",
+        "vi": "Trình bày là đồ thị sở hữu có thời gian, không phải đối chiếu ảnh chụp."
+      },
+      "publicExplanation": {
+        "en": "The claim is bounded to statically recovered contracts and clean-room verification.",
+        "vi": "Tuyên bố được giới hạn ở hợp đồng phục hồi tĩnh và xác minh clean-room."
+      },
+      "displayQualifier": {
+        "en": "Recovered presentation contract.",
+        "vi": "Hợp đồng trình bày đã phục hồi."
+      },
+      "tags": ["classic", "presentation"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Curated contract summary only.",
+          "vi": "Chỉ tóm tắt hợp đồng đã tuyển chọn."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-CLASSIC-AUDIO-BOUNDARY",
+      "order": 34,
+      "publicCopy": {
+        "en": "Classic audio recovers effects-gated selection before handoff, bomb entry and explosion requests around retained-handle stops, stopAllEffects before result replacement, and conditional rank audio order.",
+        "vi": "Âm thanh Classic phục hồi lựa chọn có cổng effects trước handoff, yêu cầu âm thanh vào bom và nổ quanh thao tác dừng handle được giữ, stopAllEffects trước khi thay kết quả và thứ tự âm thanh xếp hạng có điều kiện."
+      },
+      "publicExcerpt": {
+        "en": "Audio requests and retained handles have explicit lifecycle order.",
+        "vi": "Yêu cầu âm thanh và handle được giữ có thứ tự vòng đời tường minh."
+      },
+      "publicExplanation": {
+        "en": "Audio files themselves remain outside standalone editorial publication.",
+        "vi": "Bản thân tệp âm thanh vẫn nằm ngoài phạm vi công bố biên tập độc lập."
+      },
+      "displayQualifier": {
+        "en": "Recovered audio contract; media rights separate.",
+        "vi": "Hợp đồng âm thanh đã phục hồi; quyền media tách riêng."
+      },
+      "tags": ["classic", "audio"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Only request ordering is presented; audio bytes stay excluded.",
+          "vi": "Chỉ trình bày thứ tự yêu cầu; byte âm thanh vẫn bị loại."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-BASIC-BLADE-PRESENTATION",
+      "order": 35,
+      "publicCopy": {
+        "en": "Default blade ID 0 creates four independent BasicBlade trails using paired blade0.png bytes, a ten-point path, 11-to-9 overflow, frame-count disposal, recovered float32 geometry and UVs, and a 20-byte textured triangle-strip vertex layout.",
+        "vi": "Lưỡi dao mặc định ID 0 tạo bốn trail BasicBlade độc lập bằng cặp byte blade0.png, đường 10 điểm, overflow 11-về-9, hủy theo số frame, hình học và UV float32 đã phục hồi cùng layout vertex triangle-strip có texture 20 byte."
+      },
+      "publicExcerpt": {
+        "en": "The default trail has exact path, lifetime, geometry, and buffer contracts.",
+        "vi": "Trail mặc định có hợp đồng chính xác về đường đi, vòng đời, hình học và buffer."
+      },
+      "publicExplanation": {
+        "en": "The texture identity is verified inside the game build but not republished as standalone media.",
+        "vi": "Danh tính texture được xác minh trong bản dựng game nhưng không được tái công bố như media độc lập."
+      },
+      "displayQualifier": {
+        "en": "Recovered and reconstruction-verified.",
+        "vi": "Đã phục hồi và được xác minh trên bản phục dựng."
+      },
+      "tags": ["blade", "rendering"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Contract summary is public; recovered texture bytes stay scoped to the audited H5 tree.",
+          "vi": "Tóm tắt hợp đồng được công bố; byte texture phục hồi chỉ nằm trong cây H5 đã kiểm toán."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS", "SRC-PUBLIC-TECHNICAL-CLOSEOUT"]
+    },
+    {
+      "canonicalClaimId": "CLM-SHARED-GAME-SCENE-PRESENTATION",
+      "order": 36,
+      "publicCopy": {
+        "en": "GameScene tags Background, Leaf, Theme, and MainMenu as 0,1,2,3 but inserts every root at z-order 1; clean defaults select background 0 and theme 2, while Leaf owns seven opacity-32 sprites in an independent stepped world.",
+        "vi": "GameScene gắn tag Background, Leaf, Theme và MainMenu là 0,1,2,3 nhưng chèn mọi root ở z-order 1; mặc định clean chọn background 0 và theme 2, còn Leaf sở hữu bảy sprite opacity 32 trong world step độc lập."
+      },
+      "publicExcerpt": {
+        "en": "Equal-z insertion order and the independent leaf world define the shared scene.",
+        "vi": "Thứ tự chèn cùng z và world lá độc lập xác định scene dùng chung."
+      },
+      "publicExplanation": {
+        "en": "The logical composite is reconstructed from contracts, not from executing the original.",
+        "vi": "Composite logic được phục dựng từ hợp đồng, không từ việc chạy bản gốc."
+      },
+      "displayQualifier": {
+        "en": "Recovered scene contract.",
+        "vi": "Hợp đồng scene đã phục hồi."
+      },
+      "tags": ["scene", "presentation"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Curated contract summary only.",
+          "vi": "Chỉ tóm tắt hợp đồng đã tuyển chọn."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-MAIN-MENU-PRESENTATION",
+      "order": 37,
+      "publicCopy": {
+        "en": "The clean/default boot composite is specified across shared, BasicBlade, and MainMenu contracts: equal-z insertion, four default trails, exact shell/layout/actions, three cuttable FruitButtons, review-heart drawing, toggles, audio, and same-parent navigation.",
+        "vi": "Composite boot clean/mặc định được đặc tả qua các hợp đồng shared, BasicBlade và MainMenu: chèn cùng z, bốn trail mặc định, shell/layout/action chính xác, ba FruitButton có thể cắt, vẽ tim đánh giá, toggle, âm thanh và điều hướng cùng parent."
+      },
+      "publicExcerpt": {
+        "en": "The Main Menu is a cross-contract logical composite.",
+        "vi": "Main Menu là composite logic xuyên nhiều hợp đồng."
+      },
+      "publicExplanation": {
+        "en": "Exact refers to the recovered contract denominator, not original-runtime identity.",
+        "vi": "Chính xác ở đây nói đến mẫu số hợp đồng đã phục hồi, không phải giống hệt runtime gốc."
+      },
+      "displayQualifier": {
+        "en": "Recovered logical presentation contract.",
+        "vi": "Hợp đồng trình bày logic đã phục hồi."
+      },
+      "tags": ["menu", "presentation"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Curated contract summary only.",
+          "vi": "Chỉ tóm tắt hợp đồng đã tuyển chọn."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-MODE-SELECT-PRESENTATION",
+      "order": 38,
+      "publicCopy": {
+        "en": "The clean/default Mode Select composite includes exact shell order, a six-card RopeButton rail, frame-based drag and flick with two-unit snap, FruitButton locks, a 2500-coin persistence asymmetry, a 45-particle unlock burst, audio, and same-parent navigation.",
+        "vi": "Composite Mode Select clean/mặc định gồm thứ tự shell chính xác, rail sáu thẻ RopeButton, kéo và flick theo frame với snap hai đơn vị, khóa FruitButton, bất đối xứng lưu trữ 2.500 coin, burst mở khóa 45 particle, âm thanh và điều hướng cùng parent."
+      },
+      "publicExcerpt": {
+        "en": "Mode Select combines navigation, scrolling, locks, persistence, and presentation contracts.",
+        "vi": "Mode Select kết hợp hợp đồng điều hướng, cuộn, khóa, lưu trữ và trình bày."
+      },
+      "publicExplanation": {
+        "en": "Exact refers to the reviewed recoverable contract, not a claim of observed historical frames.",
+        "vi": "Chính xác nói đến hợp đồng có thể phục hồi đã rà soát, không phải tuyên bố đã quan sát frame lịch sử."
+      },
+      "displayQualifier": {
+        "en": "Recovered logical presentation contract.",
+        "vi": "Hợp đồng trình bày logic đã phục hồi."
+      },
+      "tags": ["mode-select", "presentation"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "Curated contract summary only.",
+          "vi": "Chỉ tóm tắt hợp đồng đã tuyển chọn."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-CLAIMS"]
+    },
+    {
+      "canonicalClaimId": "CLM-CONTENT-RIGHTS",
+      "order": 39,
+      "publicCopy": {
+        "en": "Redistribution rights for the product name, artwork, fonts, music, code, and other original content are unknown and not commercially cleared.",
+        "vi": "Quyền phân phối lại tên sản phẩm, hình ảnh, phông chữ, âm nhạc, mã nguồn và nội dung gốc khác chưa được xác định và chưa được chấp thuận thương mại."
+      },
+      "publicExcerpt": {
+        "en": "Commercial content rights remain unresolved.",
+        "vi": "Quyền thương mại đối với nội dung vẫn chưa được làm rõ."
+      },
+      "publicExplanation": {
+        "en": "The separate academic display decision does not change this canonical rights status.",
+        "vi": "Quyết định hiển thị học thuật riêng không thay đổi trạng thái quyền chuẩn này."
+      },
+      "displayQualifier": {
+        "en": "Unknown; commercial release remains blocked.",
+        "vi": "Chưa xác định; phát hành thương mại vẫn bị chặn."
+      },
+      "tags": ["rights", "release"],
+      "redaction": {
+        "disposition": "public",
+        "reason": {
+          "en": "The unresolved status must remain visible.",
+          "vi": "Trạng thái chưa được làm rõ phải luôn hiển thị."
+        }
+      },
+      "publicSourceIds": ["SRC-PUBLIC-COMMERCIAL-RIGHTS", "SRC-PUBLIC-RIGHTS-CHECKLIST"]
+    }
+  ],
+  "media": [
+    {
+      "mediaId": "MEDIA-H5-AUDITED-TREE",
+      "kind": "audited-runtime-tree",
+      "publishable": true,
+      "provenance": {
+        "path": "game/build/web-mobile-pages",
+        "files": 2539,
+        "bytes": 39613694,
+        "treeDigestSha256": "90f0fed3042364f02cfb6dbe888d32561c71ca9a2218d4316f2ae8a879cb2b54"
+      },
+      "alt": {
+        "en": "Audited clean-room Pencil Blade H5 game tree.",
+        "vi": "Cây game H5 Pencil Blade clean-room đã được kiểm toán."
+      },
+      "caption": {
+        "en": "Exact audited H5 reconstruction tree; not the original runtime.",
+        "vi": "Cây phục dựng H5 đã kiểm toán chính xác; không phải môi trường chạy gốc."
+      },
+      "transformationHistory": ["Cocos Creator 3.8.8 Web Mobile build", "strict tree audit"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-PRODUCTION-480-MAIN-MENU",
+      "kind": "runtime-capture",
+      "publishable": true,
+      "provenance": {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-480x800-main-menu.png",
+        "sha256": "a78387d8d54b5b7de0176ef0722f4ce78092a7531a0863f560fa50e47d20608c",
+        "width": 480,
+        "height": 800
+      },
+      "alt": {
+        "en": "Reconstruction Main Menu at 480 by 800.",
+        "vi": "Main Menu của bản phục dựng ở 480 x 800."
+      },
+      "caption": {
+        "en": "Production reconstruction capture; not an original-runtime capture.",
+        "vi": "Ảnh chụp production của bản phục dựng; không phải ảnh runtime gốc."
+      },
+      "transformationHistory": ["Captured from audited production H5", "no pixel modification"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-PRODUCTION-480-MODE-SELECT",
+      "kind": "runtime-capture",
+      "publishable": true,
+      "provenance": {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-480x800-mode-select.png",
+        "sha256": "f5bc44358c043020709f99d28c6e3a5d16ce4623681084a286c45f4cb4f2a4c8",
+        "width": 480,
+        "height": 800
+      },
+      "alt": {
+        "en": "Reconstruction Mode Select at 480 by 800.",
+        "vi": "Mode Select của bản phục dựng ở 480 x 800."
+      },
+      "caption": {
+        "en": "Production reconstruction capture; not an original-runtime capture.",
+        "vi": "Ảnh chụp production của bản phục dựng; không phải ảnh runtime gốc."
+      },
+      "transformationHistory": ["Captured from audited production H5", "no pixel modification"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-PRODUCTION-480-CLASSIC",
+      "kind": "runtime-capture",
+      "publishable": true,
+      "provenance": {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-480x800-classic.png",
+        "sha256": "f8f9a6a2677fd4c86fc1212d5a15de2992676443b067744f553cbcfa56191a1e",
+        "width": 480,
+        "height": 800
+      },
+      "alt": {
+        "en": "Reconstruction Classic gameplay at 480 by 800.",
+        "vi": "Gameplay Classic của bản phục dựng ở 480 x 800."
+      },
+      "caption": {
+        "en": "Production reconstruction capture; not an original-runtime capture.",
+        "vi": "Ảnh chụp production của bản phục dựng; không phải ảnh runtime gốc."
+      },
+      "transformationHistory": ["Captured from audited production H5", "no pixel modification"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-PRODUCTION-720-MAIN-MENU",
+      "kind": "runtime-capture",
+      "publishable": true,
+      "provenance": {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-720x1280-main-menu.png",
+        "sha256": "81e53faeaa21b0b05ea2c7fefe6e7161fbecccaa21ea8131969ddcdbbe6daf70",
+        "width": 720,
+        "height": 1280
+      },
+      "alt": {
+        "en": "Reconstruction Main Menu at 720 by 1280.",
+        "vi": "Main Menu của bản phục dựng ở 720 x 1280."
+      },
+      "caption": {
+        "en": "Production reconstruction capture; not an original-runtime capture.",
+        "vi": "Ảnh chụp production của bản phục dựng; không phải ảnh runtime gốc."
+      },
+      "transformationHistory": ["Captured from audited production H5", "no pixel modification"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-PRODUCTION-720-MODE-SELECT",
+      "kind": "runtime-capture",
+      "publishable": true,
+      "provenance": {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-720x1280-mode-select.png",
+        "sha256": "87f55b4aafb01d346c7ce8a98a7b9ab4958ba9c5842b950ffff132b2b93055b5",
+        "width": 720,
+        "height": 1280
+      },
+      "alt": {
+        "en": "Reconstruction Mode Select at 720 by 1280.",
+        "vi": "Mode Select của bản phục dựng ở 720 x 1280."
+      },
+      "caption": {
+        "en": "Production reconstruction capture; not an original-runtime capture.",
+        "vi": "Ảnh chụp production của bản phục dựng; không phải ảnh runtime gốc."
+      },
+      "transformationHistory": ["Captured from audited production H5", "no pixel modification"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-PRODUCTION-720-CLASSIC",
+      "kind": "runtime-capture",
+      "publishable": true,
+      "provenance": {
+        "path": "plans/260721-2253-pencil-blade-restoration/reports/runtime-matrix/production-pages/chrome-720x1280-classic.png",
+        "sha256": "80efc4c60ee39ae020fce7cff3ce2d6519d3c6393e777dd9889d1f4f39477991",
+        "width": 720,
+        "height": 1280
+      },
+      "alt": {
+        "en": "Reconstruction Classic gameplay at 720 by 1280.",
+        "vi": "Gameplay Classic của bản phục dựng ở 720 x 1280."
+      },
+      "caption": {
+        "en": "Production reconstruction capture; not an original-runtime capture.",
+        "vi": "Ảnh chụp production của bản phục dựng; không phải ảnh runtime gốc."
+      },
+      "transformationHistory": ["Captured from audited production H5", "no pixel modification"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-BRAND-CASE-STUDY-MARK",
+      "kind": "project-authored-brand-svg",
+      "publishable": true,
+      "provenance": {
+        "path": "site/src/assets/brand/case-study-mark.svg",
+        "sha256": "e79b68e0be21801ff5a1d5a064ec6a9142b27a1f35dd48067e77a57bbbdf460e",
+        "width": 192,
+        "height": 192
+      },
+      "alt": {
+        "en": "A pencil crosses an evidence registration mark.",
+        "vi": "Một cây bút chì cắt qua dấu định vị bằng chứng."
+      },
+      "caption": {
+        "en": "Project-authored case-study identity; no recovered artwork.",
+        "vi": "Nhận diện do dự án tự tạo; không dùng hình ảnh phục hồi."
+      },
+      "transformationHistory": ["authored as sanitized SVG", "no external references"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-BRAND-LAB-LINEWORK",
+      "kind": "project-authored-diagram-svg",
+      "publishable": true,
+      "provenance": {
+        "path": "site/src/assets/brand/lab-linework.svg",
+        "sha256": "e98ce54bbca952f2eb645a2a7ecba701e23feb167ea7d8628efb48761ea12d9a",
+        "width": 960,
+        "height": 320
+      },
+      "alt": {
+        "en": "An abstract evidence workbench from APK artifact to measured proof.",
+        "vi": "Bàn bằng chứng trừu tượng từ hiện vật APK đến kiểm chứng đo được."
+      },
+      "caption": {
+        "en": "Project-authored evidence-chain linework; no recovered artwork.",
+        "vi": "Đường nét chuỗi bằng chứng do dự án tự tạo; không dùng hình ảnh phục hồi."
+      },
+      "transformationHistory": ["authored as sanitized SVG", "no external references"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-PLAY-PREVIEW-SHARED",
+      "kind": "runtime-display-derivative",
+      "publishable": true,
+      "provenance": {
+        "path": "site/src/assets/media/shared/play-preview.png",
+        "sha256": "a78387d8d54b5b7de0176ef0722f4ce78092a7531a0863f560fa50e47d20608c",
+        "width": 480,
+        "height": 800,
+        "sourceMediaId": "MEDIA-PRODUCTION-480-MAIN-MENU"
+      },
+      "alt": {
+        "en": "Reconstruction Main Menu at 480 by 800; not the original runtime.",
+        "vi": "Main Menu của bản phục dựng ở 480 x 800; không phải runtime gốc."
+      },
+      "caption": {
+        "en": "Exact byte copy of the waiver-scoped production reconstruction capture.",
+        "vi": "Bản sao byte chính xác của ảnh production bản phục dựng trong phạm vi miễn trừ."
+      },
+      "transformationHistory": ["exact byte copy from MEDIA-PRODUCTION-480-MAIN-MENU", "no pixel modification"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-FAVICON-SVG",
+      "kind": "project-authored-brand-svg",
+      "publishable": true,
+      "provenance": {
+        "path": "site/public/favicon.svg",
+        "sha256": "c3108c2e85d5a25a1aee0b3f21730538919e5ec7ce71ac21d05b7236f7311af9",
+        "width": 64,
+        "height": 64
+      },
+      "alt": {
+        "en": "Pencil case-study favicon.",
+        "vi": "Favicon cây bút chì của hồ sơ."
+      },
+      "caption": {
+        "en": "Project-authored site identity.",
+        "vi": "Nhận diện trang do dự án tự tạo."
+      },
+      "transformationHistory": ["authored as sanitized SVG", "no external references"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-SOCIAL-EN-SVG",
+      "kind": "project-authored-social-source",
+      "publishable": true,
+      "provenance": {
+        "path": "site/public/social/pencil-blade-en.svg",
+        "sha256": "4662ff5656ffbaa312f24c76bc5772bce53f0d1cdc5394838db87053192a5ada",
+        "width": 1200,
+        "height": 630,
+        "locale": "en",
+        "route": "/"
+      },
+      "alt": {
+        "en": "Pencil Blade evidence-to-reconstruction social preview.",
+        "vi": "Ảnh xem trước mạng xã hội Pencil Blade từ bằng chứng đến phục dựng."
+      },
+      "caption": {
+        "en": "Project-authored English social-preview source.",
+        "vi": "Nguồn ảnh xem trước tiếng Anh do dự án tự tạo."
+      },
+      "transformationHistory": ["authored as sanitized SVG", "no recovered artwork or external fonts"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-SOCIAL-VI-SVG",
+      "kind": "project-authored-social-source",
+      "publishable": true,
+      "provenance": {
+        "path": "site/public/social/pencil-blade-vi.svg",
+        "sha256": "6112259474cb0333c33f9f4d1a013330963ec11b24f0d1583d3ca1141123691b",
+        "width": 1200,
+        "height": 630,
+        "locale": "vi",
+        "route": "/vi/"
+      },
+      "alt": {
+        "en": "Vietnamese Pencil Blade evidence-to-reconstruction social preview.",
+        "vi": "Ảnh xem trước Pencil Blade tiếng Việt từ bằng chứng đến phục dựng."
+      },
+      "caption": {
+        "en": "Project-authored Vietnamese social-preview source.",
+        "vi": "Nguồn ảnh xem trước tiếng Việt do dự án tự tạo."
+      },
+      "transformationHistory": ["authored as sanitized SVG", "no recovered artwork or external fonts"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-SOCIAL-EN-PNG",
+      "kind": "project-authored-social-preview",
+      "publishable": true,
+      "provenance": {
+        "path": "site/public/social/pencil-blade-en.png",
+        "sha256": "07b6a5139c9d0f0fabed9280c7757182e0ced02bea47761b2a34d954f90a1608",
+        "width": 1200,
+        "height": 630,
+        "locale": "en",
+        "route": "/"
+      },
+      "alt": {
+        "en": "Pencil Blade evidence-to-reconstruction social preview.",
+        "vi": "Ảnh xem trước mạng xã hội Pencil Blade từ bằng chứng đến phục dựng."
+      },
+      "caption": {
+        "en": "Rasterized project-authored English route preview.",
+        "vi": "Ảnh route tiếng Anh do dự án tự tạo được raster hóa."
+      },
+      "transformationHistory": ["rasterized from MEDIA-SOCIAL-EN-SVG with librsvg at 1200x630"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-SOCIAL-VI-PNG",
+      "kind": "project-authored-social-preview",
+      "publishable": true,
+      "provenance": {
+        "path": "site/public/social/pencil-blade-vi.png",
+        "sha256": "cc88dcb9c10c601140b500a59951169af11aeedb5aeb5bfba571fd49af49419d",
+        "width": 1200,
+        "height": 630,
+        "locale": "vi",
+        "route": "/vi/"
+      },
+      "alt": {
+        "en": "Vietnamese Pencil Blade evidence-to-reconstruction social preview.",
+        "vi": "Ảnh xem trước Pencil Blade tiếng Việt từ bằng chứng đến phục dựng."
+      },
+      "caption": {
+        "en": "Rasterized project-authored Vietnamese route preview.",
+        "vi": "Ảnh route tiếng Việt do dự án tự tạo được raster hóa."
+      },
+      "transformationHistory": ["rasterized from MEDIA-SOCIAL-VI-SVG with librsvg at 1200x630"],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-CHAPTER-RUNTIME-480-MAIN-MENU",
+      "kind": "runtime-display-derivative",
+      "publishable": true,
+      "provenance": {
+        "path": "site/src/assets/media/runtime/chrome-480x800-main-menu.png",
+        "sha256": "a78387d8d54b5b7de0176ef0722f4ce78092a7531a0863f560fa50e47d20608c",
+        "width": 480,
+        "height": 800,
+        "sourceMediaId": "MEDIA-PRODUCTION-480-MAIN-MENU"
+      },
+      "alt": {
+        "en": "Production reconstruction Main Menu at 480 by 800; not the original runtime.",
+        "vi": "Main Menu production của bản phục dựng ở 480 x 800; không phải môi trường chạy gốc."
+      },
+      "caption": {
+        "en": "Exact-byte display copy of the waiver-scoped production reconstruction Main Menu capture.",
+        "vi": "Bản sao hiển thị đúng byte của ảnh Main Menu production bản phục dựng trong phạm vi miễn trừ."
+      },
+      "transformationHistory": [
+        "exact byte copy from MEDIA-PRODUCTION-480-MAIN-MENU",
+        "no pixel modification, crop, resize, re-encode, or color change"
+      ],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-CHAPTER-RUNTIME-480-MODE-SELECT",
+      "kind": "runtime-display-derivative",
+      "publishable": true,
+      "provenance": {
+        "path": "site/src/assets/media/runtime/chrome-480x800-mode-select.png",
+        "sha256": "f5bc44358c043020709f99d28c6e3a5d16ce4623681084a286c45f4cb4f2a4c8",
+        "width": 480,
+        "height": 800,
+        "sourceMediaId": "MEDIA-PRODUCTION-480-MODE-SELECT"
+      },
+      "alt": {
+        "en": "Production reconstruction frame changed by the New Game gesture at 480 by 800; not the original runtime.",
+        "vi": "Frame production của bản phục dựng thay đổi bởi gesture New Game ở 480 x 800; không phải môi trường chạy gốc."
+      },
+      "caption": {
+        "en": "Exact-byte display copy after the production New Game gesture changed the frame; not proof of a complete mode-selection sequence.",
+        "vi": "Bản sao hiển thị đúng byte sau khi gesture New Game production làm thay đổi frame; không chứng minh một chuỗi chọn chế độ hoàn chỉnh."
+      },
+      "transformationHistory": [
+        "exact byte copy from MEDIA-PRODUCTION-480-MODE-SELECT",
+        "no pixel modification, crop, resize, re-encode, or color change"
+      ],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-CHAPTER-RUNTIME-480-CLASSIC",
+      "kind": "runtime-display-derivative",
+      "publishable": true,
+      "provenance": {
+        "path": "site/src/assets/media/runtime/chrome-480x800-classic.png",
+        "sha256": "f8f9a6a2677fd4c86fc1212d5a15de2992676443b067744f553cbcfa56191a1e",
+        "width": 480,
+        "height": 800,
+        "sourceMediaId": "MEDIA-PRODUCTION-480-CLASSIC"
+      },
+      "alt": {
+        "en": "Production reconstruction frame changed by the Classic gesture at 480 by 800; not the original runtime.",
+        "vi": "Frame production của bản phục dựng thay đổi bởi gesture Classic ở 480 x 800; không phải môi trường chạy gốc."
+      },
+      "caption": {
+        "en": "Exact-byte display copy after the production Classic gesture changed the frame; not proof of a complete gameplay comparison.",
+        "vi": "Bản sao hiển thị đúng byte sau khi gesture Classic production làm thay đổi frame; không chứng minh phép so sánh gameplay hoàn chỉnh."
+      },
+      "transformationHistory": [
+        "exact byte copy from MEDIA-PRODUCTION-480-CLASSIC",
+        "no pixel modification, crop, resize, re-encode, or color change"
+      ],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-CHAPTER-RUNTIME-720-MAIN-MENU",
+      "kind": "runtime-display-derivative",
+      "publishable": true,
+      "provenance": {
+        "path": "site/src/assets/media/runtime/chrome-720x1280-main-menu.png",
+        "sha256": "81e53faeaa21b0b05ea2c7fefe6e7161fbecccaa21ea8131969ddcdbbe6daf70",
+        "width": 720,
+        "height": 1280,
+        "sourceMediaId": "MEDIA-PRODUCTION-720-MAIN-MENU"
+      },
+      "alt": {
+        "en": "Production reconstruction Main Menu at 720 by 1280; not the original runtime.",
+        "vi": "Main Menu production của bản phục dựng ở 720 x 1280; không phải môi trường chạy gốc."
+      },
+      "caption": {
+        "en": "Exact-byte display copy of the waiver-scoped production reconstruction Main Menu capture.",
+        "vi": "Bản sao hiển thị đúng byte của ảnh Main Menu production bản phục dựng trong phạm vi miễn trừ."
+      },
+      "transformationHistory": [
+        "exact byte copy from MEDIA-PRODUCTION-720-MAIN-MENU",
+        "no pixel modification, crop, resize, re-encode, or color change"
+      ],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-CHAPTER-RUNTIME-720-MODE-SELECT",
+      "kind": "runtime-display-derivative",
+      "publishable": true,
+      "provenance": {
+        "path": "site/src/assets/media/runtime/chrome-720x1280-mode-select.png",
+        "sha256": "87f55b4aafb01d346c7ce8a98a7b9ab4958ba9c5842b950ffff132b2b93055b5",
+        "width": 720,
+        "height": 1280,
+        "sourceMediaId": "MEDIA-PRODUCTION-720-MODE-SELECT"
+      },
+      "alt": {
+        "en": "Production reconstruction frame changed by the New Game gesture at 720 by 1280; not the original runtime.",
+        "vi": "Frame production của bản phục dựng thay đổi bởi gesture New Game ở 720 x 1280; không phải môi trường chạy gốc."
+      },
+      "caption": {
+        "en": "Exact-byte display copy after the production New Game gesture changed the frame; not proof of a complete mode-selection sequence.",
+        "vi": "Bản sao hiển thị đúng byte sau khi gesture New Game production làm thay đổi frame; không chứng minh một chuỗi chọn chế độ hoàn chỉnh."
+      },
+      "transformationHistory": [
+        "exact byte copy from MEDIA-PRODUCTION-720-MODE-SELECT",
+        "no pixel modification, crop, resize, re-encode, or color change"
+      ],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    },
+    {
+      "mediaId": "MEDIA-CHAPTER-RUNTIME-720-CLASSIC",
+      "kind": "runtime-display-derivative",
+      "publishable": true,
+      "provenance": {
+        "path": "site/src/assets/media/runtime/chrome-720x1280-classic.png",
+        "sha256": "80efc4c60ee39ae020fce7cff3ce2d6519d3c6393e777dd9889d1f4f39477991",
+        "width": 720,
+        "height": 1280,
+        "sourceMediaId": "MEDIA-PRODUCTION-720-CLASSIC"
+      },
+      "alt": {
+        "en": "Production reconstruction frame changed by the Classic gesture at 720 by 1280; not the original runtime.",
+        "vi": "Frame production của bản phục dựng thay đổi bởi gesture Classic ở 720 x 1280; không phải môi trường chạy gốc."
+      },
+      "caption": {
+        "en": "Exact-byte display copy after the production Classic gesture changed the frame; not proof of a complete gameplay comparison.",
+        "vi": "Bản sao hiển thị đúng byte sau khi gesture Classic production làm thay đổi frame; không chứng minh phép so sánh gameplay hoàn chỉnh."
+      },
+      "transformationHistory": [
+        "exact byte copy from MEDIA-PRODUCTION-720-CLASSIC",
+        "no pixel modification, crop, resize, re-encode, or color change"
+      ],
+      "academicDisplayDecisionRef": "reference/case-study-academic-display-decision.json",
+      "commercialRightsRecordRef": "release/public-release-variant-manifest.json"
+    }
+  ],
+  "aiEpisodeContract": {
+    "requiredFields": [
+      "id",
+      "question",
+      "evidence",
+      "hypothesis",
+      "reviewDecision",
+      "decisionActorKind",
+      "decisionRef",
+      "implementation",
+      "verification",
+      "failureLesson",
+      "reportRefs"
+    ],
+    "decisionActorKinds": ["human", "automation", "mixed", "unknown"],
+    "forbiddenFields": [
+      "rawChat",
+      "rawTranscript",
+      "prompt",
+      "systemPrompt",
+      "chainOfThought",
+      "hiddenCoT"
+    ],
+    "humanWordingRequiresPublicSignoff": true,
+    "sourceReportIds": [
+      "SRC-PUBLIC-TECHNICAL-CLOSEOUT",
+      "SRC-PUBLIC-RECONSTRUCTION-REPORT"
+    ]
+  },
+  "aiEpisodes": [],
+  "releaseInputs": {
+    "candidateStatus": "blocked-pending-evidence",
+    "accountableReleaseOwner": {
+      "roleId": "accountable-release-owner",
+      "evidenceStatus": "pending"
+    },
+    "publicCorrections": {
+      "roleId": "public-corrections-owner",
+      "channel": "https://github.com/dantech0xff/pencil-blade-2026/issues",
+      "channelStatus": "proposed-unconfirmed"
+    },
+    "vietnameseFactualReview": {
+      "roleId": "vietnamese-factual-reviewer",
+      "evidenceStatus": "pending"
+    },
+    "attributionTemplate": {
+      "en": "Unofficial, noncommercial clean-room reconstruction. Not affiliated with the original owner, developer, or publisher. Recovered third-party content remains subject to its own rights.",
+      "vi": "Bản phục dựng clean-room không chính thức, phi thương mại. Không liên kết với chủ sở hữu, nhà phát triển hoặc nhà phát hành ban đầu. Nội dung bên thứ ba được phục hồi vẫn chịu quyền riêng."
+    }
+  }
+}

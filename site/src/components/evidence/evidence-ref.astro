@@ -1,0 +1,18 @@
+---
+import { localizedPath, withBase } from "../../data/routes.ts";
+import type { Locale } from "../../data/locales.ts";
+
+interface Props {
+  id: string;
+  locale?: Locale;
+  label?: string;
+}
+
+const { id, locale = "en", label = id } = Astro.props;
+const href = `${withBase(localizedPath(locale, "/evidence/"))}#${encodeURIComponent(id)}`;
+---
+
+<a class="evidence-ref" href={href} data-evidence-ref={id}>
+  <span aria-hidden="true">↗</span>
+  {label}
+</a>
