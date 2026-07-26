@@ -1,8 +1,8 @@
 # Revised Pencil Blade Case-Study Plan Validation
 
-Date: 2026-07-26  
-Review tier: Full  
-Review mode: read-only plan validation; no implementation files changed  
+Date: 2026-07-26
+Review tier: Full
+Review mode: read-only plan validation; no implementation files changed
 Baseline: revised `plan.md` and Phases 01–08 after the four red-team reports
 
 ## Code Review Summary
@@ -462,8 +462,8 @@ Only risk-calibrating observations:
 2. Should Phase 7 validate the historical technical closeout semantically in a new no-workspace
    API mode, or only verify its frozen bytes/hash/schema?
 
-Status: DONE_WITH_CONCERNS  
+Status: DONE_WITH_CONCERNS
 Summary: revised plan is structurally sound and resolves the red-team architecture blockers, but
-two High release-contract gaps and three Medium evidence/documentation gaps remain.  
+two High release-contract gaps and three Medium evidence/documentation gaps remain.
 Concerns/Blockers: approval tooling/event chronology; clean-runner closeout mode; runtime report
 privacy/atomicity; stale authority wording; 46 broken research-report links.

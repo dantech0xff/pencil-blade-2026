@@ -158,4 +158,3 @@ export function restrictedMdxPolicy(
     assertRestrictedMdxTree(tree, options);
   };
 }
-

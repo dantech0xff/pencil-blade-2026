@@ -1,8 +1,8 @@
 # Red-Team Security Adversary Plan Review
 
-Date: 2026-07-26  
-Review target: `plans/260725-2334-pencil-blade-interactive-case-study/`  
-Lens: trust boundaries, public-data exposure, supply chain, release authorization, rollback integrity, and factual publication safety  
+Date: 2026-07-26
+Review target: `plans/260725-2334-pencil-blade-interactive-case-study/`
+Lens: trust boundaries, public-data exposure, supply chain, release authorization, rollback integrity, and factual publication safety
 Execution constraint: read-only review; no lint, build, or test command was run
 
 ## Assessment
@@ -27,7 +27,7 @@ approval afterward. That is not a fail-closed release process.
 
 ### 1. Critical — The plan deploys publicly before the owner/editorial/rights release gate
 
-**Severity:** Critical  
+**Severity:** Critical
 **Location:** `plan.md:124-133,164-174`;
 `phase-07-unify-testing-build-and-github-pages-deployment.md:200-222,255-264`;
 `phase-08-complete-launch-qa-legal-review-and-editorial-release.md:163-219`
@@ -80,7 +80,7 @@ copy, routes, accessibility, SEO, and owner sign-off—before the Phase 7 deploy
 
 ### 2. High — The same-origin iframe is described as an isolation boundary even though it is not one
 
-**Severity:** High  
+**Severity:** High
 **Location:** `phase-06-integrate-playable-h5-game-experience.md:145-148,198-212`;
 `phase-07-unify-testing-build-and-github-pages-deployment.md:268-288`
 
@@ -134,7 +134,7 @@ Choose and document one real security model:
 
 ### 3. High — Source allowlisting validates the citation path but not the content it exposes
 
-**Severity:** High  
+**Severity:** High
 **Location:** `phase-01-establish-public-narrative-and-evidence-contract.md:57-61,105-130,214-223`;
 `phase-02-build-astro-platform-and-content-pipeline.md:56-60,160-169`
 
@@ -194,7 +194,7 @@ Hash-freezing unsafe input prevents drift; it does not sanitize it.
 
 ### 4. High — The PR-to-self-hosted-runner security test is specified as a string check, not a workflow-graph check
 
-**Severity:** High  
+**Severity:** High
 **Location:** `phase-07-unify-testing-build-and-github-pages-deployment.md:176-192,224-243`
 
 **Flaw**
@@ -243,7 +243,7 @@ Add adversarial fixtures for indirect reusable workflows, matrices, expressions,
 
 ### 5. High — Mutable action tags are deliberately retained on privileged and self-hosted jobs
 
-**Severity:** High  
+**Severity:** High
 **Location:** `phase-07-unify-testing-build-and-github-pages-deployment.md:211-220`
 
 **Flaw**
@@ -285,7 +285,7 @@ actions introduced by the split workflow.
 
 ### 6. High — “Known-good commit” rollback is not a known-good artifact under the stated toolchain
 
-**Severity:** High  
+**Severity:** High
 **Location:** `plan.md:190-200`;
 `phase-07-unify-testing-build-and-github-pages-deployment.md:218-222,290-297`;
 `phase-08-complete-launch-qa-legal-review-and-editorial-release.md:285-295`
@@ -336,7 +336,7 @@ commands.
 
 ### 7. High — The MDX/JSON-LD contract does not close build-time execution or persistent-XSS paths
 
-**Severity:** High  
+**Severity:** High
 **Location:** `phase-02-build-astro-platform-and-content-pipeline.md:50-71,148-170,217-230`;
 `phase-03-create-editorial-design-system-and-global-experience.md:123-132`
 
@@ -388,7 +388,7 @@ Define an AST-level content policy:
 
 ### 8. Medium — Two preselected “source-backed” AI episodes are false or unsupported by tracked evidence
 
-**Severity:** Medium  
+**Severity:** Medium
 **Location:** `phase-05-build-ai-lab-and-evidence-explorer.md:133-156`
 
 **Flaw**
@@ -653,6 +653,6 @@ Phase 8 totals: **11 VERIFIED / 0 FAILED / 4 UNVERIFIED**.
 3. Is there a tracked, public-safe Actions record proving the claimed deploy-service timeout? If
    not, that episode must not ship as fact.
 
-Status: DONE_WITH_CONCERNS  
-Summary: Full red-team review completed; the amended academic waiver and frozen H5/capture scope verify, but release ordering, same-origin trust, citation leakage, workflow enforcement, supply-chain pinning, rollback reproducibility, and MDX execution require plan changes.  
+Status: DONE_WITH_CONCERNS
+Summary: Full red-team review completed; the amended academic waiver and frozen H5/capture scope verify, but release ordering, same-origin trust, citation leakage, workflow enforcement, supply-chain pinning, rollback reproducibility, and MDX execution require plan changes.
 Concerns/Blockers: One critical pre-public gate-order defect, six high-risk security/reliability defects, and two contradicted/unsupported public-story claims.

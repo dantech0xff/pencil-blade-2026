@@ -1,8 +1,8 @@
 # Pencil Blade editorial experience specification
 
-**Date:** 2026-07-25  
-**Scope:** information architecture, editorial visual system, interaction model, responsive and inclusive experience  
-**Product:** interactive engineering documentary for the Pencil Blade clean-room restoration  
+**Date:** 2026-07-25
+**Scope:** information architecture, editorial visual system, interaction model, responsive and inclusive experience
+**Product:** interactive engineering documentary for the Pencil Blade clean-room restoration
 **Status:** proposed experience contract; no implementation or mockup
 
 ## Executive direction

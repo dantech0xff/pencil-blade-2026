@@ -205,4 +205,3 @@ legal proposition. Any semantic mismatch blocks the candidate.
 > Bản trình diễn học thuật không cấp quyền thương mại đối với tên gọi, hình ảnh, âm thanh, phông
 > chữ, nhận diện hoặc môi trường chạy được tạo ra. Dự án không chính thức và không liên kết với
 > chủ sở hữu, nhà phát triển hoặc nhà phát hành ban đầu.
-

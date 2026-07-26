@@ -348,4 +348,3 @@ The key dependency rule is simple:
 1. Should `/play/` be only a launcher page, or should it also expose a lightweight stats/article panel beside the iframe?
 2. Do you want the game mount to be `/play/h5/` exactly, or should `/play/game/` be the public mount with `/play/h5/` reserved for tests?
 3. Should the merged artifact keep the current game-only verifier name, or should the final merged check get a new `verify-pages-artifact` wrapper and leave the current verifier untouched?
-
