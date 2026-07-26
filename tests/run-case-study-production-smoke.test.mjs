@@ -1,0 +1,289 @@
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import test from 'node:test';
+
+import {
+  safeReportDirectory,
+  smokeProductionPages,
+} from '../scripts/run-case-study-production-smoke.mjs';
+
+const commitSha = '1'.repeat(40);
+const contentDigest = 'a'.repeat(64);
+const requiredFiles = [
+  'index.html',
+  'story/index.html',
+  'forensics/index.html',
+  'reconstruction/index.html',
+  'ai-lab/index.html',
+  'evidence/index.html',
+  'play/index.html',
+  'about/index.html',
+  'vi/index.html',
+  'vi/story/index.html',
+  'vi/forensics/index.html',
+  'vi/reconstruction/index.html',
+  'vi/ai-lab/index.html',
+  'vi/evidence/index.html',
+  'vi/play/index.html',
+  'vi/about/index.html',
+  'play/game/index.html',
+];
+
+function sha256(bytes) {
+  return createHash('sha256').update(bytes).digest('hex');
+}
+
+function fixture(options = {}) {
+  const release = {
+    schemaVersion: 1,
+    commitSha,
+    workflow: {
+      runId: '91357',
+      runAttempt: 2,
+    },
+    content: {
+      contentTreeDigest: contentDigest,
+    },
+    ...options.release,
+  };
+  const files = new Map();
+  files.set(
+    'case-study-release.json',
+    Buffer.from(`${JSON.stringify(release)}\n`),
+  );
+  for (const path of requiredFiles) {
+    files.set(
+      path,
+      Buffer.from(`<!doctype html><title>${path}</title><main>verified</main>\n`),
+    );
+  }
+  files.set('assets/site.css', Buffer.from('body{color:#171a18}\n'));
+  if (options.deletePath) files.delete(options.deletePath);
+  if (options.addPath) files.set(options.addPath, Buffer.from('unsafe'));
+
+  const manifest = {
+    schemaVersion: 1,
+    files: [...files].map(([path, bytes]) => ({
+      path,
+      bytes: bytes.length,
+      sha256: sha256(bytes),
+    })),
+  };
+  if (options.mutateManifest) options.mutateManifest(manifest);
+  const manifestBytes = Buffer.from(`${JSON.stringify(manifest)}\n`);
+  return {
+    files,
+    manifest,
+    manifestBytes,
+    treeDigest: sha256(manifestBytes),
+  };
+}
+
+function contentType(path) {
+  if (path.endsWith('.html')) return 'text/html; charset=utf-8';
+  if (path.endsWith('.json')) return 'application/json; charset=utf-8';
+  if (path.endsWith('.css')) return 'text/css; charset=utf-8';
+  return 'application/octet-stream';
+}
+
+function fakeFetch(input, fixtureState, options = {}) {
+  const url = new URL(input);
+  const prefix = '/pencil-blade-2026/';
+  const path = decodeURIComponent(url.pathname.slice(prefix.length));
+  let bytes = path === 'case-study-tree-manifest.json'
+    ? fixtureState.manifestBytes
+    : fixtureState.files.get(path);
+  if (options.corruptPath === path && bytes) {
+    bytes = Buffer.from(bytes);
+    bytes[0] ^= 0xff;
+  }
+  if (!bytes) {
+    return Promise.resolve(new Response('missing', {
+      status: 404,
+      headers: { 'content-type': 'text/plain' },
+    }));
+  }
+  const type = options.wrongMimePath === path
+    ? 'text/plain'
+    : contentType(path);
+  return Promise.resolve(new Response(bytes, {
+    status: 200,
+    headers: { 'content-type': type },
+  }));
+}
+
+function smokeOptions(state, overrides = {}) {
+  return {
+    baseUrl: 'https://dantech0xff.github.io/pencil-blade-2026/',
+    expectedCommit: commitSha,
+    expectedRunId: '91357',
+    expectedRunAttempt: 2,
+    expectedContentDigest: contentDigest,
+    expectedTreeManifestDigest: state.treeDigest,
+    fetchImpl: (url) => fakeFetch(url, state),
+    cacheToken: 'test-run',
+    filesOnly: true,
+    ...overrides,
+  };
+}
+
+test('production smoke verifies identity, every manifest byte/MIME, and required routes', async () => {
+  const state = fixture();
+  const report = await smokeProductionPages(smokeOptions(state));
+  assert.equal(report.status, 'pass');
+  assert.equal(report.filesVerified, state.files.size);
+  assert.equal(report.identity.commitSha, commitSha);
+  assert.equal(report.identity.contentTreeDigestSha256, contentDigest);
+  assert.equal(report.treeManifestDigestSha256, state.treeDigest);
+  assert.equal(report.journeys.status, 'not-run-files-only');
+});
+
+test('production smoke runs an explicit complete browser journey contract', async () => {
+  const state = fixture();
+  let called = 0;
+  const report = await smokeProductionPages(smokeOptions(state, {
+    filesOnly: false,
+    journeyRunner: async ({ baseUrl, releaseRecord, treeManifest }) => {
+      called += 1;
+      assert.equal(baseUrl.pathname, '/pencil-blade-2026/');
+      assert.equal(releaseRecord.commitSha, commitSha);
+      assert.equal(treeManifest.files.length, state.files.size);
+      return {
+        status: 'pass',
+        launcherNoPreload: true,
+        launcherActivation: true,
+        launcherParentIntegrity: true,
+        launcherStoragePreserved: true,
+        launcherIframeReload: true,
+        launcherIframeRemoval: true,
+        embeddedGameViewports: ['480x800', '720x1280'],
+        directGameViewports: ['480x800', '720x1280'],
+      };
+    },
+  }));
+  assert.equal(called, 1);
+  assert.equal(report.journeys.status, 'pass');
+});
+
+test('production smoke rejects wrong manifest, file bytes, MIME, missing route, and identity', async () => {
+  const state = fixture();
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(state, {
+      expectedTreeManifestDigest: 'f'.repeat(64),
+    })),
+    /tree-manifest bytes/u,
+  );
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(state, {
+      fetchImpl: (url) => fakeFetch(url, state, {
+        corruptPath: 'assets/site.css',
+      }),
+    })),
+    /byte size|SHA-256/u,
+  );
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(state, {
+      fetchImpl: (url) => fakeFetch(url, state, {
+        wrongMimePath: 'assets/site.css',
+      }),
+    })),
+    /unacceptable live MIME/u,
+  );
+
+  const missingRoute = fixture({ deletePath: 'vi/about/index.html' });
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(missingRoute)),
+    /Required production route/u,
+  );
+  const wrongIdentity = fixture({
+    release: {
+      workflow: {
+        runId: '91358',
+        runAttempt: 2,
+      },
+    },
+  });
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(wrongIdentity)),
+    /identity does not match/u,
+  );
+});
+
+test('production smoke rejects traversal, duplicate paths, self-inclusion, and incomplete journeys', async () => {
+  for (const mutateManifest of [
+    (manifest) => manifest.files.push({
+      path: '../private.txt',
+      bytes: 1,
+      sha256: 'a'.repeat(64),
+    }),
+    (manifest) => manifest.files.push({ ...manifest.files[0] }),
+    (manifest) => manifest.files.push({
+      path: 'case-study-tree-manifest.json',
+      bytes: 1,
+      sha256: 'a'.repeat(64),
+    }),
+  ]) {
+    const state = fixture({ mutateManifest });
+    await assert.rejects(
+      () => smokeProductionPages(smokeOptions(state)),
+      /traverses|Duplicate|cannot list itself/u,
+    );
+  }
+
+  const state = fixture();
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(state, {
+      filesOnly: false,
+      journeyRunner: async () => ({
+        status: 'pass',
+        launcherNoPreload: false,
+        launcherActivation: true,
+        launcherParentIntegrity: true,
+        launcherStoragePreserved: true,
+        launcherIframeReload: true,
+        launcherIframeRemoval: true,
+        embeddedGameViewports: ['480x800', '720x1280'],
+        directGameViewports: ['480x800', '720x1280'],
+      }),
+    })),
+    /did not pass completely/u,
+  );
+  await assert.rejects(
+    () => smokeProductionPages(smokeOptions(state, {
+      filesOnly: false,
+      journeyRunner: undefined,
+    })),
+    /requires explicit browser journeys/u,
+  );
+});
+
+test('manifest-wide fetch honors bounded concurrency', async () => {
+  const state = fixture();
+  let active = 0;
+  let maximum = 0;
+  const fetchImpl = async (url) => {
+    active += 1;
+    maximum = Math.max(maximum, active);
+    await new Promise((resolve) => setTimeout(resolve, 2));
+    const response = await fakeFetch(url, state);
+    active -= 1;
+    return response;
+  };
+  await smokeProductionPages(smokeOptions(state, {
+    fetchImpl,
+    concurrency: 2,
+  }));
+  assert.ok(maximum <= 2);
+  assert.ok(maximum > 1);
+});
+
+test('runner-temp report directories are allowed while roots and existing targets fail closed', () => {
+  const temporaryRoot = mkdtempSync(join(tmpdir(), 'case-study-smoke-report-'));
+  const reportDirectory = join(temporaryRoot, 'production-smoke');
+  assert.equal(safeReportDirectory(reportDirectory), reportDirectory);
+  assert.throws(() => safeReportDirectory(temporaryRoot), /must not already exist/u);
+  assert.throws(() => safeReportDirectory('/'), /filesystem root/u);
+});

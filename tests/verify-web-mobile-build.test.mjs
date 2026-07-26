@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import test, { after } from 'node:test';
 
 import {
+  createWebBuildVerificationConfig,
   createPagesPrefixServer,
   PAGES_PREFIX,
   pagesUrlForPath,
@@ -63,10 +64,63 @@ test('verifier serves every eager and statically discoverable lazy asset at the 
   )));
 });
 
+test('verification config normalizes and freezes invocation-scoped paths', () => {
+  const config = createWebBuildVerificationConfig({
+    pagesPrefix: '/pencil-blade-2026/play/game',
+    entryPath: 'index.html',
+    buildDirectory: '.',
+  });
+
+  assert.equal(config.pagesPrefix, '/pencil-blade-2026/play/game/');
+  assert.equal(config.entryPath, 'index.html');
+  assert.equal(Object.isFrozen(config), true);
+  assert.throws(
+    () => createWebBuildVerificationConfig({ pagesPrefix: '/../escape/' }),
+    /without traversal/u,
+  );
+  assert.throws(
+    () => createWebBuildVerificationConfig({ entryPath: '../index.html' }),
+    /must not contain/u,
+  );
+});
+
+test('the same raw build verifies at the legacy and nested mount prefixes', async () => {
+  const buildRoot = createValidBuild();
+  const [legacy, nested] = await Promise.all([
+    verifyWebMobileBuild(buildRoot),
+    verifyWebMobileBuild(buildRoot, {
+      pagesPrefix: '/pencil-blade-2026/play/game/',
+      entryPath: 'index.html',
+    }),
+  ]);
+
+  assert.equal(legacy.prefix, '/pencil-blade-2026/');
+  assert.equal(nested.prefix, '/pencil-blade-2026/play/game/');
+  assert.equal(legacy.checkedFiles, nested.checkedFiles);
+  assert.ok(legacy.requests.every((entry) => (
+    entry.path === '/'
+    || entry.path === '/pencil-blade-2026'
+    || entry.path === '/other-project/index.html'
+    || entry.path.startsWith(legacy.prefix)
+  )));
+  assert.ok(nested.requests.every((entry) => (
+    entry.path === '/'
+    || entry.path === '/pencil-blade-2026/play/game'
+    || entry.path === '/other-project/index.html'
+    || entry.path.startsWith(nested.prefix)
+  )));
+});
+
 test('Pages URL generation percent-encodes each build path segment under the fixed prefix', () => {
   assert.equal(
     pagesUrlForPath('assets/game/loading screen.png'),
     '/pencil-blade-2026/assets/game/loading%20screen.png',
+  );
+  assert.equal(
+    pagesUrlForPath('assets/game/loading screen.png', {
+      pagesPrefix: '/pencil-blade-2026/play/game/',
+    }),
+    '/pencil-blade-2026/play/game/assets/game/loading%20screen.png',
   );
 });
 
@@ -340,6 +394,40 @@ test('verifier CLI is directly usable by the Pages workflow and fails closed', (
   });
   assert.equal(failure.status, 1);
   assert.match(failure.stderr, /src\/lazy\.js returned HTTP 404/u);
+});
+
+test('verifier CLI accepts the exact nested-prefix contract and rejects invalid options', () => {
+  const buildRoot = createValidBuild();
+  const nested = spawnSync(process.execPath, [
+    verifierScript,
+    buildRoot,
+    '--pages-prefix',
+    '/pencil-blade-2026/play/game/',
+    '--entry-path',
+    'index.html',
+  ], {
+    encoding: 'utf8',
+    timeout: 15_000,
+  });
+  assert.equal(nested.status, 0, nested.stderr);
+  assert.match(
+    nested.stdout,
+    /exact Pages prefix \/pencil-blade-2026\/play\/game\//u,
+  );
+
+  const invalid = spawnSync(process.execPath, [
+    verifierScript,
+    buildRoot,
+    '--unknown',
+    'value',
+  ], {
+    encoding: 'utf8',
+    timeout: 15_000,
+  });
+  assert.equal(invalid.status, 2);
+  assert.match(invalid.stderr, /unknown option/u);
+  assert.match(invalid.stderr, /--pages-prefix <prefix>/u);
+  assert.doesNotMatch(invalid.stderr, new RegExp(testRoot, 'u'));
 });
 
 function createValidBuild() {
