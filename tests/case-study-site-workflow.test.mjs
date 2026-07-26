@@ -43,6 +43,10 @@ test('PR-reachable work stays on one exact GitHub-hosted Linux runner', () => {
 
 test('workflow uses exact Node/npm and installs only the locked site package', () => {
   assert.match(workflowSource, /node-version-file: \.node-version/u);
+  assert.match(
+    workflowSource,
+    /name: Install exact npm[\s\S]*npm install --global npm@11\.6\.2 --ignore-scripts --no-audit --no-fund[\s\S]*name: Verify exact Node and npm/u,
+  );
   assert.match(workflowSource, /test "\$\(node --version\)" = "v24\.18\.0"/u);
   assert.match(workflowSource, /test "\$\(npm --version\)" = "11\.6\.2"/u);
   assert.match(

@@ -32,6 +32,10 @@ jobs:
           cache: npm
           cache-dependency-path: site/package-lock.json
 
+      - name: Install exact npm
+        shell: bash
+        run: npm install --global npm@11.6.2 --ignore-scripts --no-audit --no-fund
+
       - name: Verify exact Node and npm
         shell: bash
         run: |

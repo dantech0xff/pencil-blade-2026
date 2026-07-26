@@ -181,6 +181,22 @@ test('exact Node/npm and package isolation are enforced in every build domain', 
   assert.match(workflowSource, /node-version-file: \.node-version/u);
   assert.match(workflowSource, /test "\$\(node --version\)" = "v24\.18\.0"/u);
   assert.match(workflowSource, /test "\$\(npm --version\)" = "11\.6\.2"/u);
+  for (const jobId of [
+    'site-build',
+    'game-build',
+    'compose-pages',
+    'record-approval-evidence',
+    'production-smoke',
+  ]) {
+    const steps = workflow.jobs[jobId].steps;
+    const setupIndex = steps.findIndex((step) => step.name === 'Set up exact Node');
+    const npmIndex = steps.findIndex((step) => step.name === 'Install exact npm');
+    assert.ok(setupIndex >= 0 && npmIndex === setupIndex + 1);
+    assert.equal(
+      steps[npmIndex].run,
+      'npm install --global npm@11.6.2 --ignore-scripts --no-audit --no-fund',
+    );
+  }
 
   const siteJob = jobSource('site-build', 'game-build');
   const gameJob = jobSource('game-build', 'compose-pages');
@@ -193,6 +209,28 @@ test('exact Node/npm and package isolation are enforced in every build domain', 
     gameJob,
     /working-directory: site|site\/package-lock\.json|npm --prefix site|playwright install/u,
   );
+});
+
+test('runner-scoped temp paths are initialized only after jobs reach a runner', () => {
+  for (const job of Object.values(workflow.jobs)) {
+    for (const value of Object.values(job.env ?? {})) {
+      assert.doesNotMatch(String(value), /\$\{\{\s*runner\./u);
+    }
+  }
+
+  const expectedInitializers = new Map([
+    ['compose-pages', 'Initialize ephemeral candidate paths'],
+    ['record-approval-evidence', 'Initialize ephemeral evidence paths'],
+    ['production-smoke', 'Initialize ephemeral smoke path'],
+  ]);
+  for (const [jobId, stepName] of expectedInitializers) {
+    const initializer = workflow.jobs[jobId].steps.find(
+      (step) => step.name === stepName,
+    );
+    assert.ok(initializer, `${jobId} must initialize its runner temp paths`);
+    assert.match(initializer.run, /\$RUNNER_TEMP/u);
+    assert.match(initializer.run, /\$GITHUB_ENV/u);
+  }
 });
 
 test('self-hosted game job runs only the exact manifest and strict raw-game gates', () => {
