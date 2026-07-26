@@ -34,9 +34,11 @@ date: 2026-07-26
 - `docs/deployment.md`
 - `docs/journals/260726-1535-focus-three-public-sections.md`
 
-## Known Limitations
+## Deployment
 
-- Changes are verified locally but not deployed.
+- GitHub Pages run `30195473067`, attempt `1`, deployed commit `7e73a27`.
+- Production verification passed `2,560` files, `40,243,610` bytes, and all browser journeys.
+- Retained routes return `200`; removed EN/VI route families return `404`.
 
 ## Unresolved Questions
 

@@ -124,10 +124,10 @@ published Pages tree.
 
 ## Current Verified Release
 
-Run [`30190536530`](https://github.com/dantech0xff/pencil-blade-2026/actions/runs/30190536530),
-attempt `1`, deployed commit `10851abb9499a439c099bc427fffe165c54840e1` as deployment
-`5607847060`. Production verification passed `2,668` files and `43,622,567` bytes, including
+Run [`30195473067`](https://github.com/dantech0xff/pencil-blade-2026/actions/runs/30195473067),
+attempt `1`, deployed commit `7e73a2712b15401808c545a76a1de6218da0fa8a` as deployment
+`5608809377`. Production verification passed `2,560` files and `40,243,610` bytes, including
 all required routes and both embedded/direct browser journeys at both supported viewports.
 Authenticated environment evidence records reviewer `dantech0xff` under
-`solo-owner-self-review`; the archived release details and Lighthouse measurements are in the
-[launch QA report](../plans/260725-2334-pencil-blade-interactive-case-study/reports/launch-qa-report.md).
+`solo-owner-self-review`; the run retains the candidate, approval request, QA, approval
+evidence, and production-smoke artifacts under the same run ID.
