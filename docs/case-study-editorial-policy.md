@@ -35,6 +35,14 @@ The chapter arc progresses from uncertainty to method, implementation, verificat
 bounded playable proof. It must not progress from uncertainty to a marketing claim of
 historical identity.
 
+### Home entry
+
+Both Home routes summarize the work in exactly three sections: extract the APK, read
+`libgame.so` and connect it to recovered resources, then try the reconstruction. Each section
+shows only the method, one bounded source/output sample, and the result. Detailed metrics,
+rights records, AI episodes, and contract traces stay on their dedicated routes. Home keeps
+the playable build behind the localized Play launcher and does not load game bytes eagerly.
+
 ## Evidence labels
 
 | Label | Public definition | Display rule |
