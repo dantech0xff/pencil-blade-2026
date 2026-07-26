@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("skeptical engineer can trace a chapter claim into its canonical evidence", async ({ page }) => {
   await page.goto("");
-  await page.getByRole("link", { name: /Forensics/i }).first().click();
+  await page.getByRole("link", { name: /detailed forensics/i }).click();
   await expect(page).toHaveURL(/\/forensics\/$/u);
   await expect(page.getByRole("heading", { name: "Reading a Game That Cannot Run" })).toBeVisible();
   await page.getByRole("link", { name: "CLM-NATIVE-PROFILE" }).first().click();
