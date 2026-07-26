@@ -16,6 +16,13 @@ export default defineConfig({
   build: {
     format: "directory",
   },
+  vite: {
+    build: {
+      assetsInlineLimit(filePath) {
+        return filePath.endsWith(".js") ? false : undefined;
+      },
+    },
+  },
   i18n: {
     defaultLocale: "en",
     locales: ["en", "vi"],

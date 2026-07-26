@@ -61,6 +61,14 @@ test("editorial CSP grants frame capability only to localized Play routes", () =
   assert.match(viPlay, /frame-src 'self'/u);
 });
 
+test("Astro keeps executable JavaScript external for the editorial CSP", async () => {
+  const { default: config } = await import("../site/astro.config.mjs");
+  const inlineLimit = config.vite?.build?.assetsInlineLimit;
+  assert.equal(typeof inlineLimit, "function");
+  assert.equal(inlineLimit("editorial-enhancements.js"), false);
+  assert.equal(inlineLimit("play-preview.png"), undefined);
+});
+
 test("all new publication media bytes match their exact manifest records", async () => {
   const manifest = JSON.parse(await read("reference/case-study-publication-manifest.json"));
   const records = manifest.media.filter((record) => record.provenance?.path?.startsWith("site/"));
