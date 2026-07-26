@@ -1,15 +1,10 @@
 ---
 import BaseLayout from "../layouts/base-layout.astro";
-import EvidenceRef from "../components/evidence/evidence-ref.astro";
-import EvidenceStatus from "../components/evidence/evidence-status.astro";
-import MetricLedger from "../components/editorial/metric-ledger.astro";
-import RightsBoundary from "../components/editorial/rights-boundary.astro";
 import { withBase } from "../data/routes.ts";
-import linework from "../assets/brand/lab-linework.svg";
 import playPreview from "../assets/media/shared/play-preview.png";
 
-const title = "Pencil Blade · Evidence to Reconstruction";
-const description = "How one non-runnable APK became explicit evidence contracts, a clean-room TypeScript reconstruction, and an audited playable proof.";
+const title = "Pencil Blade · From APK to a playable game";
+const description = "Three reconstruction steps: open the APK, read libgame.so, and try the Web H5 build.";
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "Article",
@@ -17,93 +12,137 @@ const structuredData = {
   description,
   inLanguage: "en",
   isAccessibleForFree: true,
-  about: ["reverse engineering", "clean-room reconstruction", "Cocos Creator"],
+  about: ["APK", "libgame.so", "clean-room reconstruction"],
 };
 ---
 
-<BaseLayout locale="en" route="/" routeId="home.en" title={title} description={description} structuredData={structuredData}>
-  <article>
-    <section class="hero">
-      <p class="eyebrow">Case file 01 · static evidence only</p>
-      <h1>One APK. No runnable original. A defensible reconstruction.</h1>
-      <p class="hero__lede">
-        The surviving 35,817,225-byte APK was never installed or executed. Its package, native
-        surface, resources, and contracts became the boundary for a pure Cocos Creator 3.8.8 and
-        TypeScript reconstruction.
-      </p>
+<BaseLayout
+  locale="en"
+  route="/"
+  routeId="home.en"
+  title={title}
+  description={description}
+  structuredData={structuredData}
+  showChapterRail={false}
+>
+  <article class="walkthrough">
+    <header class="walkthrough-intro">
+      <p class="eyebrow">APK → libgame.so → game</p>
+      <h1>From an old APK to a game you can play again</h1>
       <p>
-        <EvidenceStatus status="recovered" /> <EvidenceRef id="CLM-APK-BYTES" label="Inspect the source claim" />
+        No original source code was available. We took facts from the APK, rewrote them in TypeScript,
+        and verified the result in Cocos Creator.
       </p>
-      <img src={linework.src} width="960" height="320" alt="APK evidence passes through contract and implementation stations to measured proof." />
-    </section>
+      <nav aria-label="The three reconstruction parts">
+        <ol class="walkthrough-nav">
+          <li><a href="#part-1">01 · Open the APK</a></li>
+          <li><a href="#part-2">02 · Read libgame.so</a></li>
+          <li><a href="#part-3">03 · Try the game</a></li>
+        </ol>
+      </nav>
+    </header>
 
-    <section aria-labelledby="transformation-heading" data-reveal>
-      <p class="eyebrow">The transformation</p>
-      <h2 id="transformation-heading">Evidence before implementation</h2>
-      <ol class="evidence-sequence">
-        <li class="evidence-step">
-          <h3>Artifact</h3>
-          <p>The sole canonical source is an immutable APK with 985 members.</p>
-          <EvidenceRef id="CLM-APK-ZIP" />
-        </li>
-        <li class="evidence-step">
-          <h3>Method</h3>
-          <p>Static package, ARM/Thumb, symbol, resource, and presentation analysis—never original-runtime observation.</p>
-          <EvidenceRef id="CLM-NATIVE-PROFILE" />
-        </li>
-        <li class="evidence-step">
-          <h3>Contract</h3>
-          <p>Recovered values and bounded inferences became reviewed, testable behavioral contracts.</p>
-          <EvidenceRef id="CLM-CLASSIC-BLADE-QUERY" />
-        </li>
-        <li class="evidence-step">
-          <h3>Proof</h3>
-          <p>Deterministic tests and audited Android/H5 reconstruction runs verify the build—not historical identity.</p>
-          <EvidenceStatus status="measured" />
-        </li>
-      </ol>
-    </section>
+    <section id="part-1" class="walkthrough-section" data-home-part data-reveal aria-labelledby="part-1-heading">
+      <p class="walkthrough-section__number" aria-hidden="true">01</p>
+      <div class="walkthrough-section__content">
+        <p class="eyebrow">Part 1</p>
+        <h2 id="part-1-heading">What do we get from the APK?</h2>
+        <p class="walkthrough-section__summary">
+          Extract it once to separate the resources, decompiled Java from the app package, and
+          the native library.
+        </p>
 
-    <section aria-labelledby="chapter-map-heading" data-reveal>
-      <p class="eyebrow">Open the workbench</p>
-      <h2 id="chapter-map-heading">Follow the evidence chain</h2>
-      <div class="chapter-map">
-        <a class="evidence-step" href={withBase("/story/")}><strong>Story</strong><br />Why the original could not be observed.</a>
-        <a class="evidence-step" href={withBase("/forensics/")}><strong>Forensics</strong><br />How 713 indexed functions and 862 resources became bounded evidence.</a>
-        <a class="evidence-step" href={withBase("/reconstruction/")}><strong>Reconstruction</strong><br />How contracts became clean-room code and proof.</a>
-        <a class="evidence-step" href={withBase("/ai-lab/")}><strong>AI Lab</strong><br />Curated decisions, corrections, and verification—not transcripts.</a>
+        <h3>Method</h3>
+        <ol class="method-list">
+          <li>Verify the hash so the APK cannot change unnoticed.</li>
+          <li>Run <code>scripts/inventory-apk.sh extract</code>; it uses JADX for <code>classes.dex</code> and extracts <code>libgame.so</code>.</li>
+          <li>Keep the output unchanged as the reference for later work.</li>
+        </ol>
+
+        <figure class="raw-sample" data-raw-sample>
+          <figcaption>One slice of the extracted data</figcaption>
+          <pre><code>jadx/resources/…
+java/app-owned/PencilBlade.java
+java/app-owned/R.java
+native/libgame.so</code></pre>
+        </figure>
+
+        <p class="result-line">
+          <strong>Result:</strong> 862 resources, 3 decompiled Java files from the app package,
+          and one{" "}<code>libgame.so</code>.
+        </p>
       </div>
     </section>
 
-    <section aria-labelledby="ledger-heading" data-reveal>
-      <p class="eyebrow">Proof ledger</p>
-      <h2 id="ledger-heading">Maximal recoverable fidelity, with the denominator visible</h2>
-      <div class="metric-grid">
-        <MetricLedger label="Canonical claims" numerator="39" denominator="39" version="snapshot-v1" date="2026-07-25" qualifier="Projected from the frozen claim ledger." source="forensics/claims.jsonl" />
-        <MetricLedger label="Resource census" numerator="862" denominator="862" version="closure-v1" date="2026-07-25" qualifier="Reconciled resources; presence is not proof of runtime use." source="presentation/resource closure" />
-        <MetricLedger label="Residual records" numerator="25" denominator="25" version="fidelity-v1" date="2026-07-25" qualifier="All residuals remain disclosed; zero are unexplained." source="fidelity report" />
-        <MetricLedger label="Commercial clearance" numerator="0" denominator="862" version="rights-v1" date="2026-07-25" qualifier="No per-asset commercial rights were established." source="release rights record" />
+    <section id="part-2" class="walkthrough-section" data-home-part data-reveal aria-labelledby="part-2-heading">
+      <p class="walkthrough-section__number" aria-hidden="true">02</p>
+      <div class="walkthrough-section__content">
+        <p class="eyebrow">Part 2</p>
+        <h2 id="part-2-heading">Read libgame.so and connect it to resources</h2>
+        <p class="walkthrough-section__summary">
+          Find functions, constants, and path strings; then match those paths to the resources
+          extracted in Part 1.
+        </p>
+
+        <h3>Method</h3>
+        <ol class="method-list">
+          <li>Use <code>readelf</code> and <code>nm -C</code> to identify the architecture, symbols, and addresses.</li>
+          <li>Run <code>scripts/analyze-native-static.sh</code> to map functions, calls, constants, and string xrefs.</li>
+          <li>Match each path xref to the same resource path, then write the behavior as a tested contract.</li>
+        </ol>
+
+        <figure class="raw-sample" data-raw-sample>
+          <figcaption>Excerpt from the function map</figcaption>
+          <pre><code>0x00145538  Bomb::onEnter()
+string_xref → "Bomb/bomb_X.png"
+string_xref → "Sounds/boomsound.wav"</code></pre>
+        </figure>
+
+        <p class="result-line">
+          <strong>Result:</strong> the <code>Bomb::onEnter()</code> handler connects to the{" "}
+          <code>bomb_X.png</code> sprite and{" "}<code>boomsound.wav</code> sound. The same method
+          handles the remaining evidence.
+        </p>
+        <p><a href={withBase("/forensics/")}>Open the detailed forensics <span aria-hidden="true">→</span></a></p>
       </div>
     </section>
 
-    <section aria-labelledby="play-glimpse-heading" data-reveal>
-      <p class="eyebrow">Playable proof · explicit load only</p>
-      <h2 id="play-glimpse-heading">The game stays outside the editorial payload</h2>
-      <img
-        src={playPreview.src}
-        width="480"
-        height="800"
-        loading="lazy"
-        alt="Reconstructed Pencil Blade main menu at 480 by 800; not the original runtime."
-      />
-      <p>The approximately 40 MB audited H5 tree loads only after a deliberate action on the Play route.</p>
-      <a href={withBase("/play/")}>Review the disclosure before loading <span aria-hidden="true">→</span></a>
-    </section>
+    <section id="part-3" class="walkthrough-section" data-home-part data-reveal aria-labelledby="part-3-heading">
+      <p class="walkthrough-section__number" aria-hidden="true">03</p>
+      <div class="walkthrough-section__content">
+        <p class="eyebrow">Part 3</p>
+        <h2 id="part-3-heading">Try the game</h2>
+        <p class="walkthrough-section__summary">
+          The contracts were rewritten in TypeScript, connected to the recovered resources,
+          and run in Cocos Creator 3.8.8. This is a reconstruction, not the original runtime;
+          it never loads or links <code>libgame.so</code>.
+        </p>
 
-    <RightsBoundary
-      technical="The clean-room runtime and its tests are auditable reconstruction proof."
-      academic="The exact audited H5 tree and six hashed captures have a frozen academic/noncommercial display decision."
-      commercial="Rights to the original product name, artwork, fonts, music, code, and other content remain unknown and not commercially cleared."
-    />
+        <h3>Method</h3>
+        <ol class="method-list">
+          <li>Open the Web H5 build.</li>
+          <li>Press Play to load the game.</li>
+          <li>Choose a mode and try slicing fruit.</li>
+        </ol>
+
+        <figure class="play-proof" data-raw-sample>
+          <img
+            src={playPreview.src}
+            width="480"
+            height="800"
+            loading="lazy"
+            alt="Main Menu of the reconstructed Pencil Blade Web H5 build."
+          />
+          <figcaption>
+            <span>Capture from the current H5 build.</span>
+            <a class="play-link" href={withBase("/play/")}>Try the game <span aria-hidden="true">→</span></a>
+          </figcaption>
+        </figure>
+
+        <p class="result-line">
+          <strong>Result:</strong> the reconstruction runs in the browser with all 6 game modes.
+        </p>
+      </div>
+    </section>
   </article>
 </BaseLayout>

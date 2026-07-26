@@ -173,6 +173,10 @@ pre {
     gap: var(--space-7);
   }
 
+  .main-content.main-content--single {
+    display: block;
+  }
+
   .main-content > :not(.chapter-rail) {
     grid-column: 2;
   }

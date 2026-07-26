@@ -31,6 +31,7 @@ interface Props {
   surface?: "paper" | "lab";
   noIndex?: boolean;
   includeCanonical?: boolean;
+  showChapterRail?: boolean;
 }
 
 const {
@@ -43,6 +44,7 @@ const {
   surface = "paper",
   noIndex = false,
   includeCanonical = true,
+  showChapterRail = true,
 } = Astro.props;
 
 const alternateLocale = otherLocale(locale);
@@ -100,8 +102,12 @@ const skipLabel = locale === "vi" ? "Đi đến nội dung chính" : "Skip to co
   <body data-surface={surface}>
     <a class="skip-link" href="#main-content">{skipLabel}</a>
     <SiteHeader locale={locale} route={route} />
-    <main id="main-content" class="main-content site-frame" tabindex="-1">
-      <ChapterRail locale={locale} currentRouteId={routeId} />
+    <main
+      id="main-content"
+      class:list={["main-content", "site-frame", { "main-content--single": !showChapterRail }]}
+      tabindex="-1"
+    >
+      {showChapterRail && <ChapterRail locale={locale} currentRouteId={routeId} />}
       <slot />
     </main>
     <SiteFooter locale={locale} />
