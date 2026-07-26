@@ -312,9 +312,6 @@ jobs:
       candidate-artifact-name: ${{ steps.release.outputs.candidate-artifact-name }}
       approval-artifact-name: ${{ steps.release.outputs.approval-artifact-name }}
       candidate-run-attempt: ${{ steps.release.outputs.candidate-run-attempt }}
-    env:
-      REVIEW_REPORT_DIR: .case-study-work
-
     steps:
       - name: Check out protected main
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -349,6 +346,7 @@ jobs:
             printf 'GAME_DIST=%s/game-dist\n' "$RUNNER_TEMP"
             printf 'CANDIDATE_DIR=%s/case-study-pages\n' "$RUNNER_TEMP"
             printf 'NONDEPLOYABLE_DIR=%s/case-study-review\n' "$RUNNER_TEMP"
+            printf 'REVIEW_REPORT_DIR=%s/case-study-work\n' "$RUNNER_TEMP"
           } >> "$GITHUB_ENV"
 
       - name: Install locked composition and browser dependencies

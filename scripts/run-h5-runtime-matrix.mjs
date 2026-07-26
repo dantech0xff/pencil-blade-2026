@@ -87,11 +87,24 @@ export function createH5RuntimeMatrixConfig(options = {}) {
     options.playwrightModuleDirectory,
     options.browserExecutable ?? options.chromeExecutable,
   ].filter((value) => typeof value === 'string');
-  if (ci && explicitCiPaths.some((value) => (
-    value.startsWith('/Users/')
-    || value === homedir()
-    || value.startsWith(`${homedir()}/`)
-  ))) {
+  const runnerTemp = process.env.RUNNER_TEMP
+    ? resolve(process.env.RUNNER_TEMP)
+    : undefined;
+  if (ci && explicitCiPaths.some((value) => {
+    const resolvedValue = resolve(value);
+    const isRunnerTempPath = Boolean(
+      runnerTemp
+      && (
+        resolvedValue === runnerTemp
+        || resolvedValue.startsWith(`${runnerTemp}/`)
+      ),
+    );
+    return !isRunnerTempPath && (
+      value.startsWith('/Users/')
+      || value === homedir()
+      || value.startsWith(`${homedir()}/`)
+    );
+  })) {
     throw new Error('CI inputs must not use a workstation path');
   }
 

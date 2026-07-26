@@ -8,7 +8,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { homedir, tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test, { after } from 'node:test';
@@ -244,6 +244,28 @@ test('runtime CLI requires explicit CI inputs and does not print workstation pat
   assert.equal(unsafe.status, 2);
   assert.match(unsafe.stderr, /must not use a workstation path/u);
   assert.doesNotMatch(unsafe.stderr, /private-developer/u);
+});
+
+test('CI accepts GitHub runner temp paths nested under the runner home', () => {
+  const previousRunnerTemp = process.env.RUNNER_TEMP;
+  const runnerTemp = join(homedir(), 'work', '_temp');
+  process.env.RUNNER_TEMP = runnerTemp;
+  try {
+    assert.doesNotThrow(() => createH5RuntimeMatrixConfig({
+      buildDirectory: join(runnerTemp, 'game-dist'),
+      pagesPrefix: '/pencil-blade-2026/play/game/',
+      entryPath: 'index.html',
+      reportDirectory: join(runnerTemp, 'case-study-work', 'runtime-nested'),
+      playwrightModuleDirectory: 'site/node_modules/playwright',
+      ci: true,
+    }));
+  } finally {
+    if (previousRunnerTemp === undefined) {
+      delete process.env.RUNNER_TEMP;
+    } else {
+      process.env.RUNNER_TEMP = previousRunnerTemp;
+    }
+  }
 });
 
 function runtimeOptions(reportDirectory) {

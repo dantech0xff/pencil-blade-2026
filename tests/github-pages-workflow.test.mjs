@@ -231,6 +231,16 @@ test('runner-scoped temp paths are initialized only after jobs reach a runner', 
     assert.match(initializer.run, /\$RUNNER_TEMP/u);
     assert.match(initializer.run, /\$GITHUB_ENV/u);
   }
+
+  const composeJob = workflow.jobs['compose-pages'];
+  const composeInitializer = composeJob.steps.find(
+    (step) => step.name === 'Initialize ephemeral candidate paths',
+  );
+  assert.equal(composeJob.env?.REVIEW_REPORT_DIR, undefined);
+  assert.match(
+    composeInitializer.run,
+    /REVIEW_REPORT_DIR=%s\/case-study-work\\n' "\$RUNNER_TEMP"/u,
+  );
 });
 
 test('self-hosted game job runs only the exact manifest and strict raw-game gates', () => {
